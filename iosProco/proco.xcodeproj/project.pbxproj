@@ -312,6 +312,7 @@
 		32083ADA2608313000B2C3EB /* SettingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewModel.swift; sourceTree = "<group>"; };
 		32083AE02608325E00B2C3EB /* MyQuestionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyQuestionModel.swift; sourceTree = "<group>"; };
 		32083AE826083E8200B2C3EB /* MyQuestionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyQuestionDetailView.swift; sourceTree = "<group>"; };
+		32088B1F2675D2D4004C8000 /* ProcoCalendarLibrary */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ProcoCalendarLibrary; path = ../../../../Downloads/ProcoCalendarLibrary; sourceTree = "<group>"; };
 		320D1E4225F75A4A00ED0284 /* ScheduleLikeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleLikeView.swift; sourceTree = "<group>"; };
 		320D8AE525EF22680084662E /* CalendarLikeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarLikeModel.swift; sourceTree = "<group>"; };
 		320E893F25776C360097131A /* SignupTermsListContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupTermsListContainer.swift; sourceTree = "<group>"; };
@@ -328,7 +329,6 @@
 		3217D2BB257F941600CDBA50 /* DateFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatter.swift; sourceTree = "<group>"; };
 		3217D2C025809B3300CDBA50 /* ResponseCheckLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseCheckLogin.swift; sourceTree = "<group>"; };
 		3217D2C52580A0B600CDBA50 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
-		321A11C325E7CB7B0049CF7D /* ProcoCalendar */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ProcoCalendar; path = ../../../../../Documents/ProcoCalendar; sourceTree = "<group>"; };
 		321A11E525E7CD6F0049CF7D /* SmallSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallSchedule.swift; sourceTree = "<group>"; };
 		321A11EA25E7CD900049CF7D /* SmallScheduleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallScheduleListView.swift; sourceTree = "<group>"; };
 		321A7E0C25FB0F0500BCC574 /* LikeUserListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeUserListModel.swift; sourceTree = "<group>"; };
@@ -810,9 +810,9 @@
 		3244A4432558EECE0022CE40 /* iosProco */ = {
 			isa = PBXGroup;
 			children = (
+				32088B1F2675D2D4004C8000 /* ProcoCalendarLibrary */,
 				3276A26426392A5F008E74BA /* NavigationBarModifier.swift */,
 				32BF24C925E7CF38001976AB /* SimSimFeedPage.swift */,
-				321A11C325E7CB7B0049CF7D /* ProcoCalendar */,
 				32E9052425A179B800F05DC1 /* Socket */,
 				324485FD2577472D00210146 /* Common */,
 				32A825DF2581F5D9009C4580 /* Interceptors */,
