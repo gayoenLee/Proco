@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "77056883-69FD-47FC-8126-A055E64D8D34"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "40751D8A-852C-4ABB-B218-A4516A7D9871"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/View/search_all_result_view.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "96"
+            endingLineNumber = "96"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C4ECFA8D-8B0C-402C-AF63-644615168606"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/View/search_all_view.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "3"
+            endingLineNumber = "3"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B34B3025-91BB-40B8-A4DF-60315E3D49BA"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/View/friendChatTab.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "93"
+            endingLineNumber = "93"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DF1851EE-3CA2-4908-8368-8312D7F4B754"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/Server/APIClient.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
+            landmarkName = "check_phone_auth_api(phone_num:auth_num:type:completion:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "011D5775-A22E-4926-81D1-3A8FC499CCA3"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/View/user_setting/signup_profile_view.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "147"
+            endingLineNumber = "147"
+            landmarkName = "send_user_info()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0DF56359-DD37-4E4E-B027-BAD50FBBF7C7"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "436"
+            endingLineNumber = "436"
+            landmarkName = "ManageFriendViewModel"
+            landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0712A300-C5DD-44FC-A556-7BC5CDD42EC6"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/Server/Constants.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "133"
+            endingLineNumber = "133"
+            landmarkName = "Keys"
+            landmarkType = "14">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "204"
+            endingLineNumber = "204"
+            landmarkName = "show_alert_no_friend"
+            landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - 8f57104fbb6741de"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "property wrapper backing initializer of proco.RequestGroupListDataModel.seaerch_alert : proco.FriendRequestAlert"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "40">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - ef2d0b8542ff8ca3"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.seaerch_alert.getter : proco.FriendRequestAlert"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "120">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - 6fcf86e2bb60c9f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.seaerch_alert.setter : proco.FriendRequestAlert"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "144">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - 3b60de9413a0a234"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.seaerch_alert.modify : proco.FriendRequestAlert"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "24">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - 44ab33cf4d9f6c4f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.seaerch_alert.modify : proco.FriendRequestAlert with unmangled suffix &quot;.resume.0&quot;"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "24">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - 15185ca5d04c6272"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.$seaerch_alert.getter : Combine.Published&lt;proco.FriendRequestAlert&gt;.Publisher"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "116">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - c1f4c24f0c547a6e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.$seaerch_alert.setter : Combine.Published&lt;proco.FriendRequestAlert&gt;.Publisher"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "284">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - 7f1601c0cd91eebe"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.$seaerch_alert.modify : Combine.Published&lt;proco.FriendRequestAlert&gt;.Publisher"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/%3Ccompiler-generated%3E"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "60">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - d908d9a6fb3e1b3a"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.$seaerch_alert.modify : Combine.Published&lt;proco.FriendRequestAlert&gt;.Publisher with unmangled suffix &quot;.resume.0&quot;"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "32">
+               </Location>
+               <Location
+                  uuid = "B153CCA4-D422-4093-9C08-D274A7026AE8 - 603e74ad25e9acba"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "proco.RequestGroupListDataModel.init() -&gt; proco.RequestGroupListDataModel"
+                  moduleName = "proco"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/viewModel/ManageGroup/Group/RequestGroupListDataModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "2972">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1DC00724-01BF-48A3-BA2F-60E91C740738"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/View/Tab/bottomTab/volleh/friend_volleh/make_card_view.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "30"
+            endingLineNumber = "30"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "80A88B0C-BB77-4A9C-898E-E2C0CF393369"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "iosProco/View/Tab/bottomTab/volleh/friend_volleh/make_card_view.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "8"
+            endingLineNumber = "8"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

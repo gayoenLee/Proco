@@ -1,0 +1,6 @@
+module Pods_proco {
+  umbrella header "Pods-proco-umbrella.h"
+
+  export *
+  module * { export * }
+}

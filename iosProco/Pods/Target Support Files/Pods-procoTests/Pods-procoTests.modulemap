@@ -1,0 +1,6 @@
+framework module Pods_procoTests {
+  umbrella header "Pods-procoTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
