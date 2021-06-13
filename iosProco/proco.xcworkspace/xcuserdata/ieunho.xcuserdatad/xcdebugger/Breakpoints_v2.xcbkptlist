@@ -132,14 +132,14 @@
             landmarkType = "24">
             <Locations>
                <Location
-                  uuid = "B0263300-B2B3-4A39-99D5-3CD519516DB6 - cc5b814a63253c6b"
+                  uuid = "B0263300-B2B3-4A39-99D5-3CD519516DB6 - 72c5bf3d62cfa631"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Spacer, SwiftUI.Button&lt;SwiftUI._ConditionalContent&lt;&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, SwiftUI.Text&gt;&gt;, SwiftUI.Spacer, SwiftUI.Button&lt;SwiftUI._ConditionalContent&lt;&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, SwiftUI.Text&gt;&gt;, SwiftUI.Spacer, SwiftUI.Button&lt;SwiftUI._ConditionalContent&lt;&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, SwiftUI.Text&gt;&gt;)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.frame(width: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, height: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, SwiftUI.VStack&lt;SwiftUI._ConditionalContent&lt;SwiftUI._ConditionalContent&lt;proco.FriendChatTab, proco.GatheringChatTab&gt;, SwiftUI.EmptyView&gt;&gt;)&gt; in closure #1 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.navigationBarHidden(Swift.Bool) -&gt; some&gt;&gt;.0 in proco.ChatTabView.body.getter : some"
                   moduleName = "proco"
                   usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/View/Tab/bottomTab/chat/ChatTabView.swift"
+                  urlString = "file:///Users/ieunho/Desktop/IOS_REAL/iosProco/iosProco/View/Tab/bottomTab/chat/ChatTabView.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "22"
@@ -147,14 +147,14 @@
                   offsetFromSymbolStart = "968">
                </Location>
                <Location
-                  uuid = "B0263300-B2B3-4A39-99D5-3CD519516DB6 - da53aba5048850e"
+                  uuid = "B0263300-B2B3-4A39-99D5-3CD519516DB6 - b33b04cd51a21fd4"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "closure #1 () -&gt; () in closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Spacer, SwiftUI.Button&lt;SwiftUI._ConditionalContent&lt;&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, SwiftUI.Text&gt;&gt;, SwiftUI.Spacer, SwiftUI.Button&lt;SwiftUI._ConditionalContent&lt;&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, SwiftUI.Text&gt;&gt;, SwiftUI.Spacer, SwiftUI.Button&lt;SwiftUI._ConditionalContent&lt;&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, SwiftUI.Text&gt;&gt;)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.frame(width: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, height: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, SwiftUI.VStack&lt;SwiftUI._ConditionalContent&lt;SwiftUI._ConditionalContent&lt;proco.FriendChatTab, proco.GatheringChatTab&gt;, SwiftUI.EmptyView&gt;&gt;)&gt; in closure #1 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.navigationBarHidden(Swift.Bool) -&gt; some&gt;&gt;.0 in proco.ChatTabView.body.getter : some"
                   moduleName = "proco"
                   usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/ieunho/Desktop/volleh_ios/IOS/iosProco/iosProco/View/Tab/bottomTab/chat/ChatTabView.swift"
+                  urlString = "file:///Users/ieunho/Desktop/IOS_REAL/iosProco/iosProco/View/Tab/bottomTab/chat/ChatTabView.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "23"
