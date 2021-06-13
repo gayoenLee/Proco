@@ -1,0 +1,39 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+
+target 'proco' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  #use_frameworks!
+
+# add the Firebase pod for Google Analytics
+pod 'Firebase/Analytics'
+pod 'Firebase/DynamicLinks'
+pod 'Firebase/Messaging'
+
+# 필요한 모듈 추가
+pod 'KakaoSDKCommon'  # 필수 요소를 담은 공통 모듈
+pod 'KakaoSDKAuth'  # 사용자 인증
+pod 'KakaoSDKUser'  # 카카오 로그인, 사용자 관리
+pod 'KakaoSDKTalk'  # 친구, 메시지(카카오톡)
+pod 'KakaoSDKStory'  # 카카오스토리 
+pod 'KakaoSDKLink'  # 메시지(카카오링크)
+pod 'KakaoSDKTemplate'  # 메시지 템플릿 
+
+
+# add pods for any other desired Firebase products
+# https://firebase.google.com/docs/ios/setup#available-pods
+
+  # Pods for proco
+	
+
+  target 'procoTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'procoUITests' do
+    # Pods for testing
+  end
+
+end

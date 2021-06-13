@@ -1,0 +1,6 @@
+module Pods_proco_procoUITests {
+  umbrella header "Pods-proco-procoUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
