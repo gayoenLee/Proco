@@ -64,11 +64,12 @@ struct FriendVollehMainView: View {
                     //프로필 사진, 심심기간 설정 버튼, 카드 만들기 버튼
                     user_info_view
                     
+                    
                     //필터 버튼
                     filter_btn
                     HStack{
                         //내 카드 리스트 나오기 시작
-                        Text("오늘 심심한 친구")
+                        Text("오늘 심심한 친구\(self.main_vm.today_boring_friends_model.count)명")
                             .font(.custom(Font.n_bold, size: 15))
                             .foregroundColor(.proco_black)
                     }
@@ -211,12 +212,16 @@ struct FriendVollehMainView: View {
                             }
                             //내 카드 foreach문 끝
                         }
+                        
+                        
                     }, label: {
                         Text("내 카드")
-                            .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/25))
+                            .font(.custom(Font.n_bold, size: 15))
                             .foregroundColor(.proco_black)
                             .padding(.leading, UIScreen.main.bounds.width/20)
                     })
+                    .padding(.trailing)
+                    
                     //친구 카드 상세 페이지 - 액티비티로 변경함.
                     NavigationLink("", destination: FriendVollehCardDetail(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket:   SockMgr.socket_manager,calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline)
                                     .navigationBarHidden(true), isActive: self.$show_friend_card_detail)
@@ -313,7 +318,6 @@ private extension FriendVollehMainView{
                             .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
                             .cornerRadius(50)
                             .scaledToFit()
-                            .padding([.leading], UIScreen.main.bounds.width/30)
                             .onTapGesture {
                                 
                                 self.main_vm.friend_info_struct = GetFriendListStruct(idx: Int(self.main_vm.my_idx!),nickname: main_vm.my_nickname, profile_photo: self.my_photo_path, state: self.state_on, kinds:  "")
@@ -321,6 +325,10 @@ private extension FriendVollehMainView{
                                 // 내 프로필 이미지 클릭시 다이얼로그 나오고 = on, off 선택 가능
                                 self.friend_info_dialog = true
                             }
+                            .overlay(self.today_is_boring ? Circle()
+                                .stroke(Color.proco_yellow , lineWidth: 2) : nil)
+                            .padding([.leading], UIScreen.main.bounds.width/30)
+                        
                     }else{
                         
                         KFImage(URL(string: self.my_photo_path))
@@ -345,13 +353,14 @@ private extension FriendVollehMainView{
                                     .resizable()
                                     .frame(width: 40, height: 40)
                             }
-                        
+                            .overlay(self.today_is_boring ? Circle()
+                                .stroke(Color.proco_yellow , lineWidth: 2) : nil)
                         
                     }
                        
                     Rectangle()
                         .foregroundColor(self.state_on == 0 ? Color.gray : Color.proco_green)
-                    .frame(width: 12.57, height: 12.57)
+                    .frame(width: 14, height: 14)
                         .clipShape(Circle())
                         .overlay(Circle()
                                     .strokeBorder(Color.proco_white, lineWidth: 1)
@@ -384,7 +393,7 @@ private extension FriendVollehMainView{
                                 let today = Date()
                                 let boring_today = String.date_string(date: today)
                                 var action : Int = 0
-                                if self.today_is_boring == true {
+                                if self.today_is_boring == false {
                                     action = 1
                                 }
                                 print("오늘 심심기간 설정시 서버에 보내는 파라미터 확인: \(String(describing: action)), \(boring_today)")
@@ -430,13 +439,44 @@ private extension FriendVollehMainView{
                     self.main_vm.result_alert(main_vm.alert_type)
                     
                 }){
+                    HStack{
+                   
+                        ZStack(alignment: .leading){
+                            
                     Image("main_filter")
+                        .resizable()
+                        .frame(width: 18, height: 18)
+                            
+                            if self.main_vm.applied_filter{
+                                
+                            Image("check_end_btn")
+                                .resizable()
+                                .frame(width: 13, height: 13)
+                            }
+                        }
+                        Text("필터")
+                            .font(.custom(Font.n_bold, size: 10))
+                            .foregroundColor(.proco_black)
+                    }
                 }
                 
-                Text("필터")
-                    .font(.custom(Font.n_bold, size: 10))
-                    .foregroundColor(.proco_black)
-                
+                Button(action: {
+                    //전체보기 클릭시 필터 적용 해제 = 친구 메인 on appear에서 하는 통신 다시 진행.
+                    self.main_vm.get_friend_volleh_cards()
+                    self.main_vm.applied_filter = false
+                }){
+                    Text("전체보기")
+                        .font(.custom(Font.n_bold, size: 10))
+                        .foregroundColor(self.main_vm.applied_filter ? .light_gray : .proco_white)
+                        .cornerRadius(25)
+                        .padding(UIScreen.main.bounds.width/40)
+                }
+                .background(self.main_vm.applied_filter ? Color.gray : Color.proco_black)
+                .overlay(Capsule()
+                            .stroke(self.main_vm.applied_filter ? Color.gray : Color.proco_black, lineWidth: 1.5)
+                            
+                )
+                .cornerRadius(25.0)
             }
             .padding([.trailing], UIScreen.main.bounds.width/20)
         }
@@ -472,7 +512,10 @@ private extension FriendVollehMainView{
                 Text("친구")
                     .font(.custom(Font.n_bold, size: 15))
                     .foregroundColor(.proco_black)
+                    .padding(.leading, UIScreen.main.bounds.width/20)
             })
+            .padding(.trailing)
+
         }
     }
     
@@ -480,9 +523,6 @@ private extension FriendVollehMainView{
         ScrollView(.horizontal, showsIndicators: false){
             HStack{
                 ForEach(self.main_vm.today_boring_friends_model){friend in
-                    if friend.idx == Int(ChatDataManager.shared.my_idx!)!{
-                        
-                    }else{
                         
                         Button(action: {
                             print("친구 한 명 클릭")
@@ -496,23 +536,64 @@ private extension FriendVollehMainView{
                                         .resizable()
                                         .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
                                         .scaledToFit()
-                                        .padding([.trailing], UIScreen.main.bounds.width/30)
+                                        .overlay(Capsule()
+                                                    .stroke(Color.proco_yellow, lineWidth: 2)
+                                        )
+                                        .padding([.trailing], UIScreen.main.bounds.width/40)
                                 }else{
-                                    Image(friend.profile_photo_path!)
-                                        .resizable()
-                                        .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                                        .scaledToFit()
-                                        .padding([.trailing], UIScreen.main.bounds.width/30)
+                                    
+                                    KFImage(URL(string: friend.profile_photo_path!))
+                                        .placeholder{Image("main_profile_img")
+                                            .resizable()
+                                            .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
+                                        }
+                                        .loadDiskFileSynchronously()
+                                        .cacheMemoryOnly()
+                                        .fade(duration: 0.25)
+                                        .setProcessor(img_processor)
+                                        .onProgress{receivedSize, totalSize in
+                                            print("on progress: \(receivedSize), \(totalSize)")
+                                        }
+                                        .onSuccess{result in
+                                            print("성공 : \(result)")
+                                        }
+                                        .onFailure{error in
+                                            print("실패 이유: \(error)")
+                                            
+                                            Image("main_profile_img")
+                                                .resizable()
+                                                .frame(width: 40, height: 40)
+                                        }
+                                        .overlay(Capsule()
+                                                    .stroke(Color.proco_yellow, lineWidth: 2)
+                                        )
+                                    
+                                    
                                 }
+                                
+                                if friend.idx == Int(ChatDataManager.shared.my_idx!)!{
+                                    
+                                    HStack{
+                                        Image("check_end_btn")
+                                            .resizable()
+                                            .frame(width: 15, height: 15)
+                                        
+                                        Text("나")
+                                            .font(.custom(Font.n_bold, size: 10))
+                                            .foregroundColor(.proco_black)
+                                    }
+                                    
+                                }else{
                                 Text(friend.nickname)
-                                    .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/20))
+                                    .font(.custom(Font.n_bold, size: 10))
                                     .foregroundColor(.proco_black)
+                                }
                                 
                             }
                         }
-                        .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
+                        .padding([.leading, .trailing], UIScreen.main.bounds.width/40)
                     }
-                }
+                
             }
             
         }

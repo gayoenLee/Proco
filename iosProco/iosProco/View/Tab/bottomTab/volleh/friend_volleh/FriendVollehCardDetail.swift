@@ -51,6 +51,7 @@ struct FriendVollehCardDetail: View {
         
         VStack{
             top_nav_bar
+            
             //약속날짜
             HStack{
                 Spacer()
@@ -150,6 +151,9 @@ struct FriendVollehCardDetail: View {
         }.padding()
         .sheet(isPresented:self.$go_like_people_list){
             LikePeopleListView(card_idx: self.main_vm.selected_card_idx, main_vm: self.main_vm)
+        }
+        .sheet(isPresented: self.$show_report_view) {
+            ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
         }
         .onAppear{
             print("-----------------친구랑 볼래 카드 상세 화면 카드 idx:\(main_vm.selected_card_idx) , 동적링크인지 여부 : \(socket.is_dynamic_link)")
@@ -466,13 +470,17 @@ private extension FriendVollehCardDetail{
                         self.presentation.wrappedValue.dismiss()
                     }
                 }
+            
             Spacer()
+            
             Text("")
+            
             Spacer()
             //TODO 채팅방 드로어에서 넘어온 경우, 메인에서 넘어온 경우 사용하는 데이터 모델이 다름.그래서 경우 나눔.
             //카드를 만든 사람에게만 보이는 수정 버튼. 클릭시 수정하는 화면으로 이동.
             //1.메인에서 넘어온 경우
             if self.main_vm.friend_volleh_card_detail.creator.idx! == Int(self.main_vm.my_idx!){
+                
                 Button(action: {
                     
                     self.main_vm.selected_card_idx =  main_vm.friend_volleh_card_detail.card_idx!
@@ -489,9 +497,6 @@ private extension FriendVollehCardDetail{
                 }
             }
             send_report_btn
-                .sheet(isPresented: self.$show_report_view) {
-                    ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
-                }
         }
     }
     

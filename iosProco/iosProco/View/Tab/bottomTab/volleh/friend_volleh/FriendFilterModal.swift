@@ -36,11 +36,19 @@ struct FriendFilterModal: View {
                     .padding(.trailing, UIScreen.main.bounds.width/20)
                 
                 Spacer()
+                
+                Button(action: {
+                    viewmodel.user_selected_tag_list.removeAll()
+                    viewmodel.filter_start_date = Date()
+                    
+                }){
                 Image("rewind_btn")
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                     .padding()
+                }
             }
+            .padding()
             //            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width*0.3)
             
             HStack{
@@ -53,7 +61,7 @@ struct FriendFilterModal: View {
                 Spacer()
                 
             }
-            .padding()
+            .padding([.leading, .trailing])
             //태그 카테고리 뷰
             tag_list
             
@@ -68,10 +76,13 @@ struct FriendFilterModal: View {
                 Text("심심날짜")
                     .font(.custom(Font.t_extra_bold, size: 16))
                     .foregroundColor(.proco_black)
+                
+                Text("\(self.viewmodel.filter_start_date)")
                 Spacer()
             }
+            .padding([.leading, .trailing])
             
-            DatePicker("", selection: $viewmodel.filter_start_date, displayedComponents: [.date])
+            DatePicker("", selection: $viewmodel.filter_start_date,  displayedComponents: [.date])
                 .datePickerStyle(GraphicalDatePickerStyle())
             
             Button(action: {
@@ -79,11 +90,18 @@ struct FriendFilterModal: View {
                 self.viewmodel.date_to_string()
                 self.viewmodel.friend_volleh_filter()
                 show_filter_modal.toggle()
+                
             }, label: {
                 Text("확인")
+                    .font(.custom(Font.t_extra_bold, size: 15))
+                    .frame(minWidth: 0, maxWidth: .infinity)
+                    .padding()
+                    .foregroundColor(.proco_white)
+                    .background(Color.proco_black)
+                    .cornerRadius(25)
+                    .padding([.leading, .trailing], UIScreen.main.bounds.width/25)
             })
         }
-        .padding(.all)
     }
 }
 
@@ -138,6 +156,7 @@ extension FriendFilterModal {
                         })
             }
         }
+        .padding([.leading, .trailing])
     }
 }
 

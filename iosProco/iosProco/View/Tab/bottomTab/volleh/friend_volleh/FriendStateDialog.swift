@@ -31,7 +31,6 @@ struct FriendStateDialog: View {
                                     .offset(x: UIScreen.main.bounds.width*0.009, y: UIScreen.main.bounds.height * 0.05))
                 )
         }
-        
     }
 }
 
@@ -55,7 +54,7 @@ struct FriendStateDialogContents : View{
     @State private var state_on : Int = 0
     
     let scale = UIScreen.main.scale
-    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 48, height: 48)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 50, height: 50)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
     var body: some View{
         VStack{
@@ -87,7 +86,7 @@ struct FriendStateDialogContents : View{
                     
                     Image("main_profile_img")
                         .resizable()
-                        .frame(width: 48, height: 48)
+                        .frame(width: 50, height: 50)
                     Spacer()
                     
                 }else{
@@ -183,7 +182,7 @@ struct FriendStateDialogContents : View{
                                 .font(.custom(Font.t_extra_bold, size: 13))
                         }
                     }
-                    .padding(.leading, UIScreen.main.bounds.width/20)
+                    .padding(.leading, UIScreen.main.bounds.width/7)
                     
                     //다른 사람 다이얼로그인 경우 심심페이지
                 }else{
@@ -242,13 +241,14 @@ struct FriendStateDialogContents : View{
                         Text(self.state_on == 0 ? "오프라인" : "온라인")
                             .font(.custom(Font.n_extra_bold, size: 13))
                             .foregroundColor(self.state_on == 0 ? Color.gray : Color.white)
-                            .background(self.state_on == 0 ? Color.proco_white : Color.proco_green)
-                            .padding(UIScreen.main.bounds.width/30)
-                            .overlay(Capsule()
-                                        .stroke(self.state_on == 0 ? Color.gray : Color.proco_green, lineWidth: 1.5)
-                            )
-                        
+                          
                     }
+                    .background(self.state_on == 0 ? Color.proco_white : Color.proco_green)
+                    .overlay(Capsule()
+                                .stroke(self.state_on == 0 ? Color.gray : Color.proco_green, lineWidth: 1.5)
+                                
+                    )
+                    .cornerRadius(25.0)
                     .padding(.trailing, UIScreen.main.bounds.width/20)
                     
                 }else{
@@ -274,7 +274,6 @@ struct FriendStateDialogContents : View{
                 }
             }
             .padding(.bottom, UIScreen.main.bounds.width/50)
-            
         }
         .padding(.all, UIScreen.main.bounds.width/40)
         .background(Color.proco_white)
@@ -284,7 +283,7 @@ struct FriendStateDialogContents : View{
         .onAppear{
             print("친구 한 명 다이얼로그 나옴: \(self.main_vm.friend_info_struct)")
             self.interest_friend = self.main_vm.friend_info_struct.kinds == "관심친구" ? true : false
-            print("관심친구 상태: \(self.interest_friend)")
+            self.state_on = self.main_vm.friend_info_struct.state!
         }
     }
 }
