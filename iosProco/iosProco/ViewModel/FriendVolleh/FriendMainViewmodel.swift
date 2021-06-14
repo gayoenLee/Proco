@@ -946,6 +946,12 @@ class FriendVollehMainViewmodel: ObservableObject{
             })
     }
     
+    @Published var applied_filter : Bool = false{
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
     //친구랑 볼래 필터 적용하기(날짜, 태그)
     func friend_volleh_filter(){
         cancellation = APIClient.friend_volleh_filter(date_start: self.filter_start_date_string, date_end: self.filter_start_date_string, tag: self.user_selected_tag_list)
@@ -956,7 +962,6 @@ class FriendVollehMainViewmodel: ObservableObject{
                     print("친구랑 볼래 카드 필터 에러 발생 : \(error)")
                     self.alert_type = .fail
                 case .finished:
-                    
                     break
                 }
             }, receiveValue: {response in
@@ -1012,6 +1017,8 @@ class FriendVollehMainViewmodel: ObservableObject{
                         }
                     }
                     print("최종 내 카드 데이터 확인: \(self.my_friend_volleh_card_struct)")
+                    //메인뷰에서 필터 적용시 필터버튼 이미지 변경 위함.
+                    self.applied_filter = true
                 }
             })
     }
