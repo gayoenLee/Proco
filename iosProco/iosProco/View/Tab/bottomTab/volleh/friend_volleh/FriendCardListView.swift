@@ -66,6 +66,8 @@ struct FriendCardListView : View{
                             Text("#\(String(friend_volleh_card_struct.tags![index].tag_name!) )")
                                 .font(.custom(Font.n_bold, size: 15))
                                 .foregroundColor(.proco_black)
+                            
+                            Spacer()
                         }
                         }
                     }
@@ -186,7 +188,7 @@ extension FriendCardListView{
             
             Text(friend_volleh_card_struct.like_count > 0 ? "좋아요 \(friend_volleh_card_struct.like_count)개" : "")
                 .font(.custom(Font.t_extra_bold, size: 12))
-                .foregroundColor(.proco_red)
+                .foregroundColor(.proco_black)
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.clicked_like), perform: {value in
             print("친구카드 좋아요 클릭 통신 완료 받음.: \(value)")
