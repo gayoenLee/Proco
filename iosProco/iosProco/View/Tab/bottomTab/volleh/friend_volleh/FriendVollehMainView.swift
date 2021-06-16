@@ -297,7 +297,7 @@ struct FriendVollehMainView: View {
     //여기에 다이얼로그 오버레이해야 스크롤뷰 위치에 따라 오버레이 높이 결정되는 문제 해결됨.
 }
         .background(Color.proco_dark_white)
-        .overlay(FriendStateDialog(main_vm: self.main_vm, show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager))
+        .overlay(FriendStateDialog(main_vm: self.main_vm, show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on))
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
     }
@@ -318,13 +318,6 @@ private extension FriendVollehMainView{
                             .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
                             .cornerRadius(50)
                             .scaledToFit()
-                            .onTapGesture {
-                                
-                                self.main_vm.friend_info_struct = GetFriendListStruct(idx: Int(self.main_vm.my_idx!),nickname: main_vm.my_nickname, profile_photo: self.my_photo_path, state: self.state_on, kinds:  "")
-                                
-                                // 내 프로필 이미지 클릭시 다이얼로그 나오고 = on, off 선택 가능
-                                self.friend_info_dialog = true
-                            }
                             .overlay(self.today_is_boring ? Circle()
                                 .stroke(Color.proco_yellow , lineWidth: 2) : nil)
                             .padding([.leading], UIScreen.main.bounds.width/30)
@@ -365,6 +358,13 @@ private extension FriendVollehMainView{
                         .overlay(Circle()
                                     .strokeBorder(Color.proco_white, lineWidth: 1)
                         )
+                }
+                .onTapGesture {
+                    
+                    self.main_vm.friend_info_struct = GetFriendListStruct(idx: Int(self.main_vm.my_idx!),nickname: main_vm.my_nickname, profile_photo: self.my_photo_path, state: self.state_on, kinds:  "")
+                    
+                    // 내 프로필 이미지 클릭시 다이얼로그 나오고 = on, off 선택 가능
+                    self.friend_info_dialog = true
                 }
             
                 Spacer()
