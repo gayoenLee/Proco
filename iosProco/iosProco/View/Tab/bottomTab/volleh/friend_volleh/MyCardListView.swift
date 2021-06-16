@@ -56,8 +56,54 @@ struct MyCardListView: View {
                     }
 
                     Spacer()
+                    
+                    Button(action: {
+                        print("잠금 버튼 클릭")
+                        //0: 안 잠금 1: 잠금
+                        if self.my_volleh_card_struct.lock_state == 0{
+                            print("카드 잠그기")
+                            self.main_viewmodel.lock_card(card_idx: self.my_volleh_card_struct.card_idx!, lock_state: 1)
+                        }else{
+                            print("카드 열기")
+
+                            self.main_viewmodel.lock_card(card_idx: self.my_volleh_card_struct.card_idx!, lock_state: 0)
+                        }
+                        
+                    }){
+                        
                     Image(self.my_volleh_card_struct.lock_state == 0 ? "lock_public" : "lock_private")
+                        .resizable()
+                        .frame(width: 15, height: 16.61)
                         .padding(.trailing)
+                        
+                    }
+                    .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
+                        print("내 카드 잠금 통신 완료 받음.: \(value)")
+                        
+                        if let user_info = value.userInfo{
+                            let check_result = user_info["lock"]
+                            print("내 카드 잠금 데이터 확인: \(check_result)")
+                            
+                            if check_result as! String == "잠금"{
+                                let card = user_info["card_idx"] as! String
+                                let card_idx = Int(card)
+                                print("내 카드 잠금한 idx: \(card_idx)")
+                                
+                                if card_idx == self.my_volleh_card_struct.card_idx{
+                                    
+                                    self.my_volleh_card_struct.lock_state = 1
+                            }
+                            }else if check_result as! String == "잠금해제"{
+                                
+                                let card = user_info["card_idx"] as! String
+                                let card_idx = Int(card)
+                                print("잠금 취소한 idx: \(card_idx)")
+                                if card_idx == self.my_volleh_card_struct.card_idx{
+                                    self.my_volleh_card_struct.lock_state = 0
+                            }
+                        }
+                        }
+                    })
                         
                 }
                 .padding(.bottom, UIScreen.main.bounds.width/20)
@@ -102,7 +148,7 @@ private extension MyCardListView{
             
             Text(my_volleh_card_struct.like_count > 0 ? "좋아요 \(my_volleh_card_struct.like_count)개" : "")
                 .font(.custom(Font.t_extra_bold, size: 12))
-                .foregroundColor(.proco_red)
+                .foregroundColor(.proco_black)
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.clicked_like), perform: {value in
             print("내 카드 좋아요 클릭 통신 완료 받음.: \(value)")
