@@ -66,26 +66,26 @@ struct GroupVollehCardDetail: View {
                                         //self.show_current_view.toggle()
                                     }
                                 }
-
+                            
                             Spacer()
                             /*
                              수정 하기 버튼
                              - 주인만 가능.
                              - 드로어에서 넘어온 경우, 메인에서 상세 페이지로 넘어온 경우
                              */
-
-                                Button(action: {
-
-                                    self.main_vm.selected_card_idx =  main_vm.my_card_detail_struct.card_idx!
-                                    print("메인에서 상세 페이지로 들어온 후 카드 정보 수정하기 이동. card idx: \(self.main_vm.selected_card_idx)")
-
-                                    //self.main_vm.get_detail_card()
-
-                                    self.go_edit_from_main.toggle()
-                                }){
-                                    Image(systemName: "pencil.circle")
-                                        .padding()
-                                }
+                            
+                            Button(action: {
+                                
+                                self.main_vm.selected_card_idx =  main_vm.my_card_detail_struct.card_idx!
+                                print("메인에서 상세 페이지로 들어온 후 카드 정보 수정하기 이동. card idx: \(self.main_vm.selected_card_idx)")
+                                
+                                //self.main_vm.get_detail_card()
+                                
+                                self.go_edit_from_main.toggle()
+                            }){
+                                Image(systemName: "pencil.circle")
+                                    .padding()
+                            }
                         }
                     }
                     .padding(.top, UIScreen.main.bounds.width/20)
@@ -93,7 +93,7 @@ struct GroupVollehCardDetail: View {
                     Spacer()
                     report_btn
                     Group{
-
+                        
                         HStack{
                             card_category_and_title
                             Spacer()
@@ -104,24 +104,24 @@ struct GroupVollehCardDetail: View {
                             .foregroundColor(.light_gray)
                             .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
                             .overlay(
-                        host_info
-                                )
-
+                                host_info
+                            )
+                        
                         Spacer()
-
-                            //날짜
-                            date_view
-
-                            //시간
-                            time_view
+                        
+                        //날짜
+                        date_view
+                        
+                        //시간
+                        time_view
                     }
                     HStack{
                         NavigationLink(destination: ApplyPeopleListView(main_vm: self.main_vm, show_view: $go_people_list) .navigationBarTitle("", displayMode: .inline)
                                         .navigationBarHidden(true), isActive: self.$go_people_list){
-
+                            
                             apply_people_list_title
-
-
+                            
+                            
                         }.simultaneousGesture(TapGesture().onEnded{
                             //참가자, 신청자 리스트 가져오는 통신 - 드로어에서 볼 경우, 메인에서 볼 경우 모두 진행.
                             if SockMgr.socket_manager.is_from_chatroom{
@@ -129,13 +129,13 @@ struct GroupVollehCardDetail: View {
                                 self.main_vm.selected_card_idx = SockMgr.socket_manager.current_chatroom_info_struct.card_idx
                                 print("채팅방 드로어에서 참가자, 신청자 리스트 가져올 경우")
                                 // self.main_vm.get_apply_people_list()
-
+                                
                                 //캘린더에서 왔을 경우 신청자 참가자 통신
                             }else if calendar_vm.from_calendar{
                                 print("캘린더에서 왔을 경우")
                                 self.main_vm.selected_card_idx = calendar_vm.group_card_detail_model.card_idx
                                 //self.main_vm.get_apply_people_list()
-
+                                
                             }else{
                                 //수락, 거절 버튼 예외처리 위해 메소드 실행.
                                 self.main_vm.find_owner()
@@ -145,7 +145,7 @@ struct GroupVollehCardDetail: View {
                             //self.go_people_list = true
                         })
                     }
-
+                    
                     Group{
                         if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
                             if self.main_vm.my_card_detail_struct.kinds! == "오프라인 모임"{
@@ -156,15 +156,15 @@ struct GroupVollehCardDetail: View {
                                 location
                             }
                         }
-                    
+                        
                         //세부사항 부분
                         meeting_introduce
-
-                    //프로코 이용 규칙
-                    Divider()
-                        .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width/30, alignment: .center)
-                    proco_rules
-
+                        
+                        //프로코 이용 규칙
+                        Divider()
+                            .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width/30, alignment: .center)
+                        proco_rules
+                        
                         //동적링크를 통해 들어와서 참여하기 클릭시 채팅방으로 이동시키는 것.
                         NavigationLink("",destination: GatheringChatRoom(socket: SockMgr.socket_manager).navigationBarHidden(true)
                                         .navigationBarTitle(""), isActive: self.$go_invited_room)
@@ -196,23 +196,23 @@ struct GroupVollehCardDetail: View {
                                 print("참가 신청 완료 노티 받음")
                                 if let user_info = value.userInfo, let data = user_info["apply_meeting_result"]{
                                     if data as! String == "ok"{
-                                      
+                                        
                                         self.apply_ok = "ok"
                                         print("ok통신 : \(self.apply_ok)")
                                         
                                     }else{
-                                       
+                                        
                                         self.apply_ok = "fail"
                                         print("fail통신: \(self.apply_ok)")
                                     }
                                     self.apply_result = true
                                 }
                             }
-                    
+                        
                     }
                 }.padding()
             }
-       }
+        }
         .onAppear{
             print("-------------------------------상세 페이지 나타남 동적링크에서 왔는지: \(socket.is_dynamic_link), 선택한 카드idx: \(self.main_vm.selected_card_idx)------------------------")
             if socket.is_dynamic_link{
@@ -222,9 +222,9 @@ struct GroupVollehCardDetail: View {
             }
             //이걸 해야 지도 데이터 부분에서 분기처리가 됨.
             self.main_vm.is_just_showing = true
-
+            
             self.main_vm.get_group_card_detail(card_idx: self.main_vm.selected_card_idx)
-         
+            
         }
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
@@ -250,20 +250,20 @@ struct GroupVollehCardDetail: View {
                     
                     self.show_no_result = true
                 }else{
-                print("맵 데이터 상세페이지에서 확인: \(main_vm.map_data)")
-                if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
-                    
-                    self.expiration_at = String.kor_date_string(date_string: self.main_vm.my_card_detail_struct.expiration_at!)
-                    
-                    self.meeting_time = String.msg_time_formatter(date_string: self.main_vm.my_card_detail_struct.expiration_at!)
-                    
-                }else{
-                    
-                    self.expiration_at = String.kor_date_string(date_string: self.main_vm.card_detail_struct.expiration_at!)
-                    self.meeting_time = String.msg_time_formatter(date_string: self.main_vm.card_detail_struct.expiration_at!)
-                    
-                }
-                print("날짜 확인: \(self.expiration_at)")
+                    print("맵 데이터 상세페이지에서 확인: \(main_vm.map_data)")
+                    if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                        
+                        self.expiration_at = String.kor_date_string(date_string: self.main_vm.my_card_detail_struct.expiration_at!)
+                        
+                        self.meeting_time = String.msg_time_formatter(date_string: self.main_vm.my_card_detail_struct.expiration_at!)
+                        
+                    }else{
+                        
+                        self.expiration_at = String.kor_date_string(date_string: self.main_vm.card_detail_struct.expiration_at!)
+                        self.meeting_time = String.msg_time_formatter(date_string: self.main_vm.card_detail_struct.expiration_at!)
+                        
+                    }
+                    print("날짜 확인: \(self.expiration_at)")
                 }
             }else{
                 print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
@@ -290,7 +290,7 @@ extension GroupVollehCardDetail{
             
             let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
             print("수락 클릭: \(chatroom_idx)")
-
+            
             //참가 수락하는 api 서버 통신 -> ok 오면 채팅서버에 수락 이벤트 보냄.
             socket_manager.accept_dynamic_link(chatroom_idx: chatroom_idx)
             
@@ -310,6 +310,7 @@ extension GroupVollehCardDetail{
                 
             }
         }, label: {
+            
             Text("참여하기")
                 .font(.custom(Font.t_extra_bold, size: 15))
                 .frame(minWidth: 0, maxWidth: .infinity)
@@ -333,7 +334,7 @@ extension GroupVollehCardDetail{
                     
                 }else{
                     print("모임 카드에 초대한 경우 뷰 이동 노티 받음")
-                   
+                    
                 }
             }
         })
@@ -349,54 +350,54 @@ extension GroupVollehCardDetail{
              - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
              - 주의 : 친구 채팅방 카드이므로 소켓 매니저 클래스의 which_type_room변수를 GROUP로 만들기.
              */
-
-                if self.main_vm.my_nickname == self.main_vm.creator_name{
-                    Button(action: {
-
-                        socket_manager.which_type_room = "GROUP"
-
-                        let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
-                        print("모여볼래로 초대하려는 채팅방 idx: \(chatroom_idx), 카드 idx: \(main_vm.my_card_detail_struct.card_idx!)")
-                        
-                        //동적링크 생성 - kinds, card idx, chatroom idx
-//                        SockMgr.socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: "tab.grp.fill", card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: self.main_vm.my_card_detail_struct.kinds!)
-
-                        let meeting_date = self.main_vm.my_card_detail_struct.expiration_at
-                        let converted_date = String.kor_date_string(date_string: meeting_date!)
-                        let meeting_time = self.main_vm.my_card_detail_struct.expiration_at
-                        let converted_time = String.time_to_kor_language(date: meeting_time!)
-                        
-                        SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: "친구", meeting_date: converted_date, meeting_time: converted_time)
-                        
-                        //본래의 일반 채팅방 화면으로 이동.
-                        self.go_back_chatroom = true
-                        print("go_back_chatroom: \(self.go_back_chatroom)")
-                    }){
-                        Text("초대하기")
-                            .padding()
-                            .foregroundColor(Color.proco_white)
-                            .frame(maxWidth: .infinity)
-                    }
-                }else{
-                    Button(action: {
-                        print("참가 신청 버튼 클릭")
-                        self.main_vm.apply_group_card(card_idx: self.main_vm.selected_card_idx)
-                        //참가 신청 확인 모달 띄우기
-                       // main_vm.result_alert(main_vm.alert_type)
-                    }){
-
-                        Text("참가 신청")
-                            .font(.custom(Font.t_regular, size: 17))
-                            .padding()
-                            .foregroundColor(.proco_white)
-
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity)
-                    .background(Color.main_green)
-                    .cornerRadius(25)
-                    .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
-                    //.disabled(main_vm.appply_end)
+            
+            if self.main_vm.my_nickname == self.main_vm.creator_name{
+                Button(action: {
+                    
+                    socket_manager.which_type_room = "GROUP"
+                    
+                    let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
+                    print("모여볼래로 초대하려는 채팅방 idx: \(chatroom_idx), 카드 idx: \(main_vm.my_card_detail_struct.card_idx!)")
+                    
+                    //동적링크 생성 - kinds, card idx, chatroom idx
+                    //                        SockMgr.socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: "tab.grp.fill", card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: self.main_vm.my_card_detail_struct.kinds!)
+                    
+                    let meeting_date = self.main_vm.my_card_detail_struct.expiration_at
+                    let converted_date = String.kor_date_string(date_string: meeting_date!)
+                    let meeting_time = self.main_vm.my_card_detail_struct.expiration_at
+                    let converted_time = String.time_to_kor_language(date: meeting_time!)
+                    
+                    SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: "친구", meeting_date: converted_date, meeting_time: converted_time)
+                    
+                    //본래의 일반 채팅방 화면으로 이동.
+                    self.go_back_chatroom = true
+                    print("go_back_chatroom: \(self.go_back_chatroom)")
+                }){
+                    Text("초대하기")
+                        .padding()
+                        .foregroundColor(Color.proco_white)
+                        .frame(maxWidth: .infinity)
                 }
+            }else{
+                Button(action: {
+                    print("참가 신청 버튼 클릭")
+                    self.main_vm.apply_group_card(card_idx: self.main_vm.selected_card_idx)
+                    //참가 신청 확인 모달 띄우기
+                    // main_vm.result_alert(main_vm.alert_type)
+                }){
+                    
+                    Text("참가 신청")
+                        .font(.custom(Font.t_regular, size: 17))
+                        .padding()
+                        .foregroundColor(.proco_white)
+                    
+                }
+                .frame(minWidth: 0, maxWidth: .infinity)
+                .background(Color.main_green)
+                .cornerRadius(25)
+                .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
+                //.disabled(main_vm.appply_end)
+            }
         }
     }
     var report_btn : some View{
@@ -443,7 +444,7 @@ extension GroupVollehCardDetail{
                                         .frame(minWidth: 0, maxWidth: .infinity)
                                         .font(.custom(Font.t_extra_bold, size: 15))
                                         .foregroundColor(.proco_white)
-                                        )
+                                )
                         }
                     }else{
                         if main_vm.card_detail_struct.tags!.count > 0{
@@ -462,17 +463,17 @@ extension GroupVollehCardDetail{
                 .padding(.leading)
                 
                 HStack{
-                //내 카드인 경우
-                if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
-                    
-                    Text("\(main_vm.my_card_detail_struct.title!)")
-                        .font(.custom(Font.n_bold, size: 22))
-                        .foregroundColor(Color.proco_black)
-                }else{
-                    Text("\(main_vm.card_detail_struct.title!)")
-                        .font(.custom(Font.n_bold, size: 22))
-                        .foregroundColor(Color.proco_black)
-                }
+                    //내 카드인 경우
+                    if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                        
+                        Text("\(main_vm.my_card_detail_struct.title!)")
+                            .font(.custom(Font.n_bold, size: 22))
+                            .foregroundColor(Color.proco_black)
+                    }else{
+                        Text("\(main_vm.card_detail_struct.title!)")
+                            .font(.custom(Font.n_bold, size: 22))
+                            .foregroundColor(Color.proco_black)
+                    }
                     Spacer()
                 }
                 .padding(.leading)
@@ -484,52 +485,52 @@ extension GroupVollehCardDetail{
         VStack{
             Spacer()
             HStack{
-            Button(action: {
-                
-                //내 카드인 경우
-                if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
-                    if self.main_vm.my_card_detail_struct.like_state == 0{
-                        
-                        print("모임 카드 좋아요 클릭")
-                        self.main_vm.send_like_card(card_idx: self.main_vm.my_card_detail_struct.card_idx!)
-                        
-                    }else{
-                        print("모임 카드 좋아요 취소")
-                        self.main_vm.cancel_like_card(card_idx: self.main_vm.my_card_detail_struct.card_idx!)
-                    }
-                    //다른 사람 카드인 경우
-                }else{
-                    if self.main_vm.card_detail_struct.like_state == 0{
-                        
-                        print("모임 카드 좋아요 클릭")
-                        self.main_vm.send_like_card(card_idx: self.main_vm.card_detail_struct.card_idx!)
-                        
-                    }else{
-                        print("모임 카드 좋아요 취소")
-                        self.main_vm.cancel_like_card(card_idx: self.main_vm.card_detail_struct.card_idx!)
-                    }
-                }
-                
-            }){
-                //내 카드인 경우
-                if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                Button(action: {
                     
-                    Image(main_vm.my_card_detail_struct.like_state == 0 ? "heart" : "heart_fill")
-                        .resizable()
-                        .frame(width: 20, height: 18)
-
-                }else{
-                    Image(main_vm.card_detail_struct.like_state == 0 ? "heart" : "heart_fill")
-                        .resizable()
-                        .frame(width: 20, height: 18)
+                    //내 카드인 경우
+                    if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                        if self.main_vm.my_card_detail_struct.like_state == 0{
+                            
+                            print("모임 카드 좋아요 클릭")
+                            self.main_vm.send_like_card(card_idx: self.main_vm.my_card_detail_struct.card_idx!)
+                            
+                        }else{
+                            print("모임 카드 좋아요 취소")
+                            self.main_vm.cancel_like_card(card_idx: self.main_vm.my_card_detail_struct.card_idx!)
+                        }
+                        //다른 사람 카드인 경우
+                    }else{
+                        if self.main_vm.card_detail_struct.like_state == 0{
+                            
+                            print("모임 카드 좋아요 클릭")
+                            self.main_vm.send_like_card(card_idx: self.main_vm.card_detail_struct.card_idx!)
+                            
+                        }else{
+                            print("모임 카드 좋아요 취소")
+                            self.main_vm.cancel_like_card(card_idx: self.main_vm.card_detail_struct.card_idx!)
+                        }
+                    }
+                    
+                }){
+                    //내 카드인 경우
+                    if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                        
+                        Image(main_vm.my_card_detail_struct.like_state == 0 ? "heart" : "heart_fill")
+                            .resizable()
+                            .frame(width: 20, height: 18)
+                        
+                    }else{
+                        Image(main_vm.card_detail_struct.like_state == 0 ? "heart" : "heart_fill")
+                            .resizable()
+                            .frame(width: 20, height: 18)
+                    }
                 }
-            }
-            Text(main_vm.my_card_detail_struct.like_count ?? 0 > 0 ? "좋아요\(main_vm.my_card_detail_struct.like_count!)개" : "")
-                .font(.custom(Font.t_extra_bold, size: 14))
-                .foregroundColor(.proco_black)
+                Text(main_vm.my_card_detail_struct.like_count ?? 0 > 0 ? "좋아요\(main_vm.my_card_detail_struct.like_count!)개" : "")
+                    .font(.custom(Font.t_extra_bold, size: 14))
+                    .foregroundColor(.proco_black)
             }
             Spacer()
-
+            
         }
         .padding([.leading, .bottom])
         .onReceive(NotificationCenter.default.publisher(for: Notification.clicked_like), perform: {value in
@@ -649,7 +650,7 @@ extension GroupVollehCardDetail{
                             .foregroundColor(.proco_black)
                     }
                     Spacer()
-                    Text(main_vm.my_card_detail_struct.creator_attend_count ?? 0 > 0 ? "프로코 모임을 \(main_vm.my_card_detail_struct.creator_attend_count)회 참여해봤어요!" : "모임 주최 스타트")
+                    Text(main_vm.my_card_detail_struct.creator_attend_count ?? 0 > 0 ? "프로코 모임을 \(main_vm.my_card_detail_struct.creator_attend_count!)회 참여해봤어요!" : "모임 주최 스타트")
                         .font(.custom(Font.n_bold, size: 13))
                         .foregroundColor(Color.proco_black)
                     
@@ -675,7 +676,7 @@ extension GroupVollehCardDetail{
                             .foregroundColor(.proco_black)
                     }
                     Spacer()
-                    Text(main_vm.card_detail_struct.creator_attend_count ?? 0 > 0 ? "프로코 모임을 \(main_vm.card_detail_struct.creator_attend_count)회 참여해봤어요!" : "모임 주최 스타트")
+                    Text(main_vm.card_detail_struct.creator_attend_count ?? 0 > 0 ? "프로코 모임을 \(main_vm.card_detail_struct.creator_attend_count!)회 참여해봤어요!" : "모임 주최 스타트")
                         .font(.custom(Font.n_bold, size: 13))
                         .foregroundColor(Color.proco_black)
                         .padding(.trailing)
@@ -695,24 +696,24 @@ extension GroupVollehCardDetail{
                 Spacer()
             }
             .padding(.bottom)
-                            
+            
             //내 카드인 경우
             if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
-              
+                
                 Text("\(self.main_vm.my_card_detail_struct.introduce ?? "")")
                     .font(.custom(Font.n_bold, size: 13))
                     .foregroundColor(Color.proco_black)
                     .lineLimit(nil)
                     .multilineTextAlignment(.leading)
-                    //.background(Color.gray.opacity(0.5))
+                //.background(Color.gray.opacity(0.5))
             }else{
-               
+                
                 Text("\(self.main_vm.card_detail_struct.introduce ?? "")")
                     .font(.custom(Font.n_bold, size: 13))
                     .foregroundColor(Color.proco_black)
                     .lineLimit(nil)
                     .multilineTextAlignment(.leading)
-                    //.background(Color.gray.opacity(0.5))
+                //.background(Color.gray.opacity(0.5))
                 
             }
         }
@@ -768,7 +769,7 @@ extension GroupVollehCardDetail{
                 .padding(.trailing)
         }
         .padding([.bottom])
-
+        
     }
     
     var location : some View{
@@ -822,7 +823,7 @@ extension GroupVollehCardDetail{
                 Spacer()
             }
             .padding([.leading, .bottom])
-
+            
             HStack{
                 Text("위반 시 제재를 받을 수 있습니다(영구정지 또는 서비스 이용제한)")
                     .font(.custom(Font.n_bold, size: 11))
@@ -832,85 +833,85 @@ extension GroupVollehCardDetail{
             .padding([.leading, .bottom])
             
             HStack{
-            Rectangle()
-                .foregroundColor(.main_green)
-                .frame(width: UIScreen.main.bounds.width*0.35, height: UIScreen.main.bounds.width/17)
-                .overlay(
-                    Text("성적인 주제의 대화, 성드립")
-                        .foregroundColor(.proco_white)
-                        .font(.custom(Font.n_bold, size: 11))
-                )
-            Spacer()
+                Rectangle()
+                    .foregroundColor(.main_green)
+                    .frame(width: UIScreen.main.bounds.width*0.35, height: UIScreen.main.bounds.width/17)
+                    .overlay(
+                        Text("성적인 주제의 대화, 성드립")
+                            .foregroundColor(.proco_white)
+                            .font(.custom(Font.n_bold, size: 11))
+                    )
+                Spacer()
             }
             .padding(.leading)
-
+            
             HStack{
-            Rectangle()
-                .foregroundColor(.main_green)
-                .frame(width: UIScreen.main.bounds.width*0.49, height: UIScreen.main.bounds.width/20)
-                .overlay(
-                    Text("불쾌감을 줄 수 있는 사진이나 닉네임 사용")
-                        .foregroundColor(.proco_white)
-                        .font(.custom(Font.n_bold, size: 10))
-                )
-            Spacer()
+                Rectangle()
+                    .foregroundColor(.main_green)
+                    .frame(width: UIScreen.main.bounds.width*0.49, height: UIScreen.main.bounds.width/20)
+                    .overlay(
+                        Text("불쾌감을 줄 수 있는 사진이나 닉네임 사용")
+                            .foregroundColor(.proco_white)
+                            .font(.custom(Font.n_bold, size: 10))
+                    )
+                Spacer()
             }
             .padding(.leading)
-
+            
             HStack{
-            Rectangle()
-                .foregroundColor(.main_green)
-                .frame(width: UIScreen.main.bounds.width*0.42, height: UIScreen.main.bounds.width/20)
-                .overlay(
-                    Text("모임의 목적 또는 주제와 무관한 행동")
-                        .foregroundColor(.proco_white)
-                        .font(.custom(Font.n_bold, size: 10))
-                )
-            Spacer()
+                Rectangle()
+                    .foregroundColor(.main_green)
+                    .frame(width: UIScreen.main.bounds.width*0.42, height: UIScreen.main.bounds.width/20)
+                    .overlay(
+                        Text("모임의 목적 또는 주제와 무관한 행동")
+                            .foregroundColor(.proco_white)
+                            .font(.custom(Font.n_bold, size: 10))
+                    )
+                Spacer()
             }
             .padding(.leading)
-
+            
             HStack{
-            Rectangle()
-                .foregroundColor(.main_green)
-                .frame(width: UIScreen.main.bounds.width*0.14, height: UIScreen.main.bounds.width/20)
-                .overlay(
-                    Text("욕설 및 비방")
-                        .foregroundColor(.proco_white)
-                        .font(.custom(Font.n_bold, size: 10))
-                )
-            Spacer()
+                Rectangle()
+                    .foregroundColor(.main_green)
+                    .frame(width: UIScreen.main.bounds.width*0.14, height: UIScreen.main.bounds.width/20)
+                    .overlay(
+                        Text("욕설 및 비방")
+                            .foregroundColor(.proco_white)
+                            .font(.custom(Font.n_bold, size: 10))
+                    )
+                Spacer()
             }
             .padding(.leading)
-
+            
             HStack{
-            Rectangle()
-                .foregroundColor(.main_green)
-                .frame(width: UIScreen.main.bounds.width*0.12, height: UIScreen.main.bounds.width/20)
-                .overlay(
-                    Text("무단 불참")
-                        .foregroundColor(.proco_white)
-                        .font(.custom(Font.n_bold, size: 10))
-                )
-            Spacer()
+                Rectangle()
+                    .foregroundColor(.main_green)
+                    .frame(width: UIScreen.main.bounds.width*0.12, height: UIScreen.main.bounds.width/20)
+                    .overlay(
+                        Text("무단 불참")
+                            .foregroundColor(.proco_white)
+                            .font(.custom(Font.n_bold, size: 10))
+                    )
+                Spacer()
             }
             .padding([.leading, .bottom])
             
             HStack{
-                    Text("자세한 내용은 프로코 이용규칙을 확인해주세요")
-                        .foregroundColor(.proco_black)
-                        .font(.custom(Font.n_bold, size: 10))
+                Text("자세한 내용은 프로코 이용규칙을 확인해주세요")
+                    .foregroundColor(.proco_black)
+                    .font(.custom(Font.n_bold, size: 10))
                 
-            Spacer()
+                Spacer()
             }
             .padding([.leading, .bottom])
-
+            
             HStack{
-                    Text("프로코 이용규칙")
-                        .foregroundColor(.proco_black)
-                        .font(.custom(Font.n_extra_bold, size: 14))
+                Text("프로코 이용규칙")
+                    .foregroundColor(.proco_black)
+                    .font(.custom(Font.n_extra_bold, size: 14))
                 
-            Spacer()
+                Spacer()
             }
             .padding([.leading, .bottom])
             
