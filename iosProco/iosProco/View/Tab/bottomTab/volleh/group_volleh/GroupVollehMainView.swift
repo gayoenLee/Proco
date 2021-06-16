@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 import UserNotifications
+import Kingfisher
 
 struct GroupVollehMainView: View {
     @StateObject var db : ChatDataManager = ChatDataManager()
@@ -41,6 +42,14 @@ struct GroupVollehMainView: View {
     
     //친구들 모임 카드 그룹 리스트 오픈 여부
     @State private var open_all_meeting_cards = true
+    //내 프로필 사진
+    @State private var my_photo_path : String = ""
+    
+    let scale = UIScreen.main.scale
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 40, height: 40)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    
+    //내 프로필 클릭시 나타나는 다이얼로그
+    @State private var my_info_dialog : Bool = false
     
     @ViewBuilder
     var body: some View {
@@ -275,6 +284,7 @@ struct GroupVollehMainView: View {
             }
         }
         .background(Color.proco_dark_white)
+        .overlay(MyInfoDialog(main_vm: self.main_vm, show_friend_info: $my_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, profile_photo_path: self.$my_photo_path))
         //필터 뷰
         .sheet(isPresented: $show_filter){
             GroupFilterModal(main_vm: self.main_vm, show_filter: self.$show_filter)
@@ -286,6 +296,8 @@ struct GroupVollehMainView: View {
         .edgesIgnoringSafeArea(.all)
         .onAppear{
             print("*************모여 볼래 메인 뷰 나타남****************")
+            self.my_photo_path = UserDefaults.standard.string(forKey: "\(main_vm.my_idx!)_profile_photo_path") ?? ""
+            
             //user defaults에서 내 닉네임 꺼내오는 메소드 실행. 그래야 내 카드만 골라서 보여줄 수 있음.
             main_vm.get_my_nickname()
             //카드 데이터 갖고 오는 통신
@@ -309,39 +321,58 @@ extension GroupVollehMainView{
         //상단에 내 프로필, on.off버튼, 필터 버튼 그룹
       
             HStack{
-                //내 프로필
-                Image("main_profile_img")
-                    .resizable()
-                    .background(Color.gray.opacity(0.5))
-                    .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                    .cornerRadius(50)
-                    .scaledToFit()
-                    .padding([.leading], UIScreen.main.bounds.width/30)
                 
-                Button(action: {
+                ZStack(alignment: .bottomTrailing){
                     
-                    var state = ""
-                    //본래 상태가 off였었으므로 on으로 바꿈.
-                    if self.state_on == 0{
-                        print("on임")
-                        state = "OFF"
-                        self.state_on = 1
+                    if self.my_photo_path == "" || self.my_photo_path == nil{
+                    //내 프로필
+                    Image("main_profile_img")
+                        .resizable()
+                        .background(Color.gray.opacity(0.5))
+                        .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
+                        .cornerRadius(50)
+                        .scaledToFit()
+                        .padding([.leading], UIScreen.main.bounds.width/30)
                         
                     }else{
-                        print("off임")
-                        state = "ON"
-                        self.state_on = 0
                         
+                        KFImage(URL(string: self.my_photo_path))
+                            .placeholder{Image("main_profile_img")
+                                .resizable()
+                                .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
+                            }
+                            .loadDiskFileSynchronously()
+                            .cacheMemoryOnly()
+                            .fade(duration: 0.25)
+                            .setProcessor(img_processor)
+                            .onProgress{receivedSize, totalSize in
+                                print("on progress: \(receivedSize), \(totalSize)")
+                            }
+                            .onSuccess{result in
+                                print("성공 : \(result)")
+                            }
+                            .onFailure{error in
+                                print("실패 이유: \(error)")
+                                
+                                Image("main_profile_img")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                            }
                     }
-                    SockMgr.socket_manager.click_on_off(user_idx: Int(self.main_vm.my_idx!)!, state: self.state_on, state_data: "")
-                    UserDefaults.standard.set(self.state_on, forKey: "\(self.main_vm.my_idx!)_state")
-                    print("내 idx: \(self.main_vm.my_idx!)")
-                    print("온오프 버튼 클릭으로 바뀐 상태: \( self.state_on)")
                     
-                }, label: {
+                    Rectangle()
+                        .foregroundColor(self.state_on == 0 ? Color.gray : Color.proco_green)
+                    .frame(width: 14, height: 14)
+                        .clipShape(Circle())
+                        .overlay(Circle()
+                                    .strokeBorder(Color.proco_white, lineWidth: 1)
+                        )
+                }
+                .onTapGesture {
+                    self.my_info_dialog = true
                     
-                    Text(self.state_on == 0 ? "OFF" : "ON")
-                })
+                }
+                
                 Spacer()
                 Group{
                     HStack{
