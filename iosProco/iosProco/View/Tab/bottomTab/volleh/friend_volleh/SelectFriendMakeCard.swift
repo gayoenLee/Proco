@@ -85,6 +85,7 @@ struct SelectFriendMakeCard: View {
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
         .onAppear{
+            print("알릴 친구들 뷰 on appear")
             main_viewmodel.get_all_people()
         }
 
