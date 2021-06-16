@@ -64,4 +64,7 @@ extension Notification{
     
     //친구 신청 수락 및 거절 이벤트 완료시
     static let friend_request_event = Notification.Name.init("friend_request_event")
+    
+    //카드 잠금 이벤트 완료시 + 다른 곳에서도 사용
+    static let event_finished = Notification.Name.init("event_finished")
 }
