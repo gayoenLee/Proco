@@ -31,6 +31,9 @@ struct MakeCardView: View {
 
     @State private var go_to_select_friends : Bool = false
     
+    //현재 시간 기준 +10분인 경우에만 카드 만들 수 있음. 아닌 경우 경고문구 보여주기
+    @State private var card_time_not_allow : Bool = false
+    
     var body: some View {
         
         VStack{
@@ -66,7 +69,7 @@ struct MakeCardView: View {
                 VStack{
                     
                     //완료 버튼을 제외한 카드 만들기 뷰
-                    SelectedView(viewmodel: self.main_viewmodel, tag_category_struct: self.tag_category_struct, go_to_select_friends: self.$go_to_select_friends, category_alert: self.$category_alert, selected_category: self.$selected_category)
+                    SelectedView(viewmodel: self.main_viewmodel, tag_category_struct: self.tag_category_struct, go_to_select_friends: self.$go_to_select_friends, category_alert: self.$category_alert, selected_category: self.$selected_category, card_time_not_allow: self.$card_time_not_allow)
                     /*
                      완료 버튼 클릭시 카드 만들기 통신 진행, 통신 결과에 따라 alert창 띄움.
                      - 흐름: 친구와 카드 만들기 -> 카드 만들기 완료 -> 메세지 보내기 이벤트 -> 카드 상세 페이지 -> 공유하기 버튼 클릭 -> 동적 링크 생성 -> 메세지 보내짐
@@ -79,8 +82,12 @@ struct MakeCardView: View {
                             
                             print("카드에 태그 포함돼 있음.")
                             //서버에 날짜와 시간 합쳐서 보내기 위해 날짜+시간 만드는 메소드 실행.
-                            self.main_viewmodel.make_card_date()
+                           
+                            let card_time =  self.main_viewmodel.make_card_date()
                             
+                            let check_time_result = self.main_viewmodel.make_card_time_check(make_time: card_time)
+                            
+                            if check_time_result{
                             //카드 추가 통신시에 share_list파라미터 dictionary로 만드는 메소드 실행.
                             main_viewmodel.make_dictionary()
                             
@@ -104,7 +111,9 @@ struct MakeCardView: View {
                             
                             //통신 후 결과값에 따라서 아래 alert창 띄우는 것.
                             main_viewmodel.result_alert(main_viewmodel.alert_type)
-                            
+                            }else{
+                                print("현재 시간 10분 후 아님")
+                            }
                         }else{
                             print("카드에 태그 포함 안돼 있음.")
                             
@@ -140,11 +149,12 @@ struct MakeCardView: View {
                         }
                     }
                 }
-                .onAppear{
-                    //socket_manager.is_dynamic_link = false
-                }
             }
             .padding(.bottom, UIScreen.main.bounds.width/40)
+        }
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         .navigationBarColor(background_img: "wave_bg", title: "심심 설정")
         .onAppear{
@@ -152,6 +162,10 @@ struct MakeCardView: View {
             
             self.total_show_people = total_people_array.count
            // let nav_bar = main_viewmodel.viewDidLayoutSubviews()
+            
+            //필터에서 유저가 선택한 태그 데이터 모델과 여기에서 사용하는 모델이 같아서 초기화해줌
+//            self.main_viewmodel.user_selected_tag_list.removeAll()
+//            self.main_viewmodel.user_selected_tag_set.removeAll()
         }
         .onDisappear{
             print("카드 만들기 뷰 사라짐!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -172,12 +186,21 @@ struct SelectedView : View {
     
     //선택한 카테고리
     @Binding var selected_category : String
+    //카드 만들 때 10분 이후인 경우에만 만들 수 있도록 경고문구
+    @Binding var card_time_not_allow : Bool
     
     //알릴 친구들 선택에서 아무도 선택하지 않았을 경우 모든 친구텍스트 보여주기 위해 두 어레이 count합치는 것.
     var body: some View{
         Group{
             date_view
             
+            if self.card_time_not_allow{
+                HStack{
+                    Text("현재 시간 기준 10분 이후인 약속만 가능합니다.")
+                        .font(.custom(Font.n_regular, size: 16))
+                        .foregroundColor(.proco_red)
+                }
+            }
             time_view
         }
         
@@ -185,11 +208,15 @@ struct SelectedView : View {
         if tag_num_over_three{
             HStack{
                 Text("태그는 최대 3개까지 추가 가능합니다.")
+                    .font(.custom(Font.n_regular, size: 16))
+                    .foregroundColor(.proco_red)
             }
         }
         if self.category_alert{
             HStack{
-                Text("카테고리는 1개 필수 선택입니다.")
+                Text("카테고리 1개 필수 선택입니다.")
+                    .font(.custom(Font.n_regular, size: 16))
+                    .foregroundColor(.proco_red)
             }
         }
         //태그 선택 부분 시작

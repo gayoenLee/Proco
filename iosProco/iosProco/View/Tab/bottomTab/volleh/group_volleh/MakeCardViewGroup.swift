@@ -40,30 +40,30 @@ struct MakeCardViewGroup: View {
     var body: some View {
         
         VStack{
-            HStack{
-                Button(action: {
-                    self.presentationMode.wrappedValue.dismiss()
-                    
-                }, label: {
-                    Image("white_left")
-                        .resizable()
-                        .frame(width: 8.51, height: 17)
-                    
-                })
-                .padding(.leading, UIScreen.main.bounds.width/20)
-                
-                Spacer()
-                Text("방 만들기")
-                    .font(.custom(Font.t_extra_bold, size: 20))
-                    .foregroundColor(.proco_white)
-                    .padding(.trailing, UIScreen.main.bounds.width/20)
-                Spacer()
-                NavigationLink("", destination: GroupVollehMainView(main_vm: self.main_vm)  .navigationBarTitle("", displayMode: .inline)
-                                .navigationBarHidden(true)
-                                .navigationBarBackButtonHidden(true), isActive: self.$make_success)
-                
-            }
-            .frame(width: UIScreen.main.bounds.width*1.1, height: UIScreen.main.bounds.width*0.3)
+//            HStack{
+//                Button(action: {
+//                    self.presentationMode.wrappedValue.dismiss()
+//
+//                }, label: {
+//                    Image("white_left")
+//                        .resizable()
+//                        .frame(width: 8.51, height: 17)
+//
+//                })
+//                .padding(.leading, UIScreen.main.bounds.width/20)
+//
+//                Spacer()
+//                Text("방 만들기")
+//                    .font(.custom(Font.t_extra_bold, size: 20))
+//                    .foregroundColor(.proco_white)
+//                    .padding(.trailing, UIScreen.main.bounds.width/20)
+//                Spacer()
+//                NavigationLink("", destination: GroupVollehMainView(main_vm: self.main_vm)  .navigationBarTitle("", displayMode: .inline)
+//                                .navigationBarHidden(true)
+//                                .navigationBarBackButtonHidden(true), isActive: self.$make_success)
+//
+//            }
+//            .frame(width: UIScreen.main.bounds.width*1.1, height: UIScreen.main.bounds.width*0.3)
             
             ScrollView{
                 VStack{
@@ -131,6 +131,10 @@ struct MakeCardViewGroup: View {
                     }
                 }
             }
+        }
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         .navigationBarColor(background_img: "meeting_wave_bg", title: "방 만들기")
 
@@ -265,7 +269,7 @@ struct MakingView: View{
             Rectangle()
                 .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.5, alignment: .center)
                 .foregroundColor(Color.gray)
-                .overlay( MyWebView(vm: self.main_vm, url: "https://withproco.com/map?device=ios&view=create"))
+                .overlay( MyWebView(vm: self.main_vm, url: "https://withproco.com/map/map.html?device=ios&view=create"))
             }
             
             Group{
@@ -326,8 +330,8 @@ extension MakingView {
             //IOS14부터 onchange사용 가능
             .onChange(of: self.main_vm.card_name) { value in
                 print("닉네임 onchangee 들어옴")
-                if value.count > 10 {
-                    print("닉네임 10글자 넘음")
+                if value.count > 15 {
+                    print("모임 이름 15글자 넘음")
                     self.main_vm.card_name = String(value.prefix(10))
                 }
             }

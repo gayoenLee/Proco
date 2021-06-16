@@ -25,7 +25,7 @@ struct GroupCardStruct: Codable, Identifiable{
     var lock_state : Int = 0
     var like_state : Int = 0
     var like_count: Int? = 0
-    var creator_attend_count : Int = 0
+    var creator_attend_count : Int? = 0
     var tags: [Tags]? = []
     var creator: Creator? = Creator()
     //수정.삭제 스와이프 구현하기 위해 추가로 넣음.

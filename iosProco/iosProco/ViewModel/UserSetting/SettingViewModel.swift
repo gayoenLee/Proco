@@ -392,7 +392,13 @@ class SettingViewModel: ObservableObject{
                 
             }, receiveValue: {response in
                 print("유저 모든 정보 가져오기 response: \(response)")
+                
                 let result = response.dictionaryValue
+                
+                if result["result"] == "no result"{
+                    print("결과 없을 때")
+                }else{
+                
                 
                 let nickname = result["nickname"]?.stringValue
                 let password_modify_at = result["password_modify_at"]?.stringValue
@@ -409,8 +415,10 @@ class SettingViewModel: ObservableObject{
                 print("최종 저장한 유저 정보 모델: \(self.user_info_model)")
                 
                 NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["got_user_info" : "ok"])
+                }
             })
     }
+    
     //마이페이지에서 생년월일 수정시 필요.
     func string_to_date(expiration: String) -> Date{
         let formatter = DateFormatter()

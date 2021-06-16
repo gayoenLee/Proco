@@ -255,7 +255,11 @@ enum APIRouter: URLRequestConvertible {
     
     //알림 목록 가져오기
     case get_notis(page_idx: Int, page_size: Int)
+    //카드 잠그기
+    case lock_card(card_idx: Int,lock_state : Int)
     
+    //친구 카드 참여자 목록 가져오기
+    case get_friend_card_apply_people(card_idx: Int)
     
     private var method: HTTPMethod{
         switch self{
@@ -539,7 +543,12 @@ enum APIRouter: URLRequestConvertible {
         //알림 목록 가져오기
         case .get_notis:
             return .get
-            
+        //카드 잠그기
+        case .lock_card:
+            return .put
+        //카드 참여자 목록 가져오기
+        case .get_friend_card_apply_people:
+            return .get
             
         }
     }
@@ -827,6 +836,12 @@ enum APIRouter: URLRequestConvertible {
         //알림 목록 가져오기
         case .get_notis:
             return "/users/notifications"
+        //카드 잠그기
+        case .lock_card(let card_idx, _):
+            return "/cards/\(card_idx)/lock"
+        //친구 카드 참여자 목록 가져오기
+        case .get_friend_card_apply_people(let card_idx):
+            return "/cards/\(card_idx)/friends/users"
         }
     }
     
@@ -1123,6 +1138,12 @@ enum APIRouter: URLRequestConvertible {
         //알림 목록 가져오기
         case .get_notis(let page_idx, let page_size):
             return [Keys.GetNotis.page_idx: page_idx, Keys.GetNotis.page_size: page_size]
+        //카드 잠그기
+        case .lock_card(_,let lock_state):
+            return [Keys.LockCard.lock_state: lock_state]
+        //친구 카드 참여자 목록 가져오기
+        case .get_friend_card_apply_people(_):
+            return [:]
         }
         
     }
@@ -1141,7 +1162,7 @@ enum APIRouter: URLRequestConvertible {
         
         // Common Headers
         switch self{
-        case .change_password,.find_id_pwd_phone_auth, .check_phone_auth, .phone_auth, .send_signup_info, .send_check_login, .add_group, .get_friend_list, .get_group_detail, .edit_group_name, .edit_group_member, .delete_group, .add_friend_to_group, .get_request_friend, .accept_friend_request, .decline_friend_request, .add_friend_number_check, .add_friend_email_check, .add_friend_number_last, .add_friend_email_last, .friend_volleh_make_card , .edit_friend_volleh_card, .make_group_card, .edit_group_card, .get_my_apply_list, .friend_volleh_filter, .group_volleh_filter , .get_all_my_cards, .send_fcm_token, .get_boring_period, .get_card_for_calendar, .get_like_for_calendar, .send_like_in_calendar, .get_like_user_list, .send_interest_calendar, .get_interest_users, .add_personal_schedule, .get_personal_schedules, .edit_personal_schedule, .check_is_friend, .send_question_content, .edit_question, .verify_email, .setting_change_pwd, .edit_user_info, .edit_calendar_disclosure_setting, .edit_chat_alarm_setting, .edit_feed_alarm_setting, .send_reports, .send_apple_login, .send_kakao_login, .join_member_apple_end, .join_member_kakao_end, .get_today_boring_friends, .set_boring_today, .set_interest_friend, .get_enrolled_friends, .send_invite_message, .cancel_request_friend, .delete_friend, .add_friend_request, .get_interest_friends, .get_liked_cards, .get_notis:
+        case .change_password,.find_id_pwd_phone_auth, .check_phone_auth, .phone_auth, .send_signup_info, .send_check_login, .add_group, .get_friend_list, .get_group_detail, .edit_group_name, .edit_group_member, .delete_group, .add_friend_to_group, .get_request_friend, .accept_friend_request, .decline_friend_request, .add_friend_number_check, .add_friend_email_check, .add_friend_number_last, .add_friend_email_last, .friend_volleh_make_card , .edit_friend_volleh_card, .make_group_card, .edit_group_card, .get_my_apply_list, .friend_volleh_filter, .group_volleh_filter , .get_all_my_cards, .send_fcm_token, .get_boring_period, .get_card_for_calendar, .get_like_for_calendar, .send_like_in_calendar, .get_like_user_list, .send_interest_calendar, .get_interest_users, .add_personal_schedule, .get_personal_schedules, .edit_personal_schedule, .check_is_friend, .send_question_content, .edit_question, .verify_email, .setting_change_pwd, .edit_user_info, .edit_calendar_disclosure_setting, .edit_chat_alarm_setting, .edit_feed_alarm_setting, .send_reports, .send_apple_login, .send_kakao_login, .join_member_apple_end, .join_member_kakao_end, .get_today_boring_friends, .set_boring_today, .set_interest_friend, .get_enrolled_friends, .send_invite_message, .cancel_request_friend, .delete_friend, .add_friend_request, .get_interest_friends, .get_liked_cards, .get_notis, .lock_card:
             print("라우터에서 프로필 이미지 아님")
             print("라우터에서 url확인 : \(String(describing: urlRequest.url))")
             // Common Headers
@@ -1158,7 +1179,7 @@ enum APIRouter: URLRequestConvertible {
             print("라우터 스플래시 체크")
             urlRequest.setValue("Bearer \(refresh_token)", forHTTPHeaderField: HTTPHeaderField.authentication.rawValue)
             
-        case .get_all_manage_group, .get_friend_volleh_card_list, .get_card_info_friend_volleh, .delete_friend_volleh_card, .get_group_volleh_card_list, .get_group_card_detail, .delete_group_card, .apply_group_card, .get_apply_people_list, .apply_accept, .apply_decline, .accept_dynamic_link, .send_cancel_like_calendar, .cancel_interest_calendar, .delete_personal_schedule, .get_my_questions, .delete_question, .check_verify_email, .delete_exit_user, .get_detail_user_info, .send_like_card, .cancel_like_card, .get_like_card_users:
+        case .get_all_manage_group, .get_friend_volleh_card_list, .get_card_info_friend_volleh, .delete_friend_volleh_card, .get_group_volleh_card_list, .get_group_card_detail, .delete_group_card, .apply_group_card, .get_apply_people_list, .apply_accept, .apply_decline, .accept_dynamic_link, .send_cancel_like_calendar, .cancel_interest_calendar, .delete_personal_schedule, .get_my_questions, .delete_question, .check_verify_email, .delete_exit_user, .get_detail_user_info, .send_like_card, .cancel_like_card, .get_like_card_users, .get_friend_card_apply_people:
             print("라우터 파라미터 없는 요청 url: \(String(describing: urlRequest.url))")
       
         }
@@ -1167,7 +1188,7 @@ enum APIRouter: URLRequestConvertible {
         if let parameters = parameters{
             switch self{
             //심심기간 생성,수정,삭제 통신의 경우 파라미터가 json object array이므로 다른 형태로 보내줬어야 함.
-            case .change_password,.find_id_pwd_phone_auth, .check_phone_auth, .phone_auth, .send_signup_info, .send_check_login, .splash_check, .access_token, .add_group, .edit_group_name, .edit_group_member, .add_friend_to_group, .accept_friend_request, .decline_friend_request, .add_friend_number_check, .add_friend_email_check, .add_friend_number_last, .add_friend_email_last, .friend_volleh_make_card , .edit_friend_volleh_card, .make_group_card, .edit_group_card, .accept_dynamic_link, .send_fcm_token, .send_like_in_calendar, .send_cancel_like_calendar, .send_interest_calendar, .add_personal_schedule, .edit_personal_schedule, .delete_personal_schedule, .check_is_friend, .add_friend_request, .send_question_content, .edit_question, .delete_question, .verify_email, .setting_change_pwd, .delete_exit_user, .edit_user_info, .edit_calendar_disclosure_setting, .edit_chat_alarm_setting, .edit_feed_alarm_setting, .send_reports, .send_apple_login, .send_kakao_login, .join_member_apple_end, .join_member_kakao_end, .send_like_card, .cancel_like_card, .set_boring_today, .set_interest_friend, .get_enrolled_friends, .send_invite_message, .cancel_request_friend, .delete_friend:
+            case .change_password,.find_id_pwd_phone_auth, .check_phone_auth, .phone_auth, .send_signup_info, .send_check_login, .splash_check, .access_token, .add_group, .edit_group_name, .edit_group_member, .add_friend_to_group, .accept_friend_request, .decline_friend_request, .add_friend_number_check, .add_friend_email_check, .add_friend_number_last, .add_friend_email_last, .friend_volleh_make_card , .edit_friend_volleh_card, .make_group_card, .edit_group_card, .accept_dynamic_link, .send_fcm_token, .send_like_in_calendar, .send_cancel_like_calendar, .send_interest_calendar, .add_personal_schedule, .edit_personal_schedule, .delete_personal_schedule, .check_is_friend, .add_friend_request, .send_question_content, .edit_question, .delete_question, .verify_email, .setting_change_pwd, .delete_exit_user, .edit_user_info, .edit_calendar_disclosure_setting, .edit_chat_alarm_setting, .edit_feed_alarm_setting, .send_reports, .send_apple_login, .send_kakao_login, .join_member_apple_end, .join_member_kakao_end, .send_like_card, .cancel_like_card, .set_boring_today, .set_interest_friend, .get_enrolled_friends, .send_invite_message, .cancel_request_friend, .delete_friend, .lock_card:
                 do {
                     print("라우터에서 파라미터 : \(parameters)")
                     let checker = JSONSerialization.isValidJSONObject(parameters)
@@ -1187,7 +1208,7 @@ enum APIRouter: URLRequestConvertible {
                 print("이미지 라우터에서 access토큰 값 확인 : \(access_token)")
                 
             //파라미터 없는 get 요청
-            case .get_all_manage_group, .get_group_detail, .delete_group, .get_friend_volleh_card_list, .get_card_info_friend_volleh, .delete_friend_volleh_card, .get_group_volleh_card_list, .get_group_card_detail, .delete_group_card, .apply_group_card, .get_apply_people_list, .apply_accept, .apply_decline, .cancel_interest_calendar, .get_my_questions, .check_verify_email, .get_detail_user_info, .get_like_card_users, .get_liked_cards:
+            case .get_all_manage_group, .get_group_detail, .delete_group, .get_friend_volleh_card_list, .get_card_info_friend_volleh, .delete_friend_volleh_card, .get_group_volleh_card_list, .get_group_card_detail, .delete_group_card, .apply_group_card, .get_apply_people_list, .apply_accept, .apply_decline, .cancel_interest_calendar, .get_my_questions, .check_verify_email, .get_detail_user_info, .get_like_card_users, .get_liked_cards, .get_friend_card_apply_people:
                 do {
                     print("라우터에서 파라미터 없는 get 요청")
                     let checker = JSONSerialization.isValidJSONObject(parameters)

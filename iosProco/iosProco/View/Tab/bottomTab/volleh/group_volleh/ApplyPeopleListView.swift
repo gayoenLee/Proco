@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ApplyPeopleListView: View {
-    @Environment(\.presentationMode) var presentationMode
+    
     @ObservedObject var main_vm: GroupVollehMainViewmodel
     
     //신청자 정보를 담고 있는 곳
@@ -22,8 +22,7 @@ struct ApplyPeopleListView: View {
             HStack{
                 //돌아가기 버튼
                 Button(action: {
-                   //self.show_view = false
-                   // presentationMode.wrappedValue.dismiss()
+                 
                     self.show_view.toggle()
                     print("돌아가기 클릭 :")
                 }){
@@ -48,7 +47,8 @@ struct ApplyPeopleListView: View {
                 VStack{
                     if main_vm.apply_user_struct.isEmpty{
                         Text("아직 신청자가 없습니다")
-                        
+                            .font(.custom(Font.n_extra_bold, size: 18))
+                            .foregroundColor(.proco_black)
                     }else{
                       
                             //신청자 카테고리

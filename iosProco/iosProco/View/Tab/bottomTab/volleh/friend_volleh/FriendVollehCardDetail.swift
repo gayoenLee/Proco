@@ -47,17 +47,25 @@ struct FriendVollehCardDetail: View {
     @State private var go_invited_room : Bool = false
     @State private var no_result_alert : Bool = false
     
+    //카드 참가자 보기 이동
+    @State private var see_attend_people : Bool = false
+    
+    //현재 카드 idx
+    @State private var current_card_idx : Int = -1
+    
     var body: some View{
         
         VStack{
+            Group{
             top_nav_bar
-            
+           
             //약속날짜
             HStack{
                 Spacer()
                 card_meeting_day
             }
             Spacer()
+            }
             Group{
                 //카드 주인의 프로필 사진, 이름
                 owner_profile
@@ -121,6 +129,13 @@ struct FriendVollehCardDetail: View {
                            isActive: self.$go_edit_from_main)
             //피드 페이지 이동
             NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm), isActive: self.$go_to_feed)
+            
+            //좋아요한 사람들 목록 페이지 이동
+            NavigationLink("",destination: LikePeopleListView(card_idx: self.main_vm.selected_card_idx, main_vm: self.main_vm), isActive: self.$go_like_people_list)
+            
+            //참가자 목록 페이지 이동
+            NavigationLink("",destination: FriendCardApplyPeopleListView(main_vm: self.main_vm, card_idx: self.$current_card_idx, show_view: self.$see_attend_people), isActive: self.$see_attend_people)
+            
             Group{
                 //캘린더에서 넘어온 경우에는 채팅, 피드 버튼이 보이지 않음.
                 if calendar_vm.from_calendar{
@@ -149,15 +164,13 @@ struct FriendVollehCardDetail: View {
                 }
             }
         }.padding()
-        .sheet(isPresented:self.$go_like_people_list){
-            LikePeopleListView(card_idx: self.main_vm.selected_card_idx, main_vm: self.main_vm)
-        }
+    
         .sheet(isPresented: self.$show_report_view) {
             ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
         }
         .onAppear{
             print("-----------------친구랑 볼래 카드 상세 화면 카드 idx:\(main_vm.selected_card_idx) , 동적링크인지 여부 : \(socket.is_dynamic_link)")
-        
+            
             //동적링크의 경우 뷰모델에 카드 idx저장이 안돼서 소켓매니저 클래스에 저장해놓음.
             if socket.is_dynamic_link{
                 print("동적링크에서 상세페이지로 들어온 경우")
@@ -197,8 +210,10 @@ struct FriendVollehCardDetail: View {
                     //알림 띄우기
                     self.no_result_alert = true
                 }else{
-                self.expiration_at = String.dot_form_date_string(date_string: data as! String)
-                print("날짜 확인: \(self.expiration_at)")
+                    self.expiration_at = String.dot_form_date_string(date_string: data as! String)
+                    print("날짜 확인: \(self.expiration_at)")
+                    
+                    self.current_card_idx = self.main_vm.friend_volleh_card_detail.card_idx!
                 }
             }else{
                 print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
@@ -221,7 +236,7 @@ private extension FriendVollehCardDetail{
             
             let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
             print("수락 클릭: \(chatroom_idx)")
-
+            
             //참가 수락하는 api 서버 통신 -> ok 오면 채팅서버에 수락 이벤트 보냄.
             socket_manager.accept_dynamic_link(chatroom_idx: chatroom_idx)
             
@@ -264,7 +279,7 @@ private extension FriendVollehCardDetail{
                     
                 }else{
                     print("모임 카드에 초대한 경우 뷰 이동 노티 받음")
-                   
+                    
                 }
             }
         })
@@ -291,7 +306,7 @@ private extension FriendVollehCardDetail{
             print("초대하려는 채팅방 idx: \(chatroom_idx), 카드idx: \(self.main_vm.friend_volleh_card_detail.card_idx!)")
             
             //동적링크 생성
-//            SockMgr.socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: nil, card_idx: self.main_vm.friend_volleh_card_detail.card_idx!, kinds: "친구")
+            //            SockMgr.socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: nil, card_idx: self.main_vm.friend_volleh_card_detail.card_idx!, kinds: "친구")
             SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: self.main_vm.friend_volleh_card_detail.card_idx!, kinds: "친구", meeting_date: converted_date, meeting_time: converted_time)
             
             //본래의 채팅방 화면으로 이동.
@@ -360,24 +375,42 @@ private extension FriendVollehCardDetail{
     var category_tag : some View{
         HStack{
             if self.main_vm.user_selected_tag_list.count > 0{
-            Capsule()
-                .foregroundColor(self.main_vm.user_selected_tag_list[0] == "사교/인맥" ? .proco_yellow : self.main_vm.user_selected_tag_list[0] == "게임/오락" ? .proco_pink : self.main_vm.user_selected_tag_list[0] == "문화/공연/축제" ? .proco_olive : self.main_vm.user_selected_tag_list[0] == "운동/스포츠" ? .proco_green : self.main_vm.user_selected_tag_list[0] == "취미/여가" ? .proco_mint : self.main_vm.user_selected_tag_list[0] == "스터디" ? .proco_blue : .proco_red)
-                .frame(width: 76, height: 26)
-                .overlay(
-                    
-                    Text("\(self.main_vm.user_selected_tag_list[0])")
-                        .font(.custom(Font.n_bold, size: 15))
-                        .foregroundColor(.proco_white)
-                )}
+                Capsule()
+                    .foregroundColor(self.main_vm.user_selected_tag_list[0] == "사교/인맥" ? .proco_yellow : self.main_vm.user_selected_tag_list[0] == "게임/오락" ? .proco_pink : self.main_vm.user_selected_tag_list[0] == "문화/공연/축제" ? .proco_olive : self.main_vm.user_selected_tag_list[0] == "운동/스포츠" ? .proco_green : self.main_vm.user_selected_tag_list[0] == "취미/여가" ? .proco_mint : self.main_vm.user_selected_tag_list[0] == "스터디" ? .proco_blue : .proco_red)
+                    .frame(width: 76, height: 26)
+                    .overlay(
+                        
+                        Text("\(self.main_vm.user_selected_tag_list[0])")
+                            .font(.custom(Font.n_bold, size: 15))
+                            .foregroundColor(.proco_white)
+                    )}
         }
     }
     
     var cur_user : some View{
-        HStack{
-            Image("cur_user_icon")
-                .resizable()
-                .frame(width: 15, height: 16)
-            Text(self.main_vm.friend_volleh_card_detail.cur_user == 0 ? "" : "\(self.main_vm.friend_volleh_card_detail.cur_user)명")
+        
+        
+        Button(action: {
+            print("참가자 보기 클릭 카드 만든 유저: \(main_vm.friend_volleh_card_detail.creator.idx!)")
+            print("내 idx: \(self.main_vm.my_idx!)")
+            
+            //친구 카드는 카드를 만든 사람만 참가자 보기가 가능함
+            if Int(self.main_vm.my_idx!) == main_vm.friend_volleh_card_detail.creator.idx{
+                print("만든 사람이 참가자 보기 클릭")
+                self.see_attend_people = true
+
+            }
+            
+        }){
+            HStack{
+                Image("cur_user_icon")
+                    .resizable()
+                    .frame(width: 15, height: 16)
+                
+                Text(self.main_vm.friend_volleh_card_detail.cur_user == 0 ? "" : "\(self.main_vm.friend_volleh_card_detail.cur_user)명")
+                    .font(.custom(Font.n_extra_bold, size: 15))
+                    .foregroundColor(Color.proco_black)
+            }
         }
     }
     
@@ -496,7 +529,10 @@ private extension FriendVollehCardDetail{
                         .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
                 }
             }
-            send_report_btn
+            
+            if self.main_vm.friend_volleh_card_detail.creator.idx! != Int(self.main_vm.my_idx!){
+                send_report_btn
+            }
         }
     }
     
@@ -538,51 +574,58 @@ private extension FriendVollehCardDetail{
             else{
                 HStack{
                     Spacer()
-                  
-                if main_vm.friend_volleh_card_detail.creator.profile_photo_path == "" || main_vm.friend_volleh_card_detail.creator.profile_photo_path == nil {
-                    Image("main_profile_img")
-                        .resizable()
-                        .frame(width: 75, height: 75)
-                }else{
-                    Image((self.main_vm.friend_volleh_card_detail.creator.profile_photo_path!))
-                        .resizable()
-                        .frame(width: 75, height: 75)
-                }
+                    
+                    if main_vm.friend_volleh_card_detail.creator.profile_photo_path == "" || main_vm.friend_volleh_card_detail.creator.profile_photo_path == nil {
+                        Image("main_profile_img")
+                            .resizable()
+                            .frame(width: 75, height: 75)
+                    }else{
+                        Image((self.main_vm.friend_volleh_card_detail.creator.profile_photo_path!))
+                            .resizable()
+                            .frame(width: 75, height: 75)
+                    }
                     Spacer()
                 }
                 HStack{
-                Text(self.main_vm.friend_volleh_card_detail.creator.nickname)
-                    .font(.custom(Font.n_bold, size: 17))
-                    .foregroundColor(.proco_black)
-                    Button(action: {
+                    Text(self.main_vm.friend_volleh_card_detail.creator.nickname)
+                        .font(.custom(Font.n_bold, size: 17))
+                        .foregroundColor(.proco_black)
+                    
+                    //나를 제외한 사람들에게만 관심아이콘 보여주기
+                    if Int(self.main_vm.my_idx!) != self.main_vm.friend_volleh_card_detail.creator.idx{
                         
-                        if self.main_vm.friend_volleh_card_detail.is_favor_friend == 0{
-                            self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_volleh_card_detail.creator.idx, action: "관심친구")
-                        print("관심친구 아이콘 클릭")
-                        }else{
-                            self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_volleh_card_detail.creator.idx, action: "관심친구해제")
-                        }
-                        print("관심친구 아이콘 클릭")
                         
-                    }){
-                    Image(self.main_vm.friend_volleh_card_detail.is_favor_friend == 1 ? "star_fill" : "star")
-                        .resizable()
-                        .frame(width: 12, height: 12)
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: Notification.set_interest_friend), perform: {value in
-                        
-                        print("관심친구 설정 완료 노티 받음")
-                        if let user_info = value.userInfo, let check_result = user_info["set_interest_friend"]{
-                            print("알림 설정 결과 받음: \(check_result)")
-                            if check_result as! String == "set_ok_관심친구"{
-                                  self.main_vm.friend_volleh_card_detail.is_favor_friend = 1
-                            }else if check_result as! String == "set_ok_관심친구해제"{
-                                
-                                self.main_vm.friend_volleh_card_detail.is_favor_friend = 0
-                                
+                        Button(action: {
+                            
+                            if self.main_vm.friend_volleh_card_detail.is_favor_friend == 0{
+                                self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_volleh_card_detail.creator.idx, action: "관심친구")
+                                print("관심친구 아이콘 클릭")
+                            }else{
+                                self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_volleh_card_detail.creator.idx, action: "관심친구해제")
                             }
+                            print("관심친구 아이콘 클릭")
+                            
+                        }){
+                            
+                            Image(self.main_vm.friend_volleh_card_detail.is_favor_friend == 1 ? "star_fill" : "star")
+                                .resizable()
+                                .frame(width: 12, height: 12)
                         }
-                    })
+                        .onReceive(NotificationCenter.default.publisher(for: Notification.set_interest_friend), perform: {value in
+                            
+                            print("관심친구 설정 완료 노티 받음")
+                            if let user_info = value.userInfo, let check_result = user_info["set_interest_friend"]{
+                                print("알림 설정 결과 받음: \(check_result)")
+                                if check_result as! String == "set_ok_관심친구"{
+                                    self.main_vm.friend_volleh_card_detail.is_favor_friend = 1
+                                }else if check_result as! String == "set_ok_관심친구해제"{
+                                    
+                                    self.main_vm.friend_volleh_card_detail.is_favor_friend = 0
+                                    
+                                }
+                            }
+                        })
+                    }
                 }
             }
             

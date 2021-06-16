@@ -902,5 +902,23 @@ class APIClient {
         return publisher.value()
     }
     
+    //카드 잠그기
+    static func lock_card(card_idx: Int, lock_state: Int)-> AnyPublisher<JSON, AFError>{
+        let publisher = AF.request(APIRouter.lock_card(card_idx: card_idx, lock_state: lock_state), interceptor: RequestInterceptorClass())
+        
+            .publishDecodable(type: JSON.self)
+    
+        print("api client에서 카드 잠그기 확인 \(publisher.value())")
+        return publisher.value()
+    }
+    
+    //친구 카드 참여자 목록 가져오기
+    static func get_friend_card_apply_people(card_idx: Int)-> AnyPublisher<JSON, AFError>{
+        let publisher = AF.request(APIRouter.get_friend_card_apply_people(card_idx: card_idx), interceptor: RequestInterceptorClass())
+            .publishDecodable(type: JSON.self)
+    
+        print("api client에서 친구 카드 참여자 목록 가져오기 확인 \(publisher.value())")
+        return publisher.value()
+    }
 }
 

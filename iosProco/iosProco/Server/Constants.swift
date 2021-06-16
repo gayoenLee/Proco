@@ -561,6 +561,17 @@ struct Keys{
         static let page_idx = "page_idx"
         static let page_size = "page_size"
     }
+    
+    //카드 잠그기
+    struct LockCard{
+        static let lock_state = "lock_state"
+        static let card_idx = "card_idx"
+    }
+    
+    //친구 카드 참여자 목록 가져오기
+    struct GetFriendCardApplyPeople{
+        static let card_idx = "card_idx"
+    }
 
 }
 
