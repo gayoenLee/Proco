@@ -23,7 +23,7 @@ struct EditCardView: View {
     @State private var selected_category : String = ""
     //온.오프라인 모임 종류 - onappear에서 데이터 가져온 후 세팅
     @State private var is_offline_meeting : Bool = true
-    
+    @State private var go_to_select_friends : Bool = false
     
     var body: some View {
         
@@ -61,7 +61,7 @@ struct EditCardView: View {
         ScrollView{
             VStack{
                 //완료 버튼을 제외한 카드 편집 뷰
-                FreindVollehMyCardEditView(viewmodel: self.main_viewmodel, tag_category_struct: self.tag_category_struct, card_detail_struct: main_viewmodel.friend_volleh_card_detail, category_alert: self.$category_alert, selected_category: self.$selected_category)
+                FreindVollehMyCardEditView(viewmodel: self.main_viewmodel, tag_category_struct: self.tag_category_struct, card_detail_struct: main_viewmodel.friend_volleh_card_detail, go_to_select_friends: self.$go_to_select_friends, category_alert: self.$category_alert, selected_category: self.$selected_category)
             
             
             Button(action: {
@@ -126,7 +126,6 @@ struct EditCardView: View {
             self.main_viewmodel.get_card_detail(card_idx: self.main_viewmodel.selected_card_idx)
             
         }
-      
     }
 }
 
@@ -136,7 +135,7 @@ struct FreindVollehMyCardEditView : View {
     @State var tag_category_struct : VollehTagCategoryStruct
     @State var card_detail_struct : FriendVollehCardDetailModel
     //알릴 친구들 선택하는 뷰로 이동할 때 이용하는 값.
-    @State var go_to_select_friends : Bool = false
+    @Binding var go_to_select_friends : Bool
     //추가하려는 태그의 갯수가 3개를 넘으면 값이 true
     @State private var tag_num_over_three : Bool = false
     //카테고리 최소 1개 선택 안했을 경우 경고 문구를 띄우기 위함.
@@ -147,14 +146,14 @@ struct FreindVollehMyCardEditView : View {
     var body: some View{
         VStack{
         Group{
-            date_view
+           // date_view
             time_view
         }
         //태그 3개 초과해서 추가하려고 할 경우 나타나는 경고 문구
         if tag_num_over_three{
             HStack{
             Text("태그는 최대 3개까지 추가 가능합니다.")
-        }
+            }
         }
         if self.category_alert{
             HStack{
@@ -201,11 +200,12 @@ struct FreindVollehMyCardEditView : View {
                 .foregroundColor(.proco_black)
             
             //뷰모델에서 친구 리스트 데이터를 모두 갖고 오면 다음 뷰로 이동한다.
-            NavigationLink("", destination: SelectFriendMakeCard(main_viewmodel: self.viewmodel), isActive: self.$viewmodel.got_friend_list_all)
+            NavigationLink("", destination: SelectFriendMakeCard(main_viewmodel: self.viewmodel), isActive: self.$go_to_select_friends)
+            
             Button(action: {
+                print("알릴 친구들 보여주기 true로 바꿈")
                 //친구 추가하기 위해 친구 목록, 그룹 목록 리스트있는 뷰로 이동.
-                //친구 및 그룹 가져오는 통신 진행.
-                viewmodel.get_all_people()
+                self.go_to_select_friends = true
             }){
                 Image("pencil")
                     .resizable()
@@ -294,7 +294,6 @@ private extension FreindVollehMyCardEditView {
     var category_select_view : some View{
         ScrollView(.horizontal, showsIndicators: false){
             HStack{
-                Text("카테고리(최소1개 선택 필수)")
                 ForEach(0..<viewmodel.volleh_category_tag_struct.count, id: \.self){ category_index in
                     //태그 카테고리 뷰
                     //1개 클릭시 뷰모델에 user_selected_tag_set에 저장됨.
