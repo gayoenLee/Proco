@@ -16,6 +16,8 @@ struct FriendStateDialog: View {
     @State private var go_to_chat: Bool = false
     //피드 화면 이동
     @State private var go_to_feed: Bool = false
+    @Binding var state_on : Int
+    
     var body: some View {
         
         if show_friend_info {
@@ -27,7 +29,7 @@ struct FriendStateDialog: View {
                         //모달 컨텐츠를 포함하고 있는 큰 사각형. 색깔 투명하게 하기 위함.
                         .foregroundColor(.clear)
                         .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.07)
-                        .overlay(FriendStateDialogContents(main_vm: self.main_vm,show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed)
+                        .overlay(FriendStateDialogContents(main_vm: self.main_vm,show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed, state_on: self.$state_on)
                                     .offset(x: UIScreen.main.bounds.width*0.009, y: UIScreen.main.bounds.height * 0.05))
                 )
         }
@@ -51,7 +53,7 @@ struct FriendStateDialogContents : View{
     //마이페이지 이동
     @State private var go_my_page : Bool = false
     //온오프 상태 버튼
-    @State private var state_on : Int = 0
+    @Binding var state_on : Int
     
     let scale = UIScreen.main.scale
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 50, height: 50)) |> RoundCornerImageProcessor(cornerRadius: 25)
