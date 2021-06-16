@@ -73,6 +73,12 @@ class FriendVollehMainViewmodel: ObservableObject{
     /*
      데이터 모델들
      */
+    //친구 카드 참여자 모델
+    @Published var apply_user_struct : [ApplyUserStruct] = []{
+        didSet{
+            objectWillChange.send()
+        }
+    }
     ///카테고리 태그
     @Published var volleh_category_tag_struct = [VollehTagCategoryStruct(category_name: "아무거나"),VollehTagCategoryStruct(category_name: "게임/오락"),VollehTagCategoryStruct(category_name: "사교/인맥"), VollehTagCategoryStruct(category_name: "문화/공연/축제"), VollehTagCategoryStruct(category_name: "운동/스포츠"), VollehTagCategoryStruct(category_name: "취미/여가"), VollehTagCategoryStruct(category_name: "스터디")]
     
@@ -1352,6 +1358,91 @@ class FriendVollehMainViewmodel: ObservableObject{
                     NotificationCenter.default.post(name: Notification.set_interest_friend, object: nil, userInfo: ["set_interest_friend" : "error"])
                 }
     })
+    }
+    
+    //카드 만들 때 현재 시간 +10분인 경우에만 만들기 가능
+    func make_card_time_check(make_time : String) -> Bool{
+        print("들어온 카드 약속 날: \(make_time)")
+        let today = Date()
+
+        let format = DateFormatter()
+        format.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        format.locale = Locale(identifier: "ko")
+        
+        guard let card_time = format.date(from: make_time) else { return false}
+        
+        print("카드 약속날 date형식: \(card_time)")
+        //초를 리턴함.
+        let interval_time = Int(card_time.timeIntervalSince(today))
+        print("비교 결과: 시간 = \(interval_time) ")
+        let calendar = Calendar.current
+        let interval = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: today, to: card_time).minute
+        print("차이값 확인: \(interval)")
+        //10분 후인 경우에만 true리턴
+        if interval! > 10{
+            return true
+        }else{
+            return false
+        }
+        
+    }
+    
+    //카드 잠그기
+    func lock_card(card_idx: Int, lock_state: Int){
+        cancellation = APIClient.lock_card(card_idx: card_idx, lock_state: lock_state)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("관심친구 설정 통신 에러 발생 : \(error)")
+                case .finished:
+                    break
+                }
+            }, receiveValue: {response in
+                print("친구 - 카드 잠그기")
+                
+                let result : String?
+                if response["result"] == "ok"{
+                    
+                    let changed_lock_state : String
+                    if lock_state == 0{
+                        changed_lock_state = "잠금해제"
+                    }else{
+                        changed_lock_state = "잠금"
+                    }
+                //뷰 업데이트 위해 보내기
+                NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["lock" : changed_lock_state, "card_idx": String(card_idx)])
+                }
+    })}
+    
+    //친구 카드 참여자 목록 가져오기
+    func get_friend_card_apply_people(card_idx: Int){
+        cancellation = APIClient.get_friend_card_apply_people(card_idx: card_idx)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("관심친구 설정 통신 에러 발생 : \(error)")
+                case .finished:
+                    break
+                }
+                }, receiveValue: {response in
+                    print("카드 참여자 response: \(response)")
+                    
+                    let result = response.array
+                    if (result?.count)! > 0{
+                        print("참여자 있을 때")
+                        
+                        let json_string = """
+                                \(result)
+                                """
+                        let json_data = json_string.data(using: .utf8)
+                        
+                        let apply_users = try? JSONDecoder().decode([ApplyUserStruct].self, from: json_data!)
+                        self.apply_user_struct = apply_users!
+                        
+                    }else{
+                        print("참여자 없음")
+                    }
+                })
     }
     
 }
