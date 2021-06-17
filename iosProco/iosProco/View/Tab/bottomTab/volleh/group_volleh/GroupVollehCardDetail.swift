@@ -46,8 +46,21 @@ struct GroupVollehCardDetail: View {
     
     //카드 정보가 없거나 만료됐을 때 no result 알림창
     @State private var show_no_result : Bool = false
+    //카드 주최자 프로필 다이얼로그 띄우기
+    @State private var show_creator_dialog : Bool = false
     
+    //주최자 클릭시 다이얼로그를 띄우는데 이때 필요한 값..state로 안해도 되지만 다이얼로그 뷰 클래스를 여러 곳에서 함께 쓰기 위해 어쩔수 없이 state변수 만들어서 값 넘김.
+    @State private var creator_state_on : Int? = 0
+    
+    //이용규칙 뷰 보여주는 구분값
+    @State private var show_proco_rules : Bool = false
+    
+    //지도 위치 세부 뷰 띄우는 구분값
+    @State private var show_location_detail : Bool  = false
+    @State private var detail_info = false
+
     var body: some View {
+        NavigationView{
         VStack{
             
             ScrollView(.vertical, showsIndicators: false){
@@ -73,7 +86,8 @@ struct GroupVollehCardDetail: View {
                              - 주인만 가능.
                              - 드로어에서 넘어온 경우, 메인에서 상세 페이지로 넘어온 경우
                              */
-                            
+                            if Int(self.main_vm.my_idx!) == self.main_vm.card_detail_struct.creator!.idx{
+                                
                             Button(action: {
                                 
                                 self.main_vm.selected_card_idx =  main_vm.my_card_detail_struct.card_idx!
@@ -85,6 +99,7 @@ struct GroupVollehCardDetail: View {
                             }){
                                 Image(systemName: "pencil.circle")
                                     .padding()
+                            }
                             }
                         }
                     }
@@ -111,7 +126,6 @@ struct GroupVollehCardDetail: View {
                         
                         //날짜
                         date_view
-                        
                         //시간
                         time_view
                     }
@@ -120,7 +134,6 @@ struct GroupVollehCardDetail: View {
                                         .navigationBarHidden(true), isActive: self.$go_people_list){
                             
                             apply_people_list_title
-                            
                             
                         }.simultaneousGesture(TapGesture().onEnded{
                             //참가자, 신청자 리스트 가져오는 통신 - 드로어에서 볼 경우, 메인에서 볼 경우 모두 진행.
@@ -208,10 +221,15 @@ struct GroupVollehCardDetail: View {
                                     self.apply_result = true
                                 }
                             }
-                        
                     }
                 }.padding()
             }
+        }
+        .sheet(isPresented: self.$show_proco_rules){
+            TermContentsView(url: "https://withproco.com/tos.html?view=tos#tos_items_11")
+        }
+        .sheet(isPresented: self.$show_location_detail){
+           MapDetailInfoView(vm: self.main_vm)
         }
         .onAppear{
             print("-------------------------------상세 페이지 나타남 동적링크에서 왔는지: \(socket.is_dynamic_link), 선택한 카드idx: \(self.main_vm.selected_card_idx)------------------------")
@@ -233,11 +251,13 @@ struct GroupVollehCardDetail: View {
             //이렇게 해야 메인에서 다른 카드 상세 페이지 갈 때 데이터 중복 안됨.
             main_vm.my_card_detail_struct.creator!.idx = -1
             
-            //채팅방에서 상세 페이지로 넘어온 경우 true값으로 이 페이지로 들어왔으므로 나갈 때 다시 초기화.
-            //socket.is_from_chatroom = false
-            
-            //캘린더에서 상세페이지로 넘어온 경우 true값으로 이 페이지에서 구분한 값 false로 다시 변경.
-            //calendar_vm.from_calendar = false
+            //카드 만들기에서 이값들을 초기화하면 지도 뷰로 이동했다가 다시 돌아갈경우 문제 발생해서 여기에서 없앰
+//            self.main_vm.user_selected_tag_set.removeAll()
+//            self.main_vm.user_selected_tag_list.removeAll()
+//            self.main_vm.card_name = ""
+//            self.main_vm.card_date = Date()
+//            self.main_vm.card_time = Date()
+//            self.main_vm.input_introduce = ""
         }
         // 이 알림이 띄워지는지 테스트해봐야함.
         .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
@@ -275,6 +295,8 @@ struct GroupVollehCardDetail: View {
                 self.presentation.wrappedValue.dismiss()
             }))
         })
+        .overlay(FriendStateDialog(main_vm: FriendVollehMainViewmodel(),group_main_vm: self.main_vm, show_friend_info: self.$show_creator_dialog, socket: SockMgr.socket_manager, state_on: self.$creator_state_on, is_friend : false, is_from_chatroom: false))
+        }
     }
 }
 
@@ -383,7 +405,7 @@ extension GroupVollehCardDetail{
                     print("참가 신청 버튼 클릭")
                     self.main_vm.apply_group_card(card_idx: self.main_vm.selected_card_idx)
                     //참가 신청 확인 모달 띄우기
-                    // main_vm.result_alert(main_vm.alert_type)
+                     main_vm.result_alert(main_vm.alert_type)
                 }){
                     
                     Text("참가 신청")
@@ -512,6 +534,7 @@ extension GroupVollehCardDetail{
                     }
                     
                 }){
+                    HStack{
                     //내 카드인 경우
                     if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
                         
@@ -524,10 +547,20 @@ extension GroupVollehCardDetail{
                             .resizable()
                             .frame(width: 20, height: 18)
                     }
+                        if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                            
+                            Text( self.main_vm.my_card_detail_struct.like_count ?? 0 > 0 ? "좋아요\(main_vm.my_card_detail_struct.like_count!)" : "")
+                                .font(.custom(Font.n_extra_bold, size: 10))
+                                .foregroundColor(Color.proco_black)
+                            
+                        }else{
+                            Text( self.main_vm.card_detail_struct.like_count ?? 0 > 0 ? "좋아요\(main_vm.card_detail_struct.like_count!)" : "")
+                                .font(.custom(Font.n_extra_bold, size: 10))
+                                .foregroundColor(Color.proco_black)
+                            
+                        }
+                    }
                 }
-                Text(main_vm.my_card_detail_struct.like_count ?? 0 > 0 ? "좋아요\(main_vm.my_card_detail_struct.like_count!)개" : "")
-                    .font(.custom(Font.t_extra_bold, size: 14))
-                    .foregroundColor(.proco_black)
             }
             Spacer()
             
@@ -622,7 +655,9 @@ extension GroupVollehCardDetail{
                             .cornerRadius(50)
                             .scaledToFit()
                             .padding([.leading], UIScreen.main.bounds.width/30)
+                        
                     }else{
+                        
                         KFImage(URL(string: (self.main_vm.my_card_detail_struct.creator?.profile_photo_path!)!))
                             .loadDiskFileSynchronously()
                             .cacheMemoryOnly()
@@ -684,6 +719,15 @@ extension GroupVollehCardDetail{
             }
         }
         .padding(.trailing)
+        .onTapGesture {
+            
+            self.main_vm.creator_info.nickname! = main_vm.card_detail_struct.creator!.nickname
+            self.main_vm.creator_info.profile_photo_path! = main_vm.card_detail_struct.creator?.profile_photo_path ?? ""
+            self.main_vm.creator_info.idx = main_vm.card_detail_struct.creator!.idx
+            
+            //주최자 프로필 다이얼로그 띄우는 것
+            self.show_creator_dialog = true
+        }
     }
     
     var meeting_introduce : some View{
@@ -764,11 +808,9 @@ extension GroupVollehCardDetail{
             
             Image("right")
                 .resizable()
-                .padding()
-                .frame(width:7.54, height: 15.27 )
-                .padding(.trailing)
+                .frame(width:7.64, height: 15.27 )
         }
-        .padding([.bottom])
+        .padding([.trailing, .bottom])
         
     }
     
@@ -803,11 +845,18 @@ extension GroupVollehCardDetail{
                 .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.5, alignment: .center)
                 .foregroundColor(Color.gray)
                 .overlay(MyWebView(vm: self.main_vm, url: "https://withproco.com/map/map.html?device=ios"))
+                .onTapGesture {
+                    //큰 지도 뷰 띄우기
+                    self.show_location_detail = true
+                }
+            
+//            NavigationLink("",destination: MapDetailInfoView(vm: self.main_vm), isActive: self.$show_location_detail)
         }
     }
     
     var proco_rules : some View{
         VStack{
+            Group{
             HStack{
                 Text("프로코 이용 규칙")
                     .font(.custom(Font.n_extra_bold, size: 20))
@@ -831,7 +880,7 @@ extension GroupVollehCardDetail{
                 Spacer()
             }
             .padding([.leading, .bottom])
-            
+            }
             HStack{
                 Rectangle()
                     .foregroundColor(.main_green)
@@ -907,17 +956,22 @@ extension GroupVollehCardDetail{
             .padding([.leading, .bottom])
             
             HStack{
-                Text("프로코 이용규칙")
-                    .foregroundColor(.proco_black)
-                    .font(.custom(Font.n_extra_bold, size: 14))
                 
+                Button(action: {
+                    print("이용규칙 웹뷰 보기 클릭")
+                    self.show_proco_rules = true
+                }){
+                    Text("프로코 이용규칙")
+                        .foregroundColor(.proco_black)
+                        .font(.custom(Font.n_extra_bold, size: 14))
+                }
+            }
                 Spacer()
             }
             .padding([.leading, .bottom])
-            
         }
     }
-}
+
 
 
 

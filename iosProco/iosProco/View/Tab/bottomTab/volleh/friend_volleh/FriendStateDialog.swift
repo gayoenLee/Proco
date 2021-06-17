@@ -10,13 +10,21 @@ import Kingfisher
 
 struct FriendStateDialog: View {
     @ObservedObject var main_vm: FriendVollehMainViewmodel
+    @ObservedObject var group_main_vm: GroupVollehMainViewmodel
+    
     @Binding var show_friend_info: Bool
     @ObservedObject var socket : SockMgr
     //채팅하기 클릭시 채팅화면으로 이동.
     @State private var go_to_chat: Bool = false
     //피드 화면 이동
     @State private var go_to_feed: Bool = false
-    @Binding var state_on : Int
+    @Binding var state_on : Int?
+    //친구, 모임 모두에서 다이얼로그를 사용해서 구분하기 위함.
+    var is_friend : Bool
+    //신고하기 클릭시 신고하는 팝업창 띄우기
+    @State private var show_report_view : Bool = false
+    //채팅방 목록에서 회원 클릭 후 다이얼로그에서만 신고 가능함.
+    var is_from_chatroom : Bool
     
     var body: some View {
         
@@ -29,7 +37,7 @@ struct FriendStateDialog: View {
                         //모달 컨텐츠를 포함하고 있는 큰 사각형. 색깔 투명하게 하기 위함.
                         .foregroundColor(.clear)
                         .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.07)
-                        .overlay(FriendStateDialogContents(main_vm: self.main_vm,show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed, state_on: self.$state_on)
+                        .overlay(FriendStateDialogContents(main_vm: self.main_vm,group_main_vm: self.group_main_vm, show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed, state_on: self.$state_on, is_friend: self.is_friend, show_report_view: self.$show_report_view, is_from_chatroom: is_from_chatroom)
                                     .offset(x: UIScreen.main.bounds.width*0.009, y: UIScreen.main.bounds.height * 0.05))
                 )
         }
@@ -40,6 +48,8 @@ struct FriendStateDialog: View {
 struct FriendStateDialogContents : View{
     @ObservedObject var  calendar_vm: CalendarViewModel = CalendarViewModel()
     @ObservedObject var main_vm: FriendVollehMainViewmodel
+    @ObservedObject var group_main_vm: GroupVollehMainViewmodel
+    
     @Binding var show_friend_info: Bool
     @ObservedObject var socket : SockMgr
     //일대일 채팅하기 화면 이동 구분값
@@ -53,10 +63,14 @@ struct FriendStateDialogContents : View{
     //마이페이지 이동
     @State private var go_my_page : Bool = false
     //온오프 상태 버튼
-    @Binding var state_on : Int
+    @Binding var state_on : Int?
+    //친구, 모임 모두에서 다이얼로그를 사용해서 구분하기 위함.
+    var is_friend : Bool
     
     let scale = UIScreen.main.scale
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 50, height: 50)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    @Binding var show_report_view : Bool
+    var is_from_chatroom : Bool
     
     var body: some View{
         VStack{
@@ -70,7 +84,27 @@ struct FriendStateDialogContents : View{
                         }
                     }
                 Spacer()
+                
+                //채팅방 목록 안에서만 유저 신고 가능.
+                if is_from_chatroom{
+                HStack{
+                Image("context_menu_icon")
+                    .resizable()
+                    .frame(width: 3, height: 15)
+                }
+                    .contextMenu{
+                        Button(action: {
+                           print("신고하기 클릭")
+                            self.show_report_view = true
+                            
+                        }){
+                            Text("신고하기")
+                        }
+                    }
+                }
             }
+            .padding([.leading, .trailing])
+            
             //일반 채팅방 화면으로 이동.
             NavigationLink("",
                            destination: NormalChatRoom(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket: self.socket),
@@ -83,48 +117,93 @@ struct FriendStateDialogContents : View{
             HStack{
                 Spacer()
                 
-                if main_vm.friend_info_struct.profile_photo == "" || main_vm.friend_info_struct.profile_photo == nil{
-                    
-                    
-                    Image("main_profile_img")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                    Spacer()
-                    
-                }else{
-                    
-                    KFImage(URL(string:  main_vm.friend_info_struct.profile_photo!))
-                        .placeholder{Image("main_profile_img")
+                if !self.is_friend{
+                    if group_main_vm.creator_info.profile_photo_path == "" || group_main_vm.creator_info.profile_photo_path == nil{
+                        Image("main_profile_img")
                             .resizable()
-                            .frame(width: 48, height: 48)
-                        }
-                        .loadDiskFileSynchronously()
-                        .cacheMemoryOnly()
-                        .fade(duration: 0.25)
-                        .setProcessor(img_processor)
-                        .onProgress{receivedSize, totalSize in
-                            print("on progress: \(receivedSize), \(totalSize)")
-                        }
-                        .onSuccess{result in
-                            print("성공 : \(result)")
-                        }
-                        .onFailure{error in
-                            print("실패 이유: \(error)")
-                            
-                            Image("main_profile_img")
+                            .frame(width: 50, height: 50)
+                        Spacer()
+                        
+                    }else{
+                        
+                        KFImage(URL(string:  group_main_vm.creator_info.profile_photo_path!))
+                            .placeholder{Image("main_profile_img")
                                 .resizable()
                                 .frame(width: 48, height: 48)
-                        }
-                    Spacer()
+                            }
+                            .loadDiskFileSynchronously()
+                            .cacheMemoryOnly()
+                            .fade(duration: 0.25)
+                            .setProcessor(img_processor)
+                            .onProgress{receivedSize, totalSize in
+                                print("on progress: \(receivedSize), \(totalSize)")
+                            }
+                            .onSuccess{result in
+                                print("성공 : \(result)")
+                            }
+                            .onFailure{error in
+                                print("실패 이유: \(error)")
+                                
+                                Image("main_profile_img")
+                                    .resizable()
+                                    .frame(width: 48, height: 48)
+                            }
+                        Spacer()
+                    }
+                }else{
+                    if main_vm.friend_info_struct.profile_photo == "" || main_vm.friend_info_struct.profile_photo == nil{
+                        
+                        
+                        Image("main_profile_img")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                        Spacer()
+                        
+                    }else{
+                        
+                        KFImage(URL(string:  main_vm.friend_info_struct.profile_photo!))
+                            .placeholder{Image("main_profile_img")
+                                .resizable()
+                                .frame(width: 48, height: 48)
+                            }
+                            .loadDiskFileSynchronously()
+                            .cacheMemoryOnly()
+                            .fade(duration: 0.25)
+                            .setProcessor(img_processor)
+                            .onProgress{receivedSize, totalSize in
+                                print("on progress: \(receivedSize), \(totalSize)")
+                            }
+                            .onSuccess{result in
+                                print("성공 : \(result)")
+                            }
+                            .onFailure{error in
+                                print("실패 이유: \(error)")
+                                
+                                Image("main_profile_img")
+                                    .resizable()
+                                    .frame(width: 48, height: 48)
+                            }
+                        Spacer()
+                    }
                 }
             }
             
             HStack{
                 Spacer()
+                
+                if self.is_friend{
                 Text(self.main_vm.friend_info_struct.nickname!)
                     .font(.custom(Font.n_bold, size: 15))
                     .foregroundColor(.proco_black)
+                    
+                }else{
+                    
+                    Text(self.group_main_vm.creator_info.nickname!)
+                        .font(.custom(Font.n_bold, size: 15))
+                        .foregroundColor(.proco_black)
+                }
                 
+                if is_friend{
                 //내 다이얼로그인 경우 관심친구 아이콘 보여주지 않는다.
                 if Int(self.main_vm.my_idx!) == main_vm.friend_info_struct.idx{
                     
@@ -164,13 +243,17 @@ struct FriendStateDialogContents : View{
                         }
                     })
                 }
+                
+            }
                 Spacer()
             }
             .padding(.bottom,UIScreen.main.bounds.width/50)
             
             HStack{
+                
+                
                 //내 다이얼로그인 경우 마이페이지 버튼
-                if Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
+                if is_friend && Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
                     
                     Button(action: {
                         
@@ -190,11 +273,23 @@ struct FriendStateDialogContents : View{
                 }else{
                     
                     Button(action: {
-                        //캘린더를 보려는 사람의 idx = 내 idx 저장.
-                        calendar_vm.calendar_owner.watch_user_idx = Int(main_vm.my_idx!)!
                         
-                        print("친구 idx 확인: \(main_vm.friend_info_struct)")
-                        SimSimFeedPage.calendar_owner_idx = main_vm.friend_info_struct.idx!
+                        //캘린더를 보려는 사람의 idx = 내 idx 저장.
+                        
+                        if is_friend{
+                            calendar_vm.calendar_owner.watch_user_idx = Int(main_vm.my_idx!)!
+                            
+                            print("친구 idx 확인: \(main_vm.friend_info_struct)")
+                            SimSimFeedPage.calendar_owner_idx = main_vm.friend_info_struct.idx!
+                            
+                            //친구가 아닌 경우는 모임에서 다이얼로그를 클릭한 경우
+                        }else{
+                            
+                            calendar_vm.calendar_owner.watch_user_idx = Int(group_main_vm.my_idx!)!
+                            
+                            SimSimFeedPage.calendar_owner_idx = group_main_vm.creator_info.idx!
+                                                        
+                        }
                         self.go_to_feed.toggle()
                         
                     }){
@@ -215,7 +310,7 @@ struct FriendStateDialogContents : View{
                 Spacer()
                 Divider()
                 Spacer()
-                
+                if is_friend{
                 if Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
                     
                     Text("상태")
@@ -234,7 +329,8 @@ struct FriendStateDialogContents : View{
                             self.state_on = 0
                         }
                         
-                        SockMgr.socket_manager.click_on_off(user_idx: Int(self.main_vm.my_idx!)!, state: self.state_on, state_data: "")
+                        SockMgr.socket_manager.click_on_off(user_idx: Int(self.main_vm.my_idx!)!, state: self.state_on!, state_data: "")
+                        
                         UserDefaults.standard.set(self.state_on, forKey: "\(self.main_vm.my_idx!)_state")
                         print("내 idx: \(self.main_vm.my_idx!)")
                         print("온오프 버튼 클릭으로 바뀐 상태: \( self.state_on)")
@@ -243,12 +339,12 @@ struct FriendStateDialogContents : View{
                         Text(self.state_on == 0 ? "오프라인" : "온라인")
                             .font(.custom(Font.n_extra_bold, size: 13))
                             .foregroundColor(self.state_on == 0 ? Color.gray : Color.white)
-                          
+                        
                     }
                     .background(self.state_on == 0 ? Color.proco_white : Color.proco_green)
                     .overlay(Capsule()
                                 .stroke(self.state_on == 0 ? Color.gray : Color.proco_green, lineWidth: 1.5)
-                                
+                             
                     )
                     .cornerRadius(25.0)
                     .padding(.trailing, UIScreen.main.bounds.width/20)
@@ -274,6 +370,7 @@ struct FriendStateDialogContents : View{
                     }
                     .padding(.trailing, UIScreen.main.bounds.width/10)
                 }
+                }
             }
             .padding(.bottom, UIScreen.main.bounds.width/50)
         }
@@ -283,9 +380,14 @@ struct FriendStateDialogContents : View{
         .navigationBarHidden(true)
         .cornerRadius(15)
         .onAppear{
+            if is_friend{
             print("친구 한 명 다이얼로그 나옴: \(self.main_vm.friend_info_struct)")
             self.interest_friend = self.main_vm.friend_info_struct.kinds == "관심친구" ? true : false
             self.state_on = self.main_vm.friend_info_struct.state!
+            }
+        }
+        .sheet(isPresented: self.$show_report_view) {
+            ReportView(show_report: self.$show_report_view, type: "", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
         }
     }
 }

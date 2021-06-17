@@ -37,6 +37,9 @@ struct MakeCardViewGroup: View {
     @State private var image_url : String? = ""
     @State private var ui_image : UIImage? = nil
 
+    //모임 카드 10분 이전 것 만든 경우 경고창
+    @State private var make_card_time_disallow : Bool = false
+    
     var body: some View {
         
         VStack{
@@ -67,7 +70,7 @@ struct MakeCardViewGroup: View {
             
             ScrollView{
                 VStack{
-                    MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, selected_img: self.$selected_image, open_map: self.$open_map)
+                    MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, selected_img: self.$selected_image, open_map: self.$open_map, make_card_time_disallow: self.$make_card_time_disallow)
                     
                     //완료 버튼 클릭시 메인뷰로 이동.
                     Button(action: {
@@ -75,7 +78,12 @@ struct MakeCardViewGroup: View {
                         if self.main_vm.category_is_selected(){
                             
                             //서버에 날짜와 시간 합쳐서 보내기 위해 날짜+시간 만드는 메소드 실행.
-                            self.main_vm.make_card_date()
+                           let card_time = self.main_vm.make_card_date()
+                            
+                            let check_time_result = self.main_vm.make_card_time_check(make_time: card_time)
+                            
+                            if check_time_result{
+                            
                             let type: String
                             if self.is_offline_meeting{
                                 type = "오프라인 모임"
@@ -88,6 +96,7 @@ struct MakeCardViewGroup: View {
                             let category_idx = self.main_vm.user_selected_tag_list.firstIndex(where: {
                                 $0 == self.selected_category
                             })
+                                
                             //카테고리를 유저가 선택한 태그 배열에서 삭제하고 맨 첫번재 순서로 다시 집어넣는다.
                             self.main_vm.user_selected_tag_list.remove(at: category_idx!)
                             self.main_vm.user_selected_tag_list.insert(self.selected_category, at: 0)
@@ -97,7 +106,11 @@ struct MakeCardViewGroup: View {
                             main_vm.make_group_card(type: type, map_lat: self.main_vm.map_data.map_lat, map_lng: self.main_vm.map_data.map_lng)
                             //alert창 타입
                             main_vm.result_alert(main_vm.alert_type)
-                            
+                            }else{
+                                print("모임 카드 만드는 시간 현재 시간 10분 후 아님 ")
+                                self.make_card_time_disallow = true
+                            }
+                                
                         }else if self.main_vm.title_check(title: self.main_vm.card_name){
                             print("카드 이름 작성 안함.")
                             is_title_empty.toggle()
@@ -171,6 +184,9 @@ struct MakingView: View{
     
     @Binding  var open_map : Bool
 
+    //약속 시간을 현재 시간 기준 10분 이후로 안만든 경우 안내 문구 띄우기
+    @Binding var make_card_time_disallow : Bool
+    
     var body: some View{
         VStack{
             Group{
@@ -180,6 +196,8 @@ struct MakingView: View{
                 if self.is_title_empty{
                     HStack{
                         Text("모임이름은 필수입니다.")
+                            .font(.custom(Font.t_extra_bold, size: 18))
+                            .foregroundColor(Color.proco_red)
                     }
                 }
                 HStack{
@@ -191,7 +209,6 @@ struct MakingView: View{
                 .padding()
                 
                 meeting_title_tfd
-            
             }
             Group{
                 HStack{
@@ -210,11 +227,15 @@ struct MakingView: View{
                 if tag_num_over_three{
                     HStack{
                         Text("태그는 최대 3개까지 추가 가능합니다.")
+                            .font(.custom(Font.t_extra_bold, size: 16))
+                            .foregroundColor(.proco_red)
                     }
                 }
                 if self.category_alert{
                     HStack{
                         Text("카테고리는 최소 1개 필수 선택입니다.")
+                            .font(.custom(Font.t_extra_bold, size: 16))
+                            .foregroundColor(.proco_red)
                     }
                 }
                 //카테고리들 세로 리스트
@@ -222,7 +243,7 @@ struct MakingView: View{
                 
                 HStack{
                     
-             tag_textfield_view
+                    tag_textfield_view
                     plus_tag_btn
                 }
                 //선택한 카테고리 리스트로 보여주기
@@ -239,7 +260,12 @@ struct MakingView: View{
             }
             Group{
                 date_view
-        time_view
+                if make_card_time_disallow{
+                    Text("현재 시간 기준 10분 이후 약속부터 가능합니다.")
+                        .font(.custom(Font.t_extra_bold, size: 14))
+                        .foregroundColor(.proco_red)
+                }
+                time_view
             }
             //오프라인 모임인 경우에만 지도 선택 뷰 보여주기
             if is_offline_meeting{
@@ -280,6 +306,7 @@ struct MakingView: View{
         }
         .onAppear{
             self.main_vm.is_making = true
+           
             print("카드 만들기 뷰 나타남")
         }
         .onDisappear{
@@ -332,7 +359,7 @@ extension MakingView {
                 print("닉네임 onchangee 들어옴")
                 if value.count > 15 {
                     print("모임 이름 15글자 넘음")
-                    self.main_vm.card_name = String(value.prefix(10))
+                    self.main_vm.card_name = String(value.prefix(15))
                 }
             }
             .padding()
@@ -360,7 +387,7 @@ extension MakingView {
     var tag_textfield_view : some View{
         
         HStack{
-        TextField("직접입력(필수x), 최대 10글자", text: $main_vm.user_input_tag_value, onCommit:{
+        TextField("직접입력(필수x), 최대 15글자", text: $main_vm.user_input_tag_value, onCommit:{
             
             //뷰모델에서 선택한 태그 갯수 체크하는 메소드의 결과값
             self.tag_num_over_three = main_vm.limit_tag_num(tag_list: self.main_vm.user_selected_tag_list)
@@ -382,8 +409,8 @@ extension MakingView {
         //글자수 제한 적용 메소드. ios14부터만 사용 가능.
         .onChange(of: self.main_vm.user_input_tag_value, perform: {value in
             
-            if value.count > 10{
-                self.main_vm.user_input_tag_value = String(value.prefix(10))
+            if value.count > 15{
+                self.main_vm.user_input_tag_value = String(value.prefix(15))
             }
         })
         .padding()
@@ -458,7 +485,6 @@ extension MakingView {
                     self.selected_category = main_vm.user_selected_tag_list[tag_index]
                 }
             }){
-         
                     Text(main_vm.user_selected_tag_list[tag_index])
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .font(.custom(Font.n_bold, size: 14))
@@ -570,10 +596,10 @@ extension MakingView {
             .onChange(of: self.main_vm.input_introduce) { value in
                 print("그룹 소개 onchange 들어옴")
                 //현재 몇 글자 작성중인지 표시
-                self.introduce_txt_count = "\(value.count)/255"
-               if value.count > 255 {
-                print("그룹 소개 255글자 넘음")
-                self.main_vm.input_introduce = String(value.prefix(255))
+                self.introduce_txt_count = "\(value.count)/1000"
+               if value.count > 1000 {
+                print("그룹 소개 1000글자 넘음")
+                self.main_vm.input_introduce = String(value.prefix(1000))
               }
           }
             //텍스트 에디터의 placeholder값 넣기 위해

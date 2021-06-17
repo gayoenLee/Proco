@@ -32,6 +32,12 @@ extension DateFormatter {
         changer.locale = Locale(identifier: "ko")
         return changer
     }
+    
+    static var pm_time_formatter : DateFormatter {
+        let time_format = DateFormatter()
+        time_format.dateFormat = "HH:mm:ss"
+        return time_format
+    }
 }
 
 //카드 만들기 후 통신 성공, 실패에 따른 alert창 띄우기 위해 사용.
@@ -49,6 +55,20 @@ var socket_manager : SockMgr = SockMgr()
 class FriendVollehMainViewmodel: ObservableObject{
     let objectWillChange = ObservableObjectPublisher()
     var cancellation: AnyCancellable?
+    
+    //필터에서 선택한 태그 리스트와 set..기존에 카드 만들기등과 같은 변수 썼을 때 오류 발생해서 따로 뻄
+    @Published var selected_filter_tag_list : [String] = []{
+        didSet {
+            objectWillChange.send()
+        }
+    }
+    
+    @Published var selected_filter_tag_set = Set<String>(){
+        didSet {
+            objectWillChange.send()
+        }
+    }
+    
     
     //신고하기 후 알림창 띄우는데 사용 변수, 메소드
     @Published var show_result_alert : Bool = false{
@@ -429,7 +449,7 @@ class FriendVollehMainViewmodel: ObservableObject{
         print("시간: \(self.card_time)")
         print("날짜: \(self.card_date)")
         let day = DateFormatter.dateformatter.string(from: self.card_date)
-        let time = DateFormatter.time_formatter.string(from: self.card_time)
+        let time = DateFormatter.pm_time_formatter.string(from: self.card_time)
         self.card_expire_time = day + " "+time
         return self.card_expire_time
     }
@@ -1363,28 +1383,40 @@ class FriendVollehMainViewmodel: ObservableObject{
     //카드 만들 때 현재 시간 +10분인 경우에만 만들기 가능
     func make_card_time_check(make_time : String) -> Bool{
         print("들어온 카드 약속 날: \(make_time)")
-        let today = Date()
 
         let format = DateFormatter()
         format.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        format.locale = Locale(identifier: "ko")
+        format.timeZone = TimeZone(abbreviation: "UTC")
+
+        let today_format = Int(Date().timeIntervalSince1970)+3600*9
+                    let timeintervel = TimeInterval(today_format)
+                    let korean_time  = Date(timeIntervalSince1970: timeintervel)
+        let today_string = format.string(from: korean_time)
+        
+        let today = format.date(from: today_string)
         
         guard let card_time = format.date(from: make_time) else { return false}
-        
+        print("현재 시간: \(today)")
         print("카드 약속날 date형식: \(card_time)")
         //초를 리턴함.
-        let interval_time = Int(card_time.timeIntervalSince(today))
-        print("비교 결과: 시간 = \(interval_time) ")
+        //let interval_time = Int(card_time.timeIntervalSince(today))
+        //print("비교 결과: 시간 = \(interval_time) ")
         let calendar = Calendar.current
-        let interval = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: today, to: card_time).minute
+        let interval = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: today!, to: card_time).minute
+        
+        let minute_interval = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: today!, to: card_time)
+        var date = minute_interval.day
+        var hour = minute_interval.hour
+        var minute = minute_interval.minute!
+        print("분 차이 확인: \(date), \(hour), \(minute)")
         print("차이값 확인: \(interval)")
-        //10분 후인 경우에만 true리턴
-        if interval! > 10{
+        date = date!*60*24
+        hour = hour!*60
+        if (date!+hour!+minute)>10{
             return true
         }else{
             return false
         }
-        
     }
     
     //카드 잠그기

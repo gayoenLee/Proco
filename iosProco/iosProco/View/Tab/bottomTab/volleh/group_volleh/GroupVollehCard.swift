@@ -71,10 +71,13 @@ extension GroupVollehCard {
                         .font(.custom(Font.t_extra_bold, size: 13))
                 .foregroundColor(.proco_white)
                 )
-            
+            HStack{
             Text("\(group_card.title!)")
                 .font(.custom(Font.n_extra_bold, size: 18))
                 .foregroundColor(.proco_black)
+                
+                Spacer()
+            }
         }
     }
     
@@ -137,7 +140,7 @@ extension GroupVollehCard {
             }
             Text(group_card.like_count ?? 0 > 0 ? "좋아요\(group_card.like_count!)개" : "")
                 .font(.custom(Font.t_extra_bold, size: 12))
-            .foregroundColor(.proco_red)
+            .foregroundColor(.proco_black)
 
         }
         .padding([.leading, .bottom])

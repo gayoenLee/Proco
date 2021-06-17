@@ -38,7 +38,7 @@ struct FriendFilterModal: View {
                 Spacer()
                 
                 Button(action: {
-                    viewmodel.user_selected_tag_list.removeAll()
+                    viewmodel.selected_filter_tag_list.removeAll()
                     viewmodel.filter_start_date = Date()
                     
                 }){
@@ -67,7 +67,7 @@ struct FriendFilterModal: View {
             
             //사용자가 선택한 태그값이 있을 때 이곳에 태그 리스트 보여줌.
             //이곳에서 다시 태그 클릭했을 때 삭제
-            if viewmodel.user_selected_tag_list.count > 0{
+            if viewmodel.selected_filter_tag_list.count > 0{
                 ScrollView(.horizontal, showsIndicators: false){
                     selected_tag_list
                 }
@@ -77,7 +77,6 @@ struct FriendFilterModal: View {
                     .font(.custom(Font.t_extra_bold, size: 16))
                     .foregroundColor(.proco_black)
                 
-                Text("\(self.viewmodel.filter_start_date)")
                 Spacer()
             }
             .padding([.leading, .trailing])
@@ -92,6 +91,7 @@ struct FriendFilterModal: View {
                 show_filter_modal.toggle()
                 
             }, label: {
+                
                 Text("확인")
                     .font(.custom(Font.t_extra_bold, size: 15))
                     .frame(minWidth: 0, maxWidth: .infinity)
@@ -114,7 +114,7 @@ extension FriendFilterModal {
                 ForEach(0..<viewmodel.volleh_category_tag_struct.count, id: \.self){ category_index in
                     //태그 카테고리 뷰
                     //1개 클릭시 뷰모델에 user_selected_tag_set에 저장됨.
-                    VollehTagCategoryView(viewmodel: self.viewmodel, category_model: self.viewmodel.volleh_category_tag_struct[category_index], selected_category: self.$selected_category, is_for_filter: true)
+                    FilterCategoryView(viewmodel: self.viewmodel, category_model: self.viewmodel.volleh_category_tag_struct[category_index], selected_category: self.$selected_category, is_for_filter: true)
                     
                 }.padding(.leading, UIScreen.main.bounds.width/60)
             }
@@ -123,32 +123,32 @@ extension FriendFilterModal {
     var selected_tag_list : some View{
         HStack{
             
-            ForEach(0..<viewmodel.user_selected_tag_list.count, id: \.self){ tag_index in
+            ForEach(0..<viewmodel.selected_filter_tag_list.count, id: \.self){ tag_index in
                 Image("small_x")
                     .resizable()
                     .frame(width: 7, height: 7)
                 
                 Capsule()
-                    .foregroundColor(viewmodel.user_selected_tag_list[tag_index] == "사교/인맥" ? .proco_yellow : viewmodel.user_selected_tag_list[tag_index] == "게임/오락" ? .proco_pink : viewmodel.user_selected_tag_list[tag_index] == "문화/공연/축제" ? .proco_olive : viewmodel.user_selected_tag_list[tag_index] == "운동/스포츠" ? .proco_green : viewmodel.user_selected_tag_list[tag_index] == "취미/여가" ? .proco_mint : viewmodel.user_selected_tag_list[tag_index] == "스터디" ? .proco_blue : .proco_red )
+                    .foregroundColor(viewmodel.selected_filter_tag_list[tag_index] == "사교/인맥" ? .proco_yellow : viewmodel.selected_filter_tag_list[tag_index] == "게임/오락" ? .proco_pink : viewmodel.selected_filter_tag_list[tag_index] == "문화/공연/축제" ? .proco_olive : viewmodel.selected_filter_tag_list[tag_index] == "운동/스포츠" ? .proco_green : viewmodel.selected_filter_tag_list[tag_index] == "취미/여가" ? .proco_mint : viewmodel.selected_filter_tag_list[tag_index] == "스터디" ? .proco_blue : .proco_red )
                     .frame(width: 90, height: 22)
                     .overlay(
                         Button(action: {
-                            print("선택한 태그 리스트들 확인\(viewmodel.user_selected_tag_list) ")
+                            print("선택한 태그 리스트들 확인\(viewmodel.selected_filter_tag_list) ")
                             
-                            print("선택한 태그 리스트들 중 현재 선택한 것 확인 : \(viewmodel.user_selected_tag_list[tag_index])")
-                            if viewmodel.user_selected_tag_set.contains(viewmodel.user_selected_tag_list[tag_index]){
+                            print("선택한 태그 리스트들 중 현재 선택한 것 확인 : \(viewmodel.selected_filter_tag_list[tag_index])")
+                            if viewmodel.selected_filter_tag_set.contains(viewmodel.selected_filter_tag_list[tag_index]){
                                 print("이미 선택한 태그")
-                                viewmodel.user_selected_tag_set.remove(viewmodel.user_selected_tag_list[tag_index])
-                                self.viewmodel.user_selected_tag_list = Array(self.viewmodel.user_selected_tag_set)
+                                viewmodel.selected_filter_tag_set.remove(viewmodel.selected_filter_tag_list[tag_index])
+                                self.viewmodel.selected_filter_tag_list = Array(self.viewmodel.selected_filter_tag_set)
                                 
                             }else{
                                 print("새로 선택한 태그")
-                                viewmodel.user_selected_tag_set.insert(viewmodel.user_selected_tag_list[tag_index])
-                                self.viewmodel.user_selected_tag_list = Array(self.viewmodel.user_selected_tag_set)
+                                viewmodel.selected_filter_tag_set.insert(viewmodel.selected_filter_tag_list[tag_index])
+                                self.viewmodel.selected_filter_tag_list = Array(self.viewmodel.selected_filter_tag_set)
                             }
                         }){
                             
-                            Text(viewmodel.user_selected_tag_list[tag_index])
+                            Text(viewmodel.selected_filter_tag_list[tag_index])
                                 .frame(minWidth: 0, maxWidth: .infinity)
                                 .font(.custom(Font.n_bold, size: 14))
                                 .foregroundColor(.proco_white)
