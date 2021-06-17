@@ -261,6 +261,9 @@ enum APIRouter: URLRequestConvertible {
     //친구 카드 참여자 목록 가져오기
     case get_friend_card_apply_people(card_idx: Int)
     
+    //모임카드 이미지 업로드
+    case upload_card_img(card_idx: Int, photo_file: Data)
+    
     private var method: HTTPMethod{
         switch self{
         case .find_id_pwd_phone_auth:
@@ -549,6 +552,9 @@ enum APIRouter: URLRequestConvertible {
         //카드 참여자 목록 가져오기
         case .get_friend_card_apply_people:
             return .get
+        //모임카드 이미지 업로드
+        case .upload_card_img:
+            return .post
             
         }
     }
@@ -842,6 +848,9 @@ enum APIRouter: URLRequestConvertible {
         //친구 카드 참여자 목록 가져오기
         case .get_friend_card_apply_people(let card_idx):
             return "/cards/\(card_idx)/friends/users"
+        //모임카드 이미지 업로드
+        case .upload_card_img(let card_idx, _):
+            return "/cards/\(card_idx)/meeting"
         }
     }
     
@@ -1144,6 +1153,9 @@ enum APIRouter: URLRequestConvertible {
         //친구 카드 참여자 목록 가져오기
         case .get_friend_card_apply_people(_):
             return [:]
+        //모임카드 이미지 업로드
+        case .upload_card_img(_, let photo_file):
+            return [Keys.UploadCardImg.photo_file: photo_file]
         }
         
     }
@@ -1169,7 +1181,7 @@ enum APIRouter: URLRequestConvertible {
             urlRequest.setValue(ContentType.json.rawValue, forHTTPHeaderField: HTTPHeaderField.acceptType.rawValue)
             urlRequest.setValue(ContentType.json.rawValue, forHTTPHeaderField: HTTPHeaderField.contentType.rawValue)
         
-        case .send_profile_image:
+        case .send_profile_image, .upload_card_img:
             print("라우터에서 프로필 이미지")
             urlRequest.setValue(ContentType.image.rawValue, forHTTPHeaderField: HTTPHeaderField.acceptType.rawValue)
             urlRequest.setValue(ContentType.image.rawValue, forHTTPHeaderField: HTTPHeaderField.contentType.rawValue)
@@ -1202,7 +1214,7 @@ enum APIRouter: URLRequestConvertible {
                     throw AFError.parameterEncodingFailed(reason: .jsonEncodingFailed(error: error))
                 }
                 
-            case .send_profile_image:
+            case .send_profile_image, .upload_card_img:
                 let checker = JSONSerialization.isValidJSONObject(parameters)
                 print("라우터에서 체크 \(checker)")
                 print("이미지 라우터에서 access토큰 값 확인 : \(access_token)")

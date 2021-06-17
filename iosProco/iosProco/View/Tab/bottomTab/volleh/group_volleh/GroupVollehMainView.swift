@@ -241,9 +241,8 @@ struct GroupVollehMainView: View {
                             Text("만들어진 모임이 아직 없네요")
                         }else{
                             
-                            ForEach(main_vm.group_card_struct.indices, id: \.self){ card in
+                            ForEach(self.main_vm.group_card_struct){ card in
                                 HStack{
-                                    
                               
                                     RoundedRectangle(cornerRadius: 25.0)
                                         .foregroundColor(.proco_white)
@@ -252,15 +251,13 @@ struct GroupVollehMainView: View {
                                         .overlay(
                                             Button(action: {
                                                 //상세 페이지로 가려는 카드의 idx값을 뷰모델에 저장.
-                                                self.main_vm.selected_card_idx = self.main_vm.group_card_struct[card].card_idx!
+                                                self.main_vm.selected_card_idx = self.main_vm.group_card_struct[self.main_vm.get_other_card_index(item: card)].card_idx!
                                                 
-                                                //저장한 idx이용해서 상세 데이터 가져오기.
-                                               // self.main_vm.get_others_detail()
                                                 self.go_to_detail.toggle()
                                             }, label: {
                                                 GroupVollehCard(main_vm: self.main_vm,
-                                                                group_card: main_vm.group_card_struct[card])
-                                                    
+                                                                group_card: main_vm.group_card_struct[self.main_vm.get_other_card_index(item: card)])
+
                                                     .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width/2.5)
                                                     .padding()
                                             })

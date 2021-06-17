@@ -17,7 +17,7 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
     
     @ObservedObject var vm : GroupVollehMainViewmodel
     var url : String
-    @State private var at_first : Bool = false
+    @State private var is_editing : Bool = false
     //@State private var second : Bool = false
     
     func receivedJsonValueFromWebView(value: [String : Any?]) {
@@ -28,12 +28,12 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
         let map_lat = json_value["lat"].doubleValue
         let map_lng = json_value["lng"].doubleValue
         
-        self.at_first = true
+       
         if self.vm.is_editing_card{
             print("빅맵 뷰 second true일 때")
-            self.at_first = false
+            self.is_editing = true
         }
-        if at_first != true{
+        if is_editing == false{
             print("카드 편집아님")
             
             vm.response_address = address
@@ -42,17 +42,14 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
             self.vm.map_data.map_lng = map_lng
             print("데이터 모델에 넣은 것 확인: \(self.vm.map_data)")
         }
-        
         else{
             print("데이터 모델에 저장안함.")
         }
-        
     }
     
     func receivedStringValueFromWebView(value: String) {
         print("String value received from web is: \(value)")
     }
-    
     
     func makeCoordinator() -> Coordinator {
         BigMapView.Coordinator(self, vm: self.vm)
@@ -86,12 +83,12 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
         webView.allowsBackForwardNavigationGestures = false    // 가로로 스와이프 동작이 페이지 탐색을 앞뒤로 트리거하는지 여부
         webView.scrollView.isScrollEnabled = false    // 웹보기와 관련된 스크롤보기에서 스크롤 가능 여부
         
-        if self.at_first{
-            print("make ui view에서 마커셋 실행")
+        if self.vm.is_editing_card{
+            print("빅맵뷰 make ui view에서 마커셋 실행")
             webView.evaluateJavaScript("marker_set('\(self.vm.map_data.map_lat)','\(self.vm.map_data.map_lng)')", completionHandler: { (value, error) in
                 
                 // .. do anything needed with result, if any
-                print("makeUIView 222222222 marker_set : \(error)")
+                print("빅맵뷰 makeUIView 222222222 marker_set : \(error)")
                 
             })
         }
@@ -137,6 +134,7 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
                 // .. do anything needed with result, if any
                 print("didFinish 들어옴")
                 
+                if self.parent.is_editing{
                 webView.evaluateJavaScript("marker_set('\(self.vm.map_data.map_lat)','\(self.vm.map_data.map_lng)')", completionHandler: { (value, error) in
                     // .. do anything needed with result, if any
                     print("didFinish 에서 데이터 확인: \(self.vm.map_data)")
@@ -144,12 +142,11 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
                     //self.vm.is_making = true
                     
                 })
+                }
                 
             }
-            
             self.parent.vm.showLoader.send(false)
         }
-        
         
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
             print("하이드")
@@ -158,13 +155,11 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
         
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
             print("didFail")
-            
             parent.vm.showLoader.send(false)
         }
         
         func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
             print("didCommit")
-            
             parent.vm.showLoader.send(true)
         }
         
@@ -184,8 +179,6 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
                     }
                 case .reload:
                     webView.reload()
-                    
-                    
                 }
             })
         }
@@ -211,14 +204,13 @@ extension BigMapView.Coordinator: WKScriptMessageHandler {
         if message.name == "send_location" {
             if let body = message.body as? [String: Any?] {
                 
-                if  self.vm.is_making || vm.is_just_showing{
-                    self.vm.is_editing_card = true
+                if  self.vm.is_making || self.vm.is_editing_card{
+                    
                     delegate?.receivedJsonValueFromWebView(value: body)
                     print("big map view 데이터 받음 receivedJsonValueFromWebView : \(body)")
                     
                 }else{
                     print("그 외 경우")
-                    
                 }
                 
             } else if let body = message.body as? String {

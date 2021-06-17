@@ -37,37 +37,7 @@ struct MakeCardView: View {
     var body: some View {
         
         VStack{
-            //완료 버튼 클릭시 메인뷰로 이동.
-            NavigationLink("", destination: FriendVollehMainView(main_vm: self.main_viewmodel, volleh_category_struct: self.tag_category_struct).navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true), isActive: self.$end_plus)
-//            HStack{
-//                Button(action: {
-//
-//                    self.presentationMode.wrappedValue.dismiss()
-//
-//                }, label: {
-//                    Image("white_left")
-//                        .resizable()
-//                        .frame(width: 8.51, height: 17)
-//                })
-//                .padding(.leading, UIScreen.main.bounds.width/20)
-//
-//                NavigationLink("", destination: FriendVollehCardDetail(main_vm: self.main_viewmodel, group_main_vm: GroupVollehMainViewmodel(), socket: socket_manager, calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline)
-//                                .navigationBarHidden(true),
-//                               isActive: self.$go_to_share)
-//                Spacer()
-//                Text("심심함 설정")
-//                    .font(.custom("TmoneyRoundWind-ExtraBold", size: 20))
-//                    .foregroundColor(.proco_white)
-//                    .padding(.trailing, UIScreen.main.bounds.width/20)
-//                Spacer()
-//
-//            }
-//            .frame(width: UIScreen.main.bounds.width*1.1, height: UIScreen.main.bounds.width*0.6)
-
             ScrollView{
-                VStack{
-                    
                     //완료 버튼을 제외한 카드 만들기 뷰
                     SelectedView(viewmodel: self.main_viewmodel, tag_category_struct: self.tag_category_struct, go_to_select_friends: self.$go_to_select_friends, category_alert: self.$category_alert, selected_category: self.$selected_category, card_time_not_allow: self.$card_time_not_allow)
                     /*
@@ -76,9 +46,14 @@ struct MakeCardView: View {
                      - 주의 : 친구랑 만드는 카드이므로 소켓 매니저 클래스의 which_type_room변수를 FRIEND로 만들기.
                      
                      */
+                    //완료 버튼 클릭시 메인뷰로 이동........테스트 주석처리///////////////
+//                    NavigationLink("", destination: FriendVollehMainView(main_vm: self.main_viewmodel, volleh_category_struct: self.tag_category_struct).navigationBarTitle("", displayMode: .inline)
+//                                    .navigationBarHidden(true), isActive: self.$end_plus)
                     Button(action: {
                         
                         if self.main_viewmodel.category_is_selected(){
+                            //경고 문구가 이전에 나타났던 경우 지우기 위함.
+                            self.category_alert = false
                             
                             print("카드에 태그 포함돼 있음.")
                             //서버에 날짜와 시간 합쳐서 보내기 위해 날짜+시간 만드는 메소드 실행.
@@ -88,6 +63,7 @@ struct MakeCardView: View {
                             let check_time_result = self.main_viewmodel.make_card_time_check(make_time: card_time)
                             
                             if check_time_result{
+                                self.card_time_not_allow = false
                             //카드 추가 통신시에 share_list파라미터 dictionary로 만드는 메소드 실행.
                             main_viewmodel.make_dictionary()
                             
@@ -138,8 +114,11 @@ struct MakeCardView: View {
                                 if socket_manager.is_from_chatroom{
                                     //상세 정보 페이지로 바로 이동시키기
                                     self.go_to_share.toggle()
+                                    
                                 }else{
-                                self.end_plus.toggle()
+                                    ////////////////////////////테스트
+                                //self.end_plus.toggle()
+                                    self.presentationMode.wrappedValue.dismiss()
                                 }
                             }))
                         case .fail:
@@ -148,7 +127,7 @@ struct MakeCardView: View {
                             }))
                         }
                     }
-                }
+                
             }
             .padding(.bottom, UIScreen.main.bounds.width/40)
         }
@@ -164,10 +143,10 @@ struct MakeCardView: View {
            // let nav_bar = main_viewmodel.viewDidLayoutSubviews()
             
             //필터에서 유저가 선택한 태그 데이터 모델과 여기에서 사용하는 모델이 같아서 초기화해줌
-            self.main_viewmodel.user_selected_tag_list.removeAll()
-            self.main_viewmodel.user_selected_tag_set.removeAll()
-            self.main_viewmodel.card_time = Date()
-            self.main_viewmodel.card_date = Date()
+//            self.main_viewmodel.user_selected_tag_list.removeAll()
+//            self.main_viewmodel.user_selected_tag_set.removeAll()
+//            self.main_viewmodel.card_time = Date()
+//            self.main_viewmodel.card_date = Date()
         }
         .onDisappear{
             print("카드 만들기 뷰 사라짐!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -193,7 +172,8 @@ struct SelectedView : View {
     
     //알릴 친구들 선택에서 아무도 선택하지 않았을 경우 모든 친구텍스트 보여주기 위해 두 어레이 count합치는 것.
     var body: some View{
-        Group{
+        VStack{
+            Group{
             date_view
             
             if self.card_time_not_allow{
@@ -204,8 +184,9 @@ struct SelectedView : View {
                 }
             }
             time_view
-        }
-        
+            }
+            
+            Group{
         //태그 3개 초과해서 추가하려고 할 경우 나타나는 경고 문구
         if tag_num_over_three{
             HStack{
@@ -221,6 +202,7 @@ struct SelectedView : View {
                     .foregroundColor(.proco_red)
             }
         }
+            }
         //태그 선택 부분 시작
         HStack{
             Text("심심태그")
@@ -235,12 +217,13 @@ struct SelectedView : View {
         .padding()
         
         category_select_view
-        
+            Group{
         HStack{
             tag_textfield_view
             plus_tag_btn
         }
-        
+        .padding()
+            }
         //사용자가 선택한 태그값이 있을 때 이곳에 태그 리스트 보여줌.
         //이곳에서 다시 태그 클릭했을 때 삭제
         if viewmodel.user_selected_tag_list.count > 0{
@@ -307,6 +290,7 @@ struct SelectedView : View {
                     selected_show_friend
                 }
             }
+        }
         }
     }
 }
@@ -387,11 +371,9 @@ private extension SelectedView {
                     self.viewmodel.user_input_tag_value = String(value.prefix(10))
                 }
             })
-            .padding()
         }
         .background(Color.light_gray)
         .cornerRadius(25.0)
-        .padding(.leading,UIScreen.main.bounds.width/25)
     }
     
     var plus_tag_btn : some View{
@@ -415,13 +397,13 @@ private extension SelectedView {
                 
             }){
               Capsule()
-                    .frame(width: UIScreen.main.bounds.width/5, height: UIScreen.main.bounds.width/8)
+                    .frame(width: UIScreen.main.bounds.width/3, height: UIScreen.main.bounds.width/8)
                     .foregroundColor(Color.proco_black)
                     .overlay(
                         Text("추가")
                             .font(.custom(Font.t_extra_bold, size: 15))
                             .foregroundColor(.proco_white))
-                .padding(.trailing, UIScreen.main.bounds.width/40)
+               
             }
         }
     }

@@ -134,6 +134,33 @@ extension MyGroupVollehCard{
                     .resizable()
                     .frame(width: 15, height: 16.61)
             }
+            .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
+                print("내 카드 잠금 통신 완료 받음.: \(value)")
+                
+                if let user_info = value.userInfo{
+                    let check_result = user_info["lock"]
+                    print("내 카드 잠금 데이터 확인: \(check_result)")
+                    
+                    if check_result as! String == "잠금"{
+                        let card = user_info["card_idx"] as! String
+                        let card_idx = Int(card)
+                        print("내 카드 잠금한 idx: \(card_idx)")
+                        
+                        if card_idx == self.my_group_card.card_idx{
+                            
+                            self.my_group_card.lock_state = 1
+                    }
+                    }else if check_result as! String == "잠금해제"{
+                        
+                        let card = user_info["card_idx"] as! String
+                        let card_idx = Int(card)
+                        print("잠금 취소한 idx: \(card_idx)")
+                        if card_idx == self.my_group_card.card_idx{
+                            self.my_group_card.lock_state = 0
+                    }
+                }
+                }
+            })
             
         }
     .padding(.trailing)

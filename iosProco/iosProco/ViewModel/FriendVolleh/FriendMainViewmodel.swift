@@ -523,6 +523,19 @@ class FriendVollehMainViewmodel: ObservableObject{
         return limit_tag_num_result
     }
     
+    //필터 카테고리 선택 갯수 최대 3개 제한 메소드
+    func limit_filter_category_num(tag_list: Array<String>) -> Bool{
+        var limit_tag_num_result : Bool = false
+        if self.selected_filter_tag_list.count>2{
+            print("친구 필터 태그 갯수 메소드에서 3개 넘음")
+            limit_tag_num_result = true
+        }else{
+            print("뷰모델 태그 갯수 메소드에서 3개 안넘음")
+            
+            limit_tag_num_result = false
+        }
+        return limit_tag_num_result
+    }
     /*
      -----------------------------상세 페이지 정보 위한 메소드-----------------------------
      */
@@ -576,11 +589,18 @@ class FriendVollehMainViewmodel: ObservableObject{
                 //결과가 제대로 왔을 때 화면 전화 가능하도록 함.
                 if response.result == "ok"{
                     
+                    var tags : [FriendVollehTags] = []
+                    for tag in response.tags{
+                        tags.append(FriendVollehTags(idx: tag.idx, tag_name: tag.tag_name))
+                    }
+                    //////
+                    self.my_friend_volleh_card_struct.append(FriendVollehCardStruct(card_idx: response.card_idx, kinds: "친구", expiration_at: self.card_expire_time, lock_state: 0, like_count: 0, like_state: 0, tags:  tags, creator: Creator(idx: Int(self.my_idx!), nickname: self.my_nickname, profile_photo_path: ""), share_list: [], offset: 0.0))
+                    print("내 카드 추가했는지 확인: \(self.card_expire_time), \(self.my_friend_volleh_card_struct.first(where: {$0.card_idx == response.card_idx}))")
+                    
                     //카드 만들기 후 다시 들어갔을 때 이전 입력값이 그대로 남아 있는 문제가 있었음.
                     self.card_expire_time.removeAll()
                     self.user_selected_tag_list.removeAll()
                     self.user_selected_tag_set.removeAll()
-                    
                     /*
                      카드가 성공적으로 만들어졌을 경우 채팅 서버에 채팅방 idx, 유저 모델 보내기
                      1. 우선 카드 참여자 모델에 내 정보 넣기.(sqlite 저장 안함)
@@ -979,8 +999,8 @@ class FriendVollehMainViewmodel: ObservableObject{
     }
     
     //친구랑 볼래 필터 적용하기(날짜, 태그)
-    func friend_volleh_filter(){
-        cancellation = APIClient.friend_volleh_filter(date_start: self.filter_start_date_string, date_end: self.filter_start_date_string, tag: self.user_selected_tag_list)
+    func friend_volleh_filter(tag: Array<Any>){
+        cancellation = APIClient.friend_volleh_filter(date_start: self.filter_start_date_string, date_end: self.filter_start_date_string, tag: tag)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: {result in
                 switch result{

@@ -183,7 +183,6 @@ struct Keys{
     }
     //모여볼래 카드 가져오기
     struct GetGroupVollehCardList{
-        
     }
     //모여볼래 카드 만들기
     struct MakeGroupCard{
@@ -571,6 +570,12 @@ struct Keys{
     //친구 카드 참여자 목록 가져오기
     struct GetFriendCardApplyPeople{
         static let card_idx = "card_idx"
+    }
+    
+    //모임카드 이미지 업로드
+    struct UploadCardImg{
+        static let card_idx = "card_idx"
+        static let photo_file = "photo_file"
     }
 
 }

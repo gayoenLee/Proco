@@ -11,7 +11,10 @@ struct FriendFilterModal: View {
     @Binding var show_filter_modal : Bool
     @ObservedObject var viewmodel: FriendVollehMainViewmodel
     
-    @State private var selected_category : String = ""
+    @State private var selected_category = Set<String>()
+    //추가하려는 태그의 갯수가 3개를 넘으면 값이 true
+    @State private var tag_num_over_three : Bool = false
+    
     var body: some View {
         
         VStack{
@@ -42,14 +45,13 @@ struct FriendFilterModal: View {
                     viewmodel.filter_start_date = Date()
                     
                 }){
-                Image("rewind_btn")
-                    .resizable()
-                    .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
-                    .padding()
+                    Image("rewind_btn")
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+                        .padding()
                 }
             }
             .padding()
-            //            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width*0.3)
             
             HStack{
                 Text("심심태그")
@@ -62,16 +64,21 @@ struct FriendFilterModal: View {
                 
             }
             .padding([.leading, .trailing])
+            
+            if tag_num_over_three{
+                Text("태그는 최대 3개까지 적용할 수 있습니다.")
+                    .font(.custom(Font.t_extra_bold, size: 16))
+                    .foregroundColor(.proco_red)
+            }
             //태그 카테고리 뷰
             tag_list
             
             //사용자가 선택한 태그값이 있을 때 이곳에 태그 리스트 보여줌.
             //이곳에서 다시 태그 클릭했을 때 삭제
-            if viewmodel.selected_filter_tag_list.count > 0{
-                ScrollView(.horizontal, showsIndicators: false){
-                    selected_tag_list
-                }
+            ScrollView(.horizontal, showsIndicators: false){
+                selected_tag_list
             }
+            
             HStack{
                 Text("심심날짜")
                     .font(.custom(Font.t_extra_bold, size: 16))
@@ -87,7 +94,7 @@ struct FriendFilterModal: View {
             Button(action: {
                 //date -> string변환
                 self.viewmodel.date_to_string()
-                self.viewmodel.friend_volleh_filter()
+                self.viewmodel.friend_volleh_filter(tag: self.viewmodel.selected_filter_tag_list)
                 show_filter_modal.toggle()
                 
             }, label: {
@@ -108,13 +115,14 @@ struct FriendFilterModal: View {
 extension FriendFilterModal {
     
     var tag_list : some View{
+        
         ScrollView(.horizontal, showsIndicators: false){
             HStack{
                 
                 ForEach(0..<viewmodel.volleh_category_tag_struct.count, id: \.self){ category_index in
                     //태그 카테고리 뷰
                     //1개 클릭시 뷰모델에 user_selected_tag_set에 저장됨.
-                    FilterCategoryView(viewmodel: self.viewmodel, category_model: self.viewmodel.volleh_category_tag_struct[category_index], selected_category: self.$selected_category, is_for_filter: true)
+                    FilterCategoryView(viewmodel: self.viewmodel, category_model: self.viewmodel.volleh_category_tag_struct[category_index], tag_num_over_three: self.$tag_num_over_three, selected_category: self.$selected_category, is_for_filter: true)
                     
                 }.padding(.leading, UIScreen.main.bounds.width/60)
             }
@@ -124,6 +132,7 @@ extension FriendFilterModal {
         HStack{
             
             ForEach(0..<viewmodel.selected_filter_tag_list.count, id: \.self){ tag_index in
+                
                 Image("small_x")
                     .resizable()
                     .frame(width: 7, height: 7)

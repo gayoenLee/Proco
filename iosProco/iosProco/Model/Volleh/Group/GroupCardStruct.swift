@@ -22,8 +22,8 @@ struct GroupCardStruct: Codable, Identifiable{
     var apply_user: Int? = -1
     var introduce: String? = ""
     var card_photo_path : String? = ""
-    var lock_state : Int = 0
-    var like_state : Int = 0
+    var lock_state : Int? = 0
+    var like_state : Int? = 0
     var like_count: Int? = 0
     var creator_attend_count : Int? = 0
     var tags: [Tags]? = []
@@ -34,6 +34,6 @@ struct GroupCardStruct: Codable, Identifiable{
     var server_idx: Int? = -1
     //identifiable프로토콜 따르기 위해 추가함.
     var id: Int{
-        return self.card_idx ?? -1
+        card_idx!
     }
 }
