@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Combine
+import PhotosUI
+import Kingfisher
 
 struct MakeCardViewGroup: View {
     @Environment(\.presentationMode) var presentationMode : Binding<PresentationMode>
@@ -30,15 +32,23 @@ struct MakeCardViewGroup: View {
     @State private var selected_category : String = ""
     
     @State private var show_img_picker : Bool = false
-    @State private var selected_image : Image? = nil
     
     //지도 웹뷰 열기
     @State private var open_map : Bool = false
     @State private var image_url : String? = ""
-    @State private var ui_image : UIImage? = nil
 
     //모임 카드 10분 이전 것 만든 경우 경고창
     @State private var make_card_time_disallow : Bool = false
+    
+    @State var pickerResult: [UIImage] = []
+       var config: PHPickerConfiguration  {
+          var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
+        //videos, livePhotos...등도 넣을 수 있음.
+           config.filter = .images
+        //0은 제한 없음을 의미, 갯수 제한 두는 것.
+           config.selectionLimit = 1 //0 => any, set 1-2-3 for har limit
+           return config
+       }
     
     var body: some View {
         
@@ -61,16 +71,16 @@ struct MakeCardViewGroup: View {
 //                    .foregroundColor(.proco_white)
 //                    .padding(.trailing, UIScreen.main.bounds.width/20)
 //                Spacer()
-//                NavigationLink("", destination: GroupVollehMainView(main_vm: self.main_vm)  .navigationBarTitle("", displayMode: .inline)
-//                                .navigationBarHidden(true)
-//                                .navigationBarBackButtonHidden(true), isActive: self.$make_success)
+                NavigationLink("", destination: GroupVollehMainView(main_vm: self.main_vm)  .navigationBarTitle("", displayMode: .inline)
+                                .navigationBarHidden(true)
+                                .navigationBarBackButtonHidden(true), isActive: self.$make_success)
 //
 //            }
 //            .frame(width: UIScreen.main.bounds.width*1.1, height: UIScreen.main.bounds.width*0.3)
             
             ScrollView{
                 VStack{
-                    MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, selected_img: self.$selected_image, open_map: self.$open_map, make_card_time_disallow: self.$make_card_time_disallow)
+                    MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, image_url: self.$image_url, open_map: self.$open_map, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult)
                     
                     //완료 버튼 클릭시 메인뷰로 이동.
                     Button(action: {
@@ -134,7 +144,9 @@ struct MakeCardViewGroup: View {
                         switch main_vm.alert_type{
                         case .success:
                             return Alert(title: Text("카드 추가"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
+                            
                                 self.make_success.toggle()
+                                
                             }))
                         case .fail:
                             return Alert(title: Text("카드 추가"), message: Text("카드 추가를 다시 시도해주세요."), dismissButton: Alert.Button.default(Text("확인"), action:{
@@ -158,9 +170,11 @@ struct MakeCardViewGroup: View {
             print("모여볼래 카드 만드는 뷰 넘어옴")
         }
         //갤러리 나타나는 것.
-        .sheet(isPresented: $show_img_picker, content:{
-            ImagePicker(image: self.$selected_image, image_url: self.$image_url, ui_image: self.$ui_image)
-        })
+        .sheet(isPresented: $show_img_picker) {
+            PhotoPicker(configuration: self.config,
+                        pickerResult: $pickerResult,
+                        isPresented: $show_img_picker, is_profile_img: false, main_vm: SettingViewModel(), group_vm: self.main_vm)
+        }
     }
 }
 
@@ -178,7 +192,7 @@ struct MakingView: View{
     @Binding  var show_img_picker : Bool
     //선택한 카테고리
     @Binding var selected_category : String
-    @Binding var selected_img : Image?
+    @Binding var image_url : String?
     //그룹 소개 글자 수
     @State private var introduce_txt_count = "0"
     
@@ -186,6 +200,9 @@ struct MakingView: View{
 
     //약속 시간을 현재 시간 기준 10분 이후로 안만든 경우 안내 문구 띄우기
     @Binding var make_card_time_disallow : Bool
+    @Binding var pickerResult : [UIImage]
+    
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 150, height: 150)) |> RoundCornerImageProcessor(cornerRadius: 40)
     
     var body: some View{
         VStack{
@@ -636,21 +653,44 @@ extension MakingView {
         }
         .padding(.leading)
 
-        //티켓 이미지 rectangle 프레임에 맞춰서 추가시키기
-        Rectangle()
-            .overlay(
-                self.selected_img == nil ? nil : selected_img?.resizable().clipShape(Rectangle())
+            if pickerResult.count > 0{
+                
+                ForEach(pickerResult, id: \.self) { image in
+                    Image.init(uiImage: image)
+                        .resizable()
+                        //이미지 채우기
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
+                        .cornerRadius(5)
+                        .overlay(
+                            Button(action: {
+                            print("카드 이미지 선택 버튼 클릭")
+            
+                            self.show_img_picker.toggle()
+                        }){
+                            Image("plus_img_btn")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                            }, alignment: .center)
+                }
+            }else{
+                
+                //티켓 이미지 rectangle 프레임에 맞춰서 추가시키기
+                Rectangle()
+                    .overlay(
+                        Button(action: {
+                        print("카드 이미지 선택 버튼 클릭")
+        
+                        self.show_img_picker.toggle()
+                    }){
+                        Image("plus_img_btn")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                        }, alignment: .center)
                     .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
-                    .aspectRatio(contentMode: .fit))
-            .overlay(Button(action: {
-                print("카드 이미지 선택 버튼 클릭")
-
-                self.show_img_picker.toggle()
-            }){
-                Image(systemName: "plus.rectangle.on.rectangle")
-            })
-            .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
-            .foregroundColor(Color.gray)
+                    .cornerRadius(5)
+                    .foregroundColor(Color.gray)
+            }
     }
     }
 }
