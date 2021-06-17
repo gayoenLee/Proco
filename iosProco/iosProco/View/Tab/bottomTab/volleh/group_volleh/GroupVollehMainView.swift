@@ -244,7 +244,6 @@ struct GroupVollehMainView: View {
                             ForEach(main_vm.group_card_struct.indices, id: \.self){ card in
                                 HStack{
                                     
-                                   
                               
                                     RoundedRectangle(cornerRadius: 25.0)
                                         .foregroundColor(.proco_white)
@@ -359,14 +358,6 @@ extension GroupVollehMainView{
                                     .frame(width: 40, height: 40)
                             }
                     }
-                    
-                    Rectangle()
-                        .foregroundColor(self.state_on == 0 ? Color.gray : Color.proco_green)
-                    .frame(width: 14, height: 14)
-                        .clipShape(Circle())
-                        .overlay(Circle()
-                                    .strokeBorder(Color.proco_white, lineWidth: 1)
-                        )
                 }
                 .onTapGesture {
                     self.my_info_dialog = true
@@ -408,12 +399,21 @@ extension GroupVollehMainView{
                     
                 }){
                    HStack{
-                    Image("main_filter")
-                        .resizable()
-                        .frame(width: 12, height: 12)
-                    
+                    ZStack(alignment: .leading){
+                        
+                Image("main_filter")
+                    .resizable()
+                    .frame(width: 18, height: 18)
+                        
+                        if self.main_vm.applied_filter{
+                            
+                        Image("check_end_btn")
+                            .resizable()
+                            .frame(width: 13, height: 13)
+                        }
+                    }
                     Text("필터")
-                        .font(.custom(Font.n_bold, size: 12))
+                        .font(.custom(Font.n_bold, size: 10))
                         .foregroundColor(.proco_black)
                    }
                 }
@@ -422,19 +422,28 @@ extension GroupVollehMainView{
     
     var select_view_all_btn : some View{
         HStack{
+            
         Button(action: {
             main_vm.get_group_volleh_card_list()
-            print("초기화 버튼 클릭")
-            
+            print("전체보기 버튼 클릭")
+            self.main_vm.applied_filter = false
+
         }){
             
-        Text("초기화")
-            .font(.custom(Font.n_bold, size:12))
-            .foregroundColor(.proco_black)
-            
+            Text("전체보기")
+                .font(.custom(Font.n_bold, size: 10))
+                .foregroundColor(self.main_vm.applied_filter ?  .light_gray : .proco_white)
+                .cornerRadius(25)
+                .padding(UIScreen.main.bounds.width/40)
         }
+        .background(self.main_vm.applied_filter ? Color.gray :  Color.proco_black)
+        .overlay(Capsule()
+                    .stroke(self.main_vm.applied_filter ? Color.gray :  Color.proco_black, lineWidth: 1.5)
+                    
+        )
+        .cornerRadius(25.0)
     }
-        .padding(.trailing)
+        .padding([.trailing], UIScreen.main.bounds.width/20)
     }
     
     var my_applied_meetings_btn : some View{
