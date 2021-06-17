@@ -32,10 +32,9 @@ struct ApplyPeopleListView: View {
                     .padding(.leading, UIScreen.main.bounds.width/20)
                   
                 }
-                .padding()
-           
                   
                 Spacer()
+                
                 Text("신청자 목록")
                     .font(.custom(Font.t_extra_bold, size: 22))
                     .foregroundColor(.proco_black)
@@ -43,9 +42,12 @@ struct ApplyPeopleListView: View {
                 Spacer()
           
             }
+            .padding()
+            
             ScrollView{
                 VStack{
-                    if main_vm.apply_user_struct.isEmpty{
+                    if main_vm.apply_user_struct.count <= 0{
+                        
                         Text("아직 신청자가 없습니다")
                             .font(.custom(Font.n_extra_bold, size: 18))
                             .foregroundColor(.proco_black)
