@@ -153,15 +153,18 @@ struct FreindVollehMyCardEditView : View {
         if tag_num_over_three{
             HStack{
             Text("태그는 최대 3개까지 추가 가능합니다.")
+                .font(.custom(Font.t_extra_bold, size: 16))
+                .foregroundColor(.proco_red)
             }
         }
         if self.category_alert{
             HStack{
-            Text("카테고리는 최소 1개 필수 선택입니다.")
+            Text("카테고리 1개 필수 선택입니다.")
+                .font(.custom(Font.t_extra_bold, size: 16))
+                .foregroundColor(.proco_red)
             }
         }
         
-        //태그 선택 부분 시작
         //태그 선택 부분 시작
         HStack{
             Text("심심태그")
@@ -186,9 +189,10 @@ struct FreindVollehMyCardEditView : View {
         //이곳에서 다시 태그 클릭했을 때 삭제
         if viewmodel.user_selected_tag_list.count > 0{
             ScrollView(.horizontal, showsIndicators: false){
-                
+                HStack{
                 selected_category_view
                 selected_tag_view
+                }
             }
             .padding([.leading, .trailing], UIScreen.main.bounds.width/40)
         }
@@ -369,6 +373,7 @@ private extension FreindVollehMyCardEditView {
             }
         }
     }
+    
     var selected_category_view: some View{
         HStack{
             
