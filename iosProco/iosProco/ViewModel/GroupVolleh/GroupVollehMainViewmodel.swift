@@ -37,6 +37,20 @@ class GroupVollehMainViewmodel: ObservableObject{
     var showLoader = PassthroughSubject<Bool, Never>()
     var valuePublisher = PassthroughSubject<String, Never>()
     
+    //카드 주최자 정보 다이얼로그 띄울 때 정보 저장해놓기 위해 사용.
+    @Published var creator_info : MeetingCreator = MeetingCreator(){
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
+    //필터 적용시 뷰 예외처리 위해 사용.
+    @Published var applied_filter : Bool = false{
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
     @Published var map_data : MeetingCardLocationModel = MeetingCardLocationModel()
     {
         didSet{
@@ -383,7 +397,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     ///카드 만들기에서 날짜 형식 맞춰서 보내기 위해 실행하는 메소드
     func make_card_date() -> String{
         let day = DateFormatter.dateformatter.string(from: self.card_date)
-        let time = DateFormatter.time_formatter.string(from: self.card_time)
+        let time = DateFormatter.pm_time_formatter.string(from: self.card_time)
         self.card_expire_time = day + " "+time
         return self.card_expire_time
     }
@@ -565,10 +579,10 @@ class GroupVollehMainViewmodel: ObservableObject{
                     break
                 }
             }, receiveValue: {response in
-                
                 print("친구 카드 신고하기 resopnse: \(response)")
                
                     let result = response["result"].string
+                
                 if result == result{
                     if result == "ok"{
                         print("신고하기 완료")
@@ -577,12 +591,10 @@ class GroupVollehMainViewmodel: ObservableObject{
                     }else{
                         print("신고하기 실패")
                         self.request_result_alert = .fail
-                        
                     }
                 }
             })
     }
-    
     
     func get_group_volleh_card_list(){
         cancellation = APIClient.get_group_volleh_card_list()
@@ -1125,6 +1137,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                 }
                     print("최종 내 카드 데이터 확인: \(self.my_group_card_struct)")
                 }
+                self.applied_filter = true
             })
     }
     
@@ -1157,7 +1170,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                 self.card_time = time_filtered
                 print("시간 변환 확인 : \(self.card_time)")
 
-                self.input_location = response.address!
+                self.input_location = response.address ?? ""
                 self.input_introduce = response.introduce ?? ""
                 self.card_name = response.title!
 
@@ -1188,9 +1201,12 @@ class GroupVollehMainViewmodel: ObservableObject{
                         self.input_location = self.map_data.location_name
 
                     }else{
+                        
+                        if response.kinds!.contains("오프라인"){
                     //상세페이지에서 띄울 지도에서 필요한 위도, 경도 저장.
                     self.map_data = MeetingCardLocationModel( location_name: response.address!, map_lat: Double(response.map_lat!)! , map_lng: Double(response.map_lng!)!)
                     print("맵 데이터 저장한 것 확인: \( self.map_data)")
+                        }
                     }
 
                     self.my_card_detail_struct = response
@@ -1205,7 +1221,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                         self.input_location = self.map_data.location_name
                     }else{
                     //상세페이지에서 띄울 지도에서 필요한 위도, 경도 저장.
-                    self.map_data = MeetingCardLocationModel( location_name: response.address!, map_lat: Double(response.map_lat!)! , map_lng: Double(response.map_lng!)!)
+                        self.map_data = MeetingCardLocationModel( location_name: response.address ?? "", map_lat: Double(response.map_lat ?? "") ?? 0.0 , map_lng: Double(response.map_lng ?? "") ?? 0.0)
                     print("맵 데이터 저장한 것 확인: \( self.map_data)")
                     }
 
@@ -1304,4 +1320,72 @@ class GroupVollehMainViewmodel: ObservableObject{
                 }
             })
     }
+    
+    //카드 잠그기
+    func lock_card(card_idx: Int, lock_state: Int){
+        cancellation = APIClient.lock_card(card_idx: card_idx, lock_state: lock_state)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("관심친구 설정 통신 에러 발생 : \(error)")
+                case .finished:
+                    break
+                }
+            }, receiveValue: {response in
+                print("친구 - 카드 잠그기")
+                
+                let result : String?
+                if response["result"] == "ok"{
+                    
+                    let changed_lock_state : String
+                    if lock_state == 0{
+                        changed_lock_state = "잠금해제"
+                    }else{
+                        changed_lock_state = "잠금"
+                    }
+                //뷰 업데이트 위해 보내기
+                NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["lock" : changed_lock_state, "card_idx": String(card_idx)])
+                }
+    })}
+    
+    //카드 만들 때 현재 시간 +10분인 경우에만 만들기 가능
+    func make_card_time_check(make_time : String) -> Bool{
+        print("들어온 카드 약속 날: \(make_time)")
+
+        let format = DateFormatter()
+        format.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        format.timeZone = TimeZone(abbreviation: "UTC")
+
+        let today_format = Int(Date().timeIntervalSince1970)+3600*9
+                    let timeintervel = TimeInterval(today_format)
+                    let korean_time  = Date(timeIntervalSince1970: timeintervel)
+        let today_string = format.string(from: korean_time)
+        
+        let today = format.date(from: today_string)
+        
+        guard let card_time = format.date(from: make_time) else { return false}
+        print("현재 시간: \(today)")
+        print("카드 약속날 date형식: \(card_time)")
+        //초를 리턴함.
+        //let interval_time = Int(card_time.timeIntervalSince(today))
+        //print("비교 결과: 시간 = \(interval_time) ")
+        let calendar = Calendar.current
+        let interval = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: today!, to: card_time).minute
+        
+        let minute_interval = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: today!, to: card_time)
+        var date = minute_interval.day
+        var hour = minute_interval.hour
+        var minute = minute_interval.minute!
+        print("분 차이 확인: \(date), \(hour), \(minute)")
+        print("차이값 확인: \(interval)")
+        date = date!*60*24
+        hour = hour!*60
+        if (date!+hour!+minute)>10{
+            return true
+        }else{
+            return false
+        }
+    }
+    
+  
 }
