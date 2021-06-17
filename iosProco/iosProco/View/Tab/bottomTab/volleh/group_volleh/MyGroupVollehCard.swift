@@ -117,11 +117,26 @@ extension MyGroupVollehCard{
     
     var lock : some View{
         HStack{
-            Image(self.my_group_card.lock_state == 0 ? "lock_public" : "lock_private")
-                .resizable()
-                .frame(width: 14, height: 11)
+
+            Button(action: {
+                print("잠금 버튼 클릭")
+                //0: 안 잠금 1: 잠금
+                if self.my_group_card.lock_state == 0{
+                    print("카드 잠그기")
+                    self.main_vm.lock_card(card_idx: self.my_group_card.card_idx!, lock_state: 1)
+                }else{
+                    print("카드 열기")
+                    
+                    self.main_vm.lock_card(card_idx: self.my_group_card.card_idx!, lock_state: 0)
+                }
+            }){
+                Image(self.my_group_card.lock_state == 0 ? "lock_public" : "lock_private")
+                    .resizable()
+                    .frame(width: 15, height: 16.61)
+            }
+            
         }
-        .padding(.trailing)
+    .padding(.trailing)
     }
     
     var like_icon_num : some View{
@@ -146,7 +161,7 @@ extension MyGroupVollehCard{
             }
             Text(my_group_card.like_count ?? 0 > 0 ? "좋아요\(my_group_card.like_count!)개" : "")
                 .font(.custom(Font.t_extra_bold, size: 12))
-            .foregroundColor(.proco_red)
+            .foregroundColor(.proco_black)
 
         }
         .padding([.leading, .bottom])
