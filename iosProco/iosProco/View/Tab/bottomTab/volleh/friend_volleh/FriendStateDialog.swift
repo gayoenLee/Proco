@@ -308,9 +308,13 @@ struct FriendStateDialogContents : View{
                     
                 }
                 Spacer()
+                
+                //모임 참여자들의 프로필 클릭시 심심풀이 보기만 보여짐.
+                if is_friend{
+                    
                 Divider()
                 Spacer()
-                if is_friend{
+                    
                 if Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
                     
                     Text("상태")
