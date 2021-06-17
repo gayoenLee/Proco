@@ -26,10 +26,18 @@ struct GroupVollehCard: View {
                     }
                    category_and_title
                     Spacer()
-                    card_date
+                    
+                    Image("card_label_blue")
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width*0.3, height: UIScreen.main.bounds.width/14)
+                        .overlay(
+                            
+                    //카드 만료일
+                            Text("\(self.expiration_at)")
+                        .font(.custom(Font.n_extra_bold, size: 15))
+                        .foregroundColor(.proco_white))
                 }
                 HStack{
-                    
                     current_user_num
                     Spacer()
                     lock
@@ -63,6 +71,7 @@ extension GroupVollehCard {
     
     var category_and_title : some View{
         VStack{
+            HStack{
             Capsule()
                 .foregroundColor(group_card.tags![0].tag_name == "사교/인맥" ? .proco_yellow : group_card.tags![0].tag_name == "게임/오락" ? .proco_pink : group_card.tags![0].tag_name == "문화/공연/축제" ? .proco_olive : group_card.tags![0].tag_name == "운동/스포츠" ? .proco_green : group_card.tags![0].tag_name == "취미/여가" ? .proco_mint : group_card.tags![0].tag_name == "스터디" ? .proco_blue : .proco_red)
                 .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width/17)
@@ -71,9 +80,11 @@ extension GroupVollehCard {
                         .font(.custom(Font.t_extra_bold, size: 13))
                 .foregroundColor(.proco_white)
                 )
+                Spacer()
+            }
             HStack{
             Text("\(group_card.title!)")
-                .font(.custom(Font.n_extra_bold, size: 18))
+                .font(.custom(Font.n_extra_bold, size: 15))
                 .foregroundColor(.proco_black)
                 
                 Spacer()
