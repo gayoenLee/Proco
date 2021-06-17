@@ -164,8 +164,10 @@ struct MakeCardView: View {
            // let nav_bar = main_viewmodel.viewDidLayoutSubviews()
             
             //필터에서 유저가 선택한 태그 데이터 모델과 여기에서 사용하는 모델이 같아서 초기화해줌
-//            self.main_viewmodel.user_selected_tag_list.removeAll()
-//            self.main_viewmodel.user_selected_tag_set.removeAll()
+            self.main_viewmodel.user_selected_tag_list.removeAll()
+            self.main_viewmodel.user_selected_tag_set.removeAll()
+            self.main_viewmodel.card_time = Date()
+            self.main_viewmodel.card_date = Date()
         }
         .onDisappear{
             print("카드 만들기 뷰 사라짐!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
