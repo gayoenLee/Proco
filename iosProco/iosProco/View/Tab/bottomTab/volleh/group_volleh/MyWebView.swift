@@ -34,6 +34,7 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
         let map_lng = json_value["lng"].doubleValue
         
         self.got_send_location = true
+        
         if got_send_location && self.vm.is_making{
             print("카드 편집아님")
             
@@ -44,6 +45,11 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
             
             print("데이터 모델에 넣은 것 확인: \(self.vm.map_data)")
             
+        }else if self.vm.is_editing_card && self.vm.is_making{
+            vm.response_address = address
+            self.vm.map_data.location_name = address
+            self.vm.map_data.map_lat = map_lat
+            self.vm.map_data.map_lng = map_lng
         }
         
     }
@@ -220,8 +226,10 @@ extension MyWebView.Coordinator: WKScriptMessageHandler {
                     delegate?.receivedJsonValueFromWebView(value: body)
                     print("my web view 데이터 받음 receivedJsonValueFromWebView : \(body)")
                     
+                    if self.vm.is_editing_card{
+                        self.vm.is_making = true
+                    }
                 }
-                
                 else{
                     print("그 외 경우")
                     
