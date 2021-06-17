@@ -79,7 +79,7 @@ struct MyPage: View {
         .sheet(isPresented: $show_image_picker) {
             PhotoPicker(configuration: self.config,
                         pickerResult: $pickerResult,
-                        isPresented: $show_image_picker, main_vm: self.main_vm)
+                        isPresented: $show_image_picker,is_profile_img: true, main_vm: self.main_vm, group_vm : GroupVollehMainViewmodel())
         }
         .popover(isPresented: self.$go_to_edit_name, content: {
             EditNicknameView(open_view: self.$go_to_edit_name, nickname: self.$user_nickname, main_vm: self.main_vm)
