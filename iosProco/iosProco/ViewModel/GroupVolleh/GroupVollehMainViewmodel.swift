@@ -37,6 +37,23 @@ class GroupVollehMainViewmodel: ObservableObject{
     var showLoader = PassthroughSubject<Bool, Never>()
     var valuePublisher = PassthroughSubject<String, Never>()
     
+    //모임 이미지 서버에 보내기 전 저장해놓기 위함.
+    @Published var group_card_img_data : Data? = nil
+    
+    //필터에서 선택한 태그 리스트와 set..기존에 카드 만들기등과 같은 변수 썼을 때 오류 발생해서 따로 뻄
+    @Published var selected_filter_tag_list : [String] = []{
+        didSet {
+            objectWillChange.send()
+        }
+    }
+    
+    @Published var selected_filter_tag_set = Set<String>(){
+        didSet {
+            objectWillChange.send()
+        }
+    }
+    
+    
     //카드 주최자 정보 다이얼로그 띄울 때 정보 저장해놓기 위해 사용.
     @Published var creator_info : MeetingCreator = MeetingCreator(){
         didSet{
@@ -700,8 +717,16 @@ class GroupVollehMainViewmodel: ObservableObject{
                     self.user_selected_tag_list = []
                     self.user_selected_tag_set = []
                     
+                    if self.group_card_img_data != nil{
+                    //4.카드 이미지 있는 경우
+                    self.send_group_card_img(card_idx: response.card_idx, photo_file: self.group_card_img_data!)
+                        
+                    }else{
+                        self.alert_type = .success
+                    }
+                    
                     print("추가 후 값 없앴는지 확인 : \( self.card_name)")
-                    self.alert_type = .success
+                   
                 }else{
                     print("카드 안만들어졌음 오류 발생 : \(String(describing: response.result))")
                     self.alert_type = .fail
@@ -1067,8 +1092,8 @@ class GroupVollehMainViewmodel: ObservableObject{
         }
     }
     
-    func group_volleh_filter(address: String, kinds: String){
-        cancellation = APIClient.group_volleh_filter(date_start: self.filter_start_date_string, date_end: self.filter_start_date_string,address: address, tag: self.user_selected_tag_list, kinds: kinds)
+    func group_volleh_filter(address: String, kinds: String, tag : Array<Any>){
+        cancellation = APIClient.group_volleh_filter(date_start: self.filter_start_date_string, date_end: self.filter_start_date_string,address: address, tag: tag, kinds: kinds)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: {result in
                 switch result{
@@ -1091,6 +1116,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     //self.alert_type = .fail
                     
                 }else{
+                    print("필터 결과값 있을 때")
                 self.my_group_card_struct.removeAll()
                 self.group_card_struct.removeAll()
 
@@ -1116,12 +1142,11 @@ class GroupVollehMainViewmodel: ObservableObject{
                         print("내 닉네임: \(self.my_nickname)")
 
                         //내가 만든 카드일 경우
-                        if self.my_nickname == creator_name{
+                        if Int(self.my_idx!) == creator_idx{
                             for tag in tags!{
                                 self.volleh_tag_struct.append(Tags(idx: tag["idx"].intValue, tag_name: tag["tag_name"].stringValue))
                             }
 
-                            print("내 카드 추가됨 \(my_count)")
                             self.my_group_card_struct.append(GroupCardStruct(card_idx: card_idx!, kinds: kinds!, expiration_at: expiration_at, lock_state: lock_state, like_state: like_state, like_count: like_count, tags: self.volleh_tag_struct, creator: Creator(idx: creator_idx, nickname: creator_name, profile_photo_path: creator_image)))
 
                         }else{
@@ -1135,7 +1160,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                         }
                     }
                 }
-                    print("최종 내 카드 데이터 확인: \(self.my_group_card_struct)")
+                    print("최종 다른 사람 카드 데이터 확인: \(self.group_card_struct)")
                 }
                 self.applied_filter = true
             })
@@ -1387,5 +1412,33 @@ class GroupVollehMainViewmodel: ObservableObject{
         }
     }
     
+    //모임 이미지 서버에 전달 메소드
+    func send_group_card_img(card_idx: Int, photo_file: Data){
+        cancellation = APIClient.upload_card_img(card_idx: card_idx, photo_file: photo_file)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("관심친구 설정 통신 에러 발생 : \(error)")
+                case .finished:
+                    break
+                }
+            }, receiveValue: {response in
+                print("모임 카드 이미지 업로드 response: \(response)")
+                
+                if response["result"] == "upload_ok"{
+                    print("이미지 업로드 성공")
+                    //이미지 업로드까지 완료해야 카드 추가 완료됐다고 알리기
+                    self.alert_type = .success
+                    
+                }else if response["result"] == "is not valid image"{
+                    print("이미지 형식 맞지 않음")
+                    self.alert_type = .fail
+                }else{
+                //이미지 파일이 없거나 실패한 경우
+                    self.alert_type = .fail
+                    
+                }
+            })
+        }
   
 }
