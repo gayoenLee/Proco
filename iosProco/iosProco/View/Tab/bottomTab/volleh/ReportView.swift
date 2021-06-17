@@ -33,36 +33,37 @@ struct ReportView: View {
     VStack{
         
         //상단 제목 라인
-        HStack{
-            
-            Button(action: {
-                   
-                self.presentation.wrappedValue.dismiss()
-                
-            }, label: {
-                
-                Image("left")
-                    .resizable()
-                    .frame(width: 8.51, height: 17)
-            })
-            .padding(.leading, UIScreen.main.bounds.width/20)
-            
-            Spacer()
-            
-            Text("신고하기")
-                .font(.custom(Font.t_extra_bold, size: 20))
-                .foregroundColor(.proco_black)
-                .padding(.trailing, UIScreen.main.bounds.width/20)
-            
-            Spacer()
-    
-        }
-        .padding()
+//        HStack{
+//
+//            Button(action: {
+//
+//                self.presentation.wrappedValue.dismiss()
+//
+//            }, label: {
+//
+//                Image("left")
+//                    .resizable()
+//                    .frame(width: 8.51, height: 17)
+//            })
+//            .padding(.leading, UIScreen.main.bounds.width/20)
+//
+//            Spacer()
+//
+//            Text("신고하기")
+//                .font(.custom(Font.t_extra_bold, size: 20))
+//                .foregroundColor(.proco_black)
+//                .padding(.trailing, UIScreen.main.bounds.width/20)
+//
+//            Spacer()
+//
+//        }
+//        .padding()
         
         ZStack{
             ReportRadioButtons(selected: self.$selected, report_content: self.$report_content)
         }
 
+        Spacer()
         Button(action: {
             print("신고 확인 클릭")
             if self.type == "카드"{
@@ -110,6 +111,7 @@ struct ReportView: View {
                 }))
             }
         }
+        .padding(.bottom)
     }.onAppear{
         print("신고하기 뷰 나타남: \(self.type)")
         }
@@ -133,7 +135,7 @@ struct ReportRadioButtons: View{
                 }){
                     HStack{
                         Text(reason)
-                            .font(.custom(Font.n_regular, size: 10))
+                            .font(.custom(Font.n_regular, size: 15))
                             .foregroundColor(Color.proco_black)
                         
                         Spacer()
@@ -142,11 +144,11 @@ struct ReportRadioButtons: View{
                             if self.selected == reason{
                                 Image("checked_small")
                                     .resizable()
-                                    .frame(width: 6, height: 6)
+                                    .frame(width: 10, height: 10)
                             }else{
                                 Image("check_small")
                                     .resizable()
-                                    .frame(width: 6, height: 6)
+                                    .frame(width: 10, height: 10)
                             }
                         }
                     }
@@ -158,6 +160,9 @@ struct ReportRadioButtons: View{
             HStack(alignment: .firstTextBaseline, spacing: 20){
                 
             Text("신고내용")
+                .font(.custom(Font.n_regular, size: 15))
+                .foregroundColor(Color.proco_black)
+                
                 Spacer()
             }
             
@@ -171,6 +176,7 @@ struct ReportRadioButtons: View{
             }
         }.padding(.vertical)
         .padding(.horizontal, UIScreen.main.bounds.width/20)
+        .navigationBarTitle("신고하기")
     }
 }
 
