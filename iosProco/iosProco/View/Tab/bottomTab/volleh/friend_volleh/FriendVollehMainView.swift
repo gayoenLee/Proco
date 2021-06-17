@@ -36,7 +36,7 @@ struct FriendVollehMainView: View {
     @State private var friend_info_dialog : Bool = false
     
     //온오프 버튼 구분위함
-    @State private var state_on : Int = 0
+    @State private var state_on : Int? = 0
     
     //캘린더에서 카드 상세페이지로 이동시 필요했음.
     @StateObject var calendar_vm = CalendarViewModel()
@@ -297,7 +297,7 @@ struct FriendVollehMainView: View {
     //여기에 다이얼로그 오버레이해야 스크롤뷰 위치에 따라 오버레이 높이 결정되는 문제 해결됨.
 }
         .background(Color.proco_dark_white)
-        .overlay(FriendStateDialog(main_vm: self.main_vm, show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on))
+        .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true, is_from_chatroom: false))
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
     }
