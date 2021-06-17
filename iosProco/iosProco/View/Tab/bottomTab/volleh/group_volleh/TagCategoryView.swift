@@ -20,11 +20,6 @@ struct TagCategoryView: View {
     var body: some View {
         //태그 3개 초과해서 추가하려고 할 경우 나타나는 경고 문구
         VStack{
-            if tag_num_over_three{
-                Text("태그는 최대 3개까지 추가 가능합니다.")
-                    .font(.custom(Font.n_regular, size: 11))
-                    .foregroundColor(.proco_red)
-            }
             
             Capsule()
                         .foregroundColor(tag_struct.category_name == "사교/인맥" ? .proco_yellow : tag_struct.category_name == "게임/오락" ? .proco_pink : tag_struct.category_name == "문화/공연/축제" ? .proco_olive : tag_struct.category_name == "운동/스포츠" ? .proco_green : tag_struct.category_name == "취미/여가" ? .proco_mint : tag_struct.category_name == "스터디" ? .proco_blue : .proco_red )
