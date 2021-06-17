@@ -920,5 +920,14 @@ class APIClient {
         print("api client에서 친구 카드 참여자 목록 가져오기 확인 \(publisher.value())")
         return publisher.value()
     }
+    
+    //모임카드 이미지 업로드
+    static func upload_card_img(card_idx: Int, photo_file: Data)-> AnyPublisher<JSON, AFError>{
+        let publisher = AF.request(APIRouter.upload_card_img(card_idx: card_idx, photo_file: photo_file), interceptor: RequestInterceptorClass())
+            .publishDecodable(type: JSON.self)
+    
+        print("api client에서 모임카드 이미지 업로드 확인 \(publisher.value())")
+        return publisher.value()
+    }
 }
 
