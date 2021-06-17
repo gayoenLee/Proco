@@ -12,8 +12,10 @@ struct PhotoPicker: UIViewControllerRepresentable {
     let configuration: PHPickerConfiguration
     @Binding var pickerResult: [UIImage]
     @Binding var isPresented: Bool
-    
+    //프로필 이미지 변경시, 모임 카드 이미지 추가시 같이 사용해서 구분하기 위해 추가
+    var is_profile_img : Bool
     @ObservedObject var main_vm : SettingViewModel
+    @ObservedObject var group_vm : GroupVollehMainViewmodel
     
     func makeUIViewController(context: Context) -> PHPickerViewController {
         let controller = PHPickerViewController(configuration: configuration)
@@ -52,9 +54,14 @@ struct PhotoPicker: UIViewControllerRepresentable {
                             let ui_image : UIImage = newImage as! UIImage
                           let image_data = ui_image.jpegData(compressionQuality: 0.2) ?? Data()
                      
-                            //이미지 변경 통신
+                            if self.parent.is_profile_img{
+                            //프로필 이미지 변경 통신
                             self.parent.main_vm.send_profile_image(image_data: image_data)
-                            
+                                
+                            }else{
+                                //모임 이미지 추가시
+                                self.parent.group_vm.group_card_img_data = image_data
+                            }
                         }
                     }
                 } else {
