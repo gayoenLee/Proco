@@ -16,7 +16,16 @@ struct BigMapContainedView: View {
     var body: some View {
         VStack{
             HStack{
-                
+                //돌아가기 버튼
+                Image("left")
+                    .resizable()
+                    .frame(width: 10, height: 17)
+                    .padding(.leading, UIScreen.main.bounds.width/20)
+                    .onTapGesture {
+                        withAnimation{
+                            self.presentation.wrappedValue.dismiss()
+                        }
+                    }
                 Spacer()
                 Text("모임 위치")
                     .foregroundColor(Color.proco_black)
@@ -24,13 +33,17 @@ struct BigMapContainedView: View {
                 Spacer()
             }
             
-            BigMapView(vm: self.vm, url: "https://withproco.com/map/search_map.html?device=ios")
+            MyWebView(vm: self.vm, url: "https://withproco.com/map/search_map.html?device=ios")
+            
             Spacer()
             Button(action: {
                 self.presentation.wrappedValue.dismiss()
                 
                 //self.vm.map_edited =- true
                 // self.show_map.toggle()
+                //self.vm.is_editing_card = false
+                self.vm.is_making = false
+                
                 print("--------지도 위치 선택 후 확인 클릭 : \(self.vm.map_data)--------")
             }){
                 Text("확인")
