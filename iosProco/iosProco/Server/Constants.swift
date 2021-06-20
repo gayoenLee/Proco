@@ -577,7 +577,19 @@ struct Keys{
         static let card_idx = "card_idx"
         static let photo_file = "photo_file"
     }
+ // 이미지랑 카드 업로드
+    struct MakeCardWithImg{
+        static let param = "param"
+        static let photo_file = "photo_file"
 
+    }
+    
+    //모임 - 이미지랑 카드 수정
+    struct EditCardWithImg{
+        static let card_idx = "card_idx"
+        static let param = "param"
+        static let photo_file = "photo_file"
+    }
 }
 
 enum HTTPHeaderField: String{

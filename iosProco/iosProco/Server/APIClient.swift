@@ -892,6 +892,7 @@ class APIClient {
         print("api client에서 내가 좋아요한 카드 가져오기 확인 \(publisher.value())")
         return publisher.value()
     }
+    
     //알림탭 클릭시 노티 리스트 가져오기
     static func get_notis(page_idx: Int, page_size: Int)-> AnyPublisher<JSON, AFError>{
         let publisher = AF.request(APIRouter.get_notis(page_idx: page_idx, page_size: page_size), interceptor: RequestInterceptorClass())
@@ -921,13 +922,75 @@ class APIClient {
         return publisher.value()
     }
     
-    //모임카드 이미지 업로드
-    static func upload_card_img(card_idx: Int, photo_file: Data)-> AnyPublisher<JSON, AFError>{
-        let publisher = AF.request(APIRouter.upload_card_img(card_idx: card_idx, photo_file: photo_file), interceptor: RequestInterceptorClass())
-            .publishDecodable(type: JSON.self)
-    
-        print("api client에서 모임카드 이미지 업로드 확인 \(publisher.value())")
-        return publisher.value()
+    static func make_card_with_img(param : [String: Any], photo_file: Data?, to url: APIRouter, completion: @escaping (Result<ResponseMakeCardStruct, AFError>) -> ()) {
+        print("모임카드 파라미터 확인: \(param)")
+        AF.upload(multipartFormData: {multipart in
+            
+            for (key, value) in param{
+                if let temp = value as? String{
+                    multipart.append((value as! String).data(using: .utf8)!, withName: key)
+                }
+                
+                if let temp = value as? Int{
+                    multipart.append("\(temp)".data(using: .utf8)!, withName: key)
+                }
+                
+                if let temp = value as? [String]{
+                    print("어레이인 경우: \(temp)")
+                    let value = temp.joined(separator: ",")
+                    multipart.append((value as! String).data(using: .utf8)!, withName: key)
+                }
+            
+            }
+            if photo_file != nil{
+                    multipart.append(photo_file!, withName: "photo_file", fileName: "photo_file.png", mimeType: "image/png")
+            }
+        },with: url)
+        .responseDecodable(){(response: DataResponse<ResponseMakeCardStruct, AFError>) in
+                    print("모임 카드 api client에서 이미지 리스폰스 확인 : \(response)")
+                    guard let data = response.data else { return }
+                    let json = try? JSON(data: data)
+                    print("리스폰스 확인 : \(String(describing: json))")
+            completion(response.result)
+                }
     }
+    
+    static func edit_card_with_img(card_idx: Int,param : [String: Any], photo_file: Data?, to url: APIRouter, completion: @escaping (Result<ResponseEditGroupCardStruct, AFError>) -> ()) {
+        print("모임카드 파라미터 확인: \(param)")
+        AF.upload(multipartFormData: {multipart in
+            
+            for (key, value) in param{
+                if let temp = value as? String{
+                    multipart.append((value as! String).data(using: .utf8)!, withName: key)
+                }
+                
+                if let temp = value as? Int{
+                    multipart.append("\(temp)".data(using: .utf8)!, withName: key)
+                }
+                
+                if let temp = value as? [String]{
+                    print("어레이인 경우: \(temp)")
+                    let value = temp.joined(separator: ",")
+                    multipart.append((value as! String).data(using: .utf8)!, withName: key)
+                }
+            
+            }
+            if photo_file != nil{
+                    multipart.append(photo_file!, withName: "photo_file", fileName: "photo_file.png", mimeType: "image/png")
+            }
+            
+            print("데이터 확인: \(multipart)")
+        },with: url)
+        .responseDecodable(){( response : DataResponse<ResponseEditGroupCardStruct, AFError>) in
+                    print("모임 카드 수정 api client에서 이미지 리스폰스 확인 : \(response)")
+                    guard let data = response.data else { return }
+                    let json = try? JSON(data: data)
+                    print("리스폰스 확인 : \(String(describing: json))")
+                    completion(response.result)
+                }
+    }
+
+    
+    
 }
 
