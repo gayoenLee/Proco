@@ -113,7 +113,13 @@ struct MakeCardViewGroup: View {
                             print("유저가 선택한 카테고리 재배열한 것 확인: \(self.main_vm.user_selected_tag_list)")
                             
                             //카드 만들기 통신
-                            main_vm.make_group_card(type: type, map_lat: self.main_vm.map_data.map_lat, map_lng: self.main_vm.map_data.map_lng)
+//                            main_vm.make_group_card(type: type, map_lat: self.main_vm.map_data.map_lat, map_lng: self.main_vm.map_data.map_lng)
+                                
+                                var param : [String: Any] = [:]
+                                param = ["type" : type, "title": self.main_vm.card_name, "tags": self.main_vm.user_selected_tag_list, "time": self.main_vm.card_expire_time, "address": self.main_vm.map_data.location_name, "content" : self.main_vm.input_introduce, "map_lat": self.main_vm.map_data.map_lat, "map_lng" : self.main_vm.map_data.map_lng]
+                                
+                                main_vm.make_card_with_img(param: param, photo_file: self.main_vm.group_card_img_data ?? Data())
+                            
                             //alert창 타입
                             main_vm.result_alert(main_vm.alert_type)
                             }else{
@@ -606,12 +612,15 @@ extension MakingView {
         //text에는 바인딩값만 넣을 수 있음
         TextEditor(text: self.$main_vm.input_introduce)
             .textFieldStyle(RoundedBorderTextFieldStyle())
-            .foregroundColor(self.main_vm.input_introduce == "내용을 입력해주세요" ? .gray : .primary)
+            .foregroundColor(self.main_vm.input_introduce == "모임을 소개해주세요" ? .gray : .primary)
             .colorMultiply(Color.light_gray)
             .cornerRadius(3)
             .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
             .onChange(of: self.main_vm.input_introduce) { value in
                 print("그룹 소개 onchange 들어옴")
+                if self.main_vm.input_introduce == "모임을 소개해주세요"{
+                    self.main_vm.input_introduce = ""
+                }
                 //현재 몇 글자 작성중인지 표시
                 self.introduce_txt_count = "\(value.count)/1000"
                if value.count > 1000 {
