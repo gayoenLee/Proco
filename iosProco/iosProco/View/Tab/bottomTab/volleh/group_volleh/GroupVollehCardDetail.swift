@@ -62,6 +62,8 @@ struct GroupVollehCardDetail: View {
     //참가 신청 완료시 텍스트 변경하기 위함.
     @State private var apply_btn_txt : String = "참여하기"
     
+    let card_img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)) |> RoundCornerImageProcessor(cornerRadius: 40)
+    
     var body: some View {
         NavigationView{
             VStack{
@@ -143,6 +145,13 @@ struct GroupVollehCardDetail: View {
                                 
                             }else{
                                 report_btn
+                            }
+                            
+                            //모임 이미지는 선택 가능한 옵션임.
+                            if main_vm.my_card_detail_struct.card_photo_path != "" && main_vm.my_card_detail_struct.card_photo_path != nil{
+                                
+                                card_img
+                                    .padding(.bottom)
                             }
                             
                             Group{
@@ -237,7 +246,7 @@ struct GroupVollehCardDetail: View {
                                 
                                 //신고하기 페이지 이동
                                 NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: FriendVollehMainViewmodel(), socket_manager: SockMgr(), group_main_vm: self.main_vm), isActive: self.$show_report_view)
-                               
+                                
                                 apply_btn
                                     .alert(isPresented: self.$apply_result){
                                         switch self.apply_ok{
@@ -338,6 +347,28 @@ struct GroupVollehCardDetail: View {
 }
 
 extension GroupVollehCardDetail{
+    
+    var card_img : some View{
+        
+        HStack{
+            
+            KFImage(URL(string: (self.main_vm.my_card_detail_struct.card_photo_path!)))
+                .loadDiskFileSynchronously()
+                .cacheMemoryOnly()
+                .fade(duration: 0.25)
+                .setProcessor(card_img_processor)
+                .onProgress{receivedSize, totalSize in
+                    print("on progress: \(receivedSize), \(totalSize)")
+                }
+                .onSuccess{result in
+                    print("성공 : \(result)")
+                }
+                .onFailure{error in
+                    print("실패 이유: \(error)")
+                }
+            
+        }
+    }
     
     var accept_invitation_btn: some View{
         /*
@@ -444,9 +475,9 @@ extension GroupVollehCardDetail{
                     if self.apply_btn_txt == "신청 완료"{
                         
                     }else{
-                    self.main_vm.apply_group_card(card_idx: self.main_vm.selected_card_idx)
-                    //참가 신청 확인 모달 띄우기
-                    main_vm.result_alert(main_vm.alert_type)
+                        self.main_vm.apply_group_card(card_idx: self.main_vm.selected_card_idx)
+                        //참가 신청 확인 모달 띄우기
+                        main_vm.result_alert(main_vm.alert_type)
                     }
                 }){
                     
