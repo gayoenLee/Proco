@@ -208,26 +208,29 @@ private extension MyCardListView{
                 }
             }else{
                 //TODO: if문 - 카드 삭제시 리스트 갯수 업데이트 안돼서 문제 발생 아래 코드로 해결. 나중에 다시 볼 것.
-                if main_viewmodel.my_friend_volleh_card_struct.count > self.current_card_index{
+                if self.my_volleh_card_struct.tags?.count ?? 0 > 0{
                     
                     //태그들도 리스트를 포함하고 있기 때문에 여기서 다시 foreach문 돌림.
                     ForEach(main_viewmodel.my_friend_volleh_card_struct[self.current_card_index].tags!.indices, id: \.self){ index in
                         if index == 0{
-                            
+
                         }else{
+                            
                             HStack{
-                                
+
                                 Image("tag_sharp")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
                                     .padding([.leading], UIScreen.main.bounds.width/20)
-                                
-                                Text("\(my_volleh_card_struct.tags![index].tag_name ?? "")")
+
+                                Text("\(main_viewmodel.my_friend_volleh_card_struct[self.current_card_index].tags![index].tag_name!)")
                                     .font(.custom(Font.n_bold, size: 15))
                                     .foregroundColor(.proco_black)
                             }
                         }
+                        
+                        
                     }
                 }
             }

@@ -262,9 +262,11 @@ struct FriendVollehMainView: View {
                         print("친구랑 볼래에서 오늘 심심기간 초기 설정 받았음: \(check_boring)")
                         
                         //오늘이 심심기간이었는지 확인.
-                        if check_boring as! String == "0"{
+                        if check_boring as! String == "-1"{
+                            print("오늘 심심기간 설정 안해놨음")
                             self.today_is_boring = false
                         }else{
+                            print("오늘 심심기간임")
                             self.today_is_boring = true
                         }
                             print("친구랑 볼래에서 오늘 심심기간 설정 \(check_boring)")

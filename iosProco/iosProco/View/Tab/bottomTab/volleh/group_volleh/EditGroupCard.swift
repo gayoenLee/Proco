@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Combine
+import PhotosUI
+import Kingfisher
 
 struct EditGroupCard: View {
     //편집 완료 클릭시 이용해서 창 닫고 메인으로 돌아감.
@@ -26,12 +28,24 @@ struct EditGroupCard: View {
     //지도 웹뷰 열기
     @State private var open_map : Bool = false
     @State private var show_img_picker : Bool = false
-    @State private var selected_image : Image? = nil
-    @State private var image_url : String? = ""
+    var image_url : String?{
+        self.main_vm.card_detail_struct.card_photo_path ?? ""
+    }
     @State private var ui_image : UIImage? = nil
     //모임 카드 10분 이전 것 만든 경우 경고창
     @State private var make_card_time_disallow : Bool = false
+    @State private var card_img_url : String? = ""
         
+    @State var pickerResult: [UIImage] = []
+       var config: PHPickerConfiguration  {
+          var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
+        //videos, livePhotos...등도 넣을 수 있음.
+           config.filter = .images
+        //0은 제한 없음을 의미, 갯수 제한 두는 것.
+           config.selectionLimit = 1 //0 => any, set 1-2-3 for har limit
+           return config
+       }
+    
     var body: some View{
         VStack{
             HStack{
@@ -56,13 +70,15 @@ struct EditGroupCard: View {
             }
             ScrollView{
                 VStack{
-                    EditingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, selected_category: self.$selected_category, open_map: self.$open_map, selected_img: self.$selected_image, show_img_picker: self.$show_img_picker, go_to_edit: self.$go_to_edit, make_card_time_disallow: self.$make_card_time_disallow)
+                    EditingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, selected_category: self.$selected_category, open_map: self.$open_map, selected_img: self.image_url, show_img_picker: self.$show_img_picker, go_to_edit: self.$go_to_edit, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult, card_img_url: self.$card_img_url)
                 }
             }
             //갤러리 나타나는 것.
-            .sheet(isPresented: $show_img_picker, content:{
-                ImagePicker(image: self.$selected_image, image_url: self.$image_url, ui_image: self.$ui_image)
-            })
+            .sheet(isPresented: $show_img_picker) {
+                PhotoPicker(configuration: self.config,
+                            pickerResult: $pickerResult,
+                            isPresented: $show_img_picker, is_profile_img: false, main_vm: SettingViewModel(), group_vm: self.main_vm)
+            }
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
             
@@ -80,6 +96,8 @@ struct EditGroupCard: View {
                         self.is_offline_meeting = false
                         print("카드 편집에서 온라인 미팅임;")
                     }
+                    
+                    self.card_img_url = main_vm.card_detail_struct.card_photo_path ?? ""
                 }else{
                     print("모임 카드 상세 데이터 통신 노티 아님")
                 }
@@ -91,7 +109,6 @@ struct EditGroupCard: View {
                 self.main_vm.is_just_showing  = true
                 //카드 상세 정보 가져오는 통신.
                 self.main_vm.get_group_card_detail(card_idx: self.main_vm.selected_card_idx)
-                
                 
             }
         }
@@ -113,13 +130,18 @@ struct EditingView: View{
     
     //그룹 소개 글자 수
     @State private var introduce_txt_count = "0"
-    @Binding var selected_img : Image?
+    var selected_img : String?
     @Binding  var show_img_picker : Bool
     
     @Binding var go_to_edit : Bool
     
     //약속 시간을 현재 시간 기준 10분 이후로 안만든 경우 안내 문구 띄우기
     @Binding var make_card_time_disallow : Bool
+    @Binding var pickerResult : [UIImage]
+    //카드 이미지
+    @Binding var card_img_url : String?
+    
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)) |> RoundCornerImageProcessor(cornerRadius: 40)
     
     var body: some View{
         VStack{
@@ -266,7 +288,7 @@ struct EditingView: View{
                     
                     if check_time_result{
                         
-                        make_card_time_disallow.toggle()
+                        make_card_time_disallow = false
                         //태그 데이터 보낼 때 카테고리, 태그 2개 순서대로 보내야 함.
                         let category_idx = self.main_vm.user_selected_tag_list.firstIndex(where: {
                             $0 == self.selected_category
@@ -275,14 +297,19 @@ struct EditingView: View{
                         self.main_vm.user_selected_tag_list.remove(at: category_idx!)
                         self.main_vm.user_selected_tag_list.insert(self.selected_category, at: 0)
                         print("유저가 선택한 카테고리 재배열한 것 확인: \(self.main_vm.user_selected_tag_list)")
-                        print("보내는 kindds: \(self.main_vm.my_card_detail_struct)")
+                        
                         //카드 수정 완료 통신 - kinds: 온라인.오프라인 모임
-                        main_vm.edit_group_card(type: self.main_vm.my_card_detail_struct.kinds!)
+//                        main_vm.edit_group_card(type: self.main_vm.my_card_detail_struct.kinds!)
+                        
+                        main_vm.edit_card_with_img(type: self.main_vm.my_card_detail_struct.kinds!, photo_file: self.main_vm.group_card_img_data ?? Data())
+                        
                         //alert창 타입
                         main_vm.result_alert(main_vm.alert_type)
+                        
                     }else{
                         print("모임 카드 만드는 시간 현재 시간 10분 후 아님 ")
                         self.make_card_time_disallow = true
+                        
                     }
                     
                 }else if self.main_vm.title_check(title: self.main_vm.card_name){
@@ -324,23 +351,120 @@ struct EditingView: View{
                     // if tag_category as! String == "selected_category"{
                     self.selected_category = tag_category as! String
                     print("카테고리 태그 저장한 것 확인: \(self.selected_category)")
-                    if self.main_vm.my_card_detail_struct.kinds! == "온라인 모임"{
-                        self.is_offline_meeting = false
-                    }else{
-                        self.is_offline_meeting = true
-                    }
                     //}
                 }else{
                     print("내 카드 수정페이지에서category태그 못받음.")
                 }
             }
         }
-        //body 끝
+        .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
+            print("모임카드 편집 - 상세 데이터 통신 완료 노티 받음")
+            
+            if let user_info = value.userInfo, let data = user_info["get_group_card_detail_finish"]{
+                print("모임카드 편집 -  데이터 통신 완료 받았음: \(data)")
+                
+                if data as! String == "no result"{
+                    
+                }else{
+                    print("수정하려는 카드 데이터 : \(self.main_vm.my_card_detail_struct)")
+                    if self.main_vm.my_card_detail_struct.kinds! == "온라인 모임"{
+                        self.is_offline_meeting = false
+                    }else{
+                        self.is_offline_meeting = true
+                    }
+                    
+                    self.card_img_url = self.main_vm.my_card_detail_struct.card_photo_path ?? ""
+                }
+            }else{
+                print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
+            }
+        }
+        .onAppear{
+            
+        }
     }
-    
 }
 
 extension EditingView {
+    
+    var select_meeting_img_view : some View{
+        VStack{
+            HStack{
+                Text("모임 이미지")
+                    .font(.custom(Font.t_extra_bold, size: 16))
+                    .foregroundColor(.proco_black)
+                Spacer()
+            }
+            .padding([.top, .leading])
+            
+            if pickerResult.count > 0{
+                
+                ForEach(pickerResult, id: \.self) { image in
+                    Image.init(uiImage: image)
+                        .resizable()
+                        //이미지 채우기
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
+                        .cornerRadius(5)
+                        .overlay(
+                            Button(action: {
+                            print("카드 이미지 선택 버튼 클릭")
+            
+                            self.show_img_picker.toggle()
+                        }){
+                            Image("plus_img_btn")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                            }, alignment: .center)
+                }
+                
+            }else if card_img_url != ""{
+            
+                     KFImage(URL(string: self.main_vm.my_card_detail_struct.card_photo_path!))
+                         .loadDiskFileSynchronously()
+                         .cacheMemoryOnly()
+                         .fade(duration: 0.25)
+                         .setProcessor(img_processor)
+                         .onProgress{receivedSize, totalSize in
+                             print("on progress: \(receivedSize), \(totalSize)")
+                         }
+                         .onSuccess{result in
+                             print("성공 : \(result)")
+                         }
+                         .onFailure{error in
+                             print("실패 이유: \(error)")
+                         }
+                        .overlay(
+                            Button(action: {
+                            print("카드 이미지 선택 버튼 클릭")
+            
+                            self.show_img_picker.toggle()
+                        }){
+                            Image("plus_img_btn")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                            }, alignment: .center)
+                
+            }else if card_img_url == ""{
+                
+                Rectangle()
+                    .overlay(
+                        Button(action: {
+                        print("카드 이미지 선택 버튼 클릭")
+        
+                        self.show_img_picker.toggle()
+                    }){
+                        Image("plus_img_btn")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                        }, alignment: .center)
+                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
+                    .cornerRadius(5)
+                    .foregroundColor(Color.gray)
+            }
+        }
+    }
+    
     //온오프라인 모임 선택 뷰
     var meeting_kinds_selection : some View{
         HStack{
@@ -616,9 +740,9 @@ extension EditingView {
                     print("그룹 소개 onchange 들어옴")
                     //현재 몇 글자 작성중인지 표시
                     self.introduce_txt_count = "\(value.count)"
-                    if value.count > 255 {
-                        print("그룹 소개 255글자 넘음")
-                        self.main_vm.input_introduce = String(value.prefix(255))
+                    if value.count > 1000 {
+                        print("그룹 소개 1000글자 넘음")
+                        self.main_vm.input_introduce = String(value.prefix(1000))
                     }
                 }
                 //텍스트 에디터의 placeholder값 넣기 위해
@@ -642,33 +766,6 @@ extension EditingView {
                         }
                     }
                 }
-        }
-    }
-    
-    var select_meeting_img_view : some View{
-        VStack{
-            HStack{
-                Text("모임 이미지")
-                    .font(.custom(Font.t_extra_bold, size: 16))
-                    .foregroundColor(.proco_black)
-                Spacer()
-            }
-            .padding([.top, .leading])
-            //티켓 이미지 rectangle 프레임에 맞춰서 추가시키기
-            Rectangle()
-                .overlay(
-                    self.selected_img == nil ? nil : selected_img?.resizable().clipShape(Rectangle())
-                        .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
-                        .aspectRatio(contentMode: .fit))
-                .overlay(Button(action: {
-                    print("카드 이미지 선택 버튼 클릭")
-                    
-                    self.show_img_picker.toggle()
-                }){
-                    Image(systemName: "plus.rectangle.on.rectangle")
-                })
-                .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
-                .foregroundColor(Color.gray)
         }
     }
 }

@@ -111,7 +111,8 @@ struct EditCardView: View {
                 switch main_viewmodel.alert_type{
                 case .success:
                     return Alert(title: Text("카드 수정"), message: Text("카드 수정이 완료됐습니다."),  dismissButton: Alert.Button.default(Text("확인"), action:{
-                        self.end_plus.toggle()
+                        self.presentationMode.wrappedValue.dismiss()
+                        //self.end_plus.toggle()
                     }))
                 case .fail:
                     return Alert(title: Text("카드 수정"), message: Text("카드 수정을 다시 시도해주세요."), dismissButton: Alert.Button.default(Text("확인"), action:{

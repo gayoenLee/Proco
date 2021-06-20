@@ -96,8 +96,15 @@ enum APIRouter: URLRequestConvertible {
     case get_group_volleh_card_list
     //모여볼래 카드 만들기
     case make_group_card(type: String, title: String, tags: Array<Any>, time: String, address: String, content: String, map_lat: String, map_lng: String)
+    
+    //모임 - 이미지랑 카드 만들기
+    case make_card_with_img(param: [String:Any], photo_file: Data)
     //모여볼래 카드 수정
     case edit_group_card(card_idx: Int, type: String, title: String, tags: Array<Any>, time: String, address: String, content: String, map_lat: String, map_lng: String)
+    
+    //모임카드 수정 - 이미지와 함께
+    case edit_card_with_img(card_idx : Int,param: [String: Any], photo_file : Data)
+    
     //TODO 모여볼래 카드 상세 정보 가져오기
     case get_group_card_detail(card_idx: Int)
     
@@ -261,7 +268,7 @@ enum APIRouter: URLRequestConvertible {
     //친구 카드 참여자 목록 가져오기
     case get_friend_card_apply_people(card_idx: Int)
     
-    //모임카드 이미지 업로드
+    //모임카드 이미지 업로드......필요없음
     case upload_card_img(card_idx: Int, photo_file: Data)
     
     private var method: HTTPMethod{
@@ -555,6 +562,12 @@ enum APIRouter: URLRequestConvertible {
         //모임카드 이미지 업로드
         case .upload_card_img:
             return .post
+        //모임카드 이미지와 함께 만들기
+        case .make_card_with_img:
+            return .post
+        //모임카드 수정 - 이미지와 같이 하기
+        case .edit_card_with_img:
+            return .post
             
         }
     }
@@ -656,9 +669,18 @@ enum APIRouter: URLRequestConvertible {
         //모여볼래 카드 만들기
         case .make_group_card:
             return "/cards/meeting"
+            
+            //!~~~~~~~~~모임 이미지랑 같이 카드 만들기
+        case .make_card_with_img(_, _):
+            return "/cards/meeting"
+
         //모여볼래 카드 수정하기
         case .edit_group_card(let card_idx, _, _, _, _, _, _, _ , _):
             return "/cards/\(card_idx)/meeting"
+        
+        //모임 카드 이미지와 같이 수정하기
+        case .edit_card_with_img(let card_idx, _, _):
+            return "/cards/\(card_idx)/meeting/ios"
             
         //TODO 모여볼래 카드 상세 페이지 데이터 가져오기
         case .get_group_card_detail(let card_idx):
@@ -1156,6 +1178,13 @@ enum APIRouter: URLRequestConvertible {
         //모임카드 이미지 업로드
         case .upload_card_img(_, let photo_file):
             return [Keys.UploadCardImg.photo_file: photo_file]
+        
+        //모임 - 이미지랑 같이 카드 만들기
+        case .make_card_with_img(let param, let photo_file):
+            return[ Keys.MakeCardWithImg.param: param, Keys.MakeCardWithImg.photo_file : photo_file]
+        //모임카드 - 수정 이미지랑 같이
+        case .edit_card_with_img(_, let param, let photo_file):
+            return [Keys.EditCardWithImg.param : param, Keys.EditCardWithImg.photo_file: photo_file]
         }
         
     }
@@ -1181,7 +1210,7 @@ enum APIRouter: URLRequestConvertible {
             urlRequest.setValue(ContentType.json.rawValue, forHTTPHeaderField: HTTPHeaderField.acceptType.rawValue)
             urlRequest.setValue(ContentType.json.rawValue, forHTTPHeaderField: HTTPHeaderField.contentType.rawValue)
         
-        case .send_profile_image, .upload_card_img:
+        case .send_profile_image, .upload_card_img, .make_card_with_img, .edit_card_with_img:
             print("라우터에서 프로필 이미지")
             urlRequest.setValue(ContentType.image.rawValue, forHTTPHeaderField: HTTPHeaderField.acceptType.rawValue)
             urlRequest.setValue(ContentType.image.rawValue, forHTTPHeaderField: HTTPHeaderField.contentType.rawValue)
@@ -1214,7 +1243,7 @@ enum APIRouter: URLRequestConvertible {
                     throw AFError.parameterEncodingFailed(reason: .jsonEncodingFailed(error: error))
                 }
                 
-            case .send_profile_image, .upload_card_img:
+            case .send_profile_image, .upload_card_img, .make_card_with_img, .edit_card_with_img:
                 let checker = JSONSerialization.isValidJSONObject(parameters)
                 print("라우터에서 체크 \(checker)")
                 print("이미지 라우터에서 access토큰 값 확인 : \(access_token)")

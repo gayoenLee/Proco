@@ -9,10 +9,23 @@ import SwiftUI
 import WebKit
 
 struct TermContentsView: View {
-    
+    @Environment(\.presentationMode) var presentation
+
     let url : String
     
     var body: some View {
+        VStack{
+            HStack{
+                Button(action: {
+                    self.presentation.wrappedValue.dismiss()
+
+                }){
+                    Image("left")
+                        .resizable()
+                        .frame(width: 8.51, height: 17)
+                }
+            }
         SignupTermsWebView(url: URL(string: url)!)
+        }
     }
 }

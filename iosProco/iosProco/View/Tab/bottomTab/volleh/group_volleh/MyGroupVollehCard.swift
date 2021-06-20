@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct MyGroupVollehCard: View {
     @ObservedObject var main_vm : GroupVollehMainViewmodel
@@ -15,7 +16,8 @@ struct MyGroupVollehCard: View {
     
     var current_card_index : Int
     @State private var expiration_at = ""
-
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 43, height: 43)) |> RoundCornerImageProcessor(cornerRadius: 5)
+    
     var body: some View {
         //카드 1개
         HStack{
@@ -54,6 +56,7 @@ struct MyGroupVollehCard: View {
         .onAppear{
             self.expiration_at = String.dot_form_date_string(date_string: my_group_card.expiration_at!)
            print("날짜 확인: \(self.expiration_at)")
+            print("모임 카드 이미지 확인: \(self.my_group_card.card_photo_path ?? "")")
         }
         //화면 하나에 카드 여러개 보여주기 위해 조정하는 값
         .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.09)
@@ -61,10 +64,25 @@ struct MyGroupVollehCard: View {
 }
 
 extension MyGroupVollehCard{
+    
     var card_img : some View{
+        
         HStack{
-            Image( self.my_group_card.card_photo_path ?? "")
-                .frame(width: 43, height: 43)
+                KFImage(URL(string: self.my_group_card.card_photo_path!))
+                    .loadDiskFileSynchronously()
+                    .cacheMemoryOnly()
+                    .fade(duration: 0.25)
+                    .setProcessor(img_processor)
+                    .onProgress{receivedSize, totalSize in
+                        print("on progress: \(receivedSize), \(totalSize)")
+                    }
+                    .onSuccess{result in
+                        print("성공 : \(result)")
+                    }
+                    .onFailure{error in
+                        print("실패 이유: \(error)")
+                    }
+         
         }
         .padding(.leading)
     }
