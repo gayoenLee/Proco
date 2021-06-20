@@ -6,13 +6,15 @@
 // 2-0 메인화면 모여볼래 카드 리스트
 
 import SwiftUI
+import Kingfisher
 
 struct GroupVollehCard: View {
     @ObservedObject var main_vm : GroupVollehMainViewmodel
     //binding으로 했더니 카드 삭제시 계속 index에러 나서 state로 바꾼 것.
     @State var group_card : GroupCardStruct
     @State private var expiration_at = ""
-
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 43, height: 43)) |> RoundCornerImageProcessor(cornerRadius: 5)
+    
     var body : some View{
         
         //카드 1개
@@ -63,8 +65,20 @@ extension GroupVollehCard {
     
     var card_img : some View{
         HStack{
-            Image( self.group_card.card_photo_path!)
-                .frame(width: 43, height: 43)
+            KFImage(URL(string: self.group_card.card_photo_path!))
+                .loadDiskFileSynchronously()
+                .cacheMemoryOnly()
+                .fade(duration: 0.25)
+                .setProcessor(img_processor)
+                .onProgress{receivedSize, totalSize in
+                    print("on progress: \(receivedSize), \(totalSize)")
+                }
+                .onSuccess{result in
+                    print("성공 : \(result)")
+                }
+                .onFailure{error in
+                    print("실패 이유: \(error)")
+                }
         }
         .padding(.leading)
     }
