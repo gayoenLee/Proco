@@ -27,15 +27,15 @@ struct TopNavBar: View {
                 Spacer()
                 HStack{
                     Spacer()
-                    //통합 검색 버튼
-                    Button(action: {
-                        self.tab_index = 5
-                    }){
-                        Image("find_icon")
-                            .resizable()
-                            .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
-                            .aspectRatio(contentMode: .fill)                                       .foregroundColor(Color.yellow)
-                    }
+                    //통합 검색 버튼..기획 변경 - 사라짐
+//                    Button(action: {
+//                        self.tab_index = 5
+//                    }){
+//                        Image("find_icon")
+//                            .resizable()
+//                            .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+//                            .aspectRatio(contentMode: .fill)                                       .foregroundColor(Color.yellow)
+//                    }
                     
                     //친구관리 버튼
                     Button(action: {
