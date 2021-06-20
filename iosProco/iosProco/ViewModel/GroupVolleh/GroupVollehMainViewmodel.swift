@@ -99,8 +99,8 @@ class GroupVollehMainViewmodel: ObservableObject{
             objectWillChange.send()
         }
     }
-
-
+    
+    
     /*
      --------------------------데이터 모델들----------------------------
      */
@@ -313,7 +313,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     }
     //소개글
     ///사용자가 입력한 소개글
-    @Published var input_introduce : String = ""{
+    @Published var input_introduce : String = "모임을 소개해주세요"{
         didSet {
             objectWillChange.send()
         }
@@ -395,7 +395,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     }
     //모여볼래 카드에 시간 표시하기 위해, 상세 페이지에 am, pm표시하기 위함.
     func card_time_converter(meet_time: String) -> String{
-       let initial_value = self.string_to_time(expiration: meet_time)
+        let initial_value = self.string_to_time(expiration: meet_time)
         print("date형식으로 변환한 값 확인: \(initial_value)")
         let time = DateFormatter.time_formatter.string(from: initial_value)
         print("시간 확인: \(time)")
@@ -420,7 +420,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     }
     
     /*
-    -------------------------- 카드 필터 적용시 날짜 -> 스트링 변환해서 서버에 보내기
+     -------------------------- 카드 필터 적용시 날짜 -> 스트링 변환해서 서버에 보내기
      */
     
     //날짜
@@ -439,13 +439,13 @@ class GroupVollehMainViewmodel: ObservableObject{
         var limit_tag_num_result : Bool = false
         if self.user_selected_tag_list.count>2{
             print("뷰모델 태그 갯수 메소드에서 3개 넘음")
-           limit_tag_num_result = true
+            limit_tag_num_result = true
         }else{
             print("뷰모델 태그 갯수 메소드에서 3개 안넘음")
-
+            
             limit_tag_num_result = false
         }
-            return limit_tag_num_result
+        return limit_tag_num_result
     }
     
     ///카드에서 카테고리중 최소 1개는 선택해야하므로 이것 체크하는 메소드
@@ -462,7 +462,7 @@ class GroupVollehMainViewmodel: ObservableObject{
             
         }
     }
-
+    
     
     /*
      ---------------------------카드 편집
@@ -530,12 +530,12 @@ class GroupVollehMainViewmodel: ObservableObject{
     func find_owner() -> Bool{
         
         var idx : Bool = false
-            
+        
         idx =  self.my_group_card_struct.contains(where: {
             $0.card_idx == self.selected_card_idx
         })
-    
-       return idx
+        
+        return idx
         //print("주최자인지 확인: \(self.check_owner_result)")
     }
     /*
@@ -560,7 +560,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     }
     
     /*
-    ------------------------------------------- 통신 코드 시작------------------------------------
+     ------------------------------------------- 통신 코드 시작------------------------------------
      */
     
     //신고하기
@@ -576,7 +576,7 @@ class GroupVollehMainViewmodel: ObservableObject{
             objectWillChange.send()
         }
     }
-        
+    
     func request_result_alert_func(_ active: ResultAlert) -> Void {
         DispatchQueue.main.async {
             self.request_result_alert = active
@@ -597,8 +597,8 @@ class GroupVollehMainViewmodel: ObservableObject{
                 }
             }, receiveValue: {response in
                 print("친구 카드 신고하기 resopnse: \(response)")
-               
-                    let result = response["result"].string
+                
+                let result = response["result"].string
                 
                 if result == result{
                     if result == "ok"{
@@ -631,33 +631,31 @@ class GroupVollehMainViewmodel: ObservableObject{
                     print("모여볼래 카드 목록 없음.")
                     self.my_group_card_struct.removeAll()
                     self.group_card_struct.removeAll()
-
+                    
                 }else{
-
+                    
                     self.my_group_card_struct.removeAll()
                     self.group_card_struct.removeAll()
-
+                    
                     var my_count = 0
                     for card in response{
                         if my_count < response.count {
                             my_count = my_count + 1
-
+                            
                             print("만든 사람 닉네임: \(card.creator!.nickname)")
                             print("내 닉네임: \(self.my_nickname)")
                             print("데이터 제이슨 가져와졌는지 확인: \(card.expiration_at)")
                             //내가 만든 카드일 경우
                             if self.my_nickname == card.creator!.nickname{
-
+                                
                                 print("내 카드 추가됨 \(my_count)")
-                                self.my_group_card_struct.append(GroupCardStruct(result: "", card_idx: card.card_idx, title: card.title, kinds: card.kinds, expiration_at: card.expiration_at, address: card.address, map_lat: card.map_lat, map_lng: card.map_lng, cur_user: card.cur_user, apply_user: card.apply_user, introduce: card.introduce, lock_state:card.lock_state, like_state: card.like_state, like_count: card.like_count, tags: card.tags!, creator: card.creator!, offset: 0.0))
-
+                                self.my_group_card_struct.append(GroupCardStruct(result: "", card_idx: card.card_idx, title: card.title, kinds: card.kinds, expiration_at: card.expiration_at, address: card.address, map_lat: card.map_lat, map_lng: card.map_lng, cur_user: card.cur_user, apply_user: card.apply_user, introduce: card.introduce, card_photo_path: card.card_photo_path ?? "",lock_state:card.lock_state, like_state: card.like_state, like_count: card.like_count, tags: card.tags!, creator: card.creator!, offset: 0.0))
+                                
                             }else{
-
+                                
                                 print("다른 사람 카드 추가됨\(my_count)")
-                                self.group_card_struct.append(GroupCardStruct(result: "", card_idx: card.card_idx, title: card.title, kinds: card.kinds, expiration_at: card.expiration_at, address: card.address, map_lat: card.map_lat, map_lng: card.map_lng, cur_user: card.cur_user, apply_user: card.apply_user, introduce: card.introduce, lock_state:card.lock_state, like_state: card.like_state, like_count: card.like_count, tags: card.tags!, creator: card.creator!, offset: 0.0))
+                                self.group_card_struct.append(GroupCardStruct(result: "", card_idx: card.card_idx, title: card.title, kinds: card.kinds, expiration_at: card.expiration_at, address: card.address, map_lat: card.map_lat, map_lng: card.map_lng, cur_user: card.cur_user, apply_user: card.apply_user, introduce: card.introduce , card_photo_path: card.card_photo_path ?? "", lock_state:card.lock_state, like_state: card.like_state, like_count: card.like_count, tags: card.tags!, creator: card.creator!, offset: 0.0))
                             }
-                          
-
                         }
                     }
                     print("친구 카드 저장됐는지 확인: \(self.group_card_struct)")
@@ -666,21 +664,23 @@ class GroupVollehMainViewmodel: ObservableObject{
             })
     }
     
-    func make_group_card(type: String, map_lat: Double, map_lng: Double){
-        cancellation = APIClient.make_group_card(type: type, title: self.card_name, tags: self.user_selected_tag_list, time: self.card_expire_time, address: self.map_data.location_name, content: self.input_introduce, map_lat: String(map_lat), map_lng: String(map_lng))
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: {result in
-                switch result{
-                case .failure(let error):
-                    print("모여 볼래 카드 만들기 에러 발생 : \(error)")
-                case .finished:
-                    break
-                }
-            }, receiveValue: {response in
-                print("카드 만들기 결과값 : \(response)")
-                if response.result == "ok"{
+    func make_card_with_img(param: [String: Any], photo_file: Data?){
+        
+        APIClient.make_card_with_img(param: param, photo_file: photo_file, to: APIRouter.make_card_with_img(param: param, photo_file: photo_file ?? Data()), completion: {response in
+            switch response{
+            case .success(let response):
+                print("모임카드 만들기 response: \(response)")
+                let result = response.result
+                
+                if result == "ok"{
+                    print("모임 이미지와 함께 업로드됨")
+                    //모임 종류를 알기 위해 서버에 보냈던 param에서 꺼내오기
+                    let type_idx = param.firstIndex(where: {$0.key == "type"})
+                    let type = param[type_idx!].value
+                    print("모임 종류 꺼낸 것 확인: \(type)")
                     
-                    self.my_group_card_struct.append(GroupCardStruct(result: "", card_idx: response.card_idx, title: self.card_name, kinds: type, expiration_at: self.card_expire_time, address: self.map_data.location_name, map_lat: String(self.map_data.map_lat), map_lng:  String(self.map_data.map_lng), cur_user: 1, apply_user: 0, introduce: self.input_introduce, tags: response.tags, creator: nil, offset: 0.0))
+                    self.my_group_card_struct.append(GroupCardStruct(result: "", card_idx: response.card_idx, title: self.card_name, kinds: (type as! String), expiration_at: self.card_expire_time, address: self.map_data.location_name, map_lat: String(self.map_data.map_lat), map_lng:  String(self.map_data.map_lng), cur_user: 1, apply_user: 0, introduce: self.input_introduce, tags: response.tags, creator: nil, offset: 0.0))
+                    
                     print("카드 만들기 후 데이터 집어넣어졌는지 확인: \(self.card_name)")
                     print("카드 만들기 후 데이터 집어넣어졌는지 확인2: \(self.my_group_card_struct)")
                     
@@ -691,7 +691,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     
                     print("카드 이름: \(self.card_name)")
                     //2.sqlite에 데이터 저장 - chatroom, user, card, tag
-                    ChatDataManager.shared.insert_chat_info_friend(idx: response.chatroom_idx, card_idx: response.card_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, room_name: self.card_name, kinds: type)
+                    ChatDataManager.shared.insert_chat_info_friend(idx: response.chatroom_idx, card_idx: response.card_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, room_name: self.card_name, kinds: type as! String)
                     
                     let current_time = ChatDataManager.shared.make_created_at()
                     //TODO profile 사진 변경해야함
@@ -704,7 +704,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     }
                     //card
                     let created_at = ChatDataManager.shared.make_created_at()
-                    ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: type, card_photo_path: "", lock_state: 0, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
+                    ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: type as! String, card_photo_path: "", lock_state: 0, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
                     
                     //3.소켓으로 데이터 보내기
                     SockMgr.socket_manager.make_chat_room_friend(chatroom_idx: response.chatroom_idx, idx: idx!, nickname: self.my_nickname)
@@ -717,114 +717,112 @@ class GroupVollehMainViewmodel: ObservableObject{
                     self.user_selected_tag_list = []
                     self.user_selected_tag_set = []
                     
-                    if self.group_card_img_data != nil{
-                    //4.카드 이미지 있는 경우
-                    self.send_group_card_img(card_idx: response.card_idx, photo_file: self.group_card_img_data!)
-                        
-                    }else{
-                        self.alert_type = .success
-                    }
+                    self.alert_type = .success
                     
-                    print("추가 후 값 없앴는지 확인 : \( self.card_name)")
-                   
                 }else{
-                    print("카드 안만들어졌음 오류 발생 : \(String(describing: response.result))")
                     self.alert_type = .fail
                 }
-            })
+            case .failure(let error):
+                self.alert_type = .fail
+            }
+            
+        })
     }
     
     
-    func edit_group_card(type: String){
-        cancellation = APIClient.edit_group_card(card_idx: self.selected_card_idx, type: type, title: self.card_name, tags: self.user_selected_tag_list, time: self.card_expire_time, address: self.input_location, content: self.input_introduce, map_lat: String(self.map_data.map_lat), map_lng: String(self.map_data.map_lng))
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: {result in
-                switch result{
-                case .failure(let error):
-                    print("모여 볼래 카드 편집 에러 발생 : \(error)")
-                case .finished:
-                    break
-                }
-            }, receiveValue: {response in
+    func edit_card_with_img( type: String, photo_file : Data?){
+        
+        var param : [String: Any] = [:]
+        param = ["type" :type, "title": self.card_name, "tags": self.user_selected_tag_list, "time": self.card_expire_time, "address": self.map_data.location_name, "content" : self.input_introduce, "map_lat":  String(self.map_data.map_lat), "map_lng" :  String(self.map_data.map_lng)]
+        
+        APIClient.edit_card_with_img(card_idx: self.selected_card_idx, param: param, photo_file: photo_file, to: APIRouter.edit_card_with_img(card_idx: self.selected_card_idx, param: param, photo_file: photo_file ?? Data()), completion: {response in
+            
+            print("카드 편집 response: \(response)")
+            switch response{
+            case .success(let response):
                 print("카드 편집 결과값 : \(response)")
                 if response.result == "ok"{
-
-
+                    
+                    //모임 종류를 알기 위해 서버에 보냈던 param에서 꺼내오기
+                    let type_idx = param.firstIndex(where: {$0.key == "type"})
+                    let type = param[type_idx!].value as! String
+                    print("모임 종류 꺼낸 것 확인: \(type)")
+                    
                     if socket_manager.edit_from_chatroom{
                         print("채팅방 드로어에서 편집 화면으로 넘어와서 편집 완료")
-
+                        
                         let string_expirtaion = self.make_card_date()
-
-                            print("socket_manager.card_struct 확인1: \(socket_manager.card_struct)")
+                        
+                        print("socket_manager.card_struct 확인1: \(socket_manager.card_struct)")
                         //소켓 뷰모델 안의 카드 모델 데이터 업데이트
-                            socket_manager.card_struct.address = self.input_location
-                            socket_manager.card_struct.expiration_at = string_expirtaion
-                            socket_manager.card_struct.introduce = self.input_introduce
-                            socket_manager.card_struct.title = self.card_name
-                            print("socket_manager.card_struct 확인2: \(socket_manager.card_struct)")
-
+                        socket_manager.card_struct.address = self.input_location
+                        socket_manager.card_struct.expiration_at = string_expirtaion
+                        socket_manager.card_struct.introduce = self.input_introduce
+                        socket_manager.card_struct.title = self.card_name
+                        print("socket_manager.card_struct 확인2: \(socket_manager.card_struct)")
+                        
                         //로컬 디비에 카드 데이터 업데이트
                         ChatDataManager.shared.update_card_table(chatroom_idx: socket_manager.enter_chatroom_idx, creator_idx: socket_manager.card_struct.creator_idx, kinds: socket_manager.card_struct.kinds , card_photo_path: socket_manager.card_struct.card_photo_path ?? "", lock_state: socket_manager.card_struct.lock_state, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: socket_manager.card_struct.map_lat, map_lng: socket_manager.card_struct.map_lng, current_people_count: socket_manager.card_struct.cur_user, apply_user: socket_manager.card_struct.apply_user, expiration_at: string_expirtaion, created_at: socket_manager.card_struct.created_at, updated_at: socket_manager.card_struct.updated_at ?? "", deleted_at: socket_manager.card_struct.deleted_at ?? "")
-
+                        
                         let updated_at = ChatDataManager.shared.make_created_at()
-
+                        
                         //채팅 서버에 보낼 때 이곳에 데이터 넣기 위해 변수 만듬.
-                       var tag_model : [TagModel] = []
+                        var tag_model : [TagModel] = []
                         //태그 데이터 업데이트
                         for item in response.tags!{
                             ChatDataManager.shared.update_tag_table(chatroom_idx: socket_manager.enter_chatroom_idx, tag_idx: item.idx, tag_name: item.tag_name)
-
+                            
                             tag_model.append(TagModel(idx: item.idx, tag_name: item.tag_name))
-                            }
+                        }
                         print("서버에 보내는 태그 모델 확인: \(tag_model)")
-
-
+                        
+                        
                         //채팅 서버에 보내기 위해 만든 데이터.
                         let chatroom_model = ChatRoomModel(idx: socket_manager.enter_chatroom_idx, card_idx: socket_manager.current_chatroom_info_struct.card_idx, created_at: socket_manager.current_chatroom_info_struct.created_at, creator_idx: socket_manager.current_chatroom_info_struct.creator_idx, deleted_at: socket_manager.current_chatroom_info_struct.deleted_at, kinds: type, room_name: self.card_name, updated_at: updated_at, card_tag_list: tag_model, card: socket_manager.card_struct)
                         print("채팅룸 데이터: \(socket_manager.current_chatroom_info_struct)")
                         print("보내는 데이터: \(chatroom_model)")
                         socket_manager.edit_card_info_event(chatroom: chatroom_model)
-
-
+                        
+                        
                     }else{
                         print("드로어에서 온 경우가 아닐 때")
                         let string_expirtaion = self.make_card_date()
-
-                    let detail_index = self.my_group_card_struct.firstIndex(where: {$0.card_idx == self.selected_card_idx})
-                    //TODO!! 편집한 후에 여기에서 데이터를 업데이트해야 메인뷰에 돌아가면 데이터 업데이트 돼있음.!!!
-                    //편집한 데이터를 모델에 집어넣기.
-                    self.my_group_card_struct[detail_index!].address = self.input_location
-                    self.my_group_card_struct[detail_index!].expiration_at = self.card_expire_time
-                    self.my_group_card_struct[detail_index!].introduce = self.input_introduce
-                    self.my_group_card_struct[detail_index!].title! = self.card_name
-
+                        
+                        let detail_index = self.my_group_card_struct.firstIndex(where: {$0.card_idx == self.selected_card_idx})
+                        //TODO!! 편집한 후에 여기에서 데이터를 업데이트해야 메인뷰에 돌아가면 데이터 업데이트 돼있음.!!!
+                        //편집한 데이터를 모델에 집어넣기.
+                        self.my_group_card_struct[detail_index!].address = self.input_location
+                        self.my_group_card_struct[detail_index!].expiration_at = self.card_expire_time
+                        self.my_group_card_struct[detail_index!].introduce = self.input_introduce
+                        self.my_group_card_struct[detail_index!].title! = self.card_name
+                        
                         //********채팅 서버에 보낼 태그 모델*********
                         var tag_model : [TagModel] = []
-
-                    for item in response.tags!{
-                        self.my_group_card_struct[detail_index!].tags?.append(Tags(idx: item.idx, tag_name: item.tag_name))
-
-                        //채팅 서버에 보낼 태그 데이터 넣고 태그 테이블 업데이트
-                        ChatDataManager.shared.update_tag_table(chatroom_idx: socket_manager.enter_chatroom_idx, tag_idx: item.idx, tag_name: item.tag_name)
-
-                        tag_model.append(TagModel(idx: item.idx, tag_name: item.tag_name))
-
+                        
+                        for item in response.tags!{
+                            self.my_group_card_struct[detail_index!].tags?.append(Tags(idx: item.idx, tag_name: item.tag_name))
+                            
+                            //채팅 서버에 보낼 태그 데이터 넣고 태그 테이블 업데이트
+                            ChatDataManager.shared.update_tag_table(chatroom_idx: socket_manager.enter_chatroom_idx, tag_idx: item.idx, tag_name: item.tag_name)
+                            
+                            tag_model.append(TagModel(idx: item.idx, tag_name: item.tag_name))
                         }
+                        
                         print("편집한 데이터 집어넣었는지 확인 : \(String(describing: self.my_group_card_struct[detail_index!].tags))")
-
+                        
                         //채팅 서버에 보내기 위해 데이터 만들기(채팅룸 idx가져오기, 카드 업데이트 날짜 만들기, 카드 모델 만들기)
                         let chatroom = ChatDataManager.shared.get_chatroom_from_card(card_idx: self.selected_card_idx)
                         print("친구랑 볼래 뷰모델에서 채팅방 idx: \(chatroom)")
-
+                        
                         //업데이트한 날짜 만들기
                         let updated_at = ChatDataManager.shared.make_created_at()
-
+                        
                         //카드 idx로 디비에 저장된 카드 데이터 갖고 오기.
                         ChatDataManager.shared.get_card_info_from_main(chatroom_idx: chatroom)
                         print("카드 데이터 저장한 것 확인: \(socket_manager.card_struct)")
                         print("socket_manager.card_struct 확인1: \(socket_manager.card_struct)")
-
-                    //소켓 뷰모델 안의 카드 모델 데이터 업데이트
+                        
+                        //소켓 뷰모델 안의 카드 모델 데이터 업데이트
                         socket_manager.card_struct.address = self.input_location
                         socket_manager.card_struct.expiration_at = string_expirtaion
                         socket_manager.card_struct.introduce = self.input_introduce
@@ -832,33 +830,38 @@ class GroupVollehMainViewmodel: ObservableObject{
                         print("socket_manager.card_struct 확인2: \(socket_manager.card_struct)")
                         //로컬 디비에 카드 데이터 업데이트
                         ChatDataManager.shared.update_card_table(chatroom_idx: chatroom, creator_idx: socket_manager.card_struct.creator_idx, kinds: type , card_photo_path: socket_manager.card_struct.card_photo_path ?? "", lock_state: socket_manager.card_struct.lock_state, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: socket_manager.card_struct.map_lat, map_lng: socket_manager.card_struct.map_lng, current_people_count: socket_manager.card_struct.cur_user, apply_user: socket_manager.card_struct.apply_user, expiration_at: string_expirtaion, created_at: socket_manager.card_struct.created_at, updated_at: updated_at, deleted_at: socket_manager.card_struct.deleted_at ?? "")
-
+                        
                         socket_manager.card_struct.updated_at = updated_at
                         let chatroom_model = ChatRoomModel(idx: chatroom, card_idx: self.selected_card_idx, created_at: socket_manager.card_struct.created_at, creator_idx: Int(self.my_idx!)!, deleted_at: "", kinds: type, room_name: self.card_name, updated_at: updated_at, card_tag_list: tag_model, card: socket_manager.card_struct)
-
+                        
                         print("채팅룸 데이터: \(socket_manager.current_chatroom_info_struct)")
                         print("보내는 데이터: \(chatroom_model)")
                         SockMgr.socket_manager.edit_card_info_event(chatroom: chatroom_model)
                         //서버에 이벤트 보냄.
                         //socket_manager.edit_card_info_event(chatroom: chatroom_model)
-
-                    //편집한 데이터 집어넣고는 publish변수에 있던 값들 없애주기
-                    self.input_location = ""
-                    self.card_expire_time = ""
-                    self.input_introduce = ""
-                    self.card_name = ""
-                    self.user_selected_tag_list = []
-                    self.user_selected_tag_set = []
-                    print("편집 후 값 없앴는지 확인 : \( self.card_name)")
+                        
+                        //편집한 데이터 집어넣고는 publish변수에 있던 값들 없애주기
+                        self.input_location = ""
+                        self.card_expire_time = ""
+                        self.input_introduce = ""
+                        self.card_name = ""
+                        self.user_selected_tag_list = []
+                        self.user_selected_tag_set = []
+                        print("편집 후 값 없앴는지 확인 : \( self.card_name)")
                     }
                     self.alert_type = .success
-
+                    
                 }else{
                     print("카드 편집 오류 발생 : \(String(describing: response.result))")
                     self.alert_type = .fail
-
                 }
-            })
+                
+            case .failure(let error):
+                self.alert_type = .fail
+            }
+            
+        })
+        
     }
     
     func delete_group_card(){
@@ -884,6 +887,8 @@ class GroupVollehMainViewmodel: ObservableObject{
         
     }
     
+    
+    
     func apply_group_card(card_idx: Int){
         cancellation = APIClient.apply_group_card(card_idx: card_idx)
             .receive(on: DispatchQueue.main)
@@ -891,7 +896,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                 switch result{
                 case .failure(let error):
                     print("모여 볼래 카드 참가 신청 에러 발생 : \(error)")
-                   // self.alert_type = .fail
+                // self.alert_type = .fail
                 case .finished:
                     break
                 }
@@ -908,39 +913,39 @@ class GroupVollehMainViewmodel: ObservableObject{
     }
     // 참가자 있을 경우 결과 제대로 오는지 확인 필요.
     func get_apply_people_list(){
-      cancellation =  APIClient.get_apply_people(card_idx: self.selected_card_idx)
-        .receive(on: DispatchQueue.main)
-        .sink(receiveCompletion: {result in
-            switch result{
-            case .failure(let error):
-                print("참가자 가져오기 에러 발생 : \(error)")
-                //alert창 띄움.
-                self.alert_type = .fail
-            case .finished:
-                break
-            }
-        }, receiveValue: {response in
-            print("참가자 : \(response)")
-            //신청자 및 참여자가 없을 경우 오는 결과값
-            if response["result"] == "no result"{
-                print("참가자 없음 no result")
-            }else{
-                
-                for user in response{
-                    print("user확인 \(user)")
-                    
-                    let nickname = user.1["nickname"].string
-                    let idx = user.1["idx"].int
-                    let level = user.1["level"].int
-                    let kinds = user.1["kinds"].string
-                    let profile_photo_path = user.1["profile_photo_path"].string
-                    
-                    print("nickname확인 \(String(describing: nickname))")
-                    self.apply_user_struct.append(ApplyUserStruct(result: "", idx: idx, nickname: nickname, level: level, profile_photo_path: profile_photo_path, kinds: kinds))
+        cancellation =  APIClient.get_apply_people(card_idx: self.selected_card_idx)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("참가자 가져오기 에러 발생 : \(error)")
+                    //alert창 띄움.
+                    self.alert_type = .fail
+                case .finished:
+                    break
                 }
-                print("결과 확인: \(JSON(response))")
-            }
-        })
+            }, receiveValue: {response in
+                print("참가자 : \(response)")
+                //신청자 및 참여자가 없을 경우 오는 결과값
+                if response["result"] == "no result"{
+                    print("참가자 없음 no result")
+                }else{
+                    
+                    for user in response{
+                        print("user확인 \(user)")
+                        
+                        let nickname = user.1["nickname"].string
+                        let idx = user.1["idx"].int
+                        let level = user.1["level"].int
+                        let kinds = user.1["kinds"].string
+                        let profile_photo_path = user.1["profile_photo_path"].string
+                        
+                        print("nickname확인 \(String(describing: nickname))")
+                        self.apply_user_struct.append(ApplyUserStruct(result: "", idx: idx, nickname: nickname, level: level, profile_photo_path: profile_photo_path, kinds: kinds))
+                    }
+                    print("결과 확인: \(JSON(response))")
+                }
+            })
     }
     
     //참가 신청 수락 - api 서버에 결과 ok왔을 때 채팅 서버에 모임 카드 참여 수락 이벤트 보냄.
@@ -962,17 +967,17 @@ class GroupVollehMainViewmodel: ObservableObject{
                 //참가 신청 통신이 result ok로 왔을 경우 채팅서버와도 통신 진행.
                 if response["result"] == "ok"{
                     print("침기지 : \(self.apply_user_idx)")
-
+                    
                     let chatroom_idx = response["chatroom_idx"].intValue
                     print("chatroom_idx : \(chatroom_idx)")
-
+                    
                     //수락된 채팅방의 마지막 메세지 idx
                     let last_message_idx = response["message_last_idx"].intValue
                     
                     
                     //채팅 서버에 모임 카드 참여 통신 진행.
                     SockMgr.socket_manager.send_join_card_ok(user_idx: self.apply_user_idx, chatroom_idx: chatroom_idx)
-
+                    
                     
                     //참가 신청 완료 알림 나타내기
                     self.alert_type = .success
@@ -1041,9 +1046,9 @@ class GroupVollehMainViewmodel: ObservableObject{
                     print("참가 신청 목록이 있을 경우 : \(json_data)")
                     for meeting in json_data!{
                         print("user확인 \(meeting)")
-
+                        
                         self.apply_meeting_struct.append(MyApplyMeetingStruct( creator: meeting.creator, card_idx: meeting.card_idx, kinds: meeting.kinds, apply_user: meeting.apply_user, introduce: meeting.introduce ?? "", apply_kinds: meeting.apply_kinds, tags: meeting.tags!, map_lat: meeting.map_lat, map_lng: meeting.map_lng, expiration_at: meeting.expiration_at, address: meeting.address, title: meeting.title, cur_user: meeting.cur_user, card_photo_path: meeting.card_photo_path ?? "", lock_state: meeting.lock_state, like_count: meeting.like_count, like_state: meeting.like_state))
-    
+                        
                     }
                     print("데이터 들어간 것확인 \( self.apply_meeting_struct))")
                 }
@@ -1077,7 +1082,7 @@ class GroupVollehMainViewmodel: ObservableObject{
         self.year = String(total_day.split(separator: "-")[0])
         self.month = String(total_day.split(separator: "-")[1])
         self.date = String(total_day.split(separator: "-")[2])
-   
+        
     }
     //필터 전체, 채팅만, 만나서 종류 설정 어떻게 해놨는지 저장.
     @Published var filter_kind : String? = ""{
@@ -1099,12 +1104,12 @@ class GroupVollehMainViewmodel: ObservableObject{
                 switch result{
                 case .failure(let error):
                     print("모여 볼래 카드 필터 에러 발생 : \(error)")
-                    //self.alert_type = .fail
+                //self.alert_type = .fail
                 case .finished:
                     break
                 }
             }, receiveValue: {response in
-             print("모여 볼래 필터 결과값 : \(response)")
+                print("모여 볼래 필터 결과값 : \(response)")
                 
                 if response["result"] == "no result"{
                     
@@ -1117,49 +1122,49 @@ class GroupVollehMainViewmodel: ObservableObject{
                     
                 }else{
                     print("필터 결과값 있을 때")
-                self.my_group_card_struct.removeAll()
-                self.group_card_struct.removeAll()
-
-                var my_count = 0
-                for card in response{
-                    //여기에서 태그를 한 번 삭제해줘야 태그들이 이전 것까지 중복돼서 저장되지 않는다.
-                    self.volleh_tag_struct.removeAll()
-
-                    if my_count < response.count {
-                        my_count = my_count + 1
-
-                        let card_idx = card.1["card_idx"].int
-                        let kinds = card.1["kinds"].string
-                        let creator_name = card.1["creator"]["nickname"].stringValue
-                        let creator_idx = card.1["creator"]["idx"].intValue
-                        let creator_image = card.1["creator"]["profile_photo_path"].stringValue
-                        let tags = card.1["tags"].array
-                        let expiration_at = card.1["expiration_at"].stringValue
-                        let lock_state = card.1["lock_state"].intValue
-                        let like_count = card.1["like_count"].intValue
-                        let like_state = card.1["like_state"].intValue
-                        print("만든 사람 닉네임: \(creator_name)")
-                        print("내 닉네임: \(self.my_nickname)")
-
-                        //내가 만든 카드일 경우
-                        if Int(self.my_idx!) == creator_idx{
-                            for tag in tags!{
-                                self.volleh_tag_struct.append(Tags(idx: tag["idx"].intValue, tag_name: tag["tag_name"].stringValue))
-                            }
-
-                            self.my_group_card_struct.append(GroupCardStruct(card_idx: card_idx!, kinds: kinds!, expiration_at: expiration_at, lock_state: lock_state, like_state: like_state, like_count: like_count, tags: self.volleh_tag_struct, creator: Creator(idx: creator_idx, nickname: creator_name, profile_photo_path: creator_image)))
-
-                        }else{
+                    self.my_group_card_struct.removeAll()
+                    self.group_card_struct.removeAll()
+                    
+                    var my_count = 0
+                    for card in response{
+                        //여기에서 태그를 한 번 삭제해줘야 태그들이 이전 것까지 중복돼서 저장되지 않는다.
+                        self.volleh_tag_struct.removeAll()
+                        
+                        if my_count < response.count {
+                            my_count = my_count + 1
                             
-                            for tag in tags!{
-                                self.volleh_tag_struct.append(Tags(idx: tag["idx"].intValue, tag_name: tag["tag_name"].stringValue))
-                            }
+                            let card_idx = card.1["card_idx"].int
+                            let kinds = card.1["kinds"].string
+                            let creator_name = card.1["creator"]["nickname"].stringValue
+                            let creator_idx = card.1["creator"]["idx"].intValue
+                            let creator_image = card.1["creator"]["profile_photo_path"].stringValue
+                            let tags = card.1["tags"].array
+                            let expiration_at = card.1["expiration_at"].stringValue
+                            let lock_state = card.1["lock_state"].intValue
+                            let like_count = card.1["like_count"].intValue
+                            let like_state = card.1["like_state"].intValue
+                            print("만든 사람 닉네임: \(creator_name)")
+                            print("내 닉네임: \(self.my_nickname)")
                             
-                            print("다른 사람 카드 추가됨\(my_count)")
-                            self.group_card_struct.append(GroupCardStruct(card_idx: card_idx!, kinds: kinds!, expiration_at: expiration_at,  lock_state: lock_state, like_state: like_state, like_count: like_count, tags: self.volleh_tag_struct, creator: Creator(idx: creator_idx, nickname: creator_name, profile_photo_path: creator_image)))
+                            //내가 만든 카드일 경우
+                            if Int(self.my_idx!) == creator_idx{
+                                for tag in tags!{
+                                    self.volleh_tag_struct.append(Tags(idx: tag["idx"].intValue, tag_name: tag["tag_name"].stringValue))
+                                }
+                                
+                                self.my_group_card_struct.append(GroupCardStruct(card_idx: card_idx!, kinds: kinds!, expiration_at: expiration_at, lock_state: lock_state, like_state: like_state, like_count: like_count, tags: self.volleh_tag_struct, creator: Creator(idx: creator_idx, nickname: creator_name, profile_photo_path: creator_image)))
+                                
+                            }else{
+                                
+                                for tag in tags!{
+                                    self.volleh_tag_struct.append(Tags(idx: tag["idx"].intValue, tag_name: tag["tag_name"].stringValue))
+                                }
+                                
+                                print("다른 사람 카드 추가됨\(my_count)")
+                                self.group_card_struct.append(GroupCardStruct(card_idx: card_idx!, kinds: kinds!, expiration_at: expiration_at,  lock_state: lock_state, like_state: like_state, like_count: like_count, tags: self.volleh_tag_struct, creator: Creator(idx: creator_idx, nickname: creator_name, profile_photo_path: creator_image)))
+                            }
                         }
                     }
-                }
                     print("최종 다른 사람 카드 데이터 확인: \(self.group_card_struct)")
                 }
                 self.applied_filter = true
@@ -1186,78 +1191,78 @@ class GroupVollehMainViewmodel: ObservableObject{
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_group_card_detail_finish" : "no result"])
                 }else{
                     print("만료날짜 원래 데이터 확인 : \(String(describing: response.expiration_at))")
-                
-                let first_filtered_day = self.string_to_date(expiration: response.expiration_at!)
-                print("날짜 변환했는지 확인 : \(first_filtered_day)")
-                self.card_date = first_filtered_day
-
-                let time_filtered = self.string_to_time(expiration: String(response.expiration_at!.split(separator: " ")[1]))
-                self.card_time = time_filtered
-                print("시간 변환 확인 : \(self.card_time)")
-
-                self.input_location = response.address ?? ""
-                self.input_introduce = response.introduce ?? ""
-                self.card_name = response.title!
-
-                //태그 set, array에 이름 저장
-                self.user_selected_tag_set.removeAll()
-                self.user_selected_tag_list.removeAll()
-
-                                if response.tags != nil{
-                                    for tag in response.tags!{
-                                        self.user_selected_tag_set.insert(tag.tag_name)
-                                        self.user_selected_tag_list.append(tag.tag_name)
-                                        if self.category_tag_struct.contains(where: {
-                                            $0.category_name == tag.tag_name
-                                        }){
-                                            //태그 데이터중 카테고리는 뷰에 selected category로 세팅해놔야 하므로 뷰에 알리는 것.
-                                            NotificationCenter.default.post(name: Notification.send_selected_card_category, object: nil, userInfo: ["selected_category" : tag.tag_name])
-                                        }
-                                    }
-                                }
-                print("카드 정보 가져와서 태그 저장한 것 확인: \(self.user_selected_tag_list)")
-//
-             
-                //내 카드인 경우
-                if response.creator!.idx! == Int(self.my_idx!){
-
-                    if self.is_editing_card{
-                        print("지도 데이터 저장 안함 : \(self.map_data)")
-                        self.input_location = self.map_data.location_name
-
-                    }else{
-                        
-                        if response.kinds!.contains("오프라인"){
-                    //상세페이지에서 띄울 지도에서 필요한 위도, 경도 저장.
-                    self.map_data = MeetingCardLocationModel( location_name: response.address!, map_lat: Double(response.map_lat!)! , map_lng: Double(response.map_lng!)!)
-                    print("맵 데이터 저장한 것 확인: \( self.map_data)")
+                    
+                    let first_filtered_day = self.string_to_date(expiration: response.expiration_at!)
+                    print("날짜 변환했는지 확인 : \(first_filtered_day)")
+                    self.card_date = first_filtered_day
+                    
+                    let time_filtered = self.string_to_time(expiration: String(response.expiration_at!.split(separator: " ")[1]))
+                    self.card_time = time_filtered
+                    print("시간 변환 확인 : \(self.card_time)")
+                    
+                    self.input_location = response.address ?? ""
+                    self.input_introduce = response.introduce ?? ""
+                    self.card_name = response.title!
+                    
+                    //태그 set, array에 이름 저장
+                    self.user_selected_tag_set.removeAll()
+                    self.user_selected_tag_list.removeAll()
+                    
+                    if response.tags != nil{
+                        for tag in response.tags!{
+                            self.user_selected_tag_set.insert(tag.tag_name)
+                            self.user_selected_tag_list.append(tag.tag_name)
+                            if self.category_tag_struct.contains(where: {
+                                $0.category_name == tag.tag_name
+                            }){
+                                //태그 데이터중 카테고리는 뷰에 selected category로 세팅해놔야 하므로 뷰에 알리는 것.
+                                NotificationCenter.default.post(name: Notification.send_selected_card_category, object: nil, userInfo: ["selected_category" : tag.tag_name])
+                            }
                         }
                     }
-
-                    self.my_card_detail_struct = response
+                    print("카드 정보 가져와서 태그 저장한 것 확인: \(self.user_selected_tag_list)")
+                    //
                     
-                    //뷰 업데이트 위해 보내기
-                    NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_group_card_detail_finish" : response.expiration_at!])
-              
-                    //다른 사람 카드인 경우
-                }else{
-                    if self.is_editing_card{
-                        print("지도 데이터 저장 안함 : \(self.map_data)")
-                        self.input_location = self.map_data.location_name
+                    //내 카드인 경우
+                    if response.creator!.idx! == Int(self.my_idx!){
+                        
+                        if self.is_editing_card{
+                            print("지도 데이터 저장 안함 : \(self.map_data)")
+                            self.input_location = self.map_data.location_name
+                            
+                        }else{
+                            
+                            if response.kinds!.contains("오프라인"){
+                                //상세페이지에서 띄울 지도에서 필요한 위도, 경도 저장.
+                                self.map_data = MeetingCardLocationModel( location_name: response.address!, map_lat: Double(response.map_lat!)! , map_lng: Double(response.map_lng!)!)
+                                print("맵 데이터 저장한 것 확인: \( self.map_data)")
+                            }
+                        }
+                        
+                        self.my_card_detail_struct = response
+                        
+                        //뷰 업데이트 위해 보내기
+                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_group_card_detail_finish" : response.expiration_at!])
+                        
+                        //다른 사람 카드인 경우
                     }else{
-                    //상세페이지에서 띄울 지도에서 필요한 위도, 경도 저장.
-                        self.map_data = MeetingCardLocationModel( location_name: response.address ?? "", map_lat: Double(response.map_lat ?? "") ?? 0.0 , map_lng: Double(response.map_lng ?? "") ?? 0.0)
-                    print("맵 데이터 저장한 것 확인: \( self.map_data)")
+                        if self.is_editing_card{
+                            print("지도 데이터 저장 안함 : \(self.map_data)")
+                            self.input_location = self.map_data.location_name
+                        }else{
+                            //상세페이지에서 띄울 지도에서 필요한 위도, 경도 저장.
+                            self.map_data = MeetingCardLocationModel( location_name: response.address ?? "", map_lat: Double(response.map_lat ?? "") ?? 0.0 , map_lng: Double(response.map_lng ?? "") ?? 0.0)
+                            print("맵 데이터 저장한 것 확인: \( self.map_data)")
+                        }
+                        
+                        self.card_detail_struct =  response
+                        //
+                        //뷰 업데이트 위해 보내기
+                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_group_card_detail_finish" : response.expiration_at!])
                     }
-
-                    self.card_detail_struct =  response
-//
-                    //뷰 업데이트 위해 보내기
-                    NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_group_card_detail_finish" : response.expiration_at!])
                 }
             }
-            }
-        )}
+            )}
     
     //좋아요 클릭 이벤트(카드)
     func send_like_card(card_idx: Int){
@@ -1278,15 +1283,15 @@ class GroupVollehMainViewmodel: ObservableObject{
                     
                     var clicked_card : Int? = -1
                     clicked_card =  self.group_card_struct.firstIndex(where: {
-                           $0.card_idx == card_idx
-                       }) ?? -1
+                        $0.card_idx == card_idx
+                    }) ?? -1
                     if clicked_card != -1{
                         self.group_card_struct[clicked_card!].like_count! += 1
-                       self.group_card_struct[clicked_card!].like_state = 1
+                        self.group_card_struct[clicked_card!].like_state = 1
                     }else{
                         clicked_card =  self.my_group_card_struct.firstIndex(where: {
-                           $0.card_idx == card_idx
-                       })
+                            $0.card_idx == card_idx
+                        })
                         
                         self.my_group_card_struct[clicked_card!].like_count! += 1
                         self.my_group_card_struct[clicked_card!].like_state = 1
@@ -1294,7 +1299,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.clicked_like, object: nil, userInfo: ["clicked_like" : "ok", "card_idx": "\(card_idx)"])
-                   // self.like_event_copmplete = true
+                    // self.like_event_copmplete = true
                     
                     
                 }else{
@@ -1323,15 +1328,15 @@ class GroupVollehMainViewmodel: ObservableObject{
                     
                     var clicked_card : Int? = -1
                     clicked_card =  self.group_card_struct.firstIndex(where: {
-                           $0.card_idx == card_idx
-                       }) ?? -1
+                        $0.card_idx == card_idx
+                    }) ?? -1
                     if clicked_card != -1{
                         self.group_card_struct[clicked_card!].like_count! -= 1
-                       self.group_card_struct[clicked_card!].like_state = 0
+                        self.group_card_struct[clicked_card!].like_state = 0
                     }else{
                         clicked_card =  self.my_group_card_struct.firstIndex(where: {
-                           $0.card_idx == card_idx
-                       })
+                            $0.card_idx == card_idx
+                        })
                         
                         self.my_group_card_struct[clicked_card!].like_count! -= 1
                         self.my_group_card_struct[clicked_card!].like_state = 0
@@ -1339,7 +1344,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.clicked_like, object: nil, userInfo: ["clicked_like" : "canceled_ok", "card_idx": "\(card_idx)"])
                     //ui에서 사용하기 위한 boolean값 true
-                   // self.like_cancel_copmplete = true
+                    // self.like_cancel_copmplete = true
                 }else{
                     print("좋아요 취소 안됨.")
                 }
@@ -1368,22 +1373,22 @@ class GroupVollehMainViewmodel: ObservableObject{
                     }else{
                         changed_lock_state = "잠금"
                     }
-                //뷰 업데이트 위해 보내기
-                NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["lock" : changed_lock_state, "card_idx": String(card_idx)])
+                    //뷰 업데이트 위해 보내기
+                    NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["lock" : changed_lock_state, "card_idx": String(card_idx)])
                 }
-    })}
+            })}
     
     //카드 만들 때 현재 시간 +10분인 경우에만 만들기 가능
     func make_card_time_check(make_time : String) -> Bool{
         print("들어온 카드 약속 날: \(make_time)")
-
+        
         let format = DateFormatter()
         format.dateFormat = "yyyy-MM-dd HH:mm:ss"
         format.timeZone = TimeZone(abbreviation: "UTC")
-
+        
         let today_format = Int(Date().timeIntervalSince1970)+3600*9
-                    let timeintervel = TimeInterval(today_format)
-                    let korean_time  = Date(timeIntervalSince1970: timeintervel)
+        let timeintervel = TimeInterval(today_format)
+        let korean_time  = Date(timeIntervalSince1970: timeintervel)
         let today_string = format.string(from: korean_time)
         
         let today = format.date(from: today_string)
@@ -1412,33 +1417,4 @@ class GroupVollehMainViewmodel: ObservableObject{
         }
     }
     
-    //모임 이미지 서버에 전달 메소드
-    func send_group_card_img(card_idx: Int, photo_file: Data){
-        cancellation = APIClient.upload_card_img(card_idx: card_idx, photo_file: photo_file)
-            .sink(receiveCompletion: {result in
-                switch result{
-                case .failure(let error):
-                    print("관심친구 설정 통신 에러 발생 : \(error)")
-                case .finished:
-                    break
-                }
-            }, receiveValue: {response in
-                print("모임 카드 이미지 업로드 response: \(response)")
-                
-                if response["result"] == "upload_ok"{
-                    print("이미지 업로드 성공")
-                    //이미지 업로드까지 완료해야 카드 추가 완료됐다고 알리기
-                    self.alert_type = .success
-                    
-                }else if response["result"] == "is not valid image"{
-                    print("이미지 형식 맞지 않음")
-                    self.alert_type = .fail
-                }else{
-                //이미지 파일이 없거나 실패한 경우
-                    self.alert_type = .fail
-                    
-                }
-            })
-        }
-  
 }
