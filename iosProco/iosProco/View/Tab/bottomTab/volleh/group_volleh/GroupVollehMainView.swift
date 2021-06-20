@@ -233,6 +233,7 @@ struct GroupVollehMainView: View {
                             .foregroundColor(.proco_black)
                             .padding(.leading, UIScreen.main.bounds.width/20)
                     })
+                    .padding(.trailing)
                     
                     NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm), isActive : self.$go_to_detail)
                     
@@ -275,6 +276,7 @@ struct GroupVollehMainView: View {
                             .foregroundColor(.proco_black)
                             .padding(.leading, UIScreen.main.bounds.width/20)
                     })
+                    .padding(.trailing)
                     
                 }
             }
