@@ -882,9 +882,9 @@ class FriendVollehMainViewmodel: ObservableObject{
                         socket_manager.edit_card_info_event(chatroom: chatroom_model)
                         
                         //편집한 데이터 집어넣고는 publish변수에 있던 값들 없애주기
-                        self.card_expire_time = ""
-                        self.user_selected_tag_list = []
-                        self.user_selected_tag_set = []
+//                        self.card_expire_time = ""
+//                        self.user_selected_tag_list = []
+//                        self.user_selected_tag_set = []
                         print("편집 후 값 없앴는지 확인 : \( self.card_expire_time)")
                     }
                     self.alert_type = .success
@@ -1319,12 +1319,12 @@ class FriendVollehMainViewmodel: ObservableObject{
                     print("심심기간인 친구들 가져온 것 확인: \(self.today_boring_friends_model)")
                     
                     //오늘이 심심기간이었는지 확인.....이거 되는지 확인하기
-                    var action : Int? = -1
+                    var action : Int = -1
                     action = self.today_boring_friends_model.firstIndex(where: {
-                        $0.idx == Int(db.my_idx!)!
-                    }) ?? 0
+                        $0.kinds == "me"
+                    }) ?? -1
                     //처음에 뷰에 오늘 심심기간인지 아닌지 onappear에서 처리하면 시간차 때문에 설정 제대로 되지 않아서 노티 이용해서 보낸 후 뷰에서 처리.
-                    NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["set_today_boring_data" : String(action ?? 0)])
+                    NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["set_today_boring_data" : String(action)])
                     
                 }else{
                     print("심심기간인 친구들 결과 없음.")
@@ -1346,21 +1346,22 @@ class FriendVollehMainViewmodel: ObservableObject{
             }, receiveValue: {response in
                 print("오늘 심심기간 설정 통신 응답: \(response)")
                 if response["result"].stringValue == "ok"{
-                    
+                    print("심심기간 정보 확인: \(self.today_boring_friends_model)")
                    let model_idx =  self.today_boring_friends_model.firstIndex(where: {
                         $0.idx == Int(self.my_idx!)
                     }) ?? -1
                     
                     //기존에 심심기간 설정이 됐던 경우라면 삭제
                     if action == 1{
-                        self.today_boring_friends_model.remove(at: model_idx)
+                        self.today_boring_friends_model.append(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""))
+
                     }
                     //기존에 심심기간 설정이 안됐었던 경우라면 추가
                     else{
-                        self.today_boring_friends_model.append(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""))
+                        self.today_boring_friends_model.remove(at: model_idx)
+                       
                     }
                     
-                  
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.set_boring_today, object: nil, userInfo: ["today_boring_event" : "ok"])
                     
