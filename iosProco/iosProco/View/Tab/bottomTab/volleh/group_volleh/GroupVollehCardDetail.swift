@@ -442,6 +442,7 @@ extension GroupVollehCardDetail{
              */
             
             if self.main_vm.my_nickname == self.main_vm.creator_name{
+                
                 Button(action: {
                     
                     socket_manager.which_type_room = "GROUP"
@@ -469,6 +470,9 @@ extension GroupVollehCardDetail{
                         .frame(maxWidth: .infinity)
                 }
             }else{
+                
+                if Int(self.main_vm.my_idx!) != self.main_vm.my_card_detail_struct.creator!.idx{
+                    
                 Button(action: {
                     print("참가 신청 버튼 클릭")
                     
@@ -492,6 +496,7 @@ extension GroupVollehCardDetail{
                 .cornerRadius(25)
                 .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
                 //.disabled(main_vm.appply_end)
+                }
             }
         }
     }
