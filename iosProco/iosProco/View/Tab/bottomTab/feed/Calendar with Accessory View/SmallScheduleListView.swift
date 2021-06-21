@@ -41,7 +41,7 @@ struct SmallScheduleListView: View {
         }
             .animation(.easeInOut)
             .onAppear{
-                print("날짜 한칸 스케줄 뷰 나타남.: \(smallSchedules)")
+                //print("날짜 한칸 스케줄 뷰 나타남.: \(smallSchedules)")
             }
             .onReceive(timer) { _ in
                 self.shiftActivePreviewVisitIndex()
