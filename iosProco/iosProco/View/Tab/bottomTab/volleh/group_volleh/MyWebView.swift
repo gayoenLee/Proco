@@ -35,9 +35,9 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
         
         self.got_send_location = true
         
-        if got_send_location && self.vm.is_making{
+        if got_send_location && self.vm.is_making&&vm.selected_marker_already == false{
             print("카드 편집아님")
-            
+            vm.input_location = address
             vm.response_address = address
             self.vm.map_data.location_name = address
             self.vm.map_data.map_lat = map_lat
@@ -45,13 +45,18 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
             
             print("데이터 모델에 넣은 것 확인: \(self.vm.map_data)")
             
-        }else if self.vm.is_editing_card && self.vm.is_making{
+        }else if self.vm.is_editing_card && self.vm.is_making&&vm.selected_marker_already == false{
+            
+            vm.input_location = address
             vm.response_address = address
             self.vm.map_data.location_name = address
             self.vm.map_data.map_lat = map_lat
             self.vm.map_data.map_lng = map_lng
+            
+        }else if vm.selected_marker_already{
+            print("카드 만들기에서 지도 여러번 클릭시")
+            self.vm.selected_marker_already = false
         }
-        
     }
     
     func receivedStringValueFromWebView(value: String) {
@@ -66,6 +71,7 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
     
     //ui view 만들기
     func makeUIView(context: Context) ->  WKWebView {
+        print("처음에 got send location : \(self.got_send_location)")
         
         let preferences = WKPreferences()
         preferences.javaScriptCanOpenWindowsAutomatically = false  // JavaScript가 사용자 상호 작용없이 창을 열 수 있는지 여부
@@ -92,20 +98,33 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
         webView.allowsBackForwardNavigationGestures = false    // 가로로 스와이프 동작이 페이지 탐색을 앞뒤로 트리거하는지 여부
         webView.scrollView.isScrollEnabled = false    // 웹보기와 관련된 스크롤보기에서 스크롤 가능 여부
         
-        if self.got_send_location{
-            
-            webView.evaluateJavaScript("marker_set('\(self.vm.map_data.map_lat)','\(self.vm.map_data.map_lng)')", completionHandler: { (value, error) in
-                
-                // .. do anything needed with result, if any
-                print("makeUIView 222222222 marker_set : \(error)")
-                
-            })
-        }
-        
         //웹뷰 로드
         if let url = URL(string: url) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 ) {
                 webView.load(URLRequest(url: url))    // 지정된 URL 요청 개체에서 참조하는 웹 콘텐츠를로드하고 탐색
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0){
+            
+            if self.got_send_location{
+                print("make ui view에서 got send location 트루인 경우")
+                webView.evaluateJavaScript("marker_set('\(self.vm.map_data.map_lat)','\(self.vm.map_data.map_lng)')", completionHandler: { (value, error) in
+                    
+                    // .. do anything needed with result, if any
+                    print("makeUIView 222222222 marker_set : \(error)")
+                    
+                })
+            }else if vm.selected_marker_already{
+                print("마커 두번째 이상 찍는 경우: \(vm.map_data)")
+                webView.evaluateJavaScript("marker_set('\(self.vm.map_data.map_lat)','\(self.vm.map_data.map_lng)')", completionHandler: { (value, error) in
+                    
+                    // .. do anything needed with result, if any
+                    print("makeUIView 222222222 marker_set : \(error)")
+                })
+                
+            }else{
+                print("그 외 make ui view ")
             }
         }
         return webView
@@ -152,10 +171,8 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
                     print("didFinish 에서 데이터 확인: \(self.vm.map_data)")
                     print("didFinish 여기로dgfhjkhtrewq: \(value)")
                     
-                    
                 })
             }
-            
             self.parent.vm.showLoader.send(false)
         }
         
@@ -193,7 +210,6 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
                 case .reload:
                     webView.reload()
                     
-                    
                 }
             })
         }
@@ -230,8 +246,10 @@ extension MyWebView.Coordinator: WKScriptMessageHandler {
                         self.vm.is_making = true
                     }
                 }
-                else{
+                else if vm.selected_marker_already{
                     print("그 외 경우")
+                    delegate?.receivedJsonValueFromWebView(value: body)
+                    print("my web view 데이터 받음 receivedJsonValueFromWebView : \(body)")
                     
                 }
                 
