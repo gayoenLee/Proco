@@ -14,24 +14,8 @@ struct BigMapContainedView: View {
     @State private var show_map : Bool = false
     
     var body: some View {
+        NavigationView{
         VStack{
-            HStack{
-                //돌아가기 버튼
-                Image("left")
-                    .resizable()
-                    .frame(width: 10, height: 17)
-                    .padding(.leading, UIScreen.main.bounds.width/20)
-                    .onTapGesture {
-                        withAnimation{
-                            self.presentation.wrappedValue.dismiss()
-                        }
-                    }
-                Spacer()
-                Text("모임 위치")
-                    .foregroundColor(Color.proco_black)
-                    .font(.custom(Font.t_extra_bold, size: 22))
-                Spacer()
-            }
             
             MyWebView(vm: self.vm, url: "https://withproco.com/map/search_map.html?device=ios")
             
@@ -56,12 +40,17 @@ struct BigMapContainedView: View {
             .cornerRadius(25)
             .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
         }
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .onAppear{
             
             print("지도 맵뷰 나타남:\(self.vm.map_data) ")
             
         }
         .background(Color.proco_white)
+        }
     }
     
 }
