@@ -37,6 +37,13 @@ class GroupVollehMainViewmodel: ObservableObject{
     var showLoader = PassthroughSubject<Bool, Never>()
     var valuePublisher = PassthroughSubject<String, Never>()
     
+    //지도 여러번 클릭시 이전에 저장했던 데이터 보존해서 마커 찍어야 하는데 - 현재 위치 마커 안찍기 위해 구분값 줌.
+    @Published var selected_marker_already : Bool = false{
+        didSet {
+            objectWillChange.send()
+        }
+    }
+    
     //모임 이미지 서버에 보내기 전 저장해놓기 위함.
     @Published var group_card_img_data : Data? = nil
     
@@ -77,17 +84,9 @@ class GroupVollehMainViewmodel: ObservableObject{
     
     @Published var response_address : String = ""
     
-    @Published var is_just_showing : Bool = false{
-        didSet {
-            objectWillChange.send()
-        }
-    }
+    var is_just_showing : Bool = false
     
-    @Published var is_making : Bool = false{
-        didSet {
-            objectWillChange.send()
-        }
-    }
+    var is_making : Bool = false
     @Published var is_editing_card : Bool = false{
         didSet {
             objectWillChange.send()
@@ -269,7 +268,7 @@ class GroupVollehMainViewmodel: ObservableObject{
             objectWillChange.send()
         }
     }
-    @Published var alert_type : ResultAlert = .fail{
+    @Published var alert_type : ResultAlert = .success{
         didSet{
             objectWillChange.send()
         }
@@ -472,7 +471,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     func string_to_date(expiration: String) -> Date{
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        formatter.timeZone = NSTimeZone(name: "UTC") as TimeZone?
+        formatter.timeZone = NSTimeZone(name: "KST") as TimeZone?
         let date = formatter.date(from: expiration)
         return date!
     }
