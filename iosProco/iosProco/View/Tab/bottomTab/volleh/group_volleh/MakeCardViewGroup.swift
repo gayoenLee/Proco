@@ -40,7 +40,7 @@ struct MakeCardViewGroup: View {
     //모임 카드 10분 이전 것 만든 경우 경고창
     @State private var make_card_time_disallow : Bool = false
     
-    @State var pickerResult: [UIImage] = []
+    @State var pickerResult: UIImage? = UIImage()
        var config: PHPickerConfiguration  {
           var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
         //videos, livePhotos...등도 넣을 수 있음.
@@ -51,36 +51,11 @@ struct MakeCardViewGroup: View {
        }
     
     var body: some View {
-        
+        NavigationView{
         VStack{
-//            HStack{
-//                Button(action: {
-//                    self.presentationMode.wrappedValue.dismiss()
-//
-//                }, label: {
-//                    Image("white_left")
-//                        .resizable()
-//                        .frame(width: 8.51, height: 17)
-//
-//                })
-//                .padding(.leading, UIScreen.main.bounds.width/20)
-//
-//                Spacer()
-//                Text("방 만들기")
-//                    .font(.custom(Font.t_extra_bold, size: 20))
-//                    .foregroundColor(.proco_white)
-//                    .padding(.trailing, UIScreen.main.bounds.width/20)
-//                Spacer()
-                NavigationLink("", destination: GroupVollehMainView(main_vm: self.main_vm)  .navigationBarTitle("", displayMode: .inline)
-                                .navigationBarHidden(true)
-                                .navigationBarBackButtonHidden(true), isActive: self.$make_success)
-//
-//            }
-//            .frame(width: UIScreen.main.bounds.width*1.1, height: UIScreen.main.bounds.width*0.3)
-            
+
             ScrollView{
-                VStack{
-                    MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, image_url: self.$image_url, open_map: self.$open_map, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult)
+                MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, image_url: self.$image_url, open_map: self.$open_map, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult)
                     
                     //완료 버튼 클릭시 메인뷰로 이동.
                     Button(action: {
@@ -112,13 +87,11 @@ struct MakeCardViewGroup: View {
                             self.main_vm.user_selected_tag_list.insert(self.selected_category, at: 0)
                             print("유저가 선택한 카테고리 재배열한 것 확인: \(self.main_vm.user_selected_tag_list)")
                             
-                            //카드 만들기 통신
-//                            main_vm.make_group_card(type: type, map_lat: self.main_vm.map_data.map_lat, map_lng: self.main_vm.map_data.map_lng)
-                                
+                            //카드 만들기 통신 전 multipart로 통신하기 위해 param만듬.
                                 var param : [String: Any] = [:]
-                                param = ["type" : type, "title": self.main_vm.card_name, "tags": self.main_vm.user_selected_tag_list, "time": self.main_vm.card_expire_time, "address": self.main_vm.map_data.location_name, "content" : self.main_vm.input_introduce, "map_lat": self.main_vm.map_data.map_lat, "map_lng" : self.main_vm.map_data.map_lng]
+                                param = ["type" : type, "title": self.main_vm.card_name, "tags": self.main_vm.user_selected_tag_list, "time": self.main_vm.card_expire_time, "address": self.main_vm.map_data.location_name, "content" : self.main_vm.input_introduce, "map_lat": String(self.main_vm.map_data.map_lat), "map_lng" : String(self.main_vm.map_data.map_lng)]
                                 
-                                main_vm.make_card_with_img(param: param, photo_file: self.main_vm.group_card_img_data ?? Data())
+                                main_vm.make_card_with_img(param: param, photo_file: self.main_vm.group_card_img_data ?? nil)
                             
                             //alert창 타입
                             main_vm.result_alert(main_vm.alert_type)
@@ -150,8 +123,8 @@ struct MakeCardViewGroup: View {
                         switch main_vm.alert_type{
                         case .success:
                             return Alert(title: Text("카드 추가"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
-                            
-                                self.make_success.toggle()
+                                self.presentationMode.wrappedValue.dismiss()
+                                //self.make_success.toggle()
                                 
                             }))
                         case .fail:
@@ -160,7 +133,7 @@ struct MakeCardViewGroup: View {
                             }))
                         }
                     }
-                }
+                
             }
         }
         //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
@@ -168,10 +141,6 @@ struct MakeCardViewGroup: View {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         .navigationBarColor(background_img: "meeting_wave_bg", title: "방 만들기")
-
-//        .navigationBarTitle("", displayMode: .inline)
-//        .navigationBarHidden(true)
-//        .navigationBarBackButtonHidden(true)
         .onAppear{
             print("모여볼래 카드 만드는 뷰 넘어옴")
         }
@@ -181,8 +150,10 @@ struct MakeCardViewGroup: View {
                         pickerResult: $pickerResult,
                         isPresented: $show_img_picker, is_profile_img: false, main_vm: SettingViewModel(), group_vm: self.main_vm)
         }
+        }
     }
 }
+
 
 struct MakingView: View{
     @ObservedObject var main_vm: GroupVollehMainViewmodel
@@ -206,13 +177,15 @@ struct MakingView: View{
 
     //약속 시간을 현재 시간 기준 10분 이후로 안만든 경우 안내 문구 띄우기
     @Binding var make_card_time_disallow : Bool
-    @Binding var pickerResult : [UIImage]
+    @Binding var pickerResult : UIImage?
     
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 150, height: 150)) |> RoundCornerImageProcessor(cornerRadius: 40)
+    @State private var selected_marker_already : Bool = false
     
     var body: some View{
+        
         VStack{
-            Group{
+         
                 //온오프라인 모임 선택 뷰
                 meeting_kinds_selection
                 //제목을 입력하지 않고 모임 만들기를 클릭할 경우 나타난다.
@@ -232,7 +205,7 @@ struct MakingView: View{
                 .padding()
                 
                 meeting_title_tfd
-            }
+            
             Group{
                 HStack{
                     Text("심심태그")
@@ -292,6 +265,7 @@ struct MakingView: View{
             }
             //오프라인 모임인 경우에만 지도 선택 뷰 보여주기
             if is_offline_meeting{
+                
             Group{
                 HStack{
                     Text("지역")
@@ -301,10 +275,21 @@ struct MakingView: View{
                 }
                 .padding(.leading)
                 NavigationLink("",destination: BigMapContainedView(vm: self.main_vm), isActive: self.$open_map)
+                 
                 HStack{
+                    
                 Button(action: {
                     print("지역 입력 텍스트필드 클릭")
                     self.open_map.toggle()
+                    
+                    if selected_marker_already == false{
+                        selected_marker_already = true
+                    }
+                    
+                    if selected_marker_already{
+                        print("marker already 트루여서 true로 바꿈")
+                        self.main_vm.selected_marker_already = true
+                    }
                     
                 }){
                     TextField("위치를 입력해주세요", text: $main_vm.response_address)
@@ -662,10 +647,9 @@ extension MakingView {
         }
         .padding(.leading)
 
-            if pickerResult.count > 0{
+            if pickerResult != nil{
                 
-                ForEach(pickerResult, id: \.self) { image in
-                    Image.init(uiImage: image)
+                    Image.init(uiImage: pickerResult!)
                         .resizable()
                         //이미지 채우기
                         .aspectRatio(contentMode: .fill)
@@ -681,7 +665,7 @@ extension MakingView {
                                 .resizable()
                                 .frame(width: 30, height: 30)
                             }, alignment: .center)
-                }
+                
             }else{
                 
                 //티켓 이미지 rectangle 프레임에 맞춰서 추가시키기
