@@ -46,9 +46,7 @@ struct MakeCardView: View {
                  - 주의 : 친구랑 만드는 카드이므로 소켓 매니저 클래스의 which_type_room변수를 FRIEND로 만들기.
                  
                  */
-                //완료 버튼 클릭시 메인뷰로 이동........테스트 주석처리///////////////
-                //                    NavigationLink("", destination: FriendVollehMainView(main_vm: self.main_viewmodel, volleh_category_struct: self.tag_category_struct).navigationBarTitle("", displayMode: .inline)
-                //                                    .navigationBarHidden(true), isActive: self.$end_plus)
+
                 Button(action: {
                     
                     if self.main_viewmodel.category_is_selected(){
