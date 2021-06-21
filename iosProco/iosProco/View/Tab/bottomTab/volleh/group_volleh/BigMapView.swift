@@ -35,7 +35,7 @@ struct BigMapView: UIViewRepresentable, WebViewHandlerDelegate {
         }
         if is_editing == false{
             print("카드 편집아님")
-            
+            vm.input_location = address
             vm.response_address = address
             self.vm.map_data.location_name = address
             self.vm.map_data.map_lat = map_lat
