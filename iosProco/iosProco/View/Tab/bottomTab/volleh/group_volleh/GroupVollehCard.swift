@@ -15,6 +15,15 @@ struct GroupVollehCard: View {
     @State private var expiration_at = ""
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 43, height: 43)) |> RoundCornerImageProcessor(cornerRadius: 5)
     
+    //모임 카드 이미지가 없는 경우 왼쪽에 공백 생기는 문제 해결 위함.
+    var has_card_img : Bool{
+        if self.group_card.card_photo_path == "" || self.group_card.card_photo_path == nil{
+            return false
+        }else{
+            return true
+        }
+    }
+    
     var body : some View{
         
         //카드 1개
@@ -23,7 +32,7 @@ struct GroupVollehCard: View {
             //카드 1개 hstack 2칸으로 분할해서 수직 쌓기
             VStack{
                 HStack{
-                    if group_card.card_photo_path != nil || group_card.card_photo_path != "" {
+                    if has_card_img{
                         card_img
                     }
                    category_and_title
@@ -39,6 +48,8 @@ struct GroupVollehCard: View {
                         .font(.custom(Font.n_extra_bold, size: 15))
                         .foregroundColor(.proco_white))
                 }
+                .padding(.leading)
+
                 HStack{
                     current_user_num
                     Spacer()
@@ -81,6 +92,7 @@ extension GroupVollehCard {
                 }
         }
         .padding(.leading)
+        .hidden(self.group_card.card_photo_path == "" || self.group_card.card_photo_path == nil)
     }
     
     var category_and_title : some View{
