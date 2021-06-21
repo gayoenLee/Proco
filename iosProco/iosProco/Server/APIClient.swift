@@ -481,7 +481,7 @@ class APIClient {
     static func send_boring_period_events(date_array: [EditBoringDatesModel]) -> AnyPublisher<JSON,AFError>{
         
         print("api client에서 받은 파라미터: \(date_array)")
-        let publisher =   AF.request("https://withproco.com/users/calendar/boring-time", method: .post, parameters: date_array, encoder: JSONParameterEncoder.default, interceptor: RequestInterceptorClass())
+        let publisher =   AF.request("https://procotest.kro.kr/users/calendar/boring-time", method: .post, parameters: date_array, encoder: JSONParameterEncoder.default, interceptor: RequestInterceptorClass())
             .publishDecodable(type: JSON.self)
         
         print("api client에서 캘린더 심심기간 설정 이벤트 후 가져온 값 확인 : \(publisher.value())")
@@ -944,6 +944,9 @@ class APIClient {
             }
             if photo_file != nil{
                     multipart.append(photo_file!, withName: "photo_file", fileName: "photo_file.png", mimeType: "image/png")
+            }else{
+                let value = ""
+                multipart.append((value as! String).data(using: .utf8)!, withName: "photo_file")
             }
         },with: url)
         .responseDecodable(){(response: DataResponse<ResponseMakeCardStruct, AFError>) in
@@ -976,7 +979,13 @@ class APIClient {
             
             }
             if photo_file != nil{
+                print("이미지 있을 때")
+
                     multipart.append(photo_file!, withName: "photo_file", fileName: "photo_file.png", mimeType: "image/png")
+            }else{
+                print("이미지 없을 때")
+                let value = ""
+                multipart.append((value as! String).data(using: .utf8)!, withName: "photo_file")
             }
             
             print("데이터 확인: \(multipart)")
@@ -985,7 +994,7 @@ class APIClient {
                     print("모임 카드 수정 api client에서 이미지 리스폰스 확인 : \(response)")
                     guard let data = response.data else { return }
                     let json = try? JSON(data: data)
-                    print("리스폰스 확인 : \(String(describing: json))")
+                    print("리스폰스 확인 : \(String(describing: response))")
                     completion(response.result)
                 }
     }

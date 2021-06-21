@@ -53,15 +53,16 @@ struct GroupVollehMainView: View {
     
     @ViewBuilder
     var body: some View {
+        
         VStack{
             TopNavBar(page_name: "모임")
             ScrollView(.vertical, showsIndicators: false){
                 VStack{
                     
                     NavigationLink("",destination: MakeCardViewGroup(main_vm: self.main_vm), isActive: self.$go_to_make_card)
+                    
                     //문제 해결: 이동 링크에도 네비게이션바 hidden관련 속성을 넣어줘야 back button이 쌓이지 않음.
-                    NavigationLink("", destination: EditGroupCard(main_vm: self.main_vm)   .navigationBarHidden(true)
-                                    .navigationBarTitle("")
+                    NavigationLink("", destination: EditGroupCard(main_vm: self.main_vm)
                                    , isActive: self.$go_to_edit)
 
                     Group{
@@ -306,8 +307,8 @@ struct GroupVollehMainView: View {
         .onDisappear{
             print("*************모여 볼래 메인 뷰 사라짐****************")
         }
-        .navigationBarTitle("", displayMode: .inline)
-        .navigationBarHidden(true)
+       // .navigationBarTitle("", displayMode: .inline)
+        //.navigationBarHidden(true)
         .edgesIgnoringSafeArea(.all)
         
     }

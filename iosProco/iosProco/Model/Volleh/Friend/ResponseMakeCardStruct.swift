@@ -25,7 +25,7 @@ struct Tags : Codable{
 
 //모임 카드 편집 후 response
 struct ResponseEditGroupCardStruct : Codable{
-    var result : String = ""
+    var result : String? = ""
     var tags : [Tags]? = []
     var card_photo_path : String? = ""
     

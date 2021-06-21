@@ -18,17 +18,25 @@ struct MyGroupVollehCard: View {
     @State private var expiration_at = ""
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 43, height: 43)) |> RoundCornerImageProcessor(cornerRadius: 5)
     
+    //모임 카드 이미지가 없는 경우 왼쪽에 공백 생기는 문제 해결 위함.
+    var has_card_img : Bool{
+        if self.my_group_card.card_photo_path == "" || self.my_group_card.card_photo_path == nil{
+            return false
+        }else{
+            return true
+        }
+    }
     var body: some View {
         //카드 1개
         HStack{
             VStack{
                 HStack{
-                    if my_group_card.card_photo_path != nil || my_group_card.card_photo_path != ""{
+                    if has_card_img{
                         card_img
                     }
                     if SockMgr.socket_manager.is_from_chatroom{
-                        
                         category_and_title
+                        
                     }
                    else if !my_group_card.tags!.isEmpty{
                     category_and_title
@@ -37,6 +45,8 @@ struct MyGroupVollehCard: View {
                     //카드 날짜
                     card_date
                 }
+                .padding(.leading)
+
                 
                 HStack{
                     current_user_num
@@ -63,6 +73,12 @@ struct MyGroupVollehCard: View {
     }
 }
 
+extension View {
+    func hidden(_ shouldHide: Bool) -> some View {
+        opacity(shouldHide ? 0 : 1)
+    }
+}
+
 extension MyGroupVollehCard{
     
     var card_img : some View{
@@ -85,6 +101,7 @@ extension MyGroupVollehCard{
          
         }
         .padding(.leading)
+        .hidden(self.my_group_card.card_photo_path == "" || self.my_group_card.card_photo_path == nil)
     }
     
     var category_and_title : some View{

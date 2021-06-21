@@ -29,7 +29,8 @@ struct MyPage: View {
     //이미지 선택 sheet 보여줄지 구분하는 변수
     @State private var show_image_picker = false
         
-    @State var pickerResult: [UIImage] = []
+    @State var pickerResult: UIImage? = UIImage()
+    
        var config: PHPickerConfiguration  {
           var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
         //videos, livePhotos...등도 넣을 수 있음.
@@ -104,22 +105,22 @@ private extension MyPage {
             Spacer()
             VStack{
                 
-                if self.main_vm.user_info_model.profile_photo_path == "" && pickerResult.count  == 0{
+                if self.main_vm.user_info_model.profile_photo_path == "" && pickerResult  == nil{
                     
                     Image("main_profile_img")
                         .resizable()
                         .frame(width: 154.26, height: 154.26)
                     
-                }else if pickerResult.count > 0{
+                }else if pickerResult != nil{
                     
-                    ForEach(pickerResult, id: \.self) { image in
-                        Image.init(uiImage: image)
+                 
+                        Image.init(uiImage: pickerResult!)
                             .resizable()
                             //이미지 채우기
                             .aspectRatio(contentMode: .fill)
                             .frame(width: UIScreen.main.bounds.width/2, height: UIScreen.main.bounds.width/2)
                             .clipShape(Circle())
-                    }
+                    
                 }else{
                     
                     KFImage(URL(string: self.main_vm.user_info_model.profile_photo_path!))

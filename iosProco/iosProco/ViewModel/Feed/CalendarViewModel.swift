@@ -504,10 +504,10 @@ public class CalendarViewModel: ObservableObject{
                             let date = self.string_to_date(expiration: expiration_at!)
                             
                             //날짜 한 칸에 small schedule에 저장할 일정정보 모델.SmallScheduleInfo
-                            self.small_schedule_info_model.append(SmallScheduleInfo(date: date, locationName: "\(creator!["nickname"]!.stringValue)님과의약속", tagColor: Color.green, type: "group"))
+                            self.small_schedule_info_model.append(SmallScheduleInfo(date: date, locationName: card["title"]!.stringValue, tagColor: Color.green, type: "group"))
                             
                             //단일자 일정 리스트 모임 데이터 저장
-                            temp_schedules_info_model.append(ScheduleInfo(card_idx: card["card_idx"]!.intValue, type: "group", schedule_date: date, schedule_name: "\(creator!["nickname"]!.stringValue)님과의약속", tag_color: Color.green, start_time: date, end_time: date, category: tag_data[0].tag_name, current_people: card["cur_user"]?.stringValue ?? "1",  location_name: card["address"]?.stringValue ?? "", is_private: false, memo: ""))
+                            temp_schedules_info_model.append(ScheduleInfo(card_idx: card["card_idx"]!.intValue, type: "group", schedule_date: date, schedule_name: card["title"]!.stringValue, tag_color: Color.green, start_time: date, end_time: date, category: tag_data[0].tag_name, current_people: card["cur_user"]?.stringValue ?? "1",  location_name: card["address"]?.stringValue ?? "", is_private: false, memo: ""))
                             
                         }
                         //일정 정보를 저장해 놓은 배열을 다시 schedule모델에 저장.
