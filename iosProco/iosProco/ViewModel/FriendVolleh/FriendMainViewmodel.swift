@@ -597,10 +597,6 @@ class FriendVollehMainViewmodel: ObservableObject{
                     self.my_friend_volleh_card_struct.append(FriendVollehCardStruct(card_idx: response.card_idx, kinds: "친구", expiration_at: self.card_expire_time, lock_state: 0, like_count: 0, like_state: 0, tags:  tags, creator: Creator(idx: Int(self.my_idx!), nickname: self.my_nickname, profile_photo_path: ""), share_list: [], offset: 0.0))
                     print("내 카드 추가했는지 확인: \(self.card_expire_time), \(self.my_friend_volleh_card_struct.first(where: {$0.card_idx == response.card_idx}))")
                     
-                    //카드 만들기 후 다시 들어갔을 때 이전 입력값이 그대로 남아 있는 문제가 있었음.
-                    self.card_expire_time.removeAll()
-                    self.user_selected_tag_list.removeAll()
-                    self.user_selected_tag_set.removeAll()
                     /*
                      카드가 성공적으로 만들어졌을 경우 채팅 서버에 채팅방 idx, 유저 모델 보내기
                      1. 우선 카드 참여자 모델에 내 정보 넣기.(sqlite 저장 안함)
@@ -649,6 +645,13 @@ class FriendVollehMainViewmodel: ObservableObject{
                         print("메세지 보낼 때 링크 : \(SockMgr.socket_manager.invitation_link)")
                         print("동적링크 만들 때 채팅방 idx: \(chatroom_idx), 현재 채팅방 idx: \(SockMgr.socket_manager.enter_chatroom_idx)")
                     }
+                    
+                    //카드 만들기 후 다시 들어갔을 때 이전 입력값이 그대로 남아 있는 문제가 있었음.
+                    self.card_expire_time.removeAll()
+                    self.card_date = Date()
+                    self.card_time = Date()
+                    self.user_selected_tag_list.removeAll()
+                    self.user_selected_tag_set.removeAll()
                     self.alert_type = .success
                 }else{
                     //결과가 왔지만 제대로 오지 않았을 경우 화면 전환 불가.
@@ -840,29 +843,22 @@ class FriendVollehMainViewmodel: ObservableObject{
                     }else{
                         print("메인에서 편집 화면으로 넘어와서 편집 완료")
                         
-                        let detail_index = self.my_friend_volleh_card_struct.firstIndex(where: {$0.card_idx == self.selected_card_idx})
-                        
-                        //TODO!! 편집한 후에 여기에서 데이터를 업데이트해야 메인뷰에 돌아가면 데이터 업데이트 돼있음.!!!
-                        //편집한 데이터를 모델에 집어넣기.
-                        self.my_friend_volleh_card_struct[detail_index!].expiration_at = self.card_expire_time
-                        
-                        //이전에 입력했던 태그 삭제하고 업데이트하는 형식.그래야 이전 태그와 중첩돼서 저장 안됨.
-                        self.my_friend_volleh_card_struct[detail_index!].tags?.removeAll()
+//                        let detail_index = self.my_friend_volleh_card_struct.firstIndex(where: {$0.card_idx == self.selected_card_idx})
+            
                         
                         //********채팅 서버에 보낼 태그 모델*********
                         var tag_model : [TagModel] = []
+                        //친구 카드 1개 뷰에 전달할 노티에 보내기 위해 저장.
+                        var card_tag_model : [FriendVollehTags] = []
                         
                         for item in response.tags{
-                            self.my_friend_volleh_card_struct[detail_index!].tags?.append(FriendVollehTags(idx: item.idx, tag_name: item.tag_name))
                             
                             //채팅 서버에 보낼 태그 데이터 넣고 태그 테이블 업데이트
                             ChatDataManager.shared.update_tag_table(chatroom_idx: socket_manager.enter_chatroom_idx, tag_idx: item.idx, tag_name: item.tag_name)
                             
                             tag_model.append(TagModel(idx: item.idx, tag_name: item.tag_name))
+                            card_tag_model.append(FriendVollehTags(idx: item.idx, tag_name: item.tag_name))
                         }
-                        
-                        print("편집한 데이터 집어넣었는지 확인 : \(String(describing: self.my_friend_volleh_card_struct[detail_index!].tags))")
-                        //----------------뷰를 위한 데이터 모델은 업데이트 완료------------------------
                         
                         //채팅 서버에 보내기 위해 데이터 만들기(채팅룸 idx가져오기, 카드 업데이트 날짜 만들기, 카드 모델 만들기)
                         let chatroom = ChatDataManager.shared.get_chatroom_from_card(card_idx: self.selected_card_idx)
@@ -881,11 +877,10 @@ class FriendVollehMainViewmodel: ObservableObject{
                         //서버에 이벤트 보냄.
                         socket_manager.edit_card_info_event(chatroom: chatroom_model)
                         
-                        //편집한 데이터 집어넣고는 publish변수에 있던 값들 없애주기
-//                        self.card_expire_time = ""
-//                        self.user_selected_tag_list = []
-//                        self.user_selected_tag_set = []
                         print("편집 후 값 없앴는지 확인 : \( self.card_expire_time)")
+                        
+                        //뷰 업데이트 위해 보내기
+                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["friend_card_edited" : "ok", "card_idx": String(self.selected_card_idx), "tags" : card_tag_model])
                     }
                     self.alert_type = .success
                 }
@@ -1252,6 +1247,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                 if no_result == "no result"{
                     
                 }else{
+                    self.card_like_user_model.removeAll()
                     let result = response.arrayValue
                     
                     if result.count ?? 0 > 0{
@@ -1314,7 +1310,11 @@ class FriendVollehMainViewmodel: ObservableObject{
                     
                     for user in json_data!{
                         
+                        if user.idx == Int(self.my_idx!){
+                            self.today_boring_friends_model.insert(BoringFriendsModel(idx: user.idx, nickname: user.nickname, profile_photo_path: user.profile_photo_path, state: user.state, kinds: user.kinds), at: 0)
+                        }else{
                         self.today_boring_friends_model.append(BoringFriendsModel(idx: user.idx, nickname: user.nickname, profile_photo_path: user.profile_photo_path, state: user.state, kinds: user.kinds))
+                        }
                     }
                     print("심심기간인 친구들 가져온 것 확인: \(self.today_boring_friends_model)")
                     
@@ -1353,7 +1353,8 @@ class FriendVollehMainViewmodel: ObservableObject{
                     
                     //기존에 심심기간 설정이 됐던 경우라면 삭제
                     if action == 1{
-                        self.today_boring_friends_model.append(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""))
+//                        self.today_boring_friends_model.append(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""))
+                        self.today_boring_friends_model.insert(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""), at: 0)
 
                     }
                     //기존에 심심기간 설정이 안됐었던 경우라면 추가
