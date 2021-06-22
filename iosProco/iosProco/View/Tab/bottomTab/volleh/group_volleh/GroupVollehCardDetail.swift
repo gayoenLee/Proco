@@ -481,7 +481,7 @@ extension GroupVollehCardDetail{
                     }else{
                         self.main_vm.apply_group_card(card_idx: self.main_vm.selected_card_idx)
                         //참가 신청 확인 모달 띄우기
-                        main_vm.result_alert(main_vm.alert_type)
+                        main_vm.card_result_alert(main_vm.alert_type)
                     }
                 }){
                     
