@@ -37,7 +37,7 @@ struct EditGroupCard: View {
     @State private var make_card_time_disallow : Bool = false
     @State private var card_img_url : String? = ""
         
-    @State var pickerResult: UIImage? = UIImage()
+    @State private var pickerResult: UIImage? = UIImage()
        var config: PHPickerConfiguration  {
           var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
         //videos, livePhotos...등도 넣을 수 있음.
@@ -50,6 +50,7 @@ struct EditGroupCard: View {
     var body: some View{
         NavigationView{
         VStack{
+   
             ScrollView{
                
                     EditingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, selected_category: self.$selected_category, open_map: self.$open_map, selected_img: self.image_url, show_img_picker: self.$show_img_picker, go_to_edit: self.$go_to_edit, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult, card_img_url: self.$card_img_url)
@@ -85,7 +86,7 @@ struct EditGroupCard: View {
                             main_vm.edit_card_with_img(type: self.main_vm.my_card_detail_struct.kinds!, photo_file: self.main_vm.group_card_img_data ?? nil)
                             
                             //alert창 타입
-                            main_vm.result_alert(main_vm.alert_type)
+                            main_vm.card_result_alert(main_vm.alert_type)
                             
                         }else{
                             print("모임 카드 만드는 시간 현재 시간 10분 후 아님 ")
@@ -116,8 +117,10 @@ struct EditGroupCard: View {
                     switch main_vm.alert_type{
                     case .success:
                         return Alert(title: Text("카드 편집"), message: Text("카드 편집이 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
-                            self.presentationMode.wrappedValue.dismiss()
-                            //go_to_edit.toggle()
+                            print("편집 알림 클릭 후 데이터 : \(self.main_vm.my_group_card_struct)")
+                            
+                        self.presentationMode.wrappedValue.dismiss()
+                        //go_to_edit.toggle()
                         }))
                     case .fail:
                         return Alert(title: Text("카드 편집"), message: Text("카드 편집을 다시 시도해주세요."), dismissButton: Alert.Button.default(Text("확인"), action:{
@@ -174,11 +177,12 @@ struct EditGroupCard: View {
                 self.main_vm.is_just_showing  = true
                 //카드 상세 정보 가져오는 통신.
                 self.main_vm.get_group_card_detail(card_idx: self.main_vm.selected_card_idx)
-
             }
         }
-        .navigationBarColor(background_img: "meeting_wave_bg", title: "카드 수정")
         }
+        .navigationBarColor(background_img: "meeting_wave_bg")
+        .navigationBarTitle("카드 수정")
+
     }
 }
 
@@ -347,7 +351,15 @@ struct EditingView: View{
             }
    
         }
-        .navigationBarColor(background_img: "meeting_wave_bg", title: "카드 수정")
+        .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
+            
+            if let user_info = value.userInfo, let data = user_info["group_card_img_changed"]{
+                
+                if data as! String == "ok"{
+                    self.card_img_url = ""
+                }
+            }
+        })
         .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
             print("모임카드 편집 - 상세 데이터 통신 완료 노티 받음")
             
@@ -365,6 +377,7 @@ struct EditingView: View{
                     }
                     
                     self.card_img_url = self.main_vm.my_card_detail_struct.card_photo_path ?? ""
+                    print("카드 이미지 url: \(self.card_img_url)")
                 }
             }else{
                 print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
@@ -373,6 +386,8 @@ struct EditingView: View{
         .onAppear{
             
         }
+        
+
     }
 }
 
@@ -388,52 +403,52 @@ extension EditingView {
             }
             .padding([.top, .leading])
             
-            if pickerResult != nil{
+            if  card_img_url != "" && self.main_vm.group_card_img_data == nil{
                 
-                    Image.init(uiImage: pickerResult!)
-                        .resizable()
-                        //이미지 채우기
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
-                        .cornerRadius(5)
-                        .overlay(
-                            Button(action: {
-                            print("카드 이미지 선택 버튼 클릭")
-            
-                            self.show_img_picker.toggle()
-                        }){
-                            Image("plus_img_btn")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                            }, alignment: .center)
+                KFImage(URL(string: self.main_vm.my_card_detail_struct.card_photo_path!))
+                    .loadDiskFileSynchronously()
+                    .cacheMemoryOnly()
+                    .fade(duration: 0.25)
+                    .setProcessor(img_processor)
+                    .onProgress{receivedSize, totalSize in
+                        print("on progress: \(receivedSize), \(totalSize)")
+                    }
+                    .onSuccess{result in
+                        print("성공 : \(result)")
+                    }
+                    .onFailure{error in
+                        print("실패 이유: \(error)")
+                    }
+                   .overlay(
+                       Button(action: {
+                       print("카드 이미지 선택 버튼 클릭")
+       
+                       self.show_img_picker.toggle()
+                   }){
+                       Image("plus_img_btn")
+                           .resizable()
+                           .frame(width: 30, height: 30)
+                       }, alignment: .center)
                 
                 
-            }else if card_img_url != ""{
+            }else if pickerResult != nil{
             
-                     KFImage(URL(string: self.main_vm.my_card_detail_struct.card_photo_path!))
-                         .loadDiskFileSynchronously()
-                         .cacheMemoryOnly()
-                         .fade(duration: 0.25)
-                         .setProcessor(img_processor)
-                         .onProgress{receivedSize, totalSize in
-                             print("on progress: \(receivedSize), \(totalSize)")
-                         }
-                         .onSuccess{result in
-                             print("성공 : \(result)")
-                         }
-                         .onFailure{error in
-                             print("실패 이유: \(error)")
-                         }
-                        .overlay(
-                            Button(action: {
-                            print("카드 이미지 선택 버튼 클릭")
-            
-                            self.show_img_picker.toggle()
-                        }){
-                            Image("plus_img_btn")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                            }, alignment: .center)
+                Image.init(uiImage: pickerResult!)
+                    .resizable()
+                    //이미지 채우기
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
+                    .cornerRadius(5)
+                    .overlay(
+                        Button(action: {
+                        print("카드 이미지 선택 버튼 클릭")
+        
+                        self.show_img_picker.toggle()
+                    }){
+                        Image("plus_img_btn")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                        }, alignment: .center)
                 
             }else if card_img_url == ""{
                 
