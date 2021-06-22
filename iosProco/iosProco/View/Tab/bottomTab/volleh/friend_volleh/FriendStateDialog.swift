@@ -343,6 +343,7 @@ struct FriendStateDialogContents : View{
                         Text(self.state_on == 0 ? "오프라인" : "온라인")
                             .font(.custom(Font.n_extra_bold, size: 13))
                             .foregroundColor(self.state_on == 0 ? Color.gray : Color.white)
+                            .padding(UIScreen.main.bounds.width/30)
                         
                     }
                     .background(self.state_on == 0 ? Color.proco_white : Color.proco_green)
