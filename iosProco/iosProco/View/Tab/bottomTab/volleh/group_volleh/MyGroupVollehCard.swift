@@ -70,6 +70,44 @@ struct MyGroupVollehCard: View {
         }
         //화면 하나에 카드 여러개 보여주기 위해 조정하는 값
         .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.09)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
+            
+            if let user_info = value.userInfo, let data = user_info["group_card_edited"]{
+                print("모임 카드 편집 노티 \(data)")
+                
+                if data as! String == "ok"{
+                    
+                  let card_idx = user_info["card_idx"] as! String
+                    
+                    //편집한 카드인 경우
+                    if self.my_group_card.card_idx! == Int(card_idx){
+                      
+                        let card_photo_path = user_info["card_photo_path"] as! String
+                        let tags = user_info["tags"] as! [Tags]
+                        
+                        print("노티에서 받은 태그 : \(tags)")
+                        
+                        self.my_group_card.card_photo_path = card_photo_path
+                        self.my_group_card.title = self.main_vm.card_name
+                        self.my_group_card.address = self.main_vm.input_location
+                        self.my_group_card.expiration_at = self.main_vm.card_expire_time
+                        self.my_group_card.tags =  tags
+                        
+                        self.expiration_at = String.dot_form_date_string(date_string: my_group_card.expiration_at!)
+                        //편집한 데이터 집어넣고는 publish변수에 있던 값들 없애주기는 노티를 받은 뷰에서 진행함.
+                        self.main_vm.input_location = ""
+                        self.main_vm.card_expire_time = ""
+                        self.main_vm.input_introduce = ""
+                        self.main_vm.card_name = ""
+                        self.main_vm.user_selected_tag_list = []
+                        self.main_vm.user_selected_tag_set = []
+                        print("편집 후 값 없앴는지 확인 : \( self.main_vm.card_name)")
+                    }
+                }
+            }else{
+                print("모임카드 편집 노티 아님")
+            }
+        })
     }
 }
 
@@ -172,8 +210,8 @@ extension MyGroupVollehCard{
             .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
                 print("내 카드 잠금 통신 완료 받음.: \(value)")
                 
-                if let user_info = value.userInfo{
-                    let check_result = user_info["lock"]
+                if let user_info = value.userInfo, let check_result = user_info["lock"]{
+                    
                     print("내 카드 잠금 데이터 확인: \(check_result)")
                     
                     if check_result as! String == "잠금"{
