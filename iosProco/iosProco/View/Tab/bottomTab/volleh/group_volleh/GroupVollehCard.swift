@@ -53,7 +53,7 @@ struct GroupVollehCard: View {
                 HStack{
                     current_user_num
                     Spacer()
-                    lock
+                   
                 }
                 
                 HStack{
