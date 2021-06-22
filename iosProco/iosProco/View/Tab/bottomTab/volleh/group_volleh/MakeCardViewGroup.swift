@@ -56,9 +56,12 @@ struct MakeCardViewGroup: View {
 
             ScrollView{
                 MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, image_url: self.$image_url, open_map: self.$open_map, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult)
-                    
+                    Spacer()
                     //완료 버튼 클릭시 메인뷰로 이동.
                     Button(action: {
+                        //alert창 타입
+                        main_vm.card_result_alert(main_vm.alert_type)
+                        
                         //필수 카테고리를 선택했는지 체크
                         if self.main_vm.category_is_selected(){
                             
@@ -93,8 +96,7 @@ struct MakeCardViewGroup: View {
                                 
                                 main_vm.make_card_with_img(param: param, photo_file: self.main_vm.group_card_img_data ?? nil)
                             
-                            //alert창 타입
-                            main_vm.result_alert(main_vm.alert_type)
+                            
                             }else{
                                 print("모임 카드 만드는 시간 현재 시간 10분 후 아님 ")
                                 self.make_card_time_disallow = true
@@ -102,11 +104,11 @@ struct MakeCardViewGroup: View {
                                 
                         }else if self.main_vm.title_check(title: self.main_vm.card_name){
                             print("카드 이름 작성 안함.")
-                            is_title_empty.toggle()
+                            is_title_empty = true
                         }
                         else{
                             //카테고리 최소 1개 선택 안함.
-                            category_alert.toggle()
+                            category_alert = true
                         }
                     }){
                         Text("완료")
@@ -122,7 +124,8 @@ struct MakeCardViewGroup: View {
                     .alert(isPresented: $main_vm.show_alert){
                         switch main_vm.alert_type{
                         case .success:
-                            return Alert(title: Text("카드 추가"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
+                            return Alert(title: Text("모임 카드"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
+                                
                                 self.presentationMode.wrappedValue.dismiss()
                                 //self.make_success.toggle()
                                 
@@ -140,19 +143,22 @@ struct MakeCardViewGroup: View {
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
-        .navigationBarColor(background_img: "meeting_wave_bg", title: "방 만들기")
-        .onAppear{
-            print("모여볼래 카드 만드는 뷰 넘어옴")
-        }
         //갤러리 나타나는 것.
         .sheet(isPresented: $show_img_picker) {
             PhotoPicker(configuration: self.config,
                         pickerResult: $pickerResult,
                         isPresented: $show_img_picker, is_profile_img: false, main_vm: SettingViewModel(), group_vm: self.main_vm)
         }
+        .onAppear{
+            print("모여볼래 카드 만드는 뷰 넘어옴")
+        }
+        }
+        //.edgesIgnoringSafeArea(.top)
+        .navigationBarColor(background_img: "meeting_wave_bg")
+        .navigationBarTitle("방 만들기")
         }
     }
-}
+
 
 
 struct MakingView: View{
@@ -280,7 +286,7 @@ struct MakingView: View{
                     
                 Button(action: {
                     print("지역 입력 텍스트필드 클릭")
-                    self.open_map.toggle()
+                    self.open_map = true
                     
                     if selected_marker_already == false{
                         selected_marker_already = true
@@ -659,7 +665,7 @@ extension MakingView {
                             Button(action: {
                             print("카드 이미지 선택 버튼 클릭")
             
-                            self.show_img_picker.toggle()
+                            self.show_img_picker = true
                         }){
                             Image("plus_img_btn")
                                 .resizable()
@@ -674,7 +680,7 @@ extension MakingView {
                         Button(action: {
                         print("카드 이미지 선택 버튼 클릭")
         
-                        self.show_img_picker.toggle()
+                        self.show_img_picker = true
                     }){
                         Image("plus_img_btn")
                             .resizable()
