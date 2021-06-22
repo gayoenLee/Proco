@@ -76,7 +76,7 @@ struct FriendCardListView : View{
                 HStack{
                     like_icon
                     Spacer()
-                    Image(self.friend_volleh_card_struct.lock_state == 0 ? "lock_public" : "lock_private")
+                   
                 }
                 .padding(.bottom, UIScreen.main.bounds.width/20)
             }
@@ -135,8 +135,8 @@ extension FriendCardListView{
                 if main_vm.friend_volleh_card_struct.count > self.current_card_index{
                     
                     Capsule()
-                      .foregroundColor(.proco_green)
-                        .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width/17)
+                        .foregroundColor(friend_volleh_card_struct.tags![0].tag_name! == "사교/인맥" ? .proco_yellow : friend_volleh_card_struct.tags![0].tag_name! == "게임/오락" ? .proco_pink : friend_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? .proco_olive : friend_volleh_card_struct.tags![0].tag_name! == "운동/스포츠" ? .proco_green : friend_volleh_card_struct.tags![0].tag_name! == "취미/여가" ? .proco_mint : friend_volleh_card_struct.tags![0].tag_name! == "스터디" ? .proco_blue : .proco_red)
+                        .frame(width: friend_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? UIScreen.main.bounds.width*0.2 :UIScreen.main.bounds.width*0.15 , height: UIScreen.main.bounds.width/17)
                         .overlay(
                     Text("\(friend_volleh_card_struct.tags![0].tag_name!)")
                         .font(.custom(Font.t_extra_bold, size: 10))

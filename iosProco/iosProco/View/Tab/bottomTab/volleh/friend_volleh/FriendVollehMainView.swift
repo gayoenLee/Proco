@@ -111,6 +111,7 @@ struct FriendVollehMainView: View {
                                                     Button(action: {
                                                         self.main_vm.selected_card_idx = self.main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].card_idx!
                                                         
+                                                        
                                                         //수정하는 페이지로 이동
                                                         self.go_to_edit  = true
                                                         print("수정하는 페이지 이동 구분값: \(self.go_to_edit)")
@@ -242,6 +243,7 @@ struct FriendVollehMainView: View {
                 .navigationBarHidden(true)
                 .onAppear{
                     print("*************친구랑 볼래 메인 뷰 나타남****************")
+                    self.main_vm.applied_filter = false
                     self.my_photo_path = UserDefaults.standard.string(forKey: "\(main_vm.my_idx!)_profile_photo_path") ?? ""
                     //user defaults에서 내 닉네임 꺼내오는 메소드 실행. 그래야 내 카드만 골라서 보여줄 수 있음.
                     main_vm.get_my_nickname()
@@ -269,7 +271,7 @@ struct FriendVollehMainView: View {
                             print("오늘 심심기간임")
                             self.today_is_boring = true
                         }
-                            print("친구랑 볼래에서 오늘 심심기간 설정 \(check_boring)")
+                        print("친구랑 볼래에서 오늘 심심기간 설정 \(check_boring)")
                     }else{
                         print("친구 메인에서 초기에 오늘 심심기간인지 노티 아님.")
                     }
@@ -296,8 +298,8 @@ struct FriendVollehMainView: View {
                 }
             }
             
-    //여기에 다이얼로그 오버레이해야 스크롤뷰 위치에 따라 오버레이 높이 결정되는 문제 해결됨.
-}
+            //여기에 다이얼로그 오버레이해야 스크롤뷰 위치에 따라 오버레이 높이 결정되는 문제 해결됨.
+        }
         .background(Color.proco_dark_white)
         .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true, is_from_chatroom: false))
         .navigationBarTitle("", displayMode: .inline)
@@ -321,7 +323,7 @@ private extension FriendVollehMainView{
                             .cornerRadius(50)
                             .scaledToFit()
                             .overlay(self.today_is_boring ? Circle()
-                                .stroke(Color.proco_yellow , lineWidth: 2) : nil)
+                                        .stroke(Color.proco_yellow , lineWidth: 2) : nil)
                             .padding([.leading], UIScreen.main.bounds.width/30)
                         
                     }else{
@@ -349,13 +351,13 @@ private extension FriendVollehMainView{
                                     .frame(width: 40, height: 40)
                             }
                             .overlay(self.today_is_boring ? Circle()
-                                .stroke(Color.proco_yellow , lineWidth: 2) : nil)
+                                        .stroke(Color.proco_yellow , lineWidth: 2) : nil)
                         
                     }
-                       
+                    
                     Rectangle()
                         .foregroundColor(self.state_on == 0 ? Color.gray : Color.proco_green)
-                    .frame(width: 14, height: 14)
+                        .frame(width: 14, height: 14)
                         .clipShape(Circle())
                         .overlay(Circle()
                                     .strokeBorder(Color.proco_white, lineWidth: 1)
@@ -368,7 +370,7 @@ private extension FriendVollehMainView{
                     // 내 프로필 이미지 클릭시 다이얼로그 나오고 = on, off 선택 가능
                     self.friend_info_dialog = true
                 }
-            
+                
                 Spacer()
                 Group{
                     HStack{
@@ -411,6 +413,9 @@ private extension FriendVollehMainView{
                         
                         //카드 추가하기 버튼
                         Button(action: {
+                            //여기에서 남아있을 수 있는 데이터 제거 해줌. 만들기 뷰의 onappear에서 하면 네비게이션바가 제대로 안나타남
+                            self.main_vm.user_selected_tag_set.removeAll()
+                            self.main_vm.user_selected_tag_list.removeAll()
                             
                             self.go_to_make_card.toggle()
                             print("카드 추가하는 뷰로 이동 토글 값 : \(self.go_to_make_card)")
@@ -442,18 +447,18 @@ private extension FriendVollehMainView{
                     
                 }){
                     HStack{
-                   
+                        
                         ZStack(alignment: .leading){
                             
-                    Image("main_filter")
-                        .resizable()
-                        .frame(width: 18, height: 18)
+                            Image("main_filter")
+                                .resizable()
+                                .frame(width: 18, height: 18)
                             
                             if self.main_vm.applied_filter{
                                 
-                            Image("check_end_btn")
-                                .resizable()
-                                .frame(width: 13, height: 13)
+                                Image("check_end_btn")
+                                    .resizable()
+                                    .frame(width: 13, height: 13)
                             }
                         }
                         Text("필터")
@@ -476,7 +481,7 @@ private extension FriendVollehMainView{
                 .background(self.main_vm.applied_filter ? Color.gray : Color.proco_black)
                 .overlay(Capsule()
                             .stroke(self.main_vm.applied_filter ? Color.gray : Color.proco_black, lineWidth: 1.5)
-                            
+                         
                 )
                 .cornerRadius(25.0)
             }
@@ -505,7 +510,7 @@ private extension FriendVollehMainView{
                             self.main_vm.selected_card_idx = self.main_vm.friend_volleh_card_struct[self.main_vm.get_friend_index(item: item)].card_idx!
                             print("이동하려는 카드 idx: \(self.main_vm.friend_volleh_card_struct[self.main_vm.get_friend_index(item: item)].card_idx ?? -1)")
                             //TODO 상세 페이지 카드 정보 갖고 오는 통신 진행 안함.
-                           // self.main_vm.get_friend_detail()
+                            // self.main_vm.get_friend_detail()
                             self.show_friend_card_detail.toggle()
                         }
                         .padding(.bottom, UIScreen.main.bounds.width/20)
@@ -517,84 +522,86 @@ private extension FriendVollehMainView{
                     .padding(.leading, UIScreen.main.bounds.width/20)
             })
             .padding(.trailing)
-
+            
         }
     }
     
     var boring_friends_list : some View{
         ScrollView(.horizontal, showsIndicators: false){
+            
             HStack{
+                
                 ForEach(self.main_vm.today_boring_friends_model){friend in
-                        
-                        Button(action: {
-                            print("친구 한 명 클릭")
-                            self.main_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx,nickname: friend.nickname, profile_photo: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds )
-                            self.friend_info_dialog.toggle()
-                        }){
-                            VStack{
-                                if friend.profile_photo_path == "" || friend.profile_photo_path == nil{
-                                    
-                                    Image("main_profile_img")
+                    
+                    Button(action: {
+                        print("친구 한 명 클릭")
+                        self.main_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx,nickname: friend.nickname, profile_photo: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds )
+                        self.friend_info_dialog.toggle()
+                    }){
+                        VStack{
+                            if friend.profile_photo_path == "" || friend.profile_photo_path == nil{
+                                
+                                Image("main_profile_img")
+                                    .resizable()
+                                    .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
+                                    .scaledToFit()
+                                    .overlay(Capsule()
+                                                .stroke(Color.proco_yellow, lineWidth: 2)
+                                    )
+                                    .padding([.trailing], UIScreen.main.bounds.width/40)
+                            }else{
+                                
+                                KFImage(URL(string: friend.profile_photo_path!))
+                                    .placeholder{Image("main_profile_img")
                                         .resizable()
                                         .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                                        .scaledToFit()
-                                        .overlay(Capsule()
-                                                    .stroke(Color.proco_yellow, lineWidth: 2)
-                                        )
-                                        .padding([.trailing], UIScreen.main.bounds.width/40)
-                                }else{
-                                    
-                                    KFImage(URL(string: friend.profile_photo_path!))
-                                        .placeholder{Image("main_profile_img")
+                                    }
+                                    .loadDiskFileSynchronously()
+                                    .cacheMemoryOnly()
+                                    .fade(duration: 0.25)
+                                    .setProcessor(img_processor)
+                                    .onProgress{receivedSize, totalSize in
+                                        print("on progress: \(receivedSize), \(totalSize)")
+                                    }
+                                    .onSuccess{result in
+                                        print("성공 : \(result)")
+                                    }
+                                    .onFailure{error in
+                                        print("실패 이유: \(error)")
+                                        
+                                        Image("main_profile_img")
                                             .resizable()
-                                            .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                                        }
-                                        .loadDiskFileSynchronously()
-                                        .cacheMemoryOnly()
-                                        .fade(duration: 0.25)
-                                        .setProcessor(img_processor)
-                                        .onProgress{receivedSize, totalSize in
-                                            print("on progress: \(receivedSize), \(totalSize)")
-                                        }
-                                        .onSuccess{result in
-                                            print("성공 : \(result)")
-                                        }
-                                        .onFailure{error in
-                                            print("실패 이유: \(error)")
-                                            
-                                            Image("main_profile_img")
-                                                .resizable()
-                                                .frame(width: 40, height: 40)
-                                        }
-                                        .overlay(Capsule()
-                                                    .stroke(Color.proco_yellow, lineWidth: 2)
-                                        )
+                                            .frame(width: 40, height: 40)
+                                    }
+                                    .overlay(Capsule()
+                                                .stroke(Color.proco_yellow, lineWidth: 2)
+                                    )
+                                
+                                
+                            }
+                            
+                            if friend.idx == Int(ChatDataManager.shared.my_idx!)!{
+                                
+                                HStack{
+                                    Image("check_end_btn")
+                                        .resizable()
+                                        .frame(width: 15, height: 15)
                                     
-                                    
+                                    Text("나")
+                                        .font(.custom(Font.n_bold, size: 10))
+                                        .foregroundColor(.proco_black)
                                 }
                                 
-                                if friend.idx == Int(ChatDataManager.shared.my_idx!)!{
-                                    
-                                    HStack{
-                                        Image("check_end_btn")
-                                            .resizable()
-                                            .frame(width: 15, height: 15)
-                                        
-                                        Text("나")
-                                            .font(.custom(Font.n_bold, size: 10))
-                                            .foregroundColor(.proco_black)
-                                    }
-                                    
-                                }else{
+                            }else{
                                 Text(friend.nickname)
                                     .font(.custom(Font.n_bold, size: 10))
                                     .foregroundColor(.proco_black)
-                                }
-                                
                             }
+                            
                         }
-                        .padding([.leading, .trailing], UIScreen.main.bounds.width/40)
                     }
+                    .padding([.leading, .trailing], UIScreen.main.bounds.width/40)
+                }
                 
             }
             

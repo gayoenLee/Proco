@@ -180,6 +180,42 @@ private extension MyCardListView{
                 }
             }
         })
+        .onReceive(NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
+            
+            if let user_info = value.userInfo, let data = user_info["friend_card_edited"]{
+                print("모임 카드 편집 노티 \(data)")
+                
+                if data as! String == "ok"{
+                    
+                  let card_idx = user_info["card_idx"] as! String
+                    
+                    //편집한 카드인 경우
+                    if self.my_volleh_card_struct.card_idx! == Int(card_idx){
+                      
+                      
+                        let tags = user_info["tags"] as! [FriendVollehTags]
+                        
+                        print("노티에서 받은 태그 : \(tags)")
+                        
+                
+                        self.my_volleh_card_struct.expiration_at = self.main_viewmodel.card_expire_time
+                        //이전에 입력했던 태그 삭제하고 업데이트하는 형식.그래야 이전 태그와 중첩돼서 저장 안됨.
+                        self.my_volleh_card_struct.tags?.removeAll()
+                        self.my_volleh_card_struct.tags =  tags
+                        
+                        self.expiration_at = String.dot_form_date_string(date_string: self.main_viewmodel.card_expire_time)
+
+                        //편집한 데이터 집어넣고는 publish변수에 있던 값들 없애주기
+                        self.main_viewmodel.card_expire_time = ""
+                        self.main_viewmodel.user_selected_tag_list = []
+                        self.main_viewmodel.user_selected_tag_set = []
+                      
+                    }
+                }
+            }else{
+                print("모임카드 편집 노티 아님")
+            }
+        })
     }
     
     var tags: some View{
@@ -211,7 +247,7 @@ private extension MyCardListView{
                 if self.my_volleh_card_struct.tags?.count ?? 0 > 0{
                     
                     //태그들도 리스트를 포함하고 있기 때문에 여기서 다시 foreach문 돌림.
-                    ForEach(main_viewmodel.my_friend_volleh_card_struct[self.current_card_index].tags!.indices, id: \.self){ index in
+                    ForEach(my_volleh_card_struct.tags!.indices, id: \.self){ index in
                         if index == 0{
 
                         }else{
@@ -224,7 +260,7 @@ private extension MyCardListView{
                                     .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
                                     .padding([.leading], UIScreen.main.bounds.width/20)
 
-                                Text("\(main_viewmodel.my_friend_volleh_card_struct[self.current_card_index].tags![index].tag_name!)")
+                                Text("\(my_volleh_card_struct.tags![index].tag_name!)")
                                     .font(.custom(Font.n_bold, size: 15))
                                     .foregroundColor(.proco_black)
                             }

@@ -57,14 +57,14 @@ struct FriendVollehCardDetail: View {
         
         VStack{
             Group{
-            top_nav_bar
-           
-            //약속날짜
-            HStack{
+                top_nav_bar
+                
+                //약속날짜
+                HStack{
+                    Spacer()
+                    card_meeting_day
+                }
                 Spacer()
-                card_meeting_day
-            }
-            Spacer()
             }
             Group{
                 //카드 주인의 프로필 사진, 이름
@@ -164,7 +164,7 @@ struct FriendVollehCardDetail: View {
                 }
             }
         }.padding()
-    
+        
         .sheet(isPresented: self.$show_report_view) {
             ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
         }
@@ -398,7 +398,7 @@ private extension FriendVollehCardDetail{
             if Int(self.main_vm.my_idx!) == main_vm.friend_volleh_card_detail.creator.idx{
                 print("만든 사람이 참가자 보기 클릭")
                 self.see_attend_people = true
-
+                
             }
             
         }){
@@ -534,6 +534,7 @@ private extension FriendVollehCardDetail{
                 send_report_btn
             }
         }
+        .padding(.top)
     }
     
     var owner_profile : some View{

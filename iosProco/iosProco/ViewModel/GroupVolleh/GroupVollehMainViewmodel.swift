@@ -45,7 +45,13 @@ class GroupVollehMainViewmodel: ObservableObject{
     }
     
     //모임 이미지 서버에 보내기 전 저장해놓기 위함.
-    @Published var group_card_img_data : Data? = nil
+    @Published var group_card_img_data : Data? = nil{
+        didSet{
+            DispatchQueue.main.async { NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["group_card_img_changed": "ok"])
+                
+            }
+        }
+    }
     
     //필터에서 선택한 태그 리스트와 set..기존에 카드 만들기등과 같은 변수 썼을 때 오류 발생해서 따로 뻄
     @Published var selected_filter_tag_list : [String] = []{
@@ -113,6 +119,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     //내 카드 여러장
     @Published var my_group_card_struct : [GroupCardStruct] = []{
         didSet {
+            print("내 모임 카드 데이터 변경됨")
             objectWillChange.send()
         }
     }
@@ -403,8 +410,8 @@ class GroupVollehMainViewmodel: ObservableObject{
     /*
      -------------------------카드 만들기
      */
-    ///카드 만들기 통신 후 alert창 띄울 때 사용.
-    func result_alert(_ active: ResultAlert) -> Void{
+    ///신고하기 후 alert창 띄울 때 사용.
+    func card_result_alert(_ active: ResultAlert) -> Void{
         DispatchQueue.main.async {
             self.alert_type = active
             self.show_alert = true
@@ -788,12 +795,9 @@ class GroupVollehMainViewmodel: ObservableObject{
                         let string_expirtaion = self.make_card_date()
                         
                         let detail_index = self.my_group_card_struct.firstIndex(where: {$0.card_idx == self.selected_card_idx})
-                        //TODO!! 편집한 후에 여기에서 데이터를 업데이트해야 메인뷰에 돌아가면 데이터 업데이트 돼있음.!!!
-                        //편집한 데이터를 모델에 집어넣기.
-                        self.my_group_card_struct[detail_index!].address = self.input_location
-                        self.my_group_card_struct[detail_index!].expiration_at = self.card_expire_time
-                        self.my_group_card_struct[detail_index!].introduce = self.input_introduce
-                        self.my_group_card_struct[detail_index!].title! = self.card_name
+                        
+                        print("편집한 카드 idx: \(detail_index)")
+                        
                         
                         //********채팅 서버에 보낼 태그 모델*********
                         var tag_model : [TagModel] = []
@@ -806,8 +810,6 @@ class GroupVollehMainViewmodel: ObservableObject{
                             
                             tag_model.append(TagModel(idx: item.idx, tag_name: item.tag_name))
                         }
-                        
-                        print("편집한 데이터 집어넣었는지 확인 : \(String(describing: self.my_group_card_struct[detail_index!].tags))")
                         
                         //채팅 서버에 보내기 위해 데이터 만들기(채팅룸 idx가져오기, 카드 업데이트 날짜 만들기, 카드 모델 만들기)
                         let chatroom = ChatDataManager.shared.get_chatroom_from_card(card_idx: self.selected_card_idx)
@@ -838,15 +840,12 @@ class GroupVollehMainViewmodel: ObservableObject{
                         SockMgr.socket_manager.edit_card_info_event(chatroom: chatroom_model)
                         //서버에 이벤트 보냄.
                         //socket_manager.edit_card_info_event(chatroom: chatroom_model)
+
+                        print("데이터 넣은 후 ")
                         
-                        //편집한 데이터 집어넣고는 publish변수에 있던 값들 없애주기
-                        self.input_location = ""
-                        self.card_expire_time = ""
-                        self.input_introduce = ""
-                        self.card_name = ""
-                        self.user_selected_tag_list = []
-                        self.user_selected_tag_set = []
-                        print("편집 후 값 없앴는지 확인 : \( self.card_name)")
+                        //뷰 업데이트 위해 보내기
+                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["group_card_edited" : "ok", "card_idx": String(self.selected_card_idx),"card_photo_path" : String(response.card_photo_path ?? ""), "tags" : response.tags])
+                        
                     }
                     self.alert_type = .success
                     

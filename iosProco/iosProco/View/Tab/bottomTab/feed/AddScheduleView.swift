@@ -25,6 +25,12 @@ struct AddScheduleView: View {
         return !self.title.isEmpty
     }
     
+    func date_to_string(date: Date) -> String{
+        let day = DateFormatter.dateformatter.string(from: date)
+        print("date형식: \(date), 변환된 형식: \(day)")
+        return day
+    }
+    
     var body: some View {
         VStack{
             HStack{
@@ -46,7 +52,7 @@ struct AddScheduleView: View {
                     
                     print("완료 버튼 클릭")
                     
-                    let schedule_date = main_vm.date_to_string(date: self.schedule_start_date).split(separator: " ")[0]
+                    let schedule_date = self.date_to_string(date: self.schedule_start_date).split(separator: " ")[0]
                     //시간만 string으로 변환하는데 사용하는 메소드. 생각보다 간단함.
                     let schedule_start_time = DateFormatter.time_formatter.string(from: self.schedule_start_time)
                     
@@ -57,7 +63,7 @@ struct AddScheduleView: View {
                     self.main_vm.add_personal_schedule(title: self.title, content: self.schedule_memo, schedule_date: String(schedule_date), schedule_start_time: String(schedule_start_time))
                     
                     //캘린더뷰로 돌아감.
-                    self.back_to_calendar = false
+                    //self.back_to_calendar = false
                     
                 }){
                     Image("check_end_btn")
@@ -140,6 +146,10 @@ struct AddScheduleView: View {
             .font(.custom(Font.t_extra_bold, size: 16))
             .foregroundColor(Color.proco_black)
             Spacer()
+        }
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         .onAppear{
             self.main_vm.schedule_state_changed = false

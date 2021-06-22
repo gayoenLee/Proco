@@ -11,9 +11,9 @@ import UserNotifications
 import Kingfisher
 
 struct GroupVollehMainView: View {
-    @StateObject var db : ChatDataManager = ChatDataManager()
+    @ObservedObject var db : ChatDataManager = ChatDataManager()
     
-    @StateObject var main_vm = GroupVollehMainViewmodel()
+    @ObservedObject var main_vm = GroupVollehMainViewmodel()
     //카드 만들기 페이지로 이동시 사용하는 값.
     @State private var go_to_make_card : Bool = false
     //카드 편집 페이지로 이동시 사용하는 값.
@@ -294,6 +294,8 @@ struct GroupVollehMainView: View {
         
         .edgesIgnoringSafeArea(.all)
         .onAppear{
+            self.main_vm.applied_filter = false
+
             print("*************모여 볼래 메인 뷰 나타남****************")
             self.my_photo_path = UserDefaults.standard.string(forKey: "\(main_vm.my_idx!)_profile_photo_path") ?? ""
             
@@ -395,7 +397,7 @@ extension GroupVollehMainView{
                     
                     self.show_filter.toggle()
                     //만약 필터 결과가 없을 시에 alert창 띄우기
-                    self.main_vm.result_alert(main_vm.alert_type)
+                   // self.main_vm.result_alert(main_vm.alert_type)
                     
                 }){
                    HStack{
@@ -425,6 +427,8 @@ extension GroupVollehMainView{
             
         Button(action: {
             main_vm.get_group_volleh_card_list()
+            self.main_vm.selected_filter_tag_set.removeAll()
+            self.main_vm.selected_filter_tag_list.removeAll()
             print("전체보기 버튼 클릭")
             self.main_vm.applied_filter = false
 

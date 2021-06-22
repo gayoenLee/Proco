@@ -14,7 +14,7 @@ struct BigMapContainedView: View {
     @State private var show_map : Bool = false
     
     var body: some View {
-        NavigationView{
+       // NavigationView{
         VStack{
             
             MyWebView(vm: self.vm, url: "https://withproco.com/map/search_map.html?device=ios")
@@ -50,7 +50,7 @@ struct BigMapContainedView: View {
             
         }
         .background(Color.proco_white)
-        }
+        //}
     }
     
 }
