@@ -698,11 +698,10 @@ public class CalendarViewModel: ObservableObject{
                     
                     print("캘린더 카드 이벤트들 저장한 것 확인:  \(self.small_schedules.count)")
                     print("캘린더 한 칸 좋아요 데이터 확인: \(self.like_model)")
-               
                 }
-                
+                print("카드 공개 여부 확인: \(self.check_friend_result)")
                 //카드만 공개인 경우 내 기간을 가져오지 않는다.
-                if self.check_friend_result == "friend_allow_card"{
+                if self.check_friend_result == "friend_allow"{
                     
                 //내 일정 정보 가져오는 통신
                     self.get_personal_schedules(user_idx: Int(self.my_idx!)!, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
@@ -1141,7 +1140,6 @@ public class CalendarViewModel: ObservableObject{
                 if response == response{
                     
                 for schedule in response!{
-                    print("포문 안 schedule: \(schedule)")
                     
                     let schedule_idx = schedule["idx"].intValue
                     let title = schedule["title"].stringValue
@@ -1149,14 +1147,14 @@ public class CalendarViewModel: ObservableObject{
                     let content = schedule["content"].stringValue
                     let schedule_date = schedule["schedule_date"].stringValue
                     let schedule_start_time = schedule["schedule_start_time"].stringValue
-                    print("스케줄 시간 딕셔너리 확인: \(schedule_start_time)")
+                    //print("스케줄 시간 딕셔너리 확인: \(schedule_start_time)")
                     
                     var find_idx: Int? = -1
                     find_idx = self.schedules_model.firstIndex(where: {
                         let date = self.date_to_string(date: $0.date).split(separator: " ")[0]
                         return date == schedule_date
                     }) ?? -1
-                    print("기존 모델 배열 index 찾았는지 확인: \(find_idx)")
+                   // print("기존 모델 배열 index 찾았는지 확인: \(find_idx)")
                     
                     //저장에 맞는 형식으로 날짜, 시간 변환
                     let schedule_date_form = self.make_date(expiration: schedule_date)
