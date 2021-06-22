@@ -76,8 +76,9 @@ struct MyInfoDialogContents : View{
             NavigationLink("",
                            destination: NormalChatRoom(main_vm: FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(),socket: self.socket),
                            isActive: self.$go_to_chat)
-            
-            NavigationLink("",destination: SimSimFeedPage(main_vm: CalendarViewModel()), isActive: self.$go_to_feed)
+            /////////테스트///////////////
+//            NavigationLink("",destination: SimSimFeedPage(main_vm: CalendarViewModel()).navigationBarHidden(true).navigationBarTitle("", displayMode: .inline), isActive: self.$go_to_feed)
+            NavigationLink("",destination: TabbarView(view_router: ViewRouter()).navigationBarHidden(true).navigationBarTitle("", displayMode: .inline), isActive: self.$go_to_feed)
             //마이페이지 이동(내 다이얼로그인 경우)
             NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_my_page)
             
@@ -178,7 +179,7 @@ struct MyInfoDialogContents : View{
                         Text(self.state_on == 0 ? "오프라인" : "온라인")
                             .font(.custom(Font.n_extra_bold, size: 13))
                             .foregroundColor(self.state_on == 0 ? Color.gray : Color.white)
-                            .padding(UIScreen.main.bounds.width/40)
+                            .padding(UIScreen.main.bounds.width/30)
                     }
                     .background(self.state_on == 0 ? Color.proco_white : Color.proco_green)
                     .overlay(Capsule()
