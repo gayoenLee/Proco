@@ -35,7 +35,7 @@ struct MakeCardView: View {
     @State private var card_time_not_allow : Bool = false
     
     var body: some View {
-        
+        NavigationView{
         VStack{
             ScrollView{
                 //완료 버튼을 제외한 카드 만들기 뷰
@@ -110,7 +110,7 @@ struct MakeCardView: View {
                 .alert(isPresented: $main_viewmodel.show_alert){
                     switch main_viewmodel.alert_type{
                     case .success:
-                        return Alert(title: Text("카드 추가"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
+                        return Alert(title: Text("카드"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
                             if socket_manager.is_from_chatroom{
                                 //상세 정보 페이지로 바로 이동시키기
                                 self.go_to_share.toggle()
@@ -135,22 +135,21 @@ struct MakeCardView: View {
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
-        .navigationBarColor(background_img: "wave_bg", title: "심심 설정")
         .onAppear{
+
+            
             let total_people_array = main_viewmodel.show_card_friend_array + main_viewmodel.show_card_group_array
             
             self.total_show_people = total_people_array.count
-            // let nav_bar = main_viewmodel.viewDidLayoutSubviews()
-            
-            //필터에서 유저가 선택한 태그 데이터 모델과 여기에서 사용하는 모델이 같아서 초기화해줌
-            //            self.main_viewmodel.user_selected_tag_list.removeAll()
-            //            self.main_viewmodel.user_selected_tag_set.removeAll()
-            //            self.main_viewmodel.card_time = Date()
-            //            self.main_viewmodel.card_date = Date()
+                       
         }
         .onDisappear{
             print("카드 만들기 뷰 사라짐!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         }
+        }
+        .navigationBarColor(background_img: "wave_bg")
+        .navigationBarTitle("카드 만들기")
+
     }
 }
 
