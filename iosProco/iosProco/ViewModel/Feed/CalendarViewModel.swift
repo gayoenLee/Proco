@@ -158,22 +158,22 @@ public class CalendarViewModel: ObservableObject{
         }
     }
     //아래 3가지 변수 및 메소드: 친구 요청 통신 결과값에 따라서 alert창 띄워주기 위해 사용.
-    @Published var show_result_alert : Bool = false{
+    @Published var show_friend_result_alert : Bool = false{
         didSet{
             objectWillChange.send()
         }
     }
     
-    @Published var request_result_alert :AskFriendRequestAlert  = .no_friends{
+    @Published var friend_request_result_alert :AskFriendRequestAlert  = .success{
         didSet{
             objectWillChange.send()
         }
     }
     
-    func request_result_alert_func(_ active: AskFriendRequestAlert) -> Void {
+    func friend_request_result_alert_func(_ active: AskFriendRequestAlert) -> Void {
         DispatchQueue.main.async {
-            self.request_result_alert = active
-            self.show_result_alert = true
+            self.friend_request_result_alert = active
+            self.show_friend_result_alert = true
         }
     }
     //-------------------------------------------------
@@ -1371,32 +1371,115 @@ public class CalendarViewModel: ObservableObject{
                print("캘린더에서 친구 요청 통신 response: \(response)")
                   
                 if response["result"] == "ok"{
-                    self.request_result_alert = .success
+                    
+                    self.friend_request_result_alert = .success
                     print("친구추가하기 성공")
+                    
                 } else if response["result"]  == "no signed friends"{
+                    
                     print("친구추가하기 없는 사용자")
-                    self.request_result_alert = .no_friends
+                    self.friend_request_result_alert = .no_friends
                     
                 }else if response["result"]  == "친구요청대기"{
-                    print("친구 요청 대기중")
-                    self.request_result_alert = .request_wait
+                    
+                    self.friend_request_result_alert = .request_wait
+                    print("친구 요청 대기중 : \( self.friend_request_result_alert)")
                     
                 }else if response["result"]  == "친구요청뱓음"{
+                    
                     print("친구 요청 대기중")
-                    self.request_result_alert = .requested
+                    self.friend_request_result_alert = .requested
                     
                 }else if response["result"]  == "친구상태"{
+                    
                     print("이미 친구입니다")
-                    self.request_result_alert = .already_friend
+                    self.friend_request_result_alert = .already_friend
                     
                 }else if response["result"]  == "자기자신"{
+                    
                     print("나자신")
-                    self.request_result_alert = .myself
+                    self.friend_request_result_alert = .myself
+                    
                 }else{
+                    
                     print("실패")
-                    self.request_result_alert = .fail
+                    self.friend_request_result_alert = .fail
                 }                    
                 })
+    }
+    
+    //설정창에서 필요한 데이터 모두 가져오는 통신
+    @Published var user_info_model : MyPageModel = MyPageModel(){
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
+    
+    //마이페이지에서 유저 모든 정보를 가져와야 해서 통신.
+    func get_detail_user_info(user_idx: Int){
+        cancellation = APIClient.get_detail_user_info(user_idx: user_idx)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("유저 모든 정보 가져오기 통신 에러 발생 : \(error)")
+                case .finished:
+                    break
+                }
+                
+            }, receiveValue: {response in
+                print("유저 모든 정보 가져오기 response: \(response)")
+                
+                let result = response.dictionaryValue
+                
+                if result["result"] == "no result"{
+                    print("결과 없을 때")
+                }else{
+                
+                
+                let nickname = result["nickname"]?.stringValue
+                let password_modify_at = result["password_modify_at"]?.stringValue
+                let card_notify_state = result["card_notify_state"]?.intValue
+                let chat_notify_state = result["chat_notify_state"]?.intValue
+                let password = result["password"]?.stringValue
+                let calendar_public_state = result["calendar_public_state"]?.intValue
+                let feed_notify_state = result["feed_notify_state"]?.intValue
+                let idx = result["idx"]?.intValue
+                let phone_number = result["phone_number"]?.stringValue
+                let profile_photo_path = result["profile_photo_path"]?.stringValue
+               
+                self.user_info_model = MyPageModel(nickname: nickname!, password_modify_at: password_modify_at!, card_notify_state: card_notify_state!, chat_notify_state: chat_notify_state!, password: password!, calendar_public_state: calendar_public_state!, feed_notify_state: feed_notify_state!, idx: idx!, phone_number: phone_number!, profile_photo_path: profile_photo_path ?? "")
+                print("최종 저장한 유저 정보 모델: \(self.user_info_model)")
+                
+                NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["got_calendar_alarm_info" : "ok"])
+                }
+            })
+    }
+    
+    //설정 - 캘린더 공개범위 설정
+    func edit_calendar_disclosure_setting(calendar_public_state: Int){
+        cancellation = APIClient.edit_calendar_disclosure_setting(calendar_public_state: calendar_public_state)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("캘린더 공개범위 설정 에러 발생 : \(error)")
+                case .finished:
+                    break
+                }
+                
+            }, receiveValue: {response in
+                print("피드에서 캘린더 공개범위 설정 response: \(response)")
+                
+                let result = response["result"].stringValue
+                if result == "ok"{
+                    print("ok")
+                //result ok 아닐 때 처리 필요한지 생각해보기.
+                }else{
+                    
+                }
+            })
     }
 }
 
