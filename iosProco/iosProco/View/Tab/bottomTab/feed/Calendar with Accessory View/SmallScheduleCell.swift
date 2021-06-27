@@ -22,25 +22,27 @@ struct SmallScheduleCell: View {
                 }
             }
             .frame(height: SmallSchedulePreviewConstants.cellHeight*0.6)
-        .padding(.vertical, SmallSchedulePreviewConstants.cellPadding)
+            .padding(.vertical, SmallSchedulePreviewConstants.cellPadding)
+            Spacer()
             /*
-            좋아요
-            - 1) 내가 좋아요를 누른 경우, 아닌 경우
-            - 2) 좋아요 갯수가 있을 경우
-                 */
+             좋아요
+             - 1) 내가 좋아요를 누른 경우, 아닌 경우
+             - 2) 좋아요 갯수가 있을 경우
+             */
             HStack{
+                Spacer()
                 Button(action: {
-
+                    
                     print("좋아요 아이콘 클릭, 상태: \(smallSchedule.clicked_like_myself)")
                 }){
-                Image(smallSchedule.clicked_like_myself ? "heart_fill" : "heart")
-                    .resizable()
-                    .frame(width: UIScreen.main.bounds.width/50, height: UIScreen.main.bounds.width/50)
-                    .foregroundColor(Color.red)
+                    Image(smallSchedule.clicked_like_myself ? "heart_fill" : "heart")
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width/50, height: UIScreen.main.bounds.width/50)
+                        .foregroundColor(Color.red)
                 }
-
+                
                 if smallSchedule.like_num > 0{
-
+                    
                     Text(String(smallSchedule.like_num))
                         .font(.system(size: 6))
                         .foregroundColor(Color.red)
@@ -66,7 +68,7 @@ struct SmallScheduleCell: View {
             }
             
         }
-//        .frame(width: UIScreen.main.bounds.width/30, height: UIScreen.main.bounds.width/40)
+        //        .frame(width: UIScreen.main.bounds.width/30, height: UIScreen.main.bounds.width/40)
     }
 }
 
