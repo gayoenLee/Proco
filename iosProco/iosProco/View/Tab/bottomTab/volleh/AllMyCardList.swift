@@ -91,7 +91,7 @@ struct AllMyCardList: View {
                 HStack{
                     Text("모임 카드")
                         .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/20))
-                    .foregroundColor(.proco_black)
+                        .foregroundColor(.proco_black)
                     Spacer()
                     
                 }
@@ -104,7 +104,8 @@ struct AllMyCardList: View {
                         .shadow(color: .gray, radius: 2, x: 0, y: 2)
                         .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.4)
                         .overlay(
-                            MyGroupVollehCard(main_vm: self.group_vm, my_group_card: card, current_card_index: group_vm.get_index(item: card)))
+                            MyGroupVollehCard(main_vm: self.group_vm, my_group_card: card, current_card_index: group_vm.get_index(item: card))
+                        )
                         //한번 탭했을 때 상세 페이지로 이동.
                         .onTapGesture {
                             print("클릭한 카드 idx: \(card.card_idx!)")
