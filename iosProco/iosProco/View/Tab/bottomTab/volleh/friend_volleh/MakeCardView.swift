@@ -146,10 +146,15 @@ struct MakeCardView: View {
         .onDisappear{
             print("카드 만들기 뷰 사라짐!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         }
+        .navigationBarColor(background_img: "wave_bg", btn_img: "left")
+        .navigationBarTitle("카드 만들기", displayMode: .inline)
+        .navigationBarItems(leading:
+                                Button(action: {
+                                    self.presentationMode.wrappedValue.dismiss()
+                                }){
+                                    Image("left")
+                                })
         }
-        .navigationBarColor(background_img: "wave_bg")
-        .navigationBarTitle("카드 만들기")
-
     }
 }
 
