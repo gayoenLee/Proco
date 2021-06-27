@@ -83,6 +83,7 @@ struct ScheduleDetailView: View {
                             
                             //시간
                             let schedule_time = DateFormatter.time_formatter.string(from: self.main_vm.schedule_start_time)
+                            
                             self.main_vm.edit_personal_schedule(previous_date: self.previous_date, schedule_idx: info_model.card_idx, title: self.title, content: main_vm.schedule_memo, schedule_date: String(schedule_date), schedule_start_time: schedule_time)
                             
                             //편집모드를 끝내기 - 서버에 보낸 수정된 데이터로 업데이트(날짜, 시간, 제목, 메모)

@@ -14,7 +14,8 @@ struct ResponseMakeCardStruct : Codable{
     var chatroom_idx : Int
     var server_idx : Int
     var tags : [Tags]
-    
+    var card_photo_path : String? = ""
+
 }
 
 struct Tags : Codable{

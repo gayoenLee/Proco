@@ -27,10 +27,11 @@ struct ProcoMainCalendarView: View {
     let calendar_owner_data : CalendarOwnerModel
     
     @State private var go_mypage : Bool = false
+    @State private var go_setting_page : Bool = false
     
     //boring days
     //여기에서 받은 boring days를 elegant calendar manager에 넘겨줘서 monthly calendar manager에서 사용할 수 있게 하는 것.
-    init(ascSmallSchedules: [SmallSchedule], initialMonth: Date?, ascSchedules: [Schedule], ascInterest: [InterestModel],boring_days: [Date], main_vm: CalendarViewModel, ascSmallInterest: [SmallInterestModel], calendarOwner: CalendarOwnerModel, go_mypage: Bool?,previousMonth : Date) {
+    init(ascSmallSchedules: [SmallSchedule], initialMonth: Date?, ascSchedules: [Schedule], ascInterest: [InterestModel],boring_days: [Date], main_vm: CalendarViewModel, ascSmallInterest: [SmallInterestModel], calendarOwner: CalendarOwnerModel, go_mypage: Bool?,previousMonth : Date, go_setting_page: Bool?) {
         //여기에서 value가 연도 달력에서 몇년도까지 날짜를 셋팅할   인지 설정하는 것.
         let configuration = CalendarConfiguration(
             calendar: currentCalendar,
@@ -41,7 +42,7 @@ struct ProcoMainCalendarView: View {
         
         calendarManager = ElegantCalendarManager(
             configuration: configuration,
-            initialMonth: initialMonth, selections: boring_days, owner_idx: calendarOwner.user_idx, owner_photo_path: calendarOwner.profile_photo_path, owner_name: calendarOwner.user_nickname, watch_user_idx: calendarOwner.watch_user_idx, go_mypage: go_mypage ?? false, previousMonth: previousMonth)
+            initialMonth: initialMonth, selections: boring_days, owner_idx: calendarOwner.user_idx, owner_photo_path: calendarOwner.profile_photo_path, owner_name: calendarOwner.user_nickname, watch_user_idx: calendarOwner.watch_user_idx, go_mypage: go_mypage ?? false, previousMonth: previousMonth, go_setting_page: go_setting_page ?? false)
        
         schedule_by_day = Dictionary(
             grouping: main_vm.schedules_model,
@@ -62,6 +63,7 @@ struct ProcoMainCalendarView: View {
         calendar_owner_data = CalendarOwnerModel(user_idx: calendarOwner.user_idx, profile_photo_path: calendarOwner.profile_photo_path, user_nickname: calendarOwner.user_nickname)
         self.main_vm = main_vm
         self.go_mypage = go_mypage ?? false
+        self.go_setting_page = go_setting_page ?? false
         
         calendarManager.datasource = self
         calendarManager.delegate = self
@@ -92,9 +94,39 @@ struct ProcoMainCalendarView: View {
                                 print("마이페이지 이동값 변경하기")
                             }
                         }else{
-                            print("일반 로그인시 fcm 토큰 못 받음")
+                            print("캘린더 주인 프로필 클릭 이벤트 노티 아님")
                         }
                     })
+                    .onReceive(NotificationCenter.default.publisher(for: Notification.calendar_owner_click), perform: {value in
+                        print("캘린더 설정 클릭 이벤트 받음")
+                        
+                        if let user_info = value.userInfo, let data = user_info["calendar_setting_click"]{
+                            print("캘린더 설정 버튼  클릭 이벤트 \(data)")
+                            
+                            if data as! String == "ok"{
+                                self.main_vm.get_detail_user_info(user_idx: Int(self.main_vm.my_idx!)!)
+                                
+                                print("설정 페이지 이동값 변경하기")
+                            }
+                        }else{
+                            print("설정 페이지 이동 노티 아님")
+                        }
+                    })
+                    .onReceive(NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
+                        
+                        if let user_info = value.userInfo, let data = user_info["got_calendar_alarm_info"]{
+                            print("캘린더 설정 - 유저 정보 노티 \(data)")
+                            
+                            if data as! String == "ok"{
+                                
+                                self.go_setting_page = true
+                            
+                            }
+                        }else{
+                            print("그룹관리 - 친구 리스트 데이터 노티 아님")
+                        }
+                    })
+                
                 
                 Spacer()
                 VStack{
@@ -114,12 +146,16 @@ struct ProcoMainCalendarView: View {
             .navigationBarTitle("", displayMode: .inline)
         }
         .onAppear{
-            
+            self.go_setting_page = false
             print("프로코메인캘린더뷰 나타남 initial_month:\(main_vm.initial_month)")
         }
         .navigationBarHidden(true)
         .navigationBarTitle("", displayMode: .inline)
         .frame(height: UIScreen.main.bounds.height*0.9, alignment: .top)
+        .sheet(isPresented: self.$go_setting_page){
+            FeedDisclosureSettingView(main_vm: self.main_vm)
+           
+        }
     }
 }
 

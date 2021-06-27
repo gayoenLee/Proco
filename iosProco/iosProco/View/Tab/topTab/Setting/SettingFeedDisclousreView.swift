@@ -14,10 +14,11 @@ struct SettingFeedDisclousreView: View {
     
     var body: some View {
         VStack{
-                RadioButtons(selected: self.$selected)
-         Spacer()
+            RadioButtons(selected: self.$selected)
+            Spacer()
         }
         .onAppear{
+            
             //설정 페이지 들어올 때 user info model에 저장했던 calendar public state가져옴.
             if self.main_vm.user_info_model.calendar_public_state == 0{
                 self.selected = "전체 공개"
@@ -50,9 +51,9 @@ struct SettingFeedDisclousreView: View {
 struct RadioButtons: View{
     
     @Binding var selected: String
-     var menus = ["전체 공개", "카드만 공개", "비공개"]
-
-     var sub_menus = ["(모든 일정 공개)", "(개인일정 공개 안함)", "(나만 보기)"]
+    var menus = ["전체 공개", "카드만 공개", "비공개"]
+    
+    var sub_menus = ["(모든 일정 공개)", "(개인일정 공개 안함)", "(나만 보기)"]
     
     var body: some View{
         
@@ -89,7 +90,7 @@ struct RadioButtons: View{
                         
                         ZStack{
                             Circle().stroke(Color.proco_black)
-                            .frame(width: 20, height: 20)
+                                .frame(width: 20, height: 20)
                             if self.selected == menu{
                                 Circle().fill(Color.proco_black).frame(width: 20, height: 20)
                             }

@@ -26,8 +26,8 @@ struct MyApplyMeetingStruct: Codable, Identifiable{
     var cur_user: Int? = 0
     var card_photo_path : String? = ""
     var lock_state : Int? = 0
-    var like_count : Int = 0
-    var like_state : Int = 0
+    var like_count : Int? = 0
+    var like_state : Int? = 0
     var id: Int{
         return self.card_idx ?? -1
     }

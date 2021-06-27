@@ -100,7 +100,7 @@ extension GroupVollehCard {
             HStack{
             Capsule()
                 .foregroundColor(group_card.tags![0].tag_name == "사교/인맥" ? .proco_yellow : group_card.tags![0].tag_name == "게임/오락" ? .proco_pink : group_card.tags![0].tag_name == "문화/공연/축제" ? .proco_olive : group_card.tags![0].tag_name == "운동/스포츠" ? .proco_green : group_card.tags![0].tag_name == "취미/여가" ? .proco_mint : group_card.tags![0].tag_name == "스터디" ? .proco_blue : .proco_red)
-                .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width/17)
+                .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width/17)
                 .overlay(
                     Text("\(group_card.tags![0].tag_name)")
                         .font(.custom(Font.t_extra_bold, size: 13))
@@ -144,15 +144,6 @@ extension GroupVollehCard {
                 .foregroundColor(.proco_black)
         }
         .padding(.leading)
-    }
-    
-    var lock : some View{
-        HStack{
-            Image(self.group_card.lock_state == 0 ? "lock_public" : "lock_private")
-                .resizable()
-                .frame(width: 14, height: 11)
-        }
-        .padding(.trailing)
     }
     
     var like_icon_num : some View{
