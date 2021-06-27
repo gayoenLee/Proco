@@ -685,7 +685,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     let type = param[type_idx!].value
                     print("모임 종류 꺼낸 것 확인: \(type)")
                     
-                    self.my_group_card_struct.append(GroupCardStruct(result: "", card_idx: response.card_idx, title: self.card_name, kinds: (type as! String), expiration_at: self.card_expire_time, address: self.map_data.location_name, map_lat: String(self.map_data.map_lat), map_lng:  String(self.map_data.map_lng), cur_user: 1, apply_user: 0, introduce: self.input_introduce, tags: response.tags, creator: nil, offset: 0.0))
+                    self.my_group_card_struct.append(GroupCardStruct(result: "", card_idx: response.card_idx, title: self.card_name, kinds: (type as! String), expiration_at: self.card_expire_time, address: self.map_data.location_name, map_lat: String(self.map_data.map_lat), map_lng:  String(self.map_data.map_lng), cur_user: 1, apply_user: 0, introduce: self.input_introduce,card_photo_path: response.card_photo_path ?? "",tags: response.tags ,creator: nil, offset: 0.0))
                     
                     print("카드 만들기 후 데이터 집어넣어졌는지 확인: \(self.card_name)")
                     print("카드 만들기 후 데이터 집어넣어졌는지 확인2: \(self.my_group_card_struct)")
@@ -1030,16 +1030,14 @@ class GroupVollehMainViewmodel: ObservableObject{
                     //참가 신청 완료 알림 나타내기
                     print("참가 신청 목록 없음")
                 }else{
-                    
-                    let json_decoder = JSONDecoder()
-                    
+                                        
                     let json_string = """
                         \(String(describing: response))
                         """
                     let data = json_string.data(using: .utf8)
                     print("data 스트링 변환 확인: \(json_string)")
                     
-                    let json_data = try? json_decoder.decode([MyApplyMeetingStruct].self, from: data!)
+                    let json_data = try? JSONDecoder().decode([MyApplyMeetingStruct].self, from: data!)
                     
                     print("참가 신청 목록이 있을 경우 : \(json_data)")
                     for meeting in json_data!{
