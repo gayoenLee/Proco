@@ -46,6 +46,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
                         if let error = error {
                             print(error.localizedDescription)
                         } else {
+                            
                             print("리절트를 어펜드함: \(String(describing: newImage))")
                             //뷰에 보여주기 위해 넣는 것.
                             self.parent.pickerResult = newImage as! UIImage
@@ -53,11 +54,11 @@ struct PhotoPicker: UIViewControllerRepresentable {
                             //이미지 데이터를 UIImage로 변환해서 jpeg로 만듬.
                             let ui_image : UIImage = newImage as! UIImage
                             print("ui image 확인: \(ui_image)")
-                          let image_data = ui_image.jpegData(compressionQuality: 0.2) ?? Data()
-                     print("이미지 데이터 확인: \(image_data)")
+                            let image_data = ui_image.jpegData(compressionQuality: 0.2) ?? Data()
+                            print("이미지 데이터 확인: \(image_data)")
                             if self.parent.is_profile_img{
-                            //프로필 이미지 변경 통신
-                            self.parent.main_vm.send_profile_image(image_data: image_data)
+                                //프로필 이미지 변경 통신
+                                self.parent.main_vm.send_profile_image(image_data: image_data)
                                 
                             }else{
                                 //모임 이미지 추가시
