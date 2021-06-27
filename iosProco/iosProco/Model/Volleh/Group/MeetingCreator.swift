@@ -8,7 +8,9 @@
 import Foundation
 
 struct MeetingCreator: Codable, Identifiable{
-    var id = UUID()
+    var id : Int{
+        idx!
+    }
     var nickname: String? = ""
     var idx: Int? = -1
     var profile_photo_path: String? = ""
