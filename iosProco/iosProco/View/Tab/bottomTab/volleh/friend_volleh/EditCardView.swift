@@ -95,14 +95,19 @@ struct EditCardView: View {
                 }
             }
         }
-        
+        .navigationBarColor(background_img: "wave_bg", btn_img: "card_dialog_close_icon")
+        .navigationBarTitle("카드 수정")
+        .navigationBarItems(leading:
+                                Button(action: {
+                                    self.presentationMode.wrappedValue.dismiss()
+                                }){
+                                    Image("left")
+                                })
         .onAppear{
             print("상세 페이지 나타남")
             self.main_viewmodel.get_card_detail(card_idx: self.main_viewmodel.selected_card_idx)
         }
         }
-        .navigationBarColor(background_img: "wave_bg")
-        .navigationBarTitle("카드 수정")
 
     }
 }
