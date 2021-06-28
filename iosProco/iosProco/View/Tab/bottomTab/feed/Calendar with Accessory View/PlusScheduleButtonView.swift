@@ -23,7 +23,7 @@ struct PlusScheduleButtonView: View {
             Button(action: {
                 
                 print("일정 추가하기 버튼 클릭")
-                self.add_schedule.toggle()
+                self.add_schedule = true
                 
             }){
                 Image("plus_yellow_btn")

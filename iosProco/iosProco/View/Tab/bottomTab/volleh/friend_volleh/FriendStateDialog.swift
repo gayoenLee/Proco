@@ -11,7 +11,8 @@ import Kingfisher
 struct FriendStateDialog: View {
     @ObservedObject var main_vm: FriendVollehMainViewmodel
     @ObservedObject var group_main_vm: GroupVollehMainViewmodel
-    
+    @ObservedObject var  calendar_vm: CalendarViewModel
+
     @Binding var show_friend_info: Bool
     @ObservedObject var socket : SockMgr
     //채팅하기 클릭시 채팅화면으로 이동.
@@ -37,7 +38,7 @@ struct FriendStateDialog: View {
                         //모달 컨텐츠를 포함하고 있는 큰 사각형. 색깔 투명하게 하기 위함.
                         .foregroundColor(.clear)
                         .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.07)
-                        .overlay(FriendStateDialogContents(main_vm: self.main_vm,group_main_vm: self.group_main_vm, show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed, state_on: self.$state_on, is_friend: self.is_friend, show_report_view: self.$show_report_view, is_from_chatroom: is_from_chatroom)
+                        .overlay(FriendStateDialogContents(calendar_vm: self.calendar_vm, main_vm: self.main_vm,group_main_vm: self.group_main_vm, show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed, state_on: self.$state_on, is_friend: self.is_friend, show_report_view: self.$show_report_view, is_from_chatroom: is_from_chatroom)
                                     .offset(x: UIScreen.main.bounds.width*0.009, y: UIScreen.main.bounds.height * 0.05))
                 )
         }
@@ -46,7 +47,7 @@ struct FriendStateDialog: View {
 
 
 struct FriendStateDialogContents : View{
-    @ObservedObject var  calendar_vm: CalendarViewModel = CalendarViewModel()
+    @ObservedObject var  calendar_vm: CalendarViewModel
     @ObservedObject var main_vm: FriendVollehMainViewmodel
     @ObservedObject var group_main_vm: GroupVollehMainViewmodel
     
@@ -110,7 +111,8 @@ struct FriendStateDialogContents : View{
                            destination: NormalChatRoom(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket: self.socket),
                            isActive: self.$go_to_chat)
             
-            NavigationLink("",destination: SimSimFeedPage(main_vm: CalendarViewModel()), isActive: self.$go_to_feed)
+            NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm), isActive: self.$go_to_feed)
+            
             //마이페이지 이동(내 다이얼로그인 경우)
             NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_my_page)
             
@@ -250,15 +252,12 @@ struct FriendStateDialogContents : View{
             .padding(.bottom,UIScreen.main.bounds.width/50)
             
             HStack{
-                
-                
                 //내 다이얼로그인 경우 마이페이지 버튼
                 if is_friend && Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
                     
                     Button(action: {
                         
                         self.go_to_feed.toggle()
-                        
                     }){
                         HStack{
                             
@@ -273,19 +272,27 @@ struct FriendStateDialogContents : View{
                 }else{
                     
                     Button(action: {
-                        
+                        print("다른 사람 피드 보기 버튼 클릭")
                         //캘린더를 보려는 사람의 idx = 내 idx 저장.
-                        
                         if is_friend{
-                            calendar_vm.calendar_owner.watch_user_idx = Int(main_vm.my_idx!)!
+                          print("친구인 경우")
+                            calendar_vm.calendar_owner.watch_user_idx = Int(calendar_vm.my_idx!)!
+                            print("캘린더 보는 유저 idx: \(calendar_vm.calendar_owner.watch_user_idx), \(Int(calendar_vm.my_idx!)!)")
                             
-                            print("친구 idx 확인: \(main_vm.friend_info_struct)")
+                            calendar_vm.calendar_owner.profile_photo_path = main_vm.friend_info_struct.profile_photo ?? ""
+                            
+                            calendar_vm.calendar_owner.user_idx = main_vm.friend_info_struct.idx!
+                            print("캘린더 주인 idx: \(main_vm.friend_info_struct.idx!)")
+                            print("캘린더 주인 데이터 넣은 것 확인: \(calendar_vm.calendar_owner)")
+                            
                             SimSimFeedPage.calendar_owner_idx = main_vm.friend_info_struct.idx!
                             
                             //친구가 아닌 경우는 모임에서 다이얼로그를 클릭한 경우
                         }else{
-                            
+                            print("친구가 아닌 경우 피드 보기 버튼 클릭")
+
                             calendar_vm.calendar_owner.watch_user_idx = Int(group_main_vm.my_idx!)!
+                            
                             
                             SimSimFeedPage.calendar_owner_idx = group_main_vm.creator_info.idx!
                                                         

@@ -21,6 +21,9 @@ struct SimSimFeedPage: View {
     
     @State private var previous_month : Date = Date()
     
+    //친구 신청 후 뷰 변경시키기 위함
+    @State private var friend_requested: Bool = false
+    
     var body: some View {
         VStack{
             if !is_loading{
@@ -42,71 +45,159 @@ struct SimSimFeedPage: View {
                     
                     //친구지만 비공개
                 }else if main_vm.check_friend_result == "friend_disallow"{
-                    
-//                    FeedLimitedView(main_vm: self.main_vm, show_range: "friend_disallow")
-                    Button(action: {
-                        print("친구 신청 버튼 클릭")
-                        self.main_vm.friend_request_result_alert_func(main_vm.friend_request_result_alert)
-                        
-                        //친구 요청 통신
-                        self.main_vm.add_friend_request(f_idx: SimSimFeedPage.calendar_owner_idx!)
-                        
-                    }){
-                                Text("친구 신청")
-                                    .font(.system(size: 15))
-                    }
-                    
+                    Spacer()
+
+                    //                    FeedLimitedView(main_vm: self.main_vm, show_range: "friend_disallow")
+                        Text("비공개 피드입니다")
+                            .font(.custom(Font.n_bold, size: 15))
+                            .foregroundColor(Color.proco_white)
+                            .foregroundColor(.proco_white)
+                            .background(Color.main_orange)
+                            .cornerRadius(25)
+                            .frame(width: 150, height: 70)
+                    Spacer()
+
                 }
                 //친구 아닐 때
                 else{
-//                    FeedLimitedView(main_vm: self.main_vm, show_range: "not_friend")
-                    Button(action: {
-                        print("친구 신청 버튼 클릭")
-                        self.main_vm.friend_request_result_alert_func(main_vm.friend_request_result_alert)
-                        
-                        //친구 요청 통신
-                        self.main_vm.add_friend_request(f_idx: SimSimFeedPage.calendar_owner_idx!)
-                    }){
-                        
-                                Text("친구 신청")
-                                    .font(.system(size: 15))
+                    Spacer()
+
+                    if friend_requested{
+                        HStack{
+                     
+                                Text("요청됨")
+                                    .padding()
+                                    .font(.custom(Font.n_bold, size: 16))
+                                    .foregroundColor(Color.proco_white)
+                                    .foregroundColor(.proco_white)
+                                    .background(Color.main_orange)
+                                    .cornerRadius(25)
+                                    .frame(width: 100, height: 70)
                             
+                            Button(action: {
+                                print("친구 취소 버튼 클릭")
+                                
+                                self.main_vm.cancel_request_friend(f_idx: SimSimFeedPage.calendar_owner_idx!)
+                            }){
+                                Text("취소")
+                                    .padding()
+                                    .font(.custom(Font.n_bold, size: 16))
+                                    .frame(width: 100, height: 70)
+                                    .foregroundColor(Color.gray)
+                                    .background(Color.light_gray)
+                                    .cornerRadius(25)
+                                    .border(Color.main_orange, width: 1)
+                            }
+                        }
+                    }else{
+                        
+                        HStack{
+                            Spacer()
+                            Text("친구가 아닌 경우")
+                                .font(.custom(Font.n_bold, size: 15))
+                                .foregroundColor(Color.proco_black)
+                            Spacer()
+
+                        }
+                        HStack{
+                            Spacer()
+
+                            Text("심심풀이를 볼 수 없어요.")
+                                .font(.custom(Font.n_bold, size: 15))
+                                .foregroundColor(Color.proco_black)
+                            Spacer()
+
+                        }
+                        HStack{
+                            Spacer()
+
+                            Text("친구가 된후에 즐겨보세요")
+                                .font(.custom(Font.n_bold, size: 15))
+                                .foregroundColor(Color.proco_black)
+                            Spacer()
+
+                        }
+                        Button(action: {
+                            print("친구 신청 버튼 클릭")
+                            self.main_vm.friend_request_result_alert_func(main_vm.friend_request_result_alert)
+                            
+                            //친구 요청 통신
+                            self.main_vm.add_friend_request(f_idx: SimSimFeedPage.calendar_owner_idx!)
+                        }){
+                            Text("친구신청")
+                                .padding()
+                                .font(.custom(Font.n_bold, size: 16))
+                                .foregroundColor(Color.proco_white)
+                                .foregroundColor(.proco_white)
+                                .background(Color.main_orange)
+                                .cornerRadius(25)
+                                .frame(width: 150, height: 70)
+                        }
                     }
-               
+                    //                    FeedLimitedView(main_vm: self.main_vm, show_range: "not_friend")
                 }
             }else{
                 ProgressView()
             }
             Spacer()
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.request_friend), perform: {value in
+            
+            if let user_info = value.userInfo{
+                let check_result = user_info["request_friend_feed"]
+                print("친구 요청 데이터 확인: \(String(describing: check_result))")
+                
+                //친구 신청 취소한 경우
+                 if check_result as! String == "canceled_ok"{
+                    let friend_idx = user_info["friend"] as! String
+                    
+                    if SimSimFeedPage.calendar_owner_idx! == Int(friend_idx){
+                       friend_requested = false
+                    }
+                }else if check_result as! String == "canceled_fail"{
+                    let friend_idx = user_info["friend"] as! String
+                    
+                    //실패 알림창 띄움
+                    if  SimSimFeedPage.calendar_owner_idx! == Int(friend_idx){
+                      
+                    }
+                }
+            }
+        })
         .alert(isPresented: $main_vm.show_friend_result_alert){
             switch main_vm.friend_request_result_alert{
             case .no_friends, .denied:
                 return Alert(title: Text("친구 추가하기"), message: Text("없는 사용자입니다"), dismissButton: Alert.Button.default(Text("확인"), action: {
                     main_vm.show_friend_result_alert = false
+                    
                 }))
                 
             case .request_wait:
                 return Alert(title: Text("친구 추가하기"), message: Text("친구 요청된 사용자입니다"), dismissButton:
                                 Alert.Button.default(Text("확인"), action: {
+                                    friend_requested = true
                                     main_vm.show_friend_result_alert = false
                                 }))
                 
             case .requested:
                 return Alert(title: Text("친구 추가하기"), message: Text("친구 요청된 사용자입니다"), dismissButton:Alert.Button.default(Text("확인"), action: {
+                    friend_requested = true
                     main_vm.show_friend_result_alert = false
                 }))
             case .already_friend:
                 return Alert(title: Text("친구 추가하기"), message: Text("이미 친구 상태인 사용자입니다"), dismissButton: Alert.Button.default(Text("확인"), action: {
+                    friend_requested = true
                     main_vm.show_friend_result_alert = false
                 }))
             case .myself:
                 return Alert(title: Text("친구 추가하기"), message: Text("내 번호입니다"), dismissButton:Alert.Button.default(Text("확인"), action: {
+                    
                     main_vm.show_friend_result_alert = false
                 }))
-
+                
             case .success:
                 return Alert(title: Text("친구 추가하기"), message: Text("친구 신청이 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
+                    friend_requested = true
                     main_vm.show_friend_result_alert = false
                 }))
             case .fail:
@@ -124,16 +215,17 @@ struct SimSimFeedPage: View {
             print("순서1. 심심피드 페이지에서 initial month 확인: \(main_vm.initial_month) 이전 달: \(self.previous_month)")
             
             //이 페이지에 들어온 사람이 친구인지 체크하는 통신 -> true면 카드 공개범위 가져오는 통신 -> 카드 이벤트들 가져오기 -> small schedules 데이터 저장 -> 심심기간 데이터 가져옴
-            main_vm.check_is_friend(friend_idx: SimSimFeedPage.calendar_owner_idx ?? Int(ChatDataManager.shared.my_idx!)!)
+            print("심심피드 페이지에서 친구 체크하기 전 캘린더 모델 데이터 확인: \(main_vm.calendar_owner.user_idx)")
+            
+            main_vm.check_is_friend(friend_idx: self.main_vm.calendar_owner.user_idx)
             
             //친구 체크 통신 시간이 걸리는 것을 감안해서 뷰 로딩시간 만듬
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0){
                 self.is_loading = false
             }
             print("피드페이지 온어피어 \(main_vm.check_friend_result)")
         }
     }
-    
 }
 
 extension Calendar{

@@ -328,9 +328,16 @@ private extension FriendVollehCardDetail{
                 //캘린더를 보려는 사람의 idx = 내 idx 저장.
                 calendar_vm.calendar_owner.watch_user_idx = Int(main_vm.my_idx!)!
                 
-                print("친구 idx 확인: \(main_vm.friend_info_struct)")
+                calendar_vm.calendar_owner.user_idx = main_vm.friend_volleh_card_detail.creator.idx
+                
+                calendar_vm.calendar_owner.profile_photo_path = main_vm.friend_volleh_card_detail.creator.profile_photo_path ?? ""
+                
+                calendar_vm.calendar_owner.user_nickname = main_vm.friend_volleh_card_detail.creator.nickname
+                print("심심피드 보기 클릭시 친구 idx 확인: \(main_vm.friend_volleh_card_detail.creator)")
+                
                 SimSimFeedPage.calendar_owner_idx = main_vm.friend_volleh_card_detail.creator.idx
                 self.go_to_feed.toggle()
+                
             }){
                 
                 HStack{

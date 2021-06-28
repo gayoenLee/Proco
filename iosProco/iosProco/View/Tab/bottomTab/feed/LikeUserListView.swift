@@ -9,12 +9,13 @@ import SwiftUI
 
 struct LikeUserListView: View {
     
-    @ObservedObject var main_vm : CalendarViewModel
+    @StateObject var main_vm : CalendarViewModel
     @State var searchText = ""
     //사용자가 현재 검색창에 텍스트를 입력중인가를 알 수 있는 변수
     @State var isSearching = false
     //키보드에서 엔터 버튼 클릭시 검색 완료를 알리기 위한 변수
     @State var end_search = false
+    var schedule_date : Date
     
     var body: some View {
         VStack{
@@ -22,14 +23,18 @@ struct LikeUserListView: View {
                 .font(.custom(Font.n_extra_bold, size: 22))
                 .foregroundColor(Color.proco_black)
                 .padding()
+            
             HStack{
                 ClickUserSearchBar(searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
             }
+            
             //검색할 경우에는 보여주지 않기
             if (isSearching == false && end_search == false){
+                
                 ForEach(main_vm.calendar_like_user_model){user in
                     LikeUserCell(like_user_model: user)
                 }
+                
             }else{
                 ForEach((main_vm.calendar_like_user_model).filter({"\($0)".contains(searchText)}), id: \.id){user in
                     
@@ -40,6 +45,9 @@ struct LikeUserListView: View {
         }
         .onAppear{
             print("좋아요한 사람들 목록뷰 나옴.")
+            let current_date_string = self.main_vm.date_to_string(date: schedule_date).split(separator: " ")[0]
+            
+            self.main_vm.get_like_user_list(user_idx: Int(self.main_vm.my_idx!)!, calendar_date: String(current_date_string))
         }
     }
 }
@@ -63,9 +71,9 @@ struct ClickUserSearchBar: View {
                     //키보드에서 엔터 버튼 클릭시 검색 완료를 알리기 위한 변수
                     end_search =  true
                 })
-                    //검색 버튼이 있는 키보드 설정
-                    .keyboardType(.webSearch)
-                    .padding(.leading, UIScreen.main.bounds.width/20)
+                //검색 버튼이 있는 키보드 설정
+                .keyboardType(.webSearch)
+                .padding(.leading, UIScreen.main.bounds.width/20)
             }
             .padding()
             .background(Color(.systemGray5))
@@ -100,7 +108,7 @@ struct ClickUserSearchBar: View {
                     searchText = ""
                     //키보드를 숨기는 메소드
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                
+                    
                 }, label: {
                     Text("Cancel")
                         .padding(.trailing)

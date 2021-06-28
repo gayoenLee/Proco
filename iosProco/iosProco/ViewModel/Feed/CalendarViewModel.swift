@@ -39,7 +39,7 @@ public class CalendarViewModel: ObservableObject{
         didSet{
             print("캘린더 뷰모델에 initial month didset 들어옴: \(self.initial_month).")
           
-            self.get_card_for_calendar(user_idx: Int(self.my_idx!)!, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
+            self.get_card_for_calendar(user_idx: self.calendar_owner.user_idx, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
         }
     }
     
@@ -72,6 +72,7 @@ public class CalendarViewModel: ObservableObject{
     //단일 일자 상세 페이지 뷰에서 보여줄 일정 리스트 모델
     @Published var schedules_model : [Schedule] = []{
         willSet{
+            print("schedules model 디드셋 안")
                 objectWillChange.send()
         }
     }
@@ -344,7 +345,7 @@ public class CalendarViewModel: ObservableObject{
                     
                     print("최종 저장한 날짜 한 칸 관심있어요 모델: \(self.interest_model)")
                     //****좋아요 정보 가져오는 통신
-                    self.get_like_for_calendar(user_idx: Int(self.my_idx!)!, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
+                    self.get_like_for_calendar(user_idx: self.calendar_owner.user_idx, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
                 }
             })
     }
@@ -540,7 +541,7 @@ public class CalendarViewModel: ObservableObject{
                     print("단일자 일정 리스트 모델 schedules에 저장됐는지 확인: \(self.schedules_model)")
                     
                     //심심기간 가져오기 -> 안에 좋아요 정보 가져오는 통신 있음.
-                    self.get_boring_period(user_idx: SimSimFeedPage.calendar_owner_idx!, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
+                    self.get_boring_period(user_idx: self.calendar_owner.user_idx, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
                     
                 }else{
                     print("캘린더 카드 리스트 조회 결과값 없음")
@@ -704,7 +705,7 @@ public class CalendarViewModel: ObservableObject{
                 if self.check_friend_result == "friend_allow"{
                     
                 //내 일정 정보 가져오는 통신
-                    self.get_personal_schedules(user_idx: Int(self.my_idx!)!, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
+                    self.get_personal_schedules(user_idx: self.calendar_owner.user_idx, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
                 }
             })
     }
@@ -1088,9 +1089,14 @@ public class CalendarViewModel: ObservableObject{
                         //모델에 기존에 일정이 등록돼서 해당 날짜에 등록된 데이터가 있었을 경우
                         if find_idx != -1{
                             print("기존에 저장한 정보가 있었을 경우")
+//                            self.schedules_model[find_idx!].schedule.append(ScheduleInfo(card_idx: schedule_idx, type: "personal", schedule_date: schedule_date_form, schedule_name: title, tag_color: Color.yellow, start_time: schedule_time_form, end_time: schedule_time_form, category: "", current_people: "", location_name: "", is_private: false, memo: content))
+//                            print("내 일정 추가한 후 저장한 정보 확인: \(self.schedules_model[find_idx!])")
                             
-                            self.schedules_model[find_idx!].schedule.append(ScheduleInfo(card_idx: schedule_idx, type: "personal", schedule_date: schedule_date_form, schedule_name: title, tag_color: Color.yellow, start_time: schedule_time_form, end_time: schedule_time_form, category: "", current_people: "", location_name: "", is_private: false, memo: content))
-                            print("내 일정 추가한 후 저장한 정보 확인: \(self.schedules_model[find_idx!])")
+                            let model_idx = String(find_idx!)
+                            var schedule_info : [ScheduleInfo] = []
+                            schedule_info.append(ScheduleInfo(card_idx: schedule_idx, type: "personal", schedule_date: schedule_date_form, schedule_name: title, tag_color: Color.yellow, start_time: schedule_date_form, end_time: schedule_date_form, category: "personal", current_people: "-1", location_name: "", is_private: false, memo: content))
+                            
+                            NotificationCenter.default.post(name: Notification.calendar_personal_schedule, object: nil, userInfo: ["add_calendar_schedule" : "already_exist_ok", "data" : schedule_info, "model_idx" : model_idx])
                             
                         //기존에 일정이 등록되지 않아서 모델에 저장된 데이터가 없었을 경우
                         }else{
@@ -1099,13 +1105,14 @@ public class CalendarViewModel: ObservableObject{
                             var schedule_info : [ScheduleInfo] = []
                             schedule_info.append(ScheduleInfo(card_idx: schedule_idx, type: "personal", schedule_date: schedule_date_form, schedule_name: title, tag_color: Color.yellow, start_time: schedule_date_form, end_time: schedule_date_form, category: "personal", current_people: "-1", location_name: "", is_private: false, memo: content))
                             
-                            let schedule_date = self.make_date(expiration: schedule_date)
-                            self.schedules_model.append(Schedule(date: schedule_date, like_num: -1, liked_myself: false, like_idx: -1, schedule: schedule_info))
+//                            let schedule_date = self.make_date(expiration: schedule_date)
+//                            self.schedules_model.append(Schedule(date: schedule_date, like_num: -1, liked_myself: false, like_idx: -1, schedule: schedule_info))
+                            
+                            NotificationCenter.default.post(name: Notification.calendar_personal_schedule, object: nil, userInfo: ["add_calendar_schedule" : "new_ok", "data" : schedule_info, "schedule_date" : schedule_date])
                         }
-                        self.schedule_start_date = Date()
-                        self.schedule_start_time = Date()
                         
-                        print("내 일정 추가한 후 저장한 모델 확인: \(self.schedules_model)")
+//                        self.schedule_start_date = Date()
+//                        self.schedule_start_time = Date()
                     }
                 }
             })
@@ -1337,8 +1344,7 @@ public class CalendarViewModel: ObservableObject{
                     
                     print("카드 정보 가져오는 시작날짜: \(self.calendar_start_date), 끝날짜: \(self.calendar_end_date)")
                     
-                    
-                    self.get_card_for_calendar(user_idx: friend_idx, date_start:  self.date_to_string(date: self.calendar_start_date), date_end:  self.date_to_string(date: self.calendar_end_date
+                    self.get_card_for_calendar(user_idx: self.calendar_owner.user_idx, date_start:  self.date_to_string(date: self.calendar_start_date), date_end:  self.date_to_string(date: self.calendar_end_date
                     ))
                     self.check_friend_result = "friend_allow"
                     
@@ -1347,7 +1353,7 @@ public class CalendarViewModel: ObservableObject{
                     
                     self.check_friend_result = "friend_allow_card"
                     //피드 정보 가져오는 통신 진행.
-                    self.get_card_for_calendar(user_idx: friend_idx, date_start:  self.date_to_string(date: self.calendar_start_date), date_end:  self.date_to_string(date: self.calendar_end_date
+                    self.get_card_for_calendar(user_idx: self.calendar_owner.user_idx, date_start:  self.date_to_string(date: self.calendar_start_date), date_end:  self.date_to_string(date: self.calendar_end_date
                     ))
                     
                 }
@@ -1477,6 +1483,37 @@ public class CalendarViewModel: ObservableObject{
                     print("ok")
                 //result ok 아닐 때 처리 필요한지 생각해보기.
                 }else{
+                    
+                }
+            })
+    }
+    
+    //친구 신청 취소
+    func cancel_request_friend(f_idx: Int){
+        cancellation = APIClient.cancel_request_friend(f_idx: f_idx)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("회원가입 친구 요청 통신 에러 발생 : \(error)")
+                case .finished:
+                    break
+                }
+            }, receiveValue: {response in
+                print("친구 신청 취소 응답: \(response)")
+                
+                let result : String?
+                result = response["result"].string
+                let friend_idx = String(f_idx)
+                
+                if result == "ok"{
+                    print("친구 신청 취소 완료")
+                    
+                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend_feed": "canceled_ok", "friend": friend_idx])
+                    
+                }else{
+                    print("친구 신청 취소 실패")
+                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend_feed": "canceled_fail", "friend": friend_idx])
                     
                 }
             })
@@ -1645,7 +1682,7 @@ public class CalendarViewModel: ObservableObject{
                     stop = true
                 }
             }
-            print("최종으로 만든 스케줄 데이터: \(schedules)")
+            print("최종으로 스케줄 데이터 만듬")
         }
         return schedules
     }
