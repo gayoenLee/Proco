@@ -42,14 +42,11 @@ struct ScheduleLikeView: View {
                     .foregroundColor(Color.red)
             }
             
-            NavigationLink("", destination: LikeUserListView(main_vm: self.main_vm), isActive: self.$show_like_users)
+            NavigationLink("", destination: LikeUserListView(main_vm: self.main_vm, schedule_date: schedule.date), isActive: self.$show_like_users)
             
             //좋아요를 클릭한 사람들의 목록을 보는 페이지로 이동.
             Button(action: {
-                let current_date_string = self.main_vm.date_to_string(date: schedule.date).split(separator: " ")[0]
-                print("좋아요 목록 보기 페이지로 이동하기 클릭, 날짜 확인: \(current_date_string)")
-                
-                self.main_vm.get_like_user_list(user_idx: Int(self.main_vm.my_idx!)!, calendar_date: String(current_date_string))
+
                 //좋아요 목록 뷰로 이동시키기
                 self.show_like_users.toggle()
                 print("좋아요 유저 목록 뷰로 이동시키는 값 토글.")
