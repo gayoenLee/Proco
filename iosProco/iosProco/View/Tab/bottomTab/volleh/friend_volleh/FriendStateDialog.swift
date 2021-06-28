@@ -111,7 +111,7 @@ struct FriendStateDialogContents : View{
                            destination: NormalChatRoom(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket: self.socket),
                            isActive: self.$go_to_chat)
             
-            NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm), isActive: self.$go_to_feed)
+            NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_to_feed)
             
             //마이페이지 이동(내 다이얼로그인 경우)
             NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_my_page)
