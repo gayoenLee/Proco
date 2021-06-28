@@ -30,24 +30,14 @@ struct ScheduleCell: View {
     var body: some View {
         
         HStack{
-            //개인일정 상세페이지
-            NavigationLink("", destination: ScheduleDetailView(main_vm: self.main_vm,  info_model: clicked_info_model, back_to_calendar: self.$show_personal_card), isActive: self.$show_personal_card)
-                .isDetailLink(false)
             
-            //친구카드 상세페이지
-            NavigationLink("", destination:FriendVollehCardDetail(main_vm: self.friend_main_vm, group_main_vm: self.group_main_vm, socket: SockMgr.socket_manager, calendar_vm: self.main_vm), isActive: self.$show_friend_card)
-                .isDetailLink(false)
-            
-            //그룹카드 상세페이지
-            NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_main_vm, socket: SockMgr.socket_manager, calendar_vm: self.main_vm), isActive: self.$show_group_card)
-            
-            VStack(alignment: .leading){
+            VStack{
                 
                 ForEach(schedule_info, id: \.id){info in
                     HStack{
                         TypeView(schedule_info: info)
                         
-                        VStack(alignment: .leading){
+                        VStack{
                             
                             //개인일정일 경우 카테고리 태그 없음.
                             if info.type != "personal"{
@@ -99,12 +89,21 @@ struct ScheduleCell: View {
                         }
                     }
                 }
+                
             }
-            .padding(UIScreen.main.bounds.width/40)
-            //Spacer()
+            //.padding(.leading)
+            //개인일정 상세페이지
+            NavigationLink("", destination: ScheduleDetailView(main_vm: self.main_vm,  info_model: clicked_info_model, back_to_calendar: self.$show_personal_card), isActive: self.$show_personal_card)
+                .isDetailLink(false)
+            
+            //친구카드 상세페이지
+            NavigationLink("", destination:FriendVollehCardDetail(main_vm: self.friend_main_vm, group_main_vm: self.group_main_vm, socket: SockMgr.socket_manager, calendar_vm: self.main_vm), isActive: self.$show_friend_card)
+                .isDetailLink(false)
+            
+            //그룹카드 상세페이지
+            NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_main_vm, socket: SockMgr.socket_manager, calendar_vm: self.main_vm), isActive: self.$show_group_card)
         }
-        //.overlay(TypeView(schedule_info: schedule_info))
-        .padding(.vertical, SchedulePreviewConstants.cellPadding)
+        //.padding(.vertical, SchedulePreviewConstants.cellPadding)
         .onDisappear{
             print("날짜 상세페이지 schedule cell 사라짐.")
         }
