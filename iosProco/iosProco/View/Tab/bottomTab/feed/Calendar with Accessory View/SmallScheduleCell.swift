@@ -50,7 +50,6 @@ struct SmallScheduleCell: View {
             }
         }
         .onAppear{
-            print("날짜 한 칸모델: \(self.smallSchedule)")
             let date = self.smallSchedule.arrivalDate
             let model_idx = self.main_vm.small_schedules.firstIndex(where: {
                 $0.arrivalDate == date
@@ -68,7 +67,6 @@ struct SmallScheduleCell: View {
             }
             
         }
-        //        .frame(width: UIScreen.main.bounds.width/30, height: UIScreen.main.bounds.width/40)
     }
 }
 
