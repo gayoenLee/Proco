@@ -128,7 +128,7 @@ struct FriendVollehCardDetail: View {
                             .navigationBarBackButtonHidden(true),
                            isActive: self.$go_edit_from_main)
             //피드 페이지 이동
-            NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm), isActive: self.$go_to_feed)
+            NavigationLink("",destination: SimSimFeedPage( main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_to_feed)
             
             //좋아요한 사람들 목록 페이지 이동
             NavigationLink("",destination: LikePeopleListView(card_idx: self.main_vm.selected_card_idx, main_vm: self.main_vm), isActive: self.$go_like_people_list)

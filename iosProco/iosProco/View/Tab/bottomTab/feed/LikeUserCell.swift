@@ -20,7 +20,7 @@ struct LikeUserCell: View {
     var body: some View {
         
         HStack{
-            NavigationLink("",destination: SimSimFeedPage(main_vm: self.main_vm), isActive: self.$show_friend_feed)
+            NavigationLink("",destination: SimSimFeedPage(main_vm: self.main_vm, view_router: ViewRouter()), isActive: self.$show_friend_feed)
             
             if like_user_model.profile_photo_path == "" || like_user_model.profile_photo_path == nil{
                 
@@ -57,7 +57,8 @@ struct LikeUserCell: View {
             self.main_vm.calendar_owner.profile_photo_path = like_user_model.profile_photo_path ?? ""
             self.main_vm.calendar_owner.user_idx = like_user_model.idx
             self.main_vm.calendar_owner.watch_user_idx = Int(self.main_vm.my_idx!)!
-            
+            SimSimFeedPage.calendar_owner_idx = like_user_model.idx
+
            //피드 페이지로 이동하는 값 변경.
             self.show_friend_feed.toggle()
         }

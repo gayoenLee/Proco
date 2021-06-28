@@ -20,7 +20,7 @@ struct InterestUserCell: View {
     var body: some View {
         HStack{
             
-            NavigationLink("",destination: SimSimFeedPage(main_vm: self.main_vm), isActive: self.$show_friend_feed)
+            NavigationLink("",destination: SimSimFeedPage(main_vm: self.main_vm, view_router: ViewRouter()), isActive: self.$show_friend_feed)
             
             if interest_users_model.profile_photo_path == "" || interest_users_model.profile_photo_path == nil{
                 
@@ -54,12 +54,15 @@ struct InterestUserCell: View {
         }
         .padding()
         .onTapGesture {
-            print("유저 클릭 이벤트: \(interest_users_model.idx)")
+            print("피드 - 관심있어요한 유저 피드 페이지 이동: \(interest_users_model.idx)")
             
             self.main_vm.calendar_owner.profile_photo_path = interest_users_model.profile_photo_path ?? ""
             self.main_vm.calendar_owner.user_idx = interest_users_model.idx
             self.main_vm.calendar_owner.watch_user_idx = Int(self.main_vm.my_idx!)!
+            print("관심있어요 유저 클릭 후 캘린더 오너 데이터: \(self.main_vm.calendar_owner)")
             
+            SimSimFeedPage.calendar_owner_idx = interest_users_model.idx
+
            //피드 페이지로 이동하는 값 변경.
             self.show_friend_feed.toggle()
         }

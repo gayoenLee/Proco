@@ -18,7 +18,7 @@ struct InterestCell: View {
     var body: some View {
         HStack{
             //클릭시 관심있어요를 클릭한 사람들 목록 페이지로 이동.
-            NavigationLink("",destination: InterestUserListView(main_vm: self.main_vm), isActive: self.$show_interest_users)
+            NavigationLink("",destination: InterestUserListView(main_vm: self.main_vm, bored_date: interest_model.date!), isActive: self.$show_interest_users)
             
             Button(action: {
                 
@@ -51,11 +51,6 @@ struct InterestCell: View {
             
             Button(action: {
                 
-                let bored_date_string = interest_model.date
-                let bored_date = self.main_vm.date_to_string(date: bored_date_string!)
-                print("관심 표시한 사람들 보려는 날짜: \(bored_date)")
-                
-                self.main_vm.get_interest_users(user_idx: Int(main_vm.my_idx!)!, bored_date: bored_date)
                 self.show_interest_users = true
 
                 print("관심있어요 유저 목록 뷰로 이동 값 토글")

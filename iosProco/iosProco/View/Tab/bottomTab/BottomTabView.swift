@@ -11,11 +11,7 @@ struct BottomTabView: View {
    
     @ObservedObject var view_router: ViewRouter
     @ObservedObject var vm: CalendarViewModel = CalendarViewModel()
-    //가운데 버튼 때문에 내가 추가한 것
-    @State var move : Int = 0
-    @State var first: Bool = false
-    @State var second : Bool = false
-    
+        
     var body: some View {
         NavigationView{
             VStack {
@@ -32,17 +28,18 @@ struct BottomTabView: View {
                                 UITabBar.appearance().barTintColor = .white
                             }
                     case .feed_tab:
-                        SimSimFeedPage(main_vm: self.vm)
+                        SimSimFeedPage( main_vm: self.vm, view_router: self.view_router)
                             .onAppear{
-                                //내 피드 화면으로 이동시 내 닉네임, 프로필 사진을 저장해놔야 함.
-                                vm.calendar_owner.user_idx = Int(UserDefaults.standard.string(forKey: "user_id")!)!
+                                //내 피드 화면으로 이동시 presentation: , 내 닉네임, 프로필 사진을 저장해놔야 함.
+                                vm.calendar_owner.user_idx = SimSimFeedPage.calendar_owner_idx!
                                 vm.calendar_owner.profile_photo_path = UserDefaults.standard.string(forKey: "\(vm.calendar_owner.user_idx)_photo") ?? ""
+                                
                                 vm.calendar_owner.user_nickname = UserDefaults.standard.string(forKey: "nickname") ?? ""
                                 vm.calendar_owner.watch_user_idx = Int(vm.my_idx!)!
                                 print("심심피드 탭 클릭: \(vm.calendar_owner)")
                                 //다른 화면으로 이동시 하단 탭바 숨기는 것.
                                 //UITabBar.appearance().barTintColor = .white
-                            }
+                                }
                             
                     case .friend_volleh:
                         FriendVollehMainView()

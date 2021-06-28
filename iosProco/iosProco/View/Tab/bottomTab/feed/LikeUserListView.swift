@@ -32,13 +32,13 @@ struct LikeUserListView: View {
             if (isSearching == false && end_search == false){
                 
                 ForEach(main_vm.calendar_like_user_model){user in
-                    LikeUserCell(like_user_model: user)
+                    LikeUserCell(main_vm: self.main_vm, like_user_model: user)
                 }
                 
             }else{
                 ForEach((main_vm.calendar_like_user_model).filter({"\($0)".contains(searchText)}), id: \.id){user in
                     
-                    LikeUserCell(like_user_model: user)
+                    LikeUserCell(main_vm: self.main_vm, like_user_model: user)
                 }
             }
             Spacer()
