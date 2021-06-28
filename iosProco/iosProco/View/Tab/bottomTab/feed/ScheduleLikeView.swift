@@ -57,8 +57,8 @@ struct ScheduleLikeView: View {
                     if schedule.like_num!  > 0{
                         
                         Text("좋아요\(schedule.like_num!)개")
-                            .font(.system(size: 14))
-                            .foregroundColor(Color.black)
+                            .font(.custom(Font.n_extra_bold, size: 14))
+                            .foregroundColor(Color.proco_black)
                     }
                     Spacer()
                 }
