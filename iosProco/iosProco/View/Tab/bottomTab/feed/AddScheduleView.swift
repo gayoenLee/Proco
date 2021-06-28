@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AddScheduleView: View {
     @Environment(\.presentationMode) var presentation
-    @ObservedObject var main_vm: CalendarViewModel
+    @StateObject var main_vm: CalendarViewModel
     @Binding var back_to_calendar: Bool
     @State private var title: String = ""
     //메모 글자 수
@@ -41,7 +41,7 @@ struct AddScheduleView: View {
                     Image("card_dialog_close_icon")
                         .resizable()
                         .frame(width:13.89, height: 13.89)
-                       
+                    
                 }
                 Spacer()
                 Text("일정추가")
@@ -50,7 +50,7 @@ struct AddScheduleView: View {
                 Spacer()
                 Button(action: {
                     
-                    print("완료 버튼 클릭")
+                    print("개인 일정 추가 완료 버튼 클릭")
                     
                     let schedule_date = self.date_to_string(date: self.schedule_start_date).split(separator: " ")[0]
                     //시간만 string으로 변환하는데 사용하는 메소드. 생각보다 간단함.
@@ -69,7 +69,7 @@ struct AddScheduleView: View {
                     Image("check_end_btn")
                         .resizable()
                         .frame(width: 40, height: 40)
-                      
+                    
                     //일정 제목, 날짜, 시간을 입력해야만 활성화되도록 처리.
                 }
                 .disabled(!self.add_schedule_ok)
@@ -112,9 +112,9 @@ struct AddScheduleView: View {
             .padding()
             //메모 입력 필드
             HStack{
-            Text("메모")
-                .font(.custom(Font.t_extra_bold, size: 16))
-                .foregroundColor(Color.proco_black)
+                Text("메모")
+                    .font(.custom(Font.t_extra_bold, size: 16))
+                    .foregroundColor(Color.proco_black)
                 
                 Text("\(self.txt_count)")
                     .foregroundColor(Color.gray)
@@ -123,7 +123,7 @@ struct AddScheduleView: View {
                 Spacer()
             }
             .padding()
-             
+            
             HStack{
                 TextEditor(text: self.$schedule_memo)
                     .font(.custom(Font.n_regular, size: 12))
@@ -136,11 +136,11 @@ struct AddScheduleView: View {
                         print("메모 onchange 들어옴")
                         //현재 몇 글자 작성중인지 표시
                         self.txt_count = "\(value.count)/255"
-                       if value.count > 255 {
-                        print("255글자 넘음")
-                        self.schedule_memo = String(value.prefix(255))
-                      }
-                  }
+                        if value.count > 255 {
+                            print("255글자 넘음")
+                            self.schedule_memo = String(value.prefix(255))
+                        }
+                    }
                 
             }
             .font(.custom(Font.t_extra_bold, size: 16))
