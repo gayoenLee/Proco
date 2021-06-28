@@ -574,7 +574,7 @@ public class CalendarViewModel: ObservableObject{
     func date_to_string(date: Date) -> String{
         
         let day = DateFormatter.dateformatter.string(from: date)
-        print("date형식: \(date), 변환된 형식: \(day)")
+        //print("date형식: \(date), 변환된 형식: \(day)")
         return day
     }
     
@@ -1298,7 +1298,6 @@ public class CalendarViewModel: ObservableObject{
                     
                 }else{
                     print("내 일정 삭제 ok 아님")
-                    
                 }
             })
     }
@@ -1325,12 +1324,10 @@ public class CalendarViewModel: ObservableObject{
                 ///친구가 아닐 경우 피드 페이지 : 달력 보여주지 않고 친구 신청 버튼 놓기.
                 if result == -1{
                     print("캘린더 친구 체크 결과 친구 아님")
-                    
                     self.check_friend_result = "not_friend"
 
                 ///비공개
                 }else if result == 0{
-                    
                     self.check_friend_result = "friend_disallow"
                     
                 //공개, 자기자신인 경우
@@ -1350,12 +1347,10 @@ public class CalendarViewModel: ObservableObject{
                     
                //카드만 공개
                 }else{
-                    
                     self.check_friend_result = "friend_allow_card"
                     //피드 정보 가져오는 통신 진행.
                     self.get_card_for_calendar(user_idx: self.calendar_owner.user_idx, date_start:  self.date_to_string(date: self.calendar_start_date), date_end:  self.date_to_string(date: self.calendar_end_date
                     ))
-                    
                 }
             })
         print("친구 체크 통신 결과 후 저장한 값: \(self.check_friend_result)")
@@ -1547,7 +1542,7 @@ public class CalendarViewModel: ObservableObject{
                      - 문제: 서버 통신해서 저장한 데이터 모델을 못 가져옴.-> 뷰모델 안에 메소드 만듬.
                      - index : 친구 카드 또는 그룹 카드 둘 중 한개에서 일치하는 index가 나오므로 optional값으로 만듬.
                      */
-                    print("현재 date 확인: \(date), 마지막 날짜 확인: \(end)")
+                    //print("현재 date 확인: \(date), 마지막 날짜 확인: \(end)")
                     //비교하려는 날짜가 서버에서 받아 저장한 데이터 모델에 있는지 확인. ->있다면 index 가져오는 것.
                     //한 날짜에 일정이 여러개일 수 있으므로 first index를 쓰지 않고 filter,map을 이용해 같은 날짜의 일정이 저장된 index를 가져온다.
                     var friend_idx_array: [String] = []
@@ -1562,7 +1557,7 @@ public class CalendarViewModel: ObservableObject{
                         return  $0.expiration_at?.split(separator: " ")[0] ==
                             date_to_string(date: date).split(separator: " ")[0]
                     }).map({String($0.expiration_at!.split(separator: " ")[0])})
-                    print("모임 idx array: \(meeting_idx_array)")
+                   // print("모임 idx array: \(meeting_idx_array)")
                     //여기까지는 카드 이벤트 관련 인덱스 찾은 것.
                     /*
                      이제는 관심있어요, 좋아요 관련 정보 찾기
@@ -1586,7 +1581,7 @@ public class CalendarViewModel: ObservableObject{
                         if total_like_idx != -1{
                             like_num = like_model.calendar_like_count[total_like_idx].like_count
                         }
-                        print("이 날짜에 대한 좋아요 갯수: 날짜: \(date), \(String(describing: like_num))")
+                        //print("이 날짜에 대한 좋아요 갯수: 날짜: \(date), \(String(describing: like_num))")
                     }
                     
                     //----------내가 클릭한 좋아요 정보 가져오기 시작
@@ -1669,27 +1664,27 @@ public class CalendarViewModel: ObservableObject{
                                     input_schedules.append(SmallScheduleInfo(date: schedule_info[s_index!].date, locationName: schedule_info[s_index!].locationName, tagColor: Color.green, type: "group"))
                                 }
                             }
-                            print("1차로 저장한 input schedule: \(input_schedules)")
+                            //print("1차로 저장한 input schedule: \(input_schedules)")
                             
                             schedules.append(.mock(withDate: date, like_num: like_num, clicked_like_myself: like_myself, like_idx: clicked_like_myself_idx, schedule_info: input_schedules))
                         }
                     }
                     else{
-                        print("일치하는 index 아무것도 없음")
+                        //print("일치하는 index 아무것도 없음")
                     }
                 }
                 else {
                     stop = true
                 }
             }
-            print("최종으로 스케줄 데이터 만듬")
+            //print("최종으로 스케줄 데이터 만듬")
         }
         return schedules
     }
     
     func date_to_string(date: Date) -> String{
         let day = DateFormatter.dateformatter.string(from: date)
-        print("date형식: \(date), 변환된 형식: \(day)")
+       // print("date형식: \(date), 변환된 형식: \(day)")
         return day
     }
     
