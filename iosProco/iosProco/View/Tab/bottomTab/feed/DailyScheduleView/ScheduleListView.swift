@@ -17,7 +17,7 @@ struct ScheduleListView: View {
     let schedules : [Schedule]
     
      //한 번에 보여줄 리스트 갯수(타이머 돌아가기 때문에 모든 리스트보여줄 필요 없음)
-     let numberOfCellsInBlock: Int = 1
+     let numberOfCellsInBlock: Int = 2
     
     @ObservedObject var main_vm : CalendarViewModel
     
@@ -38,9 +38,9 @@ struct ScheduleListView: View {
     }
     
     var body: some View {
-        
+        VStack(alignment: .leading){
         schedule_like_preview
-            .padding()
+            .padding([.leading])
         schedule_preview_list
             .animation(.easeInOut)
             .onAppear(perform: setUpScheduleSlideShow)
@@ -54,6 +54,7 @@ struct ScheduleListView: View {
                 main_vm.schedule_state_changed = true
                 }
             }
+        }
         
     }
     
