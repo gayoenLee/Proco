@@ -37,8 +37,8 @@ struct ProcoMainCalendarView: View {
             calendar: currentCalendar,
             startDate: Calendar.current.date(byAdding: .day, value: -360*2, to: initialMonth!)!,
             endDate: Calendar.current.date(byAdding: .day, value: 360*2, to: initialMonth!)!)
-        print("순서2. 프로코 메인 캘린더뷰에서 init안 initial month \(String(describing: initialMonth)), previous month: \(previousMonth)")
-        print("프로코 메인 캘린더뷰 SmallSchedule 데이터 확인: \(ascSmallSchedules)")
+        print("순서2. 프로코 메인 캘린더뷰에서 init안 initial month")
+        print("프로코 메인 캘린더뷰 Schedule 데이터 확인: \(ascSchedules)")
         
         calendarManager = ElegantCalendarManager(
             configuration: configuration,
@@ -55,7 +55,6 @@ struct ProcoMainCalendarView: View {
         smallSchedulesByDay = Dictionary(
             grouping: main_vm.small_schedules,
             by: { currentCalendar.startOfDay(for: $0.arrivalDate) })
-        print("프로코 메인 캘린더뷰에서 날짜 안 스케줄 데이터 확인: \(ascSmallSchedules)")
         
         small_interest_by_day = Dictionary(grouping: ascSmallInterest, by: {currentCalendar.startOfDay(for: $0.date!)})
         
@@ -127,15 +126,18 @@ struct ProcoMainCalendarView: View {
                         }
                     })
                 
-                
                 Spacer()
                 VStack{
                     Spacer()
                     HStack{
                         Spacer()
+                        
+                        if calendar_owner_data.user_idx == Int(self.main_vm.my_idx!)!{
+                            
                         ZStack(alignment: .bottom){  //일정 추가하는 버튼
                             PlusScheduleButtonView(main_vm: self.main_vm)
                             
+                        }
                         }
                     }
                 }
@@ -147,15 +149,49 @@ struct ProcoMainCalendarView: View {
         }
         .onAppear{
             self.go_setting_page = false
-            print("프로코메인캘린더뷰 나타남 initial_month:\(main_vm.initial_month)")
+            print("프로코메인캘린더뷰 나타남 calendar owner data:\(calendar_owner_data)")
         }
         .navigationBarHidden(true)
         .navigationBarTitle("", displayMode: .inline)
         .frame(height: UIScreen.main.bounds.height*0.9, alignment: .top)
         .sheet(isPresented: self.$go_setting_page){
             FeedDisclosureSettingView(main_vm: self.main_vm)
-           
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.calendar_personal_schedule), perform: {value in
+            print("개인 스케줄 추가 노티 받음.")
+
+            if let user_info = value.userInfo, let data = user_info["add_calendar_schedule"]{
+                print("개인 스케줄 추가 노티 데이터 \(data)")
+
+                if data as! String == "new_ok"{
+
+                let schedule_date = user_info["schedule_date"] as! String
+                    let date_form = self.main_vm.make_date(expiration: schedule_date)
+                    self.main_vm.schedules_model.removeAll()
+              let schedule_info = user_info["data"] as! [ScheduleInfo]
+                    self.main_vm.schedules_model.append(Schedule(date: date_form, like_num: 0, liked_myself: false, like_idx: -1, schedule: schedule_info))
+                print("개인 스케줄 추가 후 데이터 모델에 넣음: \(schedule_info)")
+
+                    calendarManager.objectWillChange.send()
+//                    self.main_vm.schedule_start_date = Date()
+//                    self.main_vm.schedule_start_time = Date()
+                }else if data as! String == "already_exist_ok"{
+                    
+                    print("개인일정 이미 있던 경우")
+                    let schedule_data = user_info["data"] as! ScheduleInfo
+                    let model_idx = user_info["model_idx"] as! String
+                    self.main_vm.schedules_model.removeAll()
+
+                    self.main_vm.schedules_model[Int(model_idx)!].schedule.append(schedule_data)
+                    calendarManager.objectWillChange.send()
+
+//                    self.main_vm.schedule_start_date = Date()
+//                    self.main_vm.schedule_start_time = Date()
+                }
+            }else{
+                print("개인 스케줄 추가 노티 아님")
+            }
+        })
     }
 }
 
@@ -173,6 +209,7 @@ extension ProcoMainCalendarView: ElegantCalendarDataSource {
     
     //내 일정이 있는지 여부를 알기 위해 만듬.-> dayview에서 날짜 한 칸에 내 일정 아이콘 보여주는데 사용.
     func calendar(myScheduleDate date: Date) -> Bool{
+       
         var check_idx : Int? = -1
         
         //schedule모델 안에 personal타입의 데이터가 저장돼 있는지 체크하기 위해 firstindex를 갖고 오는 것.
@@ -183,10 +220,10 @@ extension ProcoMainCalendarView: ElegantCalendarDataSource {
         }) ?? -1
         //갖고 온 first index가 있으면 true
         if check_idx != -1{
+            print("내 일정이 있는지 여부 메소드 안 일정 있는 경우 true: \(schedule_by_day[date]![check_idx!])")
             return true
             
         }else{
-            
             return false
         }
     }
@@ -204,7 +241,6 @@ extension ProcoMainCalendarView: ElegantCalendarDataSource {
             print("좋아요 클릭 안했을 때 날짜 뷰")
         }
             return SmallScheduleListView(main_vm: self.main_vm, smallSchedules: smallSchedulesByDay[startOfDay] ?? [], height: size.height).erased
-        
        
     }
     
