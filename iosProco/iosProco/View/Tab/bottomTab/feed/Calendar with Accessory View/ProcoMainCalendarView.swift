@@ -9,7 +9,7 @@ import SwiftUI
 import ProcoCalendar
 
 struct ProcoMainCalendarView: View {
-    
+
     @ObservedObject private var calendarManager: ElegantCalendarManager
     @ObservedObject var main_vm : CalendarViewModel
     //날짜 한 칸 일정 리스트 데이터
@@ -38,7 +38,7 @@ struct ProcoMainCalendarView: View {
             startDate: Calendar.current.date(byAdding: .day, value: -360*2, to: initialMonth!)!,
             endDate: Calendar.current.date(byAdding: .day, value: 360*2, to: initialMonth!)!)
         print("순서2. 프로코 메인 캘린더뷰에서 init안 initial month")
-        print("프로코 메인 캘린더뷰 Schedule 데이터 확인: \(ascSchedules)")
+       // print("프로코 메인 캘린더뷰 Schedule 데이터 확인: \(ascSchedules)")
         
         calendarManager = ElegantCalendarManager(
             configuration: configuration,
@@ -70,8 +70,10 @@ struct ProcoMainCalendarView: View {
     
     var body: some View {
         VStack{
-            NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_mypage)
+            
             ZStack{
+                VStack{
+                
                 ProcoCalendarView(calendarManager: calendarManager)
                     .navigationBarTitle("", displayMode: .inline)
                     .navigationBarHidden(true)
@@ -125,7 +127,7 @@ struct ProcoMainCalendarView: View {
                             print("그룹관리 - 친구 리스트 데이터 노티 아님")
                         }
                     })
-                
+                    NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_mypage)
                 Spacer()
                 VStack{
                     Spacer()
@@ -141,8 +143,9 @@ struct ProcoMainCalendarView: View {
                         }
                     }
                 }
-                .padding(.bottom, UIScreen.main.bounds.width*0.3)
+                .padding(.bottom, UIScreen.main.bounds.width*0.2)
                 .padding(.trailing, UIScreen.main.bounds.width/20)
+                }
             }
             .navigationBarHidden(true)
             .navigationBarTitle("", displayMode: .inline)
@@ -153,7 +156,7 @@ struct ProcoMainCalendarView: View {
         }
         .navigationBarHidden(true)
         .navigationBarTitle("", displayMode: .inline)
-        .frame(height: UIScreen.main.bounds.height*0.9, alignment: .top)
+        .frame(height: UIScreen.main.bounds.height*0.8, alignment: .top)
         .sheet(isPresented: self.$go_setting_page){
             FeedDisclosureSettingView(main_vm: self.main_vm)
         }
@@ -238,7 +241,7 @@ extension ProcoMainCalendarView: ElegantCalendarDataSource {
             self.main_vm.calendar_like_changed = false
 
         }else{
-            print("좋아요 클릭 안했을 때 날짜 뷰")
+            //print("좋아요 클릭 안했을 때 날짜 뷰")
         }
             return SmallScheduleListView(main_vm: self.main_vm, smallSchedules: smallSchedulesByDay[startOfDay] ?? [], height: size.height).erased
        
