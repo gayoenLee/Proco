@@ -67,4 +67,7 @@ extension Notification{
     
     //카드 잠금 이벤트 완료시 + 다른 곳에서도 사용
     static let event_finished = Notification.Name.init("event_finished")
+    
+    //캘린더 내 일정 추가하기 후
+    static let calendar_personal_schedule = Notification.Name.init("calendar_personal_schedule")
 }
