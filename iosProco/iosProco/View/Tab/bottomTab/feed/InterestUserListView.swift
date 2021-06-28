@@ -13,15 +13,17 @@ struct InterestUserListView: View {
     
     var body: some View {
         VStack{
-            Text("관심있어요한 사람들")
-                .font(.subheadline)
-                .foregroundColor(Color.black)
-                .padding()
-            
-            ForEach(main_vm.calendar_interest_user_model){user in
-                InterestUserCell(interest_users_model: user, main_vm: self.main_vm)
+            ScrollView{
+                Text("관심있어요한 사람들")
+                    .font(.custom(Font.n_bold, size: 25))
+                    .foregroundColor(Color.black)
+                    .padding()
+                
+                ForEach(main_vm.calendar_interest_user_model){user in
+                    InterestUserCell(interest_users_model: user, main_vm: self.main_vm)
+                }
+                Spacer()
             }
-            Spacer()
         }
         .onAppear{
             print("관심있어요 유저 목록뷰 나타남.")
