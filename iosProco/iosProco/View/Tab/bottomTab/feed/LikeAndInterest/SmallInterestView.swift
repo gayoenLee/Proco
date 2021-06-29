@@ -28,10 +28,10 @@ struct SmallInterestView: View {
     var body: some View {
         small_interest_view
             .onAppear{
-                print("날짜 칸안 관심있어요 뷰 나타남: \(small_intrest_model)")
+               // print("날짜 칸안 관심있어요 뷰 나타남: \(small_intrest_model)")
             }
             .onDisappear{
-                print("관심있어요 뷰 사라짐.")
+                //print("관심있어요 뷰 사라짐.")
             }
     }
     
