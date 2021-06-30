@@ -84,6 +84,7 @@ struct ScheduleCell: View {
                             //나중에 스케줄 시작날짜와 끝날짜 개념이 생기면 수정필요함. 현재는 하루만 스케줄로 등록하기 때문에 사용 가능.
                             var date = info.schedule_date
                             clicked_info_model = info
+                            
                             self.show_personal_card.toggle()
                             
                         }
@@ -93,7 +94,7 @@ struct ScheduleCell: View {
             }
             //.padding(.leading)
             //개인일정 상세페이지
-            NavigationLink("", destination: ScheduleDetailView(main_vm: self.main_vm,  info_model: clicked_info_model, back_to_calendar: self.$show_personal_card), isActive: self.$show_personal_card)
+            NavigationLink("", destination: ScheduleDetailView(main_vm: self.main_vm,  info_model: clicked_info_model, back_to_calendar: self.$show_personal_card).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$show_personal_card)
                 .isDetailLink(false)
             
             //친구카드 상세페이지
