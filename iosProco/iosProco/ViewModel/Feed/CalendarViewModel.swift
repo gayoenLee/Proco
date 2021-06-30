@@ -572,9 +572,11 @@ public class CalendarViewModel: ObservableObject{
     }
     
     func date_to_string(date: Date) -> String{
-        
-        let day = DateFormatter.dateformatter.string(from: date)
-        //print("date형식: \(date), 변환된 형식: \(day)")
+        print("캘린더 뷰모델 date to string")
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let day = formatter.string(from: date)
+        print("date형식: \(date), 변환된 형식: \(day)")
         return day
     }
     
@@ -1345,8 +1347,13 @@ public class CalendarViewModel: ObservableObject{
                     ))
                     self.check_friend_result = "friend_allow"
                     
-               //카드만 공개
-                }else{
+              //이미 친구 신청한 유저
+                }else if result == -3{
+                    self.check_friend_result = "already_friend_requested"
+                }
+                
+                //카드만 공개
+                else{
                     self.check_friend_result = "friend_allow_card"
                     //피드 정보 가져오는 통신 진행.
                     self.get_card_for_calendar(user_idx: self.calendar_owner.user_idx, date_start:  self.date_to_string(date: self.calendar_start_date), date_end:  self.date_to_string(date: self.calendar_end_date
@@ -1375,6 +1382,7 @@ public class CalendarViewModel: ObservableObject{
                     
                     self.friend_request_result_alert = .success
                     print("친구추가하기 성공")
+                    self.check_friend_result = "already_friend_requested"
                     
                 } else if response["result"]  == "no signed friends"{
                     
