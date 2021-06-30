@@ -289,11 +289,12 @@ struct FriendStateDialogContents : View{
                             
                             //친구가 아닌 경우는 모임에서 다이얼로그를 클릭한 경우
                         }else{
-                            print("친구가 아닌 경우 피드 보기 버튼 클릭")
-
+                            print("친구가 아닌 경우 피드 보기 버튼 클릭: \(group_main_vm.creator_info)")
+                            
                             calendar_vm.calendar_owner.watch_user_idx = Int(group_main_vm.my_idx!)!
-                            
-                            
+                            calendar_vm.calendar_owner.profile_photo_path = group_main_vm.creator_info.profile_photo_path ?? ""
+                            calendar_vm.calendar_owner.user_nickname = group_main_vm.creator_info.nickname!
+                            calendar_vm.calendar_owner.user_idx = group_main_vm.creator_info.idx!
                             SimSimFeedPage.calendar_owner_idx = group_main_vm.creator_info.idx!
                                                         
                         }
