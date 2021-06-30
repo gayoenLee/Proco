@@ -9,21 +9,25 @@ import SwiftUI
 import ProcoCalendar
 import Combine
 import Alamofire
+import Kingfisher
+
 extension SimSimFeedPage{
     static var calendar_owner_idx : Int? = Int(ChatDataManager.shared.my_idx!)!
 }
 struct SimSimFeedPage: View {
+    @Environment(\.presentationMode) var presentation
+
     //캘린더에서 친구 정보를 다이얼로그 또는 탭 클릭시 미리 저장해놔야 해서 여기서 뷰모델 init하지 않음.
-    @ObservedObject var main_vm :  CalendarViewModel
+    @StateObject var main_vm :  CalendarViewModel
     @ObservedObject var view_router : ViewRouter
 
     //친구를 체크하는 통신이 진행된 후에 데이터를 가져오기 때문에 달력이 셋팅되기 전까지 보여줄 화면이 필요함.
     @State private var is_loading : Bool = true    
     
     @State private var previous_month : Date = Date()
-    
-    //친구 신청 후 뷰 변경시키기 위함
-    @State private var friend_requested: Bool = false
+
+    let img_processor = DownsamplingImageProcessor(size:CGSize(width: 41.5, height: 41.5))
+        |> RoundCornerImageProcessor(cornerRadius: 25)
     
     var body: some View {
         VStack{
@@ -47,6 +51,9 @@ struct SimSimFeedPage: View {
                     
                     //친구지만 비공개
                 }else if main_vm.check_friend_result == "friend_disallow"{
+                    
+                    top_bar
+                    
                     Spacer()
 
                     //                    FeedLimitedView(main_vm: self.main_vm, show_range: "friend_disallow")
@@ -62,9 +69,39 @@ struct SimSimFeedPage: View {
                 }
                 //친구 아닐 때
                 else{
+                    top_bar
+                    
                     Spacer()
+                    HStack{
+                        Spacer()
+                        Text("친구가 아닌 경우")
+                            .font(.custom(Font.n_bold, size: 16))
+                            .foregroundColor(Color.proco_black)
+                        Spacer()
 
-                    if friend_requested{
+                    }
+                    HStack{
+                        Spacer()
+
+                        Text("심심풀이를 볼 수 없어요.")
+                            .font(.custom(Font.n_bold, size: 16))
+                            .foregroundColor(Color.proco_black)
+                        Spacer()
+
+                    }
+                    HStack{
+                        Spacer()
+
+                        Text("친구가 된후에 즐겨보세요")
+                            .font(.custom(Font.n_bold, size: 16))
+                            .foregroundColor(Color.proco_black)
+                        Spacer()
+
+                    }
+                    .padding(.bottom)
+                    
+                    if  main_vm.check_friend_result == "already_friend_requested"{
+                        
                         HStack{
                      
                                 Text("요청됨")
@@ -76,49 +113,25 @@ struct SimSimFeedPage: View {
                                     .cornerRadius(25)
                                     .frame(width: 100, height: 70)
                             
-                            Button(action: {
-                                print("친구 취소 버튼 클릭")
-                                
-                                self.main_vm.cancel_request_friend(f_idx: SimSimFeedPage.calendar_owner_idx!)
-                            }){
-                                Text("취소")
+                          
+                                Text(" 취소 ")
                                     .padding()
                                     .font(.custom(Font.n_bold, size: 16))
-                                    .frame(width: 100, height: 70)
-                                    .foregroundColor(Color.gray)
+                                    .foregroundColor(.gray)
                                     .background(Color.light_gray)
                                     .cornerRadius(25)
-                                    .border(Color.main_orange, width: 1)
-                            }
+                                    .frame(width: 100, height: 70)
+                                    .onTapGesture {
+                                        print("친구 취소 버튼 클릭")
+                                        
+                                        self.main_vm.cancel_request_friend(f_idx: SimSimFeedPage.calendar_owner_idx!)
+                                   
+                                    }
                         }
-                    }else{
+                        .padding(.bottom)
+                    }else if main_vm.check_friend_result == "not_friend"{
                         
-                        HStack{
-                            Spacer()
-                            Text("친구가 아닌 경우")
-                                .font(.custom(Font.n_bold, size: 15))
-                                .foregroundColor(Color.proco_black)
-                            Spacer()
-
-                        }
-                        HStack{
-                            Spacer()
-
-                            Text("심심풀이를 볼 수 없어요.")
-                                .font(.custom(Font.n_bold, size: 15))
-                                .foregroundColor(Color.proco_black)
-                            Spacer()
-
-                        }
-                        HStack{
-                            Spacer()
-
-                            Text("친구가 된후에 즐겨보세요")
-                                .font(.custom(Font.n_bold, size: 15))
-                                .foregroundColor(Color.proco_black)
-                            Spacer()
-
-                        }
+                        
                         Button(action: {
                             print("친구 신청 버튼 클릭")
                             self.main_vm.friend_request_result_alert_func(main_vm.friend_request_result_alert)
@@ -135,6 +148,7 @@ struct SimSimFeedPage: View {
                                 .cornerRadius(25)
                                 .frame(width: 150, height: 70)
                         }
+                        .padding(.bottom)
                     }
                     //                    FeedLimitedView(main_vm: self.main_vm, show_range: "not_friend")
                 }
@@ -153,8 +167,9 @@ struct SimSimFeedPage: View {
                  if check_result as! String == "canceled_ok"{
                     let friend_idx = user_info["friend"] as! String
                     
+                    
                     if SimSimFeedPage.calendar_owner_idx! == Int(friend_idx){
-                       friend_requested = false
+                        main_vm.check_friend_result = "not_friend"
                     }
                 }else if check_result as! String == "canceled_fail"{
                     let friend_idx = user_info["friend"] as! String
@@ -177,18 +192,16 @@ struct SimSimFeedPage: View {
             case .request_wait:
                 return Alert(title: Text("친구 추가하기"), message: Text("친구 요청된 사용자입니다"), dismissButton:
                                 Alert.Button.default(Text("확인"), action: {
-                                    friend_requested = true
+                                  
                                     main_vm.show_friend_result_alert = false
                                 }))
                 
             case .requested:
                 return Alert(title: Text("친구 추가하기"), message: Text("친구 요청된 사용자입니다"), dismissButton:Alert.Button.default(Text("확인"), action: {
-                    friend_requested = true
                     main_vm.show_friend_result_alert = false
                 }))
             case .already_friend:
                 return Alert(title: Text("친구 추가하기"), message: Text("이미 친구 상태인 사용자입니다"), dismissButton: Alert.Button.default(Text("확인"), action: {
-                    friend_requested = true
                     main_vm.show_friend_result_alert = false
                 }))
             case .myself:
@@ -199,7 +212,6 @@ struct SimSimFeedPage: View {
                 
             case .success:
                 return Alert(title: Text("친구 추가하기"), message: Text("친구 신청이 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
-                    friend_requested = true
                     main_vm.show_friend_result_alert = false
                 }))
             case .fail:
@@ -228,7 +240,6 @@ struct SimSimFeedPage: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0){
                 self.is_loading = false
             }
-            print("피드페이지 온어피어 \(main_vm.check_friend_result)")
         }
     }
 }
@@ -237,5 +248,50 @@ extension Calendar{
     func startOfMonth(for date: Date) -> Date {
         let components = dateComponents([.month, .year], from: date)
         return self.date(from: components)!
+    }
+}
+
+extension SimSimFeedPage{
+    
+    var top_bar : some View{
+        HStack{
+            Button(action: {
+                print("뒤로 가기 버튼 클릭")
+                self.presentation.wrappedValue.dismiss()
+            }){
+                Image("left")
+                    .resizable()
+                    .frame(width: 8.51, height: 17)
+            }
+            
+            Spacer()
+            
+            Text(main_vm.calendar_owner.user_nickname)
+                .font(.custom(Font.n_bold, size: 16))
+                .foregroundColor(Color.proco_black)
+            
+            if main_vm.calendar_owner.profile_photo_path == "" || main_vm.calendar_owner.profile_photo_path == nil{
+                Image("main_profile_img")
+                    .resizable()
+                    .frame(width: 49, height: 49)
+            }else{
+                
+                KFImage(URL(string: main_vm.calendar_owner.profile_photo_path))
+                    .loadDiskFileSynchronously()
+                    .cacheMemoryOnly()
+                    .fade(duration: 0.25)
+                    .setProcessor(img_processor)
+                    .onProgress{receivedSize, totalSize in
+                        print("on progress: \(receivedSize), \(totalSize)")
+                    }
+                    .onSuccess{result in
+                        print("성공 : \(result)")
+                    }
+                    .onFailure{error in
+                        print("실패 이유: \(error)")
+                    }
+            }
+        }
+        .padding()
     }
 }

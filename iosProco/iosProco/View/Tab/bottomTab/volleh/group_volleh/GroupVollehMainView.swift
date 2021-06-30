@@ -88,7 +88,8 @@ struct GroupVollehMainView: View {
                             Text("내가 만든 모임이 아직 없네요.")
                         }else{
                             
-                            NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm), isActive: self.$go_to_my_detail)
+                            NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm)          .navigationBarTitle("", displayMode: .inline)
+                                            .navigationBarHidden(true), isActive: self.$go_to_my_detail)
                             
                             //카드 1개 선택시 2-3 참가 신청 가능한 카드 선택 페이지로 이동(참가자)
                             ForEach(main_vm.my_group_card_struct){ card in

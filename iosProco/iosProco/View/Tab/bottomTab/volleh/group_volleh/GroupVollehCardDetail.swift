@@ -65,7 +65,7 @@ struct GroupVollehCardDetail: View {
     let card_img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)) |> RoundCornerImageProcessor(cornerRadius: 40)
     
     var body: some View {
-        NavigationView{
+      
             VStack{
                 if self.show_no_result{
                     
@@ -342,7 +342,7 @@ struct GroupVollehCardDetail: View {
                 }
             }
             .overlay(FriendStateDialog(main_vm: FriendVollehMainViewmodel(),group_main_vm: self.main_vm, calendar_vm: CalendarViewModel(), show_friend_info: self.$show_creator_dialog, socket: SockMgr.socket_manager, state_on: self.$creator_state_on, is_friend : false, is_from_chatroom: false))
-        }
+        
     }
 }
 
@@ -802,7 +802,7 @@ extension GroupVollehCardDetail{
                 self.main_vm.creator_info.nickname! = main_vm.card_detail_struct.creator!.nickname
                 self.main_vm.creator_info.profile_photo_path! = main_vm.card_detail_struct.creator?.profile_photo_path ?? ""
                 self.main_vm.creator_info.idx = main_vm.card_detail_struct.creator!.idx
-                
+                print("유저 정보 저장한 것 확인: \(self.main_vm.creator_info)")
                 //주최자 프로필 다이얼로그 띄우는 것
                 self.show_creator_dialog = true
             }

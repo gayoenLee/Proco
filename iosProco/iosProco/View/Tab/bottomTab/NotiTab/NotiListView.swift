@@ -196,7 +196,7 @@ struct NotiRow: View{
                 
                 NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_card_vm, socket: SockMgr.socket_manager, calendar_vm: CalendarViewModel()), isActive: self.$go_group_card_detail)
                 
-                NavigationLink("",destination: SimSimFeedPage(main_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$go_feed)
+                NavigationLink("",destination: SimSimFeedPage(main_vm: CalendarViewModel(), view_router: ViewRouter()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$go_feed)
                     VStack{
                         //인디케이터 볼드 처리 위해 뷰빌더 메소드로 리턴
                         content()
