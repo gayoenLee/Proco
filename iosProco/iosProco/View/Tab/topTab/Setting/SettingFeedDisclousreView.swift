@@ -20,10 +20,10 @@ struct SettingFeedDisclousreView: View {
         .onAppear{
             
             //설정 페이지 들어올 때 user info model에 저장했던 calendar public state가져옴.
-            if self.main_vm.user_info_model.calendar_public_state == 0{
+            if self.main_vm.user_info_model.calendar_public_state == 1{
                 self.selected = "전체 공개"
                 
-            }else if self.main_vm.user_info_model.calendar_public_state == 1{
+            }else if self.main_vm.user_info_model.calendar_public_state == 2{
                 
                 self.selected = "카드만 공개"
                 
@@ -35,11 +35,11 @@ struct SettingFeedDisclousreView: View {
         .onDisappear{
             
             if self.selected == "전체 공개"{
-                self.main_vm.user_info_model.calendar_public_state = 0
-            }else if self.selected == "카드만 공개"{
                 self.main_vm.user_info_model.calendar_public_state = 1
-            }else{
+            }else if self.selected == "카드만 공개"{
                 self.main_vm.user_info_model.calendar_public_state = 2
+            }else{
+                self.main_vm.user_info_model.calendar_public_state = 0
             }
             print("유저가 선택한 공개범위: \(self.main_vm.user_info_model.calendar_public_state)")
             self.main_vm.edit_calendar_disclosure_setting(calendar_public_state: self.main_vm.user_info_model.calendar_public_state)
