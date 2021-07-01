@@ -43,6 +43,12 @@ public class CalendarViewModel: ObservableObject{
         }
     }
     
+    @Published var go_mypage: Bool = false{
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
     //심심기간 데이터 모델
     @Published var boring_period_model: BoredDaysModel = BoredDaysModel(){
         didSet{
@@ -440,43 +446,43 @@ public class CalendarViewModel: ObservableObject{
                     print("public친구 카드 저장 확인: \(friend_public_card)")
                     
                     //friend private은 private을 지정한 카드에만 존재.
-                    if !friend_private.isEmpty{
-                        for card in friend_private{
-                            let card = card.dictionaryValue
-                            print("friend 프라이빗 카드 데이터 저장 중 card 한 개: \(card)")
-                            
-                            friend_private_card.append(FriendCardBlockPrivateModel(idx: card["idx"]?.intValue, expiration_at: card["expiration_at"]?.stringValue))
-                            
-                            let expiration_at = card["expiration_at"]?.stringValue
-                            let date = self.string_to_date(expiration: expiration_at!)
-                            
-                            //날짜 한 칸에 small schedule에 저장할 일정정보 모델.SmallScheduleInfo
-                            self.small_schedule_info_model.append(SmallScheduleInfo(date: date, locationName: "", tagColor: Color.orange, type: "friend_private"))
-                            
-                            //단일자 일정 리스트에 저장할 private카드
-                            temp_schedules_info_model.append(ScheduleInfo(card_idx: card["idx"]!.intValue, type: "friend", schedule_date: date, schedule_name: "", tag_color: Color.orange, start_time: date, end_time: date, category: "", tags: [], current_people: "0", location_name: "", is_private: true, memo: ""))
-                        }
-                        
-                        //일정 정보를 저장해 놓은 배열을 다시 schedule모델에 저장.
-                        //for문 안에 넣으면 중복돼서 저장됨.
-                        for schedule in temp_schedules_info_model{
-                            let date = schedule.schedule_date
-                            //이미 같은 날짜로 데이터가 저장돼 있는지 확인.
-                            var is_already_stored_check_idx : Int? = -1
-                            is_already_stored_check_idx = temp_schedules_model.firstIndex(where: {$0.date == date}) ?? -1
-                            //같은 날짜로 저장돼 있는 데이터가 있었다면
-                            if is_already_stored_check_idx != -1{
-                                temp_schedules_model[is_already_stored_check_idx!].schedule.append(schedule)
-                                
-                                //이미 이 날짜로 저장된 데이터가 없었던 경우
-                            }else{
-                                var schedule_info_model : [ScheduleInfo] = []
-                                schedule_info_model.append(ScheduleInfo(card_idx: schedule.card_idx, type: schedule.type, schedule_date: schedule.schedule_date, schedule_name: schedule.schedule_name, tag_color: schedule.tag_color, start_time: schedule.start_time, end_time: schedule.end_time, category: schedule.category, current_people: schedule.current_people, location_name: schedule.location_name, is_private: schedule.is_private, memo: ""))
-                                
-                                temp_schedules_model.append(Schedule(date: date, like_num: 0, liked_myself: false, like_idx: -1, schedule: schedule_info_model))
-                            }
-                        }
-                    }
+//                    if !friend_private.isEmpty{
+//                        for card in friend_private{
+//                            let card = card.dictionaryValue
+//                            print("friend 프라이빗 카드 데이터 저장 중 card 한 개: \(card)")
+//
+//                            friend_private_card.append(FriendCardBlockPrivateModel(idx: card["idx"]?.intValue, expiration_at: card["expiration_at"]?.stringValue))
+//
+//                            let expiration_at = card["expiration_at"]?.stringValue
+//                            let date = self.string_to_date(expiration: expiration_at!)
+//
+//                            //날짜 한 칸에 small schedule에 저장할 일정정보 모델.SmallScheduleInfo
+//                            self.small_schedule_info_model.append(SmallScheduleInfo(date: date, locationName: "", tagColor: Color.orange, type: "friend_private"))
+//
+//                            //단일자 일정 리스트에 저장할 private카드
+//                            temp_schedules_info_model.append(ScheduleInfo(card_idx: card["idx"]!.intValue, type: "friend", schedule_date: date, schedule_name: "", tag_color: Color.orange, start_time: date, end_time: date, category: "", tags: [], current_people: "0", location_name: "", is_private: true, memo: ""))
+//                        }
+//
+//                        //일정 정보를 저장해 놓은 배열을 다시 schedule모델에 저장.
+//                        //for문 안에 넣으면 중복돼서 저장됨.
+//                        for schedule in temp_schedules_info_model{
+//                            let date = schedule.schedule_date
+//                            //이미 같은 날짜로 데이터가 저장돼 있는지 확인.
+//                            var is_already_stored_check_idx : Int? = -1
+//                            is_already_stored_check_idx = temp_schedules_model.firstIndex(where: {$0.date == date}) ?? -1
+//                            //같은 날짜로 저장돼 있는 데이터가 있었다면
+//                            if is_already_stored_check_idx != -1{
+//                                temp_schedules_model[is_already_stored_check_idx!].schedule.append(schedule)
+//
+//                                //이미 이 날짜로 저장된 데이터가 없었던 경우
+//                            }else{
+//                                var schedule_info_model : [ScheduleInfo] = []
+//                                schedule_info_model.append(ScheduleInfo(card_idx: schedule.card_idx, type: schedule.type, schedule_date: schedule.schedule_date, schedule_name: schedule.schedule_name, tag_color: schedule.tag_color, start_time: schedule.start_time, end_time: schedule.end_time, category: schedule.category, current_people: schedule.current_people, location_name: schedule.location_name, is_private: schedule.is_private, memo: ""))
+//
+//                                temp_schedules_model.append(Schedule(date: date, like_num: 0, liked_myself: false, like_idx: -1, schedule: schedule_info_model))
+//                            }
+//                        }
+//                    }
                     print("private친구 카드 저장 확인: \(friend_private_card)")
                     
                     //meeting데이터 저장 시작
@@ -565,20 +571,21 @@ public class CalendarViewModel: ObservableObject{
         print("변환하기 위해 받은 날짜: \(expiration)")
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone(abbreviation: "UCT")
+        formatter.timeZone = TimeZone(abbreviation: "KST")
         let date = formatter.date(from: expiration)
         print("변환날짜: \(String(describing: date))")
         return date!
     }
     
     func date_to_string(date: Date) -> String{
-        print("캘린더 뷰모델 date to string")
+        //print("캘린더 뷰모델 date to string")
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         let day = formatter.string(from: date)
-        print("date형식: \(date), 변환된 형식: \(day)")
+        //print("date형식: \(date), 변환된 형식: \(day)")
         return day
     }
+    
     
     //내 일정 추가하기에서 시간만 string만들기 위함.
     func make_time_string(time: Date) -> String{
@@ -624,7 +631,7 @@ public class CalendarViewModel: ObservableObject{
                     let like_user_checked = data["like_user_checked"]!.arrayValue
                     let calendar_like_count = data["calendar_like_count"]!.arrayValue
                     print("내가 좋아요한 날짜들 데이터 빼낸 것 확인: \(like_user_checked)")
-                    
+                    print("나+상대방 좋아요 데이터 빼낸 것 확인: \(calendar_like_count)")
                     //1.내가 체크한 좋아요 날짜들 저장하기
                     //임시로 저장할 변수
                     var temp_like_user_checked : [LikeUserCheckedModel] = []
@@ -643,53 +650,77 @@ public class CalendarViewModel: ObservableObject{
                             
                             let date_form = self.make_date(expiration: like_checked_date)
                             
-                            //좋아요 뷰를 따로 보여주려고 만들었던 것. - 사용하는지 확인하기.
+                            //좋아요 뷰를 따로 보여주려고 만들었던 것. - small schedule 데이터 저장할 때 사용
                             self.like_model.append(LikeModel(date: date_form, like_num: 0, clicked_like_myself: true, clicked_like_idx: idx))
                             
                             //단일자 상세 페이지 모델에 저장하기 위해 저장할 index찾기
                             var schedule_model_idx : Int? = -1
-                            
+                            print("단일자 스케줄 데이터: \(self.schedules_model)")
+                            print("현재 좋아요한 날짜: \(like_checked_date)")
+                            print("변환한 날짜: \(self.date_to_string(date:self.schedules_model[0].date))")
                             schedule_model_idx = self.schedules_model.firstIndex(where: {
-                                let string_date = self.date_to_string(date: $0.date)
+                                let string_date = self.date_to_string(date: $0.date).split(separator: " ")[0]
                                 return string_date == like_checked_date
                             }) ?? -1
                             
                             if schedule_model_idx != -1{
+                                print("좋아요 데이터가 있는 날짜: \(self.schedules_model[schedule_model_idx!].date)")
                                 self.schedules_model[schedule_model_idx!].liked_myself = true
                                 self.schedules_model[schedule_model_idx!].like_idx = idx
                             }
                         }
                     }
                     print("최종 저장한 내가 좋아요한 정보: \(temp_like_user_checked)")
-                    
+                    print("like model확인: \(self.like_model)")
                     //2.나 + 다른 유저들이 누른 총좋아요 갯수 일별로 정보 저장하기
                     //임시로 저장할 변수
                     var temp_calendar_like_count:[CalendarLikeCountModel] = []
+                    
                     //빈 배열일 경우는 저장하지 않도록 하기 위함.
                     if !calendar_like_count.isEmpty{
                         
-                        for info in calendar_like_count{
-                            let info = info.dictionaryValue
-                            let like_checked_date = info["like_checked_date"]?.stringValue
-                            let like_count = info["like_count"]?.intValue
-                            temp_calendar_like_count.append(CalendarLikeCountModel( like_checked_date: like_checked_date!, like_count: like_count!))
+                        for data in calendar_like_count{
+                            let info = data.dictionaryValue
+                            print("한 개 좋아요 데이터 확인: \(info)")
+                            let like_checked_date = info["like_checked_date"]!.stringValue
+                            let like_count = info["like_count"]!.intValue
+                            print("좋아요 갯수 확인: \(like_count)")
                             
-                            let date_form = self.make_date(expiration: like_checked_date!)
-                            let same_idx = self.like_model.firstIndex(where: {$0.date == date_form})
-                            self.like_model[same_idx!].like_num = like_count!
+                            temp_calendar_like_count.append(CalendarLikeCountModel( like_checked_date: like_checked_date, like_count: like_count))
                             
+                            let date_form = self.make_date(expiration: like_checked_date)
+                            print("좋아요 데이터 모델: \(self.like_model)")
+                            
+                            if self.like_model.count > 0{
+                                var same_idx : Int? = -1
+                                
+                                if same_idx != -1{
+                                    same_idx = self.like_model.firstIndex(where: {
+                                                                        print("비교하는 날짜 : \(date_form)")
+                                                                        print("모델 날짜: \($0.date)")
+                                                                       return $0.date == date_form})
+                               
+                                
+                            self.like_model[same_idx!].like_num = like_count
+                                }
+                            }else{
+                                
+                                self.like_model.append(LikeModel(date: date_form, like_num: like_count, clicked_like_myself: false, clicked_like_idx: -1))
+                            }
                             //단일자 상세 페이지 모델에 저장하기 위해 저장할 index찾기
                             var schedule_model_idx : Int? = -1
                             schedule_model_idx = self.schedules_model.firstIndex(where: {
-                                let string_date = self.date_to_string(date: $0.date)
+                                let string_date = self.date_to_string(date: $0.date).split(separator: " ")[0]
                                 return string_date == like_checked_date
                             }) ?? -1
                             if schedule_model_idx != -1{
                                 self.schedules_model[schedule_model_idx!].like_num = like_count
                             }
-                            print("단일자 데이터 모델 저장한 것 최종 확인: \(self.schedules_model)")
+
                         }
                     }
+                    print("날짜 별 좋아요 갯수 모델: \(temp_calendar_like_count)")
+                    print("날짜별 좋아요 여부 모델: \(temp_like_user_checked)")
                     
                     //모든 데이터를 카드 좋아요 모델에 합쳐서 저장하기
                     self.calendar_like_model = CalendarLikeModel(like_checked_date: temp_like_user_checked, calendar_like_count: temp_calendar_like_count)
@@ -753,14 +784,17 @@ public class CalendarViewModel: ObservableObject{
                     //서버로부터 받은 좋아요 idx
                     let like_idx = response["like_idx"].intValue
                     print("좋아요 클릭시 저장됐던 데이터 확인: \(self.schedules_model)")
+                    print("좋아요 클릭시 저장됐던 데이터 small 확인: \(self.small_schedules)")
                     print("좋아요 클릭해서 서버에 보낸 날짜: \(like_date)")
 
                     var like_click_idx : Int? = -1
                     //1. 상세페이지 뷰 데이터 변경하기
                     //좋아요 클릭한 날짜가 저장된 모델의 배열 idx값을 찾아와서 저장.
                     like_click_idx = self.schedules_model.firstIndex(where: {
-                        let string_date = self.date_to_string(date: $0.date)
-                        return string_date == like_date
+                        let string_date = self.date_to_string(date: $0.date).split(separator: " ")[0]
+                        print("상세페이지뷰 날짜 : \(string_date)")
+                        print("비교하려는 날짜: \(like_date)")
+                        return string_date == like_date.split(separator: " ")[0]
                     }) ?? -1
 
                     if like_click_idx != -1{
@@ -775,9 +809,9 @@ public class CalendarViewModel: ObservableObject{
                     //2.날짜 한 칸 뷰 데이터 변경하기
                     //좋아요 클릭한 날짜가 저장된 모델의 배열 idx값을 찾아와서 저장.
                     like_click_idx = self.small_schedules.firstIndex(where: {
-                        let string_date = self.date_to_string(date: $0.arrivalDate)
+                        let string_date = self.date_to_string(date: $0.arrivalDate).split(separator: " ")[0]
                         print("날짜 한 칸 날짜 변환 후 확인: \(string_date)")
-                        return string_date == like_date
+                        return string_date == like_date.split(separator: " ")[0]
                     }) ?? -1
 
                     if like_click_idx != -1{
@@ -822,6 +856,9 @@ public class CalendarViewModel: ObservableObject{
                             print("좋아요 취소하려는 idx: \(calendar_like_idx)")
                             let like_idx = calendar_like_idx
                             
+                            print("작은 스케줄 모델: \(self.small_schedules)")
+                            print("큰 스케줄 모델: \(self.schedules_model)")
+                            
                             //1.Schedules모델 : 상세 페이지 뷰의 데이터 모델
                             var like_cancel_idx : Int? = -1
                             like_cancel_idx = self.schedules_model.firstIndex(where: {
@@ -844,7 +881,7 @@ public class CalendarViewModel: ObservableObject{
                             //좋아요 클릭한 like idx가 저장된 모델의 배열 idx값을 찾아와서 저장.
                             like_cancel_idx = self.small_schedules.firstIndex(where: {
                                 print("날짜 한 칸 like cancel idx 확인: \(like_cancel_idx)")
-                                return $0.like_idx == like_idx
+                                return $0.like_idx == calendar_like_idx
                             }) ?? -1
 
                             if like_cancel_idx != -1{
@@ -1606,8 +1643,8 @@ public class CalendarViewModel: ObservableObject{
                             
                             like_myself = true
                         }
-                        print("이 날짜에 내가 좋아요 눌렀는지: \(like_myself)")
-                        print("이 날짜에 내가 좋아요 id: \(clicked_like_myself_idx)")
+//                        print("이 날짜에 내가 좋아요 눌렀는지: \(like_myself)")
+//                        print("이 날짜에 내가 좋아요 id: \(clicked_like_myself_idx)")
                     }
                     
                     if friend_idx_array.count > 0{
@@ -1625,7 +1662,7 @@ public class CalendarViewModel: ObservableObject{
                             let schedule_idx_array = schedule_info.filter({
                                 
                                 let schedule_date = self.date_to_string(date: $0.date)
-                                print("string으로 변환한 날짜: \(schedule_date), 지금 비교하고 있는 날: \(date)")
+                                //print("string으로 변환한 날짜: \(schedule_date), 지금 비교하고 있는 날: \(date)")
                                 return schedule_date == day
                             }).map({$0.date})
                             
@@ -1655,7 +1692,6 @@ public class CalendarViewModel: ObservableObject{
                                                                                 let compare_date = $0.expiration_at?.split(separator: " ")[0]
                                                                                 return compare_date! == day})
                             let meeting_name = card_block_model.meeting[index!].expiration_at
-                            
                             
                             //현재 date와 일치하는 id저장하는 배열.
                             let schedule_idx_array = schedule_info.filter({
