@@ -69,8 +69,9 @@ struct ProcoMainCalendarView: View {
     }
     
     var body: some View {
+        
         VStack{
-            
+            NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_mypage)
             ZStack{
                 VStack{
                 
@@ -84,20 +85,6 @@ struct ProcoMainCalendarView: View {
                     .onDisappear{
                         self.main_vm.schedule_state_changed = false
                     }
-                    .onReceive(NotificationCenter.default.publisher(for: Notification.calendar_owner_click), perform: {value in
-                        print("캘린더 주인 프로필 클릭 이벤트 받음")
-                        
-                        if let user_info = value.userInfo, let data = user_info["calendar_owner_click"]{
-                            print("캘린더 주인 프로필 클릭 이벤트 \(data)")
-                            
-                            if data as! String == "ok"{
-                                self.go_mypage = true
-                                print("마이페이지 이동값 변경하기")
-                            }
-                        }else{
-                            print("캘린더 주인 프로필 클릭 이벤트 노티 아님")
-                        }
-                    })
                     .onReceive(NotificationCenter.default.publisher(for: Notification.calendar_owner_click), perform: {value in
                         print("캘린더 설정 클릭 이벤트 받음")
                         
@@ -127,7 +114,7 @@ struct ProcoMainCalendarView: View {
                             print("그룹관리 - 친구 리스트 데이터 노티 아님")
                         }
                     })
-                    NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_mypage)
+                  
                 Spacer()
                 VStack{
                     Spacer()
@@ -196,6 +183,7 @@ struct ProcoMainCalendarView: View {
             }
         })
     }
+    
 }
 
 extension ProcoMainCalendarView: ElegantCalendarDataSource {
@@ -233,7 +221,7 @@ extension ProcoMainCalendarView: ElegantCalendarDataSource {
     
     func calendar(viewForSelectedDate date: Date, dimensions size: CGSize) -> AnyView {
         let startOfDay = currentCalendar.startOfDay(for: date)
-        print("startOfDay 확인: \(startOfDay), \(String(describing: smallSchedulesByDay[startOfDay])), smallschedules\(smallSchedulesByDay)")
+        //print("startOfDay 확인: \(startOfDay), \(String(describing: smallSchedulesByDay[startOfDay])), smallschedules\(smallSchedulesByDay)")
         
         if self.main_vm.calendar_like_changed == true{
             print("좋아요 클릭시 뷰 데이터: \(main_vm.small_schedules)")
