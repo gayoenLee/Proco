@@ -195,6 +195,16 @@ public class CalendarViewModel: ObservableObject{
     @Published var group_card_detail_model : CalendarGroupCardDetailModel = CalendarGroupCardDetailModel()
     
     
+    func make_kr_date(date_string : String) -> Date{
+        let utc_date = self.make_date(expiration: date_string)
+        let int_format = Int(utc_date.timeIntervalSince1970)+3600*9
+        let timeintervel = TimeInterval(int_format)
+        let korean_time  = Date(timeIntervalSince1970: timeintervel)
+        print("피드 시간 변경 utc_date: \(utc_date),korean_time: \(korean_time) ")
+
+        return korean_time
+        
+    }
     //심심기간 통신
     func get_boring_period(user_idx: Int, date_start: String, date_end: String){
         cancellation = APIClient.get_boring_period(user_idx: user_idx, date_start: date_start, date_end: date_end)
@@ -252,7 +262,7 @@ public class CalendarViewModel: ObservableObject{
                                 temp_boring_period_selections.append(bored_day_form)
                                 
                                 //date형식으로 바꾸기
-                                let bored_period_date = self.make_date(expiration: bored_day_form)
+                                let bored_period_date = self.make_kr_date(date_string: bored_day_form)
                                 print("날짜 형식으로 바꾼 \(bored_period_date)")
                                 
                                 self.selections.append(bored_period_date)
@@ -266,7 +276,7 @@ public class CalendarViewModel: ObservableObject{
                                 temp_boring_period_selections.append(bored_day_form)
                                 
                                 //date형식으로 바꾸기
-                                let bored_period_date = self.make_date(expiration: bored_day_form)
+                                let bored_period_date = self.make_kr_date(date_string: bored_day_form)
                                 print("날짜 형식으로 바꾼 \(bored_period_date)")
                                 //심심기간 지정한 날짜들(라이브러리 안 selections에서 사용)
                                 self.selections.append(bored_period_date)
@@ -369,17 +379,14 @@ public class CalendarViewModel: ObservableObject{
                 }
             }, receiveValue: {response in
                 print("캘린더 카드 정보 조회 receive값: \(response)")
-                let result: String? = response["result"].string
+                let result = response.array
                 self.get_card_ok = false
-                
-                if result == result{
+                if result?.count == 0{
+                    print("카드가 없을 때")
+                    print("캘린더 카드 리스트 조회 결과값 없음")
+                }else{
                     print("카드가 있을 때")
-                    self.small_schedules = []
-                    self.schedules_model.removeAll()
-                    self.card_block_model.friend.private_type.removeAll()
-                    self.card_block_model.meeting.removeAll()
-                    self.card_block_model.friend.public_type.removeAll()
-                    
+
                     /*
                      날짜 칸에 보여줄 리스트 저장 & 일자에 대한 상세 페이지의 일정 리스트 저장
                      두가지 모델에 저장해야 함.
@@ -549,9 +556,15 @@ public class CalendarViewModel: ObservableObject{
                     //심심기간 가져오기 -> 안에 좋아요 정보 가져오는 통신 있음.
                     self.get_boring_period(user_idx: self.calendar_owner.user_idx, date_start: self.date_to_string(date: self.calendar_start_date), date_end: self.date_to_string(date: self.calendar_end_date))
                     
-                }else{
-                    print("캘린더 카드 리스트 조회 결과값 없음")
                 }
+                //else{
+//                    print("캘린더 카드 리스트 조회 결과값 없음")
+//                    self.small_schedules = []
+//                    self.schedules_model.removeAll()
+//                    self.card_block_model.friend.private_type.removeAll()
+//                    self.card_block_model.meeting.removeAll()
+//                    self.card_block_model.friend.public_type.removeAll()
+                //}
             })
     }
     
@@ -915,6 +928,7 @@ public class CalendarViewModel: ObservableObject{
             }, receiveValue: {response in
                 
                 print("캘린더 좋아요 목록 가져오기 response: \(response)")
+                //self.calendar_like_user_model.removeAll()
                 let user_list = response.array
                 
                 if user_list?.count ?? 0 > 0{
@@ -1353,8 +1367,12 @@ public class CalendarViewModel: ObservableObject{
                     break
                 }
             }, receiveValue: {response in
-                print("캘린더 친구 체크 통신 response: \(response)")
                 
+                print("캘린더 친구 체크 통신 response: \(response)")
+                print("친구 체크 통신 후 데이터 확인: \(self.small_schedule_info_model)")
+                self.remove_all_data()
+                print("친구 체크 통신 후 데이터 확인2222: \(self.small_schedule_info_model)")
+
                 let result = response["result"].intValue
                 print("결과 꺼내옴: \(result)")
                 //주인 정보는 다이얼로그 또는 bottom tabview, 카드 상세 페이지에서 미리 저장함.
@@ -1384,6 +1402,7 @@ public class CalendarViewModel: ObservableObject{
                     ))
                     self.check_friend_result = "friend_allow"
                     
+                    
               //이미 친구 신청한 유저
                 }else if result == -3{
                     self.check_friend_result = "already_friend_requested"
@@ -1399,6 +1418,15 @@ public class CalendarViewModel: ObservableObject{
             })
         print("친구 체크 통신 결과 후 저장한 값: \(self.check_friend_result)")
         return self.check_friend_result
+    }
+    
+    func remove_all_data(){
+        self.small_schedules = []
+        self.small_schedule_info_model.removeAll()
+        self.schedules_model.removeAll()
+        self.card_block_model.friend.private_type.removeAll()
+        self.card_block_model.meeting.removeAll()
+        self.card_block_model.friend.public_type.removeAll()
     }
     
     //캘린더 - 친구 아닌 사람이 친구 신청 버튼 클릭시 요청 통신

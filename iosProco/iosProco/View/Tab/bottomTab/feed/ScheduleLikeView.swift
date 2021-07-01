@@ -33,6 +33,7 @@ struct ScheduleLikeView: View {
                     
                 }
             }){
+                
                 //좋아요 버튼을 누르고 취소함에 따라 동적으로 뷰가 안바뀌어서 state변수로 true,false값을 통해 뷰 변경하도록 함.
                 Image(schedule.liked_myself == true ? "heart_fill" :  "heart" )
                     .resizable()
@@ -40,7 +41,7 @@ struct ScheduleLikeView: View {
                     .foregroundColor(Color.red)
             }
             
-            NavigationLink("", destination: LikeUserListView(main_vm: self.main_vm, schedule_date: schedule.date), isActive: self.$show_like_users)
+            NavigationLink("", destination: LikeUserListView(main_vm: self.main_vm, schedule_date: schedule.date).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$show_like_users)
             
             //좋아요를 클릭한 사람들의 목록을 보는 페이지로 이동.
             Button(action: {

@@ -181,8 +181,8 @@ extension ScheduleDetailView{
             .foregroundColor(Color.proco_black)
         
     }
-
-
+    
+    
     var memo_info : some View{
         VStack(alignment: .leading){
             
@@ -192,16 +192,17 @@ extension ScheduleDetailView{
                 .foregroundColor(Color.light_gray)
                 .overlay(
                     VStack{
-        Text("\(self.info_model.memo)")
-            .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width)
-            .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
-            .multilineTextAlignment(.leading)
-            .font(.custom(Font.n_bold, size: 16))
-            .foregroundColor(Color.proco_black)
+                        
+                        Text("\(self.info_model.memo)")
+                            .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width)
+                            .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
+                            .multilineTextAlignment(.leading)
+                            .font(.custom(Font.n_bold, size: 16))
+                            .foregroundColor(Color.proco_black)
                         Spacer()
                     }
-            )
-                    
+                )
+            
         }
     }
     
@@ -373,7 +374,6 @@ extension ScheduleDetailView{
             
             //편집 모드 inactive로 전환.
             self.editMode?.wrappedValue = .inactive == self.editMode?.wrappedValue  ? .active : .inactive
-            
         }){
             
             Image(systemName: "checkmark.circle.fill")

@@ -19,7 +19,7 @@ struct SimSimFeedPage: View {
 
     //캘린더에서 친구 정보를 다이얼로그 또는 탭 클릭시 미리 저장해놔야 해서 여기서 뷰모델 init하지 않음.
     @StateObject var main_vm :  CalendarViewModel
-    @ObservedObject var view_router : ViewRouter
+    @StateObject var view_router : ViewRouter
 
     //친구를 체크하는 통신이 진행된 후에 데이터를 가져오기 때문에 달력이 셋팅되기 전까지 보여줄 화면이 필요함.
     @State private var is_loading : Bool = true    
@@ -251,6 +251,9 @@ struct SimSimFeedPage: View {
             print("심심피드 페이지에서 친구 체크하기 전 캘린더 모델 데이터 확인: \(main_vm.calendar_owner.user_idx)")
             
             if self.view_router.current_page == .feed_tab{
+                
+                SimSimFeedPage.calendar_owner_idx! = Int(self.main_vm.my_idx!)!
+                main_vm.calendar_owner.user_idx = Int(self.main_vm.my_idx!)!
                 self.main_vm.check_is_friend(friend_idx: Int(self.main_vm.my_idx!)!)
             }else{
             main_vm.check_is_friend(friend_idx: self.main_vm.calendar_owner.user_idx)
@@ -277,7 +280,7 @@ extension SimSimFeedPage{
         HStack{
             Button(action: {
                 print("뒤로 가기 버튼 클릭")
-               // self.presentation.wrappedValue.dismiss()
+                self.presentation.wrappedValue.dismiss()
             }){
                 Image("left")
                     .resizable()
