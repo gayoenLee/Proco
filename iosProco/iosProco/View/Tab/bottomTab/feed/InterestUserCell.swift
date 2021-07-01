@@ -59,6 +59,7 @@ struct InterestUserCell: View {
             self.main_vm.calendar_owner.profile_photo_path = interest_users_model.profile_photo_path ?? ""
             self.main_vm.calendar_owner.user_idx = interest_users_model.idx
             self.main_vm.calendar_owner.watch_user_idx = Int(self.main_vm.my_idx!)!
+            self.main_vm.calendar_owner.user_nickname = interest_users_model.nickname
             print("관심있어요 유저 클릭 후 캘린더 오너 데이터: \(self.main_vm.calendar_owner)")
             
             SimSimFeedPage.calendar_owner_idx = interest_users_model.idx
