@@ -53,15 +53,16 @@ struct LikeUserCell: View {
         .padding()
         .onTapGesture {
             print("유저 클릭 이벤트: \(like_user_model)")
-            
-            self.main_vm.calendar_owner.profile_photo_path = like_user_model.profile_photo_path ?? ""
-            self.main_vm.calendar_owner.user_idx = like_user_model.idx
-            self.main_vm.calendar_owner.watch_user_idx = Int(self.main_vm.my_idx!)!
-            self.main_vm.calendar_owner.user_nickname = like_user_model.nickname
-            SimSimFeedPage.calendar_owner_idx = like_user_model.idx
-
-           //피드 페이지로 이동하는 값 변경.
-            self.show_friend_feed.toggle()
+            //심심풀이 좋아요 한 사람 목록에서 한 사람 누르고 다이얼로그에서 피드로 이동했을때 뷰모델을 공유해서 심심풀이가 제대로 표시되지 않는 문제가 있었는데 현재 수정하면 기간이 너무 오래 걸릴 수 있어
+           // 심심풀이 이동자체를 막아놓기로 했음
+//            self.main_vm.calendar_owner.profile_photo_path = like_user_model.profile_photo_path ?? ""
+//            self.main_vm.calendar_owner.user_idx = like_user_model.idx
+//            self.main_vm.calendar_owner.watch_user_idx = Int(self.main_vm.my_idx!)!
+//            self.main_vm.calendar_owner.user_nickname = like_user_model.nickname
+//            SimSimFeedPage.calendar_owner_idx = like_user_model.idx
+//
+//           //피드 페이지로 이동하는 값 변경.
+//            self.show_friend_feed.toggle()
         }
     }
 }
