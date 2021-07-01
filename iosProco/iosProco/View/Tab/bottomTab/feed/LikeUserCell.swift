@@ -9,7 +9,7 @@ import SwiftUI
 import Kingfisher
 
 struct LikeUserCell: View {
-    @StateObject var main_vm : CalendarViewModel
+    @ObservedObject var main_vm : CalendarViewModel
 
     @State var like_user_model: LikeUserListModel
     //좋아요한 사람 한명 클릭시 피드페이지로 이동하는 값.
@@ -52,16 +52,16 @@ struct LikeUserCell: View {
         }
         .padding()
         .onTapGesture {
-            print("유저 클릭 이벤트: \(like_user_model.idx)")
+            print("유저 클릭 이벤트: \(like_user_model)")
             
             self.main_vm.calendar_owner.profile_photo_path = like_user_model.profile_photo_path ?? ""
             self.main_vm.calendar_owner.user_idx = like_user_model.idx
             self.main_vm.calendar_owner.watch_user_idx = Int(self.main_vm.my_idx!)!
+            self.main_vm.calendar_owner.user_nickname = like_user_model.nickname
             SimSimFeedPage.calendar_owner_idx = like_user_model.idx
 
            //피드 페이지로 이동하는 값 변경.
             self.show_friend_feed.toggle()
         }
-        
     }
 }

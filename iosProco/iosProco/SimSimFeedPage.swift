@@ -15,7 +15,7 @@ extension SimSimFeedPage{
     static var calendar_owner_idx : Int? = Int(ChatDataManager.shared.my_idx!)!
 }
 struct SimSimFeedPage: View {
-    @Environment(\.presentationMode) var presentation
+    @Environment(\.presentationMode) private var presentation
 
     //캘린더에서 친구 정보를 다이얼로그 또는 탭 클릭시 미리 저장해놔야 해서 여기서 뷰모델 init하지 않음.
     @StateObject var main_vm :  CalendarViewModel
@@ -25,13 +25,13 @@ struct SimSimFeedPage: View {
     @State private var is_loading : Bool = true    
     
     @State private var previous_month : Date = Date()
-
+    @State private var go_mypage : Bool = false
     let img_processor = DownsamplingImageProcessor(size:CGSize(width: 41.5, height: 41.5))
         |> RoundCornerImageProcessor(cornerRadius: 25)
-    
+
     var body: some View {
+        
         VStack{
-            
             if !is_loading{
                 
                 //친구 체크 통신 결과에 따라 - 친구 또는 내 피드 화면일 때
@@ -153,10 +153,14 @@ struct SimSimFeedPage: View {
                     //                    FeedLimitedView(main_vm: self.main_vm, show_range: "not_friend")
                 }
             }else{
+                Spacer()
                 ProgressView()
             }
             Spacer()
         }
+        .sheet(isPresented: self.$go_mypage, content: {
+            MyPage(main_vm: SettingViewModel())
+        })
         .onReceive(NotificationCenter.default.publisher(for: Notification.request_friend), perform: {value in
             
             if let user_info = value.userInfo{
@@ -179,6 +183,21 @@ struct SimSimFeedPage: View {
                       
                     }
                 }
+            }
+        })
+        .onReceive(NotificationCenter.default.publisher(for: Notification.calendar_owner_click), perform: {value in
+            print("캘린더 주인 프로필 클릭 이벤트 받음")
+            
+            if let user_info = value.userInfo, let data = user_info["calendar_owner_click"]{
+                print("캘린더 주인 프로필 클릭 이벤트 \(data)")
+                
+                if data as! String == "ok"{
+                    self.go_mypage = true
+                    print("마이페이지 이동값 변경하기")
+                    self.main_vm.go_mypage = true
+                }
+            }else{
+                print("캘린더 주인 프로필 클릭 이벤트 노티 아님")
             }
         })
         .alert(isPresented: $main_vm.show_friend_result_alert){
@@ -241,7 +260,8 @@ struct SimSimFeedPage: View {
                 self.is_loading = false
             }
         }
-    }
+        }
+    //}
 }
 
 extension Calendar{
@@ -257,12 +277,14 @@ extension SimSimFeedPage{
         HStack{
             Button(action: {
                 print("뒤로 가기 버튼 클릭")
-                self.presentation.wrappedValue.dismiss()
+               // self.presentation.wrappedValue.dismiss()
             }){
                 Image("left")
                     .resizable()
                     .frame(width: 8.51, height: 17)
             }
+            .padding(.leading)
+
             
             Spacer()
             

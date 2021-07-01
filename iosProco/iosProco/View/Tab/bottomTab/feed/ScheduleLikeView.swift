@@ -13,8 +13,6 @@ struct ScheduleLikeView: View {
     @ObservedObject var main_vm : CalendarViewModel
     @State private var show_like_users: Bool = false
     
-    
-    
     var body: some View {
         HStack{
             Button(action: {
@@ -23,7 +21,7 @@ struct ScheduleLikeView: View {
                 if schedule.liked_myself{
                     
                     print("일정 상세 페이지의 좋아요 취소 : 좋아요 idx \(schedule.like_idx!)")
-                    self.main_vm.send_cancel_like_calendar(user_idx: Int(main_vm.my_idx!)!, calendar_like_idx: schedule.like_idx!)
+                    self.main_vm.send_cancel_like_calendar(user_idx: self.main_vm.calendar_owner.user_idx, calendar_like_idx: schedule.like_idx!)
                     
                 }else{
                     //좋아요 +1 이벤트
@@ -31,7 +29,7 @@ struct ScheduleLikeView: View {
                     let like_date = main_vm.date_to_string(date: schedule.date)
                     print("일정 상세 페이지의 좋아요 클릭: \(like_date)")
                     
-                    self.main_vm.send_like_in_calendar(user_idx: Int(main_vm.my_idx!)!, like_date: like_date)
+                    self.main_vm.send_like_in_calendar(user_idx: self.main_vm.calendar_owner.user_idx, like_date: like_date)
                     
                 }
             }){
@@ -46,7 +44,7 @@ struct ScheduleLikeView: View {
             
             //좋아요를 클릭한 사람들의 목록을 보는 페이지로 이동.
             Button(action: {
-
+                
                 //좋아요 목록 뷰로 이동시키기
                 self.show_like_users.toggle()
                 print("좋아요 유저 목록 뷰로 이동시키는 값 토글.")
@@ -65,28 +63,31 @@ struct ScheduleLikeView: View {
             }
             Spacer()
         }
+        .onAppear{
+            print("캘린더 일자 좋아요한 데이터 확인: \(schedule)")
+        }
         .onReceive(NotificationCenter.default.publisher(for:Notification.calendar_like_click), perform: {value in
             print("캘린더 일자 상세페이지에서 좋아요 클릭 이벤트 노티: \(value)")
-
+            
             if let user_info = value.userInfo{
-             let check_result = user_info["calendar_like_click"]
+                let check_result = user_info["calendar_like_click"]
                 print("좋아요 데이터 : \(String(describing: check_result))")
-
+                
                 if check_result as! String == "ok"{
-                 //좋아요 클릭한 idx가 옴.
-                let like_idx = user_info["like_idx"] as! String
-                let like_date = user_info["like_date"] as! String
+                    //좋아요 클릭한 idx가 옴.
+                    let like_idx = user_info["like_idx"] as! String
+                    let like_date = user_info["like_date"] as! String
                     let schedule_date = self.main_vm.date_to_string(date: schedule.date)
-
+                    
                     if like_date == schedule_date{
                         print("좋아요한 날짜에 해당")
-                    
-                    //1. 상세페이지 뷰 데이터 변경하기
-                    //좋아요 클릭한 날짜가 저장된 모델의 배열 idx값을 찾아와서 저장.
+                        
+                        //1. 상세페이지 뷰 데이터 변경하기
+                        //좋아요 클릭한 날짜가 저장된 모델의 배열 idx값을 찾아와서 저장.
                         schedule.like_num! += 1
                         schedule.like_idx = Int(like_idx)
                         schedule.liked_myself = true
-                    
+                        
                         print("뷰에서 좋아요 하고 작은 날짜뷰 데이터 변경 확인: \(main_vm.small_schedules)")
                         print("뷰에서 좋아요 후 상세 페이지뷰 데이터 변경 확인: \(main_vm.schedules_model)")
                     }
@@ -94,9 +95,9 @@ struct ScheduleLikeView: View {
                     
                 }else if check_result as! String == "canceled"{
                     print("좋아요 취소 데이터: \(check_result)")
-                  //취소한 idx가 옴.
+                    //취소한 idx가 옴.
                     let like_idx = user_info["like_idx"] as! String
-
+                    
                     if Int(like_idx) == schedule.like_idx!{
                         print("좋아요 취소한 날짜")
                         
@@ -104,13 +105,13 @@ struct ScheduleLikeView: View {
                         schedule.like_num! -= 1
                         schedule.like_idx = Int(like_idx)
                         schedule.liked_myself = false
-
+                        
                         self.main_vm.calendar_like_changed = true
                         print("뷰에서 좋아요 취소하고 데이터 변경 확인: \(main_vm.small_schedules)")
-
+                        
                         print("뷰에서 좋아요 취소하고 큰 날짜 뷰 데이터 변경 확인: \(main_vm.schedules_model)")
                     }
-
+                    
                 }
             }
         })
