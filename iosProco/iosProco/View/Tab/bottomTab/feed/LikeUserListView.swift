@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct LikeUserListView: View {
-    
+    @Environment(\.presentationMode) var presentation
+
     @ObservedObject var main_vm : CalendarViewModel
     @State var searchText = ""
     //사용자가 현재 검색창에 텍스트를 입력중인가를 알 수 있는 변수
@@ -20,12 +21,33 @@ struct LikeUserListView: View {
     
     var body: some View {
         VStack{
-            ScrollView{
+            
+            HStack{
+                Button(action: {
+                
+                    print("뒤로 가기 버튼 클릭")
+
+                    self.presentation.wrappedValue.dismiss()
+                }){
+                    Image("left")
+                        .resizable()
+                        .frame(width: 8.51, height: 17)
+                }
+              
+                Spacer()
                 
                 Text("좋아요한 사람들")
                     .font(.custom(Font.n_bold, size: 25))
                     .foregroundColor(Color.proco_black)
                     .padding()
+                    .padding(.bottom)
+                
+                Spacer()
+            }
+            .padding()
+            
+            ScrollView{
+                
                 
                 HStack{
                     ClickUserSearchBar(searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
@@ -53,6 +75,8 @@ struct LikeUserListView: View {
                 Spacer()
             }
         }
+        .navigationBarTitle("", displayMode: .inline)
+        .navigationBarHidden(true)
         .onAppear{
             print("좋아요한 사람들 목록뷰 나옴.")
             let current_date_string = self.main_vm.date_to_string(date: schedule_date).split(separator: " ")[0]
