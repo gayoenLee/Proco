@@ -133,6 +133,7 @@ struct CalendarCardCategoryView: View{
     
     var body: some View{
         Group{
+            HStack{
             Capsule()
                 .foregroundColor(info.category == "사교/인맥" ? .proco_yellow :info.category == "게임/오락" ? .proco_pink : info.category == "문화/공연/축제" ? .proco_olive : info.category == "운동/스포츠" ? .proco_green : info.category == "취미/여가" ? .proco_mint : info.category == "스터디" ? .proco_blue : .proco_red )
                 .frame(width: 43, height: 16)
@@ -140,7 +141,8 @@ struct CalendarCardCategoryView: View{
                             .foregroundColor(.white)
                             .font(.custom(Font.t_extra_bold, size: 8))
                             .foregroundColor(Color.proco_white))
-            
+            Spacer()
+            }
         }
     }
 }
@@ -150,9 +152,12 @@ struct CalendarCardNameView : View{
     
     var body: some View{
         Group{
+            HStack{
             Text(info.schedule_name)
                 .font(.custom(Font.n_extra_bold, size: 15))
                 .foregroundColor(.proco_black)
+            Spacer()
+            }
         }
     }
 }
