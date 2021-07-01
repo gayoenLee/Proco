@@ -9,45 +9,61 @@ import SwiftUI
 
 struct LikeUserListView: View {
     
-    @StateObject var main_vm : CalendarViewModel
+    @ObservedObject var main_vm : CalendarViewModel
     @State var searchText = ""
     //사용자가 현재 검색창에 텍스트를 입력중인가를 알 수 있는 변수
     @State var isSearching = false
     //키보드에서 엔터 버튼 클릭시 검색 완료를 알리기 위한 변수
     @State var end_search = false
     var schedule_date : Date
+    @State private var is_loading = true
     
     var body: some View {
         VStack{
-            Text("좋아요한 사람들")
-                .font(.custom(Font.n_extra_bold, size: 22))
-                .foregroundColor(Color.proco_black)
-                .padding()
-            
-            HStack{
-                ClickUserSearchBar(searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
-            }
-            
-            //검색할 경우에는 보여주지 않기
-            if (isSearching == false && end_search == false){
+            ScrollView{
                 
-                ForEach(main_vm.calendar_like_user_model){user in
-                    LikeUserCell(main_vm: self.main_vm, like_user_model: user)
+                Text("좋아요한 사람들")
+                    .font(.custom(Font.n_bold, size: 25))
+                    .foregroundColor(Color.proco_black)
+                    .padding()
+                
+                HStack{
+                    ClickUserSearchBar(searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
                 }
                 
-            }else{
-                ForEach((main_vm.calendar_like_user_model).filter({"\($0)".contains(searchText)}), id: \.id){user in
+                if is_loading{
+                    Spacer()
+                    ProgressView()
                     
-                    LikeUserCell(main_vm: self.main_vm, like_user_model: user)
+                }else{
+                    //검색할 경우에는 보여주지 않기
+                    if (isSearching == false && end_search == false){
+                        
+                        ForEach(main_vm.calendar_like_user_model){user in
+                            LikeUserCell(main_vm: self.main_vm, like_user_model: user)
+                        }
+                    }else{
+                        
+                        ForEach((main_vm.calendar_like_user_model).filter({"\($0)".contains(searchText)}), id: \.id){user in
+                            
+                            LikeUserCell(main_vm: self.main_vm, like_user_model: user)
+                        }
+                    }
                 }
+                Spacer()
             }
-            Spacer()
         }
         .onAppear{
             print("좋아요한 사람들 목록뷰 나옴.")
             let current_date_string = self.main_vm.date_to_string(date: schedule_date).split(separator: " ")[0]
             
-            self.main_vm.get_like_user_list(user_idx: Int(self.main_vm.my_idx!)!, calendar_date: String(current_date_string))
+            self.main_vm.get_like_user_list(user_idx: self.main_vm.calendar_owner.user_idx, calendar_date: String(current_date_string))
+            
+            //데이터를 가져오고 보여주는데 시간이 걸려서 로딩 추가
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                self.is_loading = false
+
+            }
         }
     }
 }
