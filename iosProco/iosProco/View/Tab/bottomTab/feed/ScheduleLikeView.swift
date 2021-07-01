@@ -21,7 +21,7 @@ struct ScheduleLikeView: View {
                 if schedule.liked_myself{
                     
                     print("일정 상세 페이지의 좋아요 취소 : 좋아요 idx \(schedule.like_idx!)")
-                    self.main_vm.send_cancel_like_calendar(user_idx: Int(main_vm.my_idx!)!, calendar_like_idx: schedule.like_idx!)
+                    self.main_vm.send_cancel_like_calendar(user_idx: self.main_vm.calendar_owner.user_idx, calendar_like_idx: schedule.like_idx!)
                     
                 }else{
                     //좋아요 +1 이벤트
@@ -29,7 +29,7 @@ struct ScheduleLikeView: View {
                     let like_date = main_vm.date_to_string(date: schedule.date)
                     print("일정 상세 페이지의 좋아요 클릭: \(like_date)")
                     
-                    self.main_vm.send_like_in_calendar(user_idx: Int(main_vm.my_idx!)!, like_date: like_date)
+                    self.main_vm.send_like_in_calendar(user_idx: self.main_vm.calendar_owner.user_idx, like_date: like_date)
                     
                 }
             }){
