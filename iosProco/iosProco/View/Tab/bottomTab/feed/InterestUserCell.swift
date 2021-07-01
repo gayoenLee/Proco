@@ -55,17 +55,18 @@ struct InterestUserCell: View {
         .padding()
         .onTapGesture {
             print("피드 - 관심있어요한 유저 피드 페이지 이동: \(interest_users_model.idx)")
-            
-            self.main_vm.calendar_owner.profile_photo_path = interest_users_model.profile_photo_path ?? ""
-            self.main_vm.calendar_owner.user_idx = interest_users_model.idx
-            self.main_vm.calendar_owner.watch_user_idx = Int(self.main_vm.my_idx!)!
-            self.main_vm.calendar_owner.user_nickname = interest_users_model.nickname
-            print("관심있어요 유저 클릭 후 캘린더 오너 데이터: \(self.main_vm.calendar_owner)")
-            
-            SimSimFeedPage.calendar_owner_idx = interest_users_model.idx
-
-           //피드 페이지로 이동하는 값 변경.
-            self.show_friend_feed.toggle()
+            //심심풀이 좋아요 한 사람 목록에서 한 사람 누르고 다이얼로그에서 피드로 이동했을때 뷰모델을 공유해서 심심풀이가 제대로 표시되지 않는 문제가 있었는데 현재 수정하면 기간이 너무 오래 걸릴 수 있어
+           // 심심풀이 이동자체를 막아놓기로 했음
+//            self.main_vm.calendar_owner.profile_photo_path = interest_users_model.profile_photo_path ?? ""
+//            self.main_vm.calendar_owner.user_idx = interest_users_model.idx
+//            self.main_vm.calendar_owner.watch_user_idx = Int(self.main_vm.my_idx!)!
+//            self.main_vm.calendar_owner.user_nickname = interest_users_model.nickname
+//            print("관심있어요 유저 클릭 후 캘린더 오너 데이터: \(self.main_vm.calendar_owner)")
+//
+//            SimSimFeedPage.calendar_owner_idx = interest_users_model.idx
+//
+//           //피드 페이지로 이동하는 값 변경.
+//            self.show_friend_feed.toggle()
         }
         
     }
