@@ -70,11 +70,11 @@ struct ProcoMainCalendarView: View {
     
     var body: some View {
         
-        VStack{
-            NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_mypage)
+        //VStack{
+         
             ZStack{
-                VStack{
-                    
+                VStack(alignment: .leading){
+                    NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_mypage)
                     ProcoCalendarView(calendarManager: calendarManager)
                         .navigationBarTitle("", displayMode: .inline)
                         .navigationBarHidden(true)
@@ -132,18 +132,20 @@ struct ProcoMainCalendarView: View {
                     }
                     .padding(.bottom, UIScreen.main.bounds.width*0.2)
                     .padding(.trailing, UIScreen.main.bounds.width/20)
+                    Spacer()
                 }
+                Spacer()
             }
             .navigationBarHidden(true)
             .navigationBarTitle("", displayMode: .inline)
-        }
+        //}
         .onAppear{
             self.go_setting_page = false
             print("프로코메인캘린더뷰 나타남 calendar owner data:\(calendar_owner_data)")
         }
         .navigationBarHidden(true)
         .navigationBarTitle("", displayMode: .inline)
-        .frame(height: UIScreen.main.bounds.height*0.8, alignment: .top)
+        .frame(height: UIScreen.main.bounds.height*0.8)
         .sheet(isPresented: self.$go_setting_page){
             FeedDisclosureSettingView(main_vm: self.main_vm)
         }
@@ -211,7 +213,7 @@ extension ProcoMainCalendarView: ElegantCalendarDataSource {
         }) ?? -1
         //갖고 온 first index가 있으면 true
         if check_idx != -1{
-            print("내 일정이 있는지 여부 메소드 안 일정 있는 경우 true: \(schedule_by_day[date]![check_idx!])")
+           // print("내 일정이 있는지 여부 메소드 안 일정 있는 경우 true: \(schedule_by_day[date]![check_idx!])")
             return true
             
         }else{
