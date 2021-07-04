@@ -1275,8 +1275,9 @@ public class CalendarViewModel: ObservableObject{
                       2)저장.
                      */
                     print("이전 날짜: \(previous_date), 새로운 날짜: \(schedule_date)")
+                    let previous_date = previous_date.split(separator: " ")[0]
                     let schedule_model_idx = self.schedules_model.firstIndex(where: {
-                        let string_date =  self.date_to_string(date: $0.date)
+                        let string_date =  self.date_to_string(date: $0.date).split(separator: " ")[0]
                         return string_date == previous_date
                     })
                    //1-2)위에서 찾은 idx로 수정한 schedule_info idx를 가져온다.
@@ -1290,23 +1291,28 @@ public class CalendarViewModel: ObservableObject{
                     //2-1)
                     var new_model_idx : Int? = -1
                     new_model_idx = self.schedules_model.firstIndex(where: {
-                        let string_date =  self.date_to_string(date: $0.date)
+                        let string_date =  self.date_to_string(date: $0.date).split(separator: " ")[0]
                         return string_date == schedule_date
                     }) ?? -1
                     
                     //2-2)schedule_info에 저장.
-                    //기존에 저장된 데이터가 있었을 경우
+                    //기존에 저장된 데이터가 있었을 경우(기존 날짜에 저장된 다른 스케줄이 있었을 경우)
                     if new_model_idx != -1{
                         
                     self.schedules_model[new_model_idx!].schedule.append(ScheduleInfo(card_idx: schedule_idx, type: "personal", schedule_date: date_form, schedule_name: title, tag_color: Color.yellow, start_time: time_form, end_time: time_form, category: "", tags: [], current_people: "", location_name: "", is_private: false, memo: content))
                         
-                    //새롭게 데이터 저장하는 경우
+                        //뷰 업데이트 위해 보내기
+//                        NotificationCenter.default.post(name: Notification.calendar_personal_schedule, object: nil, userInfo: ["schedule_edit" : "ok_already"])
+                        
+                    //새롭게 데이터 저장하는 경우(편집한 날짜에 기존에 저장된 다른 스케줄이 없었던경우)
                     }else{
+                        
                         var schedule_info : [ScheduleInfo] = []
                         schedule_info.append(ScheduleInfo(card_idx: schedule_idx, type: "personal", schedule_date: date_form, schedule_name: title, tag_color: Color.yellow, start_time: time_form, end_time: time_form, category: "", tags: [], current_people: "", location_name: "", is_private: false, memo: content))
                         
                         self.schedules_model.append(Schedule(date: date_form, like_num: 0, liked_myself: false, like_idx: -1, schedule: schedule_info))
                         
+//                        NotificationCenter.default.post(name: Notification.calendar_personal_schedule, object: nil, userInfo: ["schedule_edit" : "ok_new", "data" : schedule_info])
                     }
                     
                 }else{
@@ -1336,7 +1342,9 @@ public class CalendarViewModel: ObservableObject{
                     
                 //모델에 저장돼 있던 데이터 삭제
                     let delete_idx = self.schedules_model.firstIndex(where: {
-                        let string_date =  self.date_to_string(date: $0.date)
+                        let string_date =  self.date_to_string(date: $0.date).split(separator: " ")[0]
+                        print("비교하려는 날짜: \(string_date)")
+                        print("기준 날짜: \(schedule_date)")
                         return string_date == schedule_date
                     })
                     
