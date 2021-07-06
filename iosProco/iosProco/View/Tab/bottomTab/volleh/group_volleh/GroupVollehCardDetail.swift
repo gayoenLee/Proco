@@ -12,8 +12,7 @@ import Kingfisher
 struct GroupVollehCardDetail: View {
     @Environment(\.presentationMode) var presentation
     @StateObject var main_vm: GroupVollehMainViewmodel
-    @StateObject var socket : SockMgr
-    
+    @StateObject var socket : SockMgr = socket_manager
     
     //드로어에서 카드 수정하기 화면으로 이동.
     @State private var go_edit_from_chat: Bool = false
@@ -184,9 +183,9 @@ struct GroupVollehCardDetail: View {
                                     
                                 }.simultaneousGesture(TapGesture().onEnded{
                                     //참가자, 신청자 리스트 가져오는 통신 - 드로어에서 볼 경우, 메인에서 볼 경우 모두 진행.
-                                    if SockMgr.socket_manager.is_from_chatroom{
+                                    if socket_manager.is_from_chatroom{
                                         print("is from chatroom true일 때 신청자 목록 페이지 이동 클릭")
-                                        self.main_vm.selected_card_idx = SockMgr.socket_manager.current_chatroom_info_struct.card_idx
+                                        self.main_vm.selected_card_idx = socket_manager.current_chatroom_info_struct.card_idx
                                         print("채팅방 드로어에서 참가자, 신청자 리스트 가져올 경우")
                                         // self.main_vm.get_apply_people_list()
                                         
@@ -254,12 +253,16 @@ struct GroupVollehCardDetail: View {
                                             return  Alert(title: Text("참가 신청"), message: Text("참가 신청이 완료됐습니다."), dismissButton: .default(Text("확인")))
                                         case "fail":
                                             return  Alert(title: Text("참가 신청"), message: Text("참가 신청을 다시 시도해주세요."), dismissButton: .default(Text("확인")))
+                                        case "already exist":
+                                            return  Alert(title: Text("참가 신청"), message: Text("이미 참가 신청이 됐습니다."), dismissButton: .default(Text("확인")))
+                                        case "not permitted":
+                                            return  Alert(title: Text("참가 신청"), message: Text("참가 권한이 없습니다."), dismissButton: .default(Text("확인")))
                                         default:
                                             return  Alert(title: Text("참가 신청"), message: Text("참가 신청을 다시 시도해주세요."), dismissButton: .default(Text("확인")))
                                         }
                                     }
                                     .onReceive(NotificationCenter.default.publisher(for: Notification.apply_meeting_result)){value in
-                                        print("참가 신청 완료 노티 받음")
+                                        print("참가 신청 완료 노티 받음: \(value)")
                                         if let user_info = value.userInfo, let data = user_info["apply_meeting_result"]{
                                             if data as! String == "ok"{
                                                 
@@ -269,8 +272,18 @@ struct GroupVollehCardDetail: View {
                                                 self.apply_btn_txt = "신청 완료"
                                             }else{
                                                 
+                                                if data as! String == "already exist"{
+                                                    
+                                                    self.apply_ok = "already exist"
+
+                                                }else if data as! String == "not permitted"{
+                                                    
+                                                    self.apply_ok = "not permitted"
+                                                    
+                                                }else{
                                                 self.apply_ok = "fail"
                                                 print("fail통신: \(self.apply_ok)")
+                                                }
                                             }
                                             self.apply_result = true
                                         }
@@ -284,11 +297,14 @@ struct GroupVollehCardDetail: View {
                 MapDetailInfoView(vm: self.main_vm)
             }
             .onAppear{
-                print("-------------------------------상세 페이지 나타남 동적링크에서 왔는지: \(socket.is_dynamic_link), 선택한 카드idx: \(self.main_vm.selected_card_idx)------------------------")
-                if socket.is_dynamic_link{
+                print("-------------------------------상세 페이지 나타남 동적링크에서 왔는지: \(socket_manager.is_dynamic_link), 선택한 카드idx: \(self.main_vm.selected_card_idx)------------------------")
+                if socket_manager.is_dynamic_link{
                     
                     self.main_vm.selected_card_idx = self.socket.selected_card_idx
                     print("동적링크에서 들어온 경우 카드 idx: \(self.main_vm.selected_card_idx)")
+                }
+                if  SockMgr.socket_manager.detail_to_invite{
+                    self.apply_btn_txt = "초대하기"
                 }
                 //이걸 해야 지도 데이터 부분에서 분기처리가 됨.
                 self.main_vm.is_just_showing = true
@@ -378,7 +394,7 @@ extension GroupVollehCardDetail{
          */
         Button(action: {
             
-            let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
+            let chatroom_idx = socket_manager.invite_chatroom_idx
             print("수락 클릭: \(chatroom_idx)")
             
             //참가 수락하는 api 서버 통신 -> ok 오면 채팅서버에 수락 이벤트 보냄.
@@ -390,7 +406,7 @@ extension GroupVollehCardDetail{
              2.읽음 처리 위해 마지막 메세지 idx 가져오기
              3.채팅방으로 이동시킨다.-> notification center에서 on receive이용.
              */
-            if SockMgr.socket_manager.server_invite_accepted{
+            if socket_manager.server_invite_accepted{
                 
                 print("서버에서 데이터 저장 완료 후 server invite accepted뷰에서 트루 받음")
                 //1.chat_user테이블에서 데이터 꺼내오기(채팅방입장시 user read이벤트 보낼 때 사용.)
@@ -411,6 +427,15 @@ extension GroupVollehCardDetail{
                 .padding([.leading, .trailing], UIScreen.main.bounds.width/25)
         })
         .padding()
+        .alert(isPresented: self.$socket.show_dynamick_link_alert){
+            if self.socket.accept_dynamic_link_result == "already exist"{
+              return  Alert(title: Text("참여"), message: Text("이미 참여한 약속입니다."), dismissButton: .default(Text("확인")))
+            }else if  self.socket.accept_dynamic_link_result == "not permitted"{
+                return  Alert(title: Text("참여"), message: Text("참여할 권한이 없습니다."), dismissButton: .default(Text("확인")))
+            }else{
+                return  Alert(title: Text("참여"), message: Text("다시 시도해주세요"), dismissButton: .default(Text("확인")))
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: Notification.dynamic_link_move_view), perform: { value in
             print("참여 수락 완료 이벤트 받음: \(value)")
             
@@ -440,13 +465,12 @@ extension GroupVollehCardDetail{
              - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
              - 주의 : 친구 채팅방 카드이므로 소켓 매니저 클래스의 which_type_room변수를 GROUP로 만들기.
              */
-            
-            if self.main_vm.my_nickname == self.main_vm.creator_name{
+            if  SockMgr.socket_manager.detail_to_invite{
                 
                 Button(action: {
                     
                     socket_manager.which_type_room = "GROUP"
-                    
+                    ChatDataManager.shared.get_card_by_card_idx(card_idx: main_vm.my_card_detail_struct.card_idx!)
                     let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
                     print("모여볼래로 초대하려는 채팅방 idx: \(chatroom_idx), 카드 idx: \(main_vm.my_card_detail_struct.card_idx!)")
                     
@@ -458,7 +482,7 @@ extension GroupVollehCardDetail{
                     let meeting_time = self.main_vm.my_card_detail_struct.expiration_at
                     let converted_time = String.time_to_kor_language(date: meeting_time!)
                     
-                    SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: "친구", meeting_date: converted_date, meeting_time: converted_time)
+                    SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: "모임", meeting_date: converted_date, meeting_time: converted_time)
                     
                     //본래의 일반 채팅방 화면으로 이동.
                     self.go_back_chatroom = true
@@ -469,6 +493,10 @@ extension GroupVollehCardDetail{
                         .foregroundColor(Color.proco_white)
                         .frame(maxWidth: .infinity)
                 }
+                .frame(minWidth: 0, maxWidth: .infinity)
+                .background(Color.main_green)
+                .cornerRadius(25)
+                .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
             }else{
                 
                 if Int(self.main_vm.my_idx!) != self.main_vm.my_card_detail_struct.creator!.idx{
