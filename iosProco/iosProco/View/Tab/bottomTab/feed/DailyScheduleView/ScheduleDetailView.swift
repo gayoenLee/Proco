@@ -35,17 +35,18 @@ struct ScheduleDetailView: View {
             top_title_bar
             
             Spacer()
-            
-            schedule_title_guid_txt
-            
-            //편집모드일 경우
-            if (.active == self.editMode?.wrappedValue){
+            HStack{
+                schedule_title_guid_txt
+                Spacer()
                 
-                schedule_title_txtfield
-                
-            }else{
-                schedule_title
-                
+                //편집모드일 경우
+                if (.active == self.editMode?.wrappedValue){
+                    
+                    schedule_title_txtfield
+                    
+                }else{
+                    schedule_title
+                }
             }
             //날짜 선택 칸
             //in: 은 미래 날짜만 선택 가능하도록 하기 위함. displayedComponents: 시간을 제외한 날짜만 캘린더에 보여주기 위함.
@@ -95,6 +96,10 @@ struct ScheduleDetailView: View {
                 }
             }
         }
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .padding(.all)
         .onAppear{
             print("개인 스케줄 상세 페이지 나타남.: \(info_model)")
@@ -141,7 +146,7 @@ extension ScheduleDetailView{
             .foregroundColor(Color.light_gray)
             .overlay(
                 Text("\(self.date)")
-                    .font(.custom(Font.n_bold, size: 17))
+                    .font(.custom(Font.n_bold, size: 16))
                     .foregroundColor(Color.black)
             )
     }
@@ -184,25 +189,24 @@ extension ScheduleDetailView{
     
     
     var memo_info : some View{
-        VStack(alignment: .leading){
+        ZStack(alignment: .topLeading){
             
             Rectangle()
-                .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width, alignment: .center)
+                .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width, alignment: .topLeading)
                 .cornerRadius(3)
                 .foregroundColor(Color.light_gray)
-                .overlay(
-                    VStack{
+              
+                   // VStack(alignment: .leading){
                         
                         Text("\(self.info_model.memo)")
-                            .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width)
-                            .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
+//                            .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width)
+                            .padding([.top, .leading, .trailing], UIScreen.main.bounds.width/20)
                             .multilineTextAlignment(.leading)
                             .font(.custom(Font.n_bold, size: 16))
                             .foregroundColor(Color.proco_black)
-                        Spacer()
-                    }
-                )
-            
+                     //   Spacer()
+                    //}
+                
         }
     }
     
@@ -219,12 +223,11 @@ extension ScheduleDetailView{
     }
     
     var schedule_title: some View{
-        VStack(alignment: .leading){
+      
             Text("\(self.info_model.schedule_name)")
-                .font(.custom(Font.n_regular, size: 15))
-                .foregroundColor(Color.proco_black)
-            Spacer()
-        }
+                .font(.custom(Font.n_bold, size: 16))
+                .foregroundColor(Color.black)
+     
     }
     
     var schedule_title_txtfield : some View{
@@ -241,14 +244,11 @@ extension ScheduleDetailView{
     
     
     var schedule_title_guid_txt: some View{
-        
-        HStack{
-            
-            Text("일정 제목")
+
+            Text("제목")
                 .font(.custom(Font.t_extra_bold, size: 16))
                 .foregroundColor(Color.proco_black)
-            Spacer()
-        }
+
     }
     
     var top_title_bar : some View{
@@ -383,6 +383,22 @@ extension ScheduleDetailView{
                 .frame(width: 40, height: 40)
                 .clipShape(Circle())
         }
+//        .onReceive(NotificationCenter.default.publisher(for: Notification.calendar_personal_schedule), perform: {value in
+//
+//            if let user_info = value.userInfo, let data = user_info["schedule_edit"]{
+//
+//                //데이터 새롭게 저장하는 경우
+//                if data as! String == "ok_new"{
+//
+//
+//
+//                }else if data as! String == "ok_already"{
+//
+//                }
+//
+//
+//            }
+//        })
     }
 }
 

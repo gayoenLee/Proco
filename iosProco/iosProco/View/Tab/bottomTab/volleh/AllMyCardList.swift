@@ -25,7 +25,7 @@ struct AllMyCardList: View {
     
     
     var body: some View {
-        
+        NavigationView{
         VStack{
             HStack{
                 Spacer()
@@ -43,13 +43,14 @@ struct AllMyCardList: View {
                         .resizable()
                         .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                 })
-                
-                //친구랑 볼래 상세 페이지
-                NavigationLink("",destination: FriendVollehCardDetail(main_vm: self.friend_vm, group_main_vm: self.group_vm, socket: self.socket, calendar_vm: self.calendar_vm), isActive: self.$see_freind_card_detail)
-                
-                //모여볼래 상세 페이지
-                NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_vm, socket: self.socket, calendar_vm: self.calendar_vm), isActive: self.$see_group_card_detail)
             }
+            
+            //친구랑 볼래 상세 페이지
+//            NavigationLink("",destination: FriendVollehCardDetail(main_vm: self.friend_vm, group_main_vm: self.group_vm, socket: self.socket, calendar_vm: self.calendar_vm).navigationBarHidden(true), isActive: self.$see_freind_card_detail)
+            
+            //모여볼래 상세 페이지
+//            NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_vm, socket: self.socket, calendar_vm: self.calendar_vm).navigationBarHidden(true), isActive: self.$see_group_card_detail)
+            
             ScrollView{
                 
                 HStack{
@@ -72,11 +73,13 @@ struct AllMyCardList: View {
                         //한번 탭했을 때 상세 페이지로 이동.
                         .onTapGesture {
                             print("클릭한 카드 idx: \(card.card_idx!)")
+                           // SockMgr.socket_manager.is_dynamic_link = true
                             
+                            SockMgr.socket_manager.selected_card_idx = card.card_idx!
                             //상세 페이지로 들어오는 경우 - 메인, 드로어(카드 정보 보기), 친구 카드 초대하기 - 내 카드 1개 클릭..이것들 구분 위함.
-                            socket.is_from_chatroom = true
+                            SockMgr.socket_manager.is_from_chatroom = true
                             //상세 페이지에서 친구 카드 초대하기에서 이동할 경우에는 확인 버튼 예외처리 위해 사용
-                            socket.detail_to_invite = true
+                            SockMgr.socket_manager.detail_to_invite = true
                             
                             //해당 카드의 상세 정보 가져오기 위한 쿼리.
                             //                        ChatDataManager.shared.get_card_by_card_idx(card_idx: card.card_idx!)
@@ -84,7 +87,6 @@ struct AllMyCardList: View {
                             friend_vm.selected_card_idx = card.card_idx!
                             self.see_freind_card_detail.toggle()
                         }
-                    
                 }
                 
                 
@@ -110,12 +112,13 @@ struct AllMyCardList: View {
                         .onTapGesture {
                             print("클릭한 카드 idx: \(card.card_idx!)")
                             //상세 페이지로 들어오는 경우 - 메인, 드로어(카드 정보 보기), 친구 카드 초대하기 - 내 카드 1개 클릭..이것들 구분 위함.
-                            socket.is_from_chatroom = true
+                            SockMgr.socket_manager.is_from_chatroom = true
                             //상세 페이지에서 친구 카드 초대하기에서 이동할 경우에는 확인 버튼
-                            socket.detail_to_invite = true
-                            print("카드 한 개 클릭: \( socket.detail_to_invite)")
+                            SockMgr.socket_manager.detail_to_invite = true
+                            print("카드 한 개 클릭: \( SockMgr.socket_manager.detail_to_invite)")
                             //해당 카드의 상세 정보 가져오기 위한 쿼리.
                             //                            ChatDataManager.shared.get_card_by_card_idx(card_idx: card.card_idx!)
+                            SockMgr.socket_manager.selected_card_idx = card.card_idx!
                             group_vm.selected_card_idx = card.card_idx!
                             self.see_group_card_detail.toggle()
                             
@@ -125,9 +128,18 @@ struct AllMyCardList: View {
             
         }
         .onAppear{
+            SockMgr.socket_manager.get_all_my_cards()
             print("저장한 내 카드 리스트 확인: \(SockMgr.socket_manager.group_card), \(SockMgr.socket_manager.friend_card)")
             print("저장한 내 카드 리스트 확인: \(socket_manager.group_card), \(socket_manager.friend_card)")
             print("저장한 내 카드 리스트 확인: \(socket.group_card), \(socket.friend_card)")
+        }
+        }
+        .navigationBarHidden(true)
+        .sheet(isPresented: self.$see_freind_card_detail){
+        FriendVollehCardDetail(main_vm: self.friend_vm, group_main_vm: self.group_vm, socket: self.socket, calendar_vm: self.calendar_vm)
+        }
+        .fullScreenCover(isPresented: self.$see_group_card_detail){
+          GroupVollehCardDetail(main_vm: self.group_vm, socket: self.socket, calendar_vm: self.calendar_vm)
         }
     }
 }

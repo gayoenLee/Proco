@@ -10,14 +10,14 @@ import Kingfisher
 
 struct ChatFriendRoomView: View {
     @Environment(\.presentationMode) var presentation
-
+    
     @ObservedObject var socket : SockMgr
     //햄버거 메뉴 클릭 여부
     @State var show_menu = false
     //추방당한 사람을 메인으로 보내기 위해 이용하는 구분값
     @State private var banished : Bool = false
     @State private var move_to_invitaion = false
-
+    
     //사진 선택 여부 값
     @State private var open_gallery : Bool = false
     //선택한 사진
@@ -36,6 +36,7 @@ struct ChatFriendRoomView: View {
     @State private var error_msg_content : String = ""
     //에러 메세지 temp key
     @State private var error_msg_kind : String = ""
+    @State private var go_back : Bool = false
     
     var body: some View {
         ZStack{
@@ -44,17 +45,20 @@ struct ChatFriendRoomView: View {
                 NavigationLink("",
                                destination: FriendVollehMainView(),
                                isActive: self.$banished)
-               
+                NavigationLink("",
+                               destination: ChatMainView().navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
+                               isActive: self.$go_back)
+                
                 //상단바
                 HStack{
                     Button(action: {
                         print("뒤로가기 클릭")
-                        self.presentation.wrappedValue.dismiss()
-
+                        //self.presentation.wrappedValue.dismiss()
+                        self.go_back = true
                     }){
-                    Image("left")
-                        .resizable()
-                        .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+                        Image("left")
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                     }
                     Spacer()
                     if SockMgr.socket_manager.current_chatroom_info_struct.room_name == ""{
@@ -64,15 +68,15 @@ struct ChatFriendRoomView: View {
                             .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/18))
                             .foregroundColor(.proco_black)
                         
-                    //커스텀한 채팅방 이름이 있을 경우
+                        //커스텀한 채팅방 이름이 있을 경우
                     }else{
                         Text(SockMgr.socket_manager.current_chatroom_info_struct.room_name)
                             .padding()
                             .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/15))
                             .foregroundColor(.proco_black)
-
+                        
                     }
-                   
+                    
                     Spacer()
                     //드로어 여는 햄버거 메뉴 버튼.
                     Button(action: {
@@ -116,7 +120,7 @@ struct ChatFriendRoomView: View {
                         ImageResizer.resize(image: ui_image!, maxByte: 10*1024*1024){ img in
                             guard let resized_img = img else{return}
                             print("리사이즈한 이미지 : \(resized_img)")
-
+                            
                             let image_data = ui_image?.jpegData(compressionQuality: 0.5)
                             print("보낼 이미지 데이터 크기: \(String(describing: image_data))")
                             if image_data!.count >= 10*1024*1024{
@@ -124,64 +128,64 @@ struct ChatFriendRoomView: View {
                                 self.too_big_img_size = true
                             }else{
                                 socket.save(file_name: String(error_msg_front_created), image_data: image_data!)
-                            
-                            //서버에 보낼 이미지
+                                
+                                //서버에 보낼 이미지
                                 let encoded =  self.socket.convert_img_base64(image_data: image_data)
-                                 final_encoded = "data:image/png;base64,\(encoded)"
+                                final_encoded = "data:image/png;base64,\(encoded)"
                             }
                         }
                     }
                     
                     if self.too_big_img_size == false{
-                    /*
-                     보내기 버튼을 눌렀을 때 1.메시지 임시저장 2.서버에 메시지 보내기 이벤트
-                     3.CHAT_USER에 read last message를 이 메세지 idx로 넣기.
-                     */
-                    //sqlite에 메세지 임시 저장
-                    print("채팅방 메시지 보내기 버튼 클릭")
-                    ChatDataManager.shared.update_send_message(chatroom_idx: chatroom_idx, chatting_idx: -1, front_created_at: error_msg_front_created, content: error_msg_content)
-                    
-                    print("채팅 메세지 데이터 확인: \(SockMgr.socket_manager.chat_message_struct)")
-                    print("채팅 메세지 데이터 확인2: \(socket_manager.chat_message_struct)")
-                    print("채팅 메세지 데이터 확인3: \(socket.chat_message_struct)")
-                    
-                    var is_same : Bool = false
-                    
-                    if !SockMgr.socket_manager.chat_message_struct.isEmpty{
-                        //바로 전 메세지를 보낸 시각
-                        var prev_msg_created : String?
-                        prev_msg_created =  SockMgr.socket_manager.chat_message_struct[SockMgr.socket_manager.chat_message_struct.endIndex-1].created_at ?? ""
-                        print("바로 전 메세지 보낸 시각: \(String(describing: prev_msg_created))")
-                        //바로 전 메세지를 보낸 사람
-                        var prev_msg_user : String?
-                        prev_msg_user  =  SockMgr.socket_manager.chat_message_struct[SockMgr.socket_manager.chat_message_struct.endIndex-1].sender ?? ""
-                        print("바로 전 메세지 보낸 prev_msg_user: \(String(describing: prev_msg_user))")
-                        is_same =  SockMgr.socket_manager.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(my_idx!))
-                        print("비교 결과: \(is_same)" )
+                        /*
+                         보내기 버튼을 눌렀을 때 1.메시지 임시저장 2.서버에 메시지 보내기 이벤트
+                         3.CHAT_USER에 read last message를 이 메세지 idx로 넣기.
+                         */
+                        //sqlite에 메세지 임시 저장
+                        print("채팅방 메시지 보내기 버튼 클릭")
+                        ChatDataManager.shared.update_send_message(chatroom_idx: chatroom_idx, chatting_idx: -1, front_created_at: error_msg_front_created, content: error_msg_content)
                         
-                    }else{
-                        is_same = false
-                        print("기존에 메세지가 없었을 경우: \(is_same)")
-                    }
-                    var is_last_consecutive_msg : Bool = true
-                    if is_same{
-                        is_last_consecutive_msg = true
+                        print("채팅 메세지 데이터 확인: \(SockMgr.socket_manager.chat_message_struct)")
+                        print("채팅 메세지 데이터 확인2: \(socket_manager.chat_message_struct)")
+                        print("채팅 메세지 데이터 확인3: \(socket.chat_message_struct)")
                         
-                        //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
-                        SockMgr.socket_manager.chat_message_struct[SockMgr.socket_manager.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
-                    }
-                    //메세지 보내기 후 여기에 일단 보여주기 위해 데이터 모델에 넣기
-              
-                    let model_idx = SockMgr.socket_manager.chat_message_struct.firstIndex(where: {
-                        $0.front_created_at == self.error_msg_front_created
-                    })
-                    SockMgr.socket_manager.chat_message_struct[model_idx!].created_at = created_at
-                    SockMgr.socket_manager.chat_message_struct[model_idx!].message_idx = -1
-                    
-                    //서버에 메세지 보내기 이벤트 실행
-                    SockMgr.socket_manager.send_message(message_idx: -1, chatroom_idx: chatroom_idx, user_idx: my_idx!, content: self.error_msg_content, kinds: error_msg_kind, created_at: created_at, front_created_at: CLong(error_msg_front_created)!)
-                    
-                    print("확인 클릭")
+                        var is_same : Bool = false
+                        
+                        if !SockMgr.socket_manager.chat_message_struct.isEmpty{
+                            //바로 전 메세지를 보낸 시각
+                            var prev_msg_created : String?
+                            prev_msg_created =  SockMgr.socket_manager.chat_message_struct[SockMgr.socket_manager.chat_message_struct.endIndex-1].created_at ?? ""
+                            print("바로 전 메세지 보낸 시각: \(String(describing: prev_msg_created))")
+                            //바로 전 메세지를 보낸 사람
+                            var prev_msg_user : String?
+                            prev_msg_user  =  SockMgr.socket_manager.chat_message_struct[SockMgr.socket_manager.chat_message_struct.endIndex-1].sender ?? ""
+                            print("바로 전 메세지 보낸 prev_msg_user: \(String(describing: prev_msg_user))")
+                            is_same =  SockMgr.socket_manager.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(my_idx!))
+                            print("비교 결과: \(is_same)" )
+                            
+                        }else{
+                            is_same = false
+                            print("기존에 메세지가 없었을 경우: \(is_same)")
+                        }
+                        var is_last_consecutive_msg : Bool = true
+                        if is_same{
+                            is_last_consecutive_msg = true
+                            
+                            //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
+                            SockMgr.socket_manager.chat_message_struct[SockMgr.socket_manager.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
+                        }
+                        //메세지 보내기 후 여기에 일단 보여주기 위해 데이터 모델에 넣기
+                        
+                        let model_idx = SockMgr.socket_manager.chat_message_struct.firstIndex(where: {
+                            $0.front_created_at == self.error_msg_front_created
+                        })
+                        SockMgr.socket_manager.chat_message_struct[model_idx!].created_at = created_at
+                        SockMgr.socket_manager.chat_message_struct[model_idx!].message_idx = -1
+                        
+                        //서버에 메세지 보내기 이벤트 실행
+                        SockMgr.socket_manager.send_message(message_idx: -1, chatroom_idx: chatroom_idx, user_idx: my_idx!, content: self.error_msg_content, kinds: error_msg_kind, created_at: created_at, front_created_at: CLong(error_msg_front_created)!)
+                        
+                        print("확인 클릭")
                     }
                 }), secondaryButton: Alert.Button.default(Text("취소"), action: {
                     
@@ -250,7 +254,7 @@ struct ChatFriendRoomView: View {
                 
                 //현재 채팅방의 주인 idx를 이용해 닉네임 가져와서 상단에 표시하기, 드로어 예외처리에 사용.
                 ChatDataManager.shared.get_creator_nickname(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx)
-
+                
                 print("현재 채팅방 데이터 확인: \(SockMgr.socket_manager.current_chatroom_info_struct)")
                 
             }
@@ -258,13 +262,13 @@ struct ChatFriendRoomView: View {
                 print("채팅룸 사라짐")
                 SockMgr.socket_manager.exit_chatroom(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx)
                 SockMgr.socket_manager.chat_message_struct.removeAll()
-
+                
             })
             .onReceive(NotificationCenter.default.publisher(for: Notification.send_msg_again), perform: {value in
                 print("에러 메세지 다시 보내기 노티 받음")
                 
                 if let user_info = value.userInfo,  let check_result = user_info["send_msg_again"]{
-                   
+                    
                     print("선택한 메세지 front created at: \(check_result)")
                     self.error_msg_front_created = check_result as! String
                     self.error_msg_content = user_info["msg_content"] as! String
@@ -286,7 +290,7 @@ struct ChatFriendRoomView: View {
             HStack{
                 ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel())
                     .background(Color.proco_white)
-                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.85)
+                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)
                     .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.1: UIScreen.main.bounds.width)
             }
         }

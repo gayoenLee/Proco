@@ -16,9 +16,10 @@ struct FriendVollehCardDetail: View {
         |> RoundCornerImageProcessor(cornerRadius: 25)
     
     @StateObject var main_vm: FriendVollehMainViewmodel
-    @ObservedObject var group_main_vm: GroupVollehMainViewmodel
+    @StateObject var group_main_vm: GroupVollehMainViewmodel
     
-    @ObservedObject var socket : SockMgr
+    @StateObject var socket :SockMgr = socket_manager
+
     //일대일 채팅하기 화면 이동 구분값
     @State private var go_to_chat: Bool = false
     //드로어에서 카드 수정하기 화면으로 이동.
@@ -26,7 +27,7 @@ struct FriendVollehCardDetail: View {
     //메인 친구랑 볼래에서 카드 수정하기 화면으로 이동.
     @State private var go_edit_from_main: Bool = false
     //1.21추가한 것.
-    @State var volleh_category_struct = VollehTagCategoryStruct()
+    @State private var volleh_category_struct = VollehTagCategoryStruct()
     @State private var go_back_chatroom: Bool = false
     
     @ObservedObject var calendar_vm: CalendarViewModel
@@ -53,8 +54,13 @@ struct FriendVollehCardDetail: View {
     //현재 카드 idx
     @State private var current_card_idx : Int = -1
     
+    //카드 초대하기 후 알림창 띄울 때 사용 구분값
+    @State private var invite_ok: Bool = false
+    //카드 초대하기 후 알림창에 보여줄 텍스트뷰
+    @State private var invite_result_txt : String = ""
+    
     var body: some View{
-        
+
         VStack{
             Group{
                 top_nav_bar
@@ -141,19 +147,18 @@ struct FriendVollehCardDetail: View {
                 if calendar_vm.from_calendar{
                 }
                 //동적링크를 통해 들어온 경우 참여하기 버튼.
-                else if socket.is_dynamic_link{
+                else if socket_manager.is_dynamic_link{
                     accept_invitaion_btn
                 }
                 else{
                     HStack{
-                        //확인 버튼 클릭 - 일반 채팅방으로 돌아감
-                        NavigationLink("",destination: NormalChatRoom(main_vm: self.main_vm, group_main_vm: self.group_main_vm,socket: SockMgr.socket_manager).navigationBarHidden(true).navigationBarTitle("", displayMode: .inline), isActive: self.$go_back_chatroom)
+            
                         /*
                          드로어에서 넘어온 경우, 카드에 초대하기 버튼 클릭
                          - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
                          - 주의 : 친구 채팅방 카드이므로 소켓 매니저 클래스의 which_type_room변수를 FRIEND로 만들기.
                          */
-                        if socket.detail_to_invite{
+                        if  SockMgr.socket_manager.detail_to_invite{
                             invite_btn
                             
                         }else{
@@ -169,12 +174,12 @@ struct FriendVollehCardDetail: View {
             ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
         }
         .onAppear{
-            print("-----------------친구랑 볼래 카드 상세 화면 카드 idx:\(main_vm.selected_card_idx) , 동적링크인지 여부 : \(socket.is_dynamic_link)")
-            
+            print("-----------------친구랑 볼래 카드 상세 화면 카드 idx:\(main_vm.selected_card_idx) , 동적링크인지 여부 : \(socket.is_dynamic_link), 채팅방에서 내 카드에 초대하기인지: \(socket_manager.selected_card_idx)")
+   
             //동적링크의 경우 뷰모델에 카드 idx저장이 안돼서 소켓매니저 클래스에 저장해놓음.
-            if socket.is_dynamic_link{
+            if socket_manager.is_dynamic_link || socket_manager.detail_to_invite{
                 print("동적링크에서 상세페이지로 들어온 경우")
-                self.main_vm.selected_card_idx = self.socket.selected_card_idx
+                self.main_vm.selected_card_idx = socket_manager.selected_card_idx
             }
             
             self.main_vm.get_card_detail(card_idx: self.main_vm.selected_card_idx)
@@ -197,9 +202,9 @@ struct FriendVollehCardDetail: View {
             calendar_vm.from_calendar = false
         }
         //카드 상세 정보 가져왔을 때 no result인 경우 띄우는 알림창
-        .alert(isPresented: self.$no_result_alert, content: {
-            Alert(title: Text("알림"), message: Text("찾을 수 없는 정보입니다."), dismissButton: .default(Text("확인")))
-        })
+//        .alert(isPresented: self.$no_result_alert, content: {
+//            Alert(title: Text("알림"), message: Text("찾을 수 없는 정보입니다."), dismissButton: .default(Text("확인")))
+//        })
         .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
             print("친구카드 상세 데이터 통신 완료 노티 받음")
             if let user_info = value.userInfo, let data = user_info["get_friend_card_detail_finish"]{
@@ -214,12 +219,16 @@ struct FriendVollehCardDetail: View {
                     print("날짜 확인: \(self.expiration_at)")
                     
                     self.current_card_idx = self.main_vm.friend_volleh_card_detail.card_idx!
+                    print("현재 카드 idx: \(self.current_card_idx)")
                 }
             }else{
                 print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
             }
         }
+
         .edgesIgnoringSafeArea(.all)
+  
+        
     }
 }
 
@@ -234,7 +243,7 @@ private extension FriendVollehCardDetail{
          */
         Button(action: {
             
-            let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
+            let chatroom_idx = socket_manager.invite_chatroom_idx
             print("수락 클릭: \(chatroom_idx)")
             
             //참가 수락하는 api 서버 통신 -> ok 오면 채팅서버에 수락 이벤트 보냄.
@@ -283,6 +292,16 @@ private extension FriendVollehCardDetail{
                 }
             }
         })
+        .alert(isPresented: self.$socket.show_dynamick_link_alert){
+            if self.socket.accept_dynamic_link_result == "already exist"{
+              return  Alert(title: Text("참여"), message: Text("이미 참여한 약속입니다."), dismissButton: .default(Text("확인")))
+            }else if  self.socket.accept_dynamic_link_result == "not permitted"{
+                return  Alert(title: Text("참여"), message: Text("참여할 권한이 없습니다."), dismissButton: .default(Text("확인")))
+            }else{
+                return  Alert(title: Text("참여"), message: Text("다시 시도해주세요"), dismissButton: .default(Text("확인")))
+            }
+        }
+ 
     }
     
     var invite_btn : some View{
@@ -309,8 +328,6 @@ private extension FriendVollehCardDetail{
             //            SockMgr.socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: nil, card_idx: self.main_vm.friend_volleh_card_detail.card_idx!, kinds: "친구")
             SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: self.main_vm.friend_volleh_card_detail.card_idx!, kinds: "친구", meeting_date: converted_date, meeting_time: converted_time)
             
-            //본래의 채팅방 화면으로 이동.
-            self.go_back_chatroom.toggle()
         }){
             Text("초대하기")
                 .font(.custom(Font.t_extra_bold, size: 15))
@@ -321,10 +338,36 @@ private extension FriendVollehCardDetail{
                 .cornerRadius(25)
                 .padding([.leading, .trailing], UIScreen.main.bounds.width/25)
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.new_message), perform: {value in
+            
+            if let user_info = value.userInfo,let check_result = user_info["new_message_link"]{
+               
+                print("내 카드에 초대하기 동적링크 데이터 확인: \(String(describing: check_result))")
+                
+                //친구 신청 취소한 경우
+                 if check_result as! String == "ok"{
+                    let chatroom_idx = user_info["chatroom_idx"] as! String
+                    if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
+                        self.invite_ok = true
+                        self.invite_result_txt = "초대가 완료됐습니다."
+                    }
+                 }else if check_result as! String == "fail"{
+                    let chatroom_idx = user_info["chatroom_idx"] as! String
+                    if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
+                        self.invite_ok = true
+                        self.invite_result_txt = "다시 시도해주세요"
+                    }
+                 }
+            }
+        })
+        .alert(isPresented: self.$invite_ok){
+            Alert(title: Text("초대하기"), message: Text(self.invite_result_txt), dismissButton: Alert.Button.default(Text("확인")))
+        }
     }
     var bottom_menu_btns : some View{
         HStack{
             Button(action: {
+                
                 //캘린더를 보려는 사람의 idx = 내 idx 저장.
                 calendar_vm.calendar_owner.watch_user_idx = Int(main_vm.my_idx!)!
                 

@@ -44,25 +44,26 @@ struct NormalChatRoom: View {
     @State private var error_msg_content : String = ""
     //에러 메세지 temp key
     @State private var error_msg_kind : String = ""
+    @State private var go_back : Bool = false
     
+    var creator_name : String{
+      let nickname =  SockMgr.socket_manager.user_drawer_struct.filter({
+          
+            return $0.user_idx != Int(ChatDataManager.shared.my_idx!)
+            
+        }).map({$0.nickname})
+        return nickname[0]!
+    }
     var body: some View {
         ZStack{
             VStack{
-                //동적링크에서 open눌렀을 때 카드 초대장으로 바로 이동시키기 위함.
-                NavigationLink("",
-                               destination: FriendVollehCardDetail( main_vm: self.main_vm, group_main_vm: self.group_main_vm, socket: self.socket, calendar_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
-                               isActive: self.$invited_friend_card)
-                
-                NavigationLink("",
-                               destination: GroupVollehCardDetail(main_vm: self.group_main_vm, socket: self.socket, calendar_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
-                               isActive: self.$invited_group_card)
                 
                 //상단바
                 HStack{
                     Button(action: {
                         print("뒤로가기 클릭")
-                        self.presentation.wrappedValue.dismiss()
-
+                       // self.presentation.wrappedValue.dismiss()
+                        self.go_back = true
                     }){
                     Image("left")
                         .resizable()
@@ -71,7 +72,7 @@ struct NormalChatRoom: View {
                     Spacer()
                     if SockMgr.socket_manager.current_chatroom_info_struct.room_name == ""{
                         //채팅방 주인 이름
-                        Text(SockMgr.socket_manager.creator_nickname)
+                        Text(creator_name)
                             .padding()
                             .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/15))
                             .foregroundColor(.proco_black)
@@ -93,11 +94,24 @@ struct NormalChatRoom: View {
                         print("드로어 보여주는 값: \(self.show_menu)")
                     }){
                         Image("drawer_menu_icon")
+                            .resizable()
+                            .frame(width: 20, height: 16)
                     }
                 }
-                .padding()
-                .padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
+                .padding([.leading, .trailing, .top], UIScreen.main.bounds.width/20)
+                //.padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
+                //동적링크에서 open눌렀을 때 카드 초대장으로 바로 이동시키기 위함.
+                NavigationLink("",
+                               destination: FriendVollehCardDetail( main_vm: self.main_vm, group_main_vm: self.group_main_vm,  calendar_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
+                               isActive: self.$invited_friend_card)
                 
+                NavigationLink("",
+                               destination: GroupVollehCardDetail(main_vm: self.group_main_vm, calendar_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
+                               isActive: self.$invited_group_card)
+               
+                NavigationLink("",
+                               destination: ChatMainView().navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
+                               isActive: self.$go_back)
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
                 NormalChatMessageView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url : self.$image_url, open_gallery : self.$open_gallery, ui_image: self.$ui_image, too_big_img_size : self.$too_big_img_size, send_again_alert: self.$send_again_click)
             }
@@ -227,7 +241,7 @@ struct NormalChatRoom: View {
                         
                     //서버에 메세지 보내기 이벤트 실행
                         SockMgr.socket_manager.send_message(message_idx: -1, chatroom_idx: chatroom_idx, user_idx: my_idx!, content: self.error_msg_content, kinds: error_msg_kind, created_at: created_at, front_created_at: CLong(error_msg_front_created)!)
-                    }
+                        }
                     }
                     
                     print("확인 클릭")
@@ -249,30 +263,6 @@ struct NormalChatRoom: View {
                 print("일대일 채팅방에서 노티  받음")
              
             }
-//            .onOpenURL { (url) in
-//                print("채팅룸에서 앱딜리게이트 오픈 url: \(url)")
-//                let result =  SockMgr.socket_manager.handle_dynamic_link(url)
-//                print("동적링크 클릭 후 일반 채팅방에서 받은 리턴값: \(result)")
-//                //어떤 카드에서 초대받았는지 종류
-//                let kinds = result.split(separator: "-")[0]
-//                let card_idx = result.split(separator: "-")[1]
-//                print("리턴값 종류: \(kinds), 카드idx: \(card_idx)")
-//
-//                socket.is_dynamic_link = true
-//                self.socket.selected_card_idx = Int(card_idx)!
-//
-//                if kinds.contains("모임"){
-//                    print("모임카드인 경우")
-//                    self.invited_group_card.toggle()
-//
-//                }else{
-//                    print("친구 카드인 경우")
-//
-//                    print("카드 idx 저장 확인: \(self.socket.selected_card_idx)")
-//                    self.invited_friend_card.toggle()
-//
-//                }
-//            }
             .onReceive(NotificationCenter.default.publisher(for: Notification.send_msg_again), perform: {value in
                 print("에러 메세지 다시 보내기 노티 받음")
                 
@@ -299,11 +289,11 @@ struct NormalChatRoom: View {
                         let kinds = data.split(separator: "-")[2]
                         
                         //초대링크를 통해 상세페이지를 들어가는 분기처리에 필요한 값 설정.
-                        socket.is_dynamic_link = true
+                        socket_manager.is_dynamic_link = true
                         //초대하려는 채팅방 idx
-                        socket.invite_chatroom_idx = Int(chatroom_idx)!
+                        socket_manager.invite_chatroom_idx = Int(chatroom_idx)!
                         //초대된 카드 idx
-                        socket.selected_card_idx = Int(card_idx)!
+                        socket_manager.selected_card_idx = Int(card_idx)!
                         //초대된 카드 종류에 따라 뷰 이동 처리
                         if kinds.contains("친구"){
                             self.invited_friend_card.toggle()
@@ -388,7 +378,7 @@ struct NormalChatRoom: View {
             HStack{
                 ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel())
                     .background(Color.white)
-                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.85)
+                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)
                     .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.1: UIScreen.main.bounds.width)
             }
         }

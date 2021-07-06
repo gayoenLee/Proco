@@ -53,6 +53,9 @@ struct NormalChatMessageView: View{
                 }//스크롤뷰 끝
             }//스크롤뷰 리더 끝
             //채팅 입력창
+            Divider()
+                .frame(width: UIScreen.main.bounds.width, height: 1)
+                .foregroundColor(Color.light_gray)
             VStack{
             HStack{
                 if self.selected_image == nil{
@@ -63,7 +66,7 @@ struct NormalChatMessageView: View{
                         HStack{
                                 msg_send_btn
                             
-                        }.padding()
+                        }.padding([.trailing])
                         //앨범에서 선택한 이미지가 있을 경우
                     }
                 }
@@ -93,9 +96,10 @@ struct NormalChatMessageView: View{
                 .animation(.easeOut)
             }
         }
-        .padding()
+           // .padding([.leading, .trailing])
         .animation(.easeOut)
         }
+        .KeyboardAwarePadding()
     }
 }
 
@@ -130,33 +134,17 @@ extension NormalChatMessageView{
         }){
             Image("circle_plus_icon")
                 .resizable()
-                .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+                .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
         }
     }
     
     var msg_txtfield : some View{
         TextField("", text: $message)
-            .padding(.vertical, 12)
-            .padding(.horizontal)
+            .padding(.vertical, UIScreen.main.bounds.width/40)
+            //.padding(.horizontal)
             .background(Color.white)
-            .clipShape(Capsule())
             .frame(width: UIScreen.main.bounds.width*0.7)
-            .onAppear{
-                // 키보드가 나타나면 placeholder값 지움
-                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (noti) in
-                    withAnimation {
-                      
-                        
-                    }
-                    
-                    // 사용자가 입력하지 않고 키보드를 다시 내렸을 경우 placeholder 다시 보여줌
-                    NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (noti) in
-                        withAnimation {
-                           
-                        }
-                    }
-                }
-            }
+
     }
     
     var msg_send_btn : some View{
@@ -256,12 +244,11 @@ extension NormalChatMessageView{
             self.message = ""
             
         }, label: {
-            Image(systemName: "paperplane.fill")
+            Image("msg_send_btn")
+                .resizable()
+                .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
                 .rotationEffect(.init(degrees: 45))
-                .padding(.all)
-                .background(Color.gray)
-                .clipShape(Circle())
-                .foregroundColor(Color.blue)
+               // .padding(.all)
         })
     }
     
@@ -397,7 +384,8 @@ extension NormalChatMessageView{
             self.message = ""
         }, label: {
             Image(systemName: "arrow.up")
-                .padding(.all)
+                .frame(width: UIScreen.main.bounds.width/15, height:  UIScreen.main.bounds.width/15)
+                .padding(.trailing)
                 .rotationEffect(.init(degrees: 45))
         })
     }

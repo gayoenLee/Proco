@@ -904,8 +904,12 @@ class GroupVollehMainViewmodel: ObservableObject{
                 if response["result"] == "ok"{
                     //참가 신청 완료 알림 나타내기
                     NotificationCenter.default.post(name: Notification.apply_meeting_result, object: nil, userInfo: ["apply_meeting_result" : "ok"])
+                    
                 }else{
-                    NotificationCenter.default.post(name: Notification.apply_meeting_result, object: nil, userInfo: ["apply_meeting_result" : "ok"])
+                    
+                    let response_string = response["result"].stringValue
+                    
+                    NotificationCenter.default.post(name: Notification.apply_meeting_result, object: nil, userInfo: ["apply_meeting_result" : response_string])
                 }
             })
     }
