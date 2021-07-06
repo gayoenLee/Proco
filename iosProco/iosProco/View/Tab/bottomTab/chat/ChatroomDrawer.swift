@@ -8,10 +8,11 @@
 import SwiftUI
 import Alamofire
 import Combine
+import Kingfisher
 
 struct ChatroomDrawer: View {
     @Environment(\.presentationMode) var presentationMode : Binding<PresentationMode>
-
+    
     @ObservedObject var socket : SockMgr
     
     //드로어에서 친구랑 볼래 카드 상세 페이지로 이동시 필요함.
@@ -62,41 +63,25 @@ struct ChatroomDrawer: View {
     var body: some View {
         
         ZStack{
-            Group{
-            //유저 프로필에서 신고하기 클릭시 신고하는 페이지 이동.
-                NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_friend_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: self.group_main_vm), isActive: self.$show_report_view)
-            
-            //친구랑 볼래에서 카드 정보 보기클릭시 상세 화면으로 이동(방장만 수정하기 버튼 생성.)
-                NavigationLink("",destination: FriendVollehCardDetail(main_vm: self.main_vm, group_main_vm: self.group_main_vm, socket: socket_manager, calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$see_card_detail)
-            
-            //모여볼래에서 카드 정보 보기 클릭시 상세 화면 이동.
-                NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_main_vm, socket: socket_manager, calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$see_card_detail_group)
-            
-            //친구와 카드 만들기 클릭시 카드 만드는 화면 이동
-            NavigationLink("",
-                           destination: MakeCardView(main_viewmodel: self.main_vm, tag_category_struct: self.volleh_category_struct).navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true),
-                           isActive: self.$lets_make_card)
-            
-            //친구 카드에 초대하기 클릭시 내가 만든 모든 카드 리스트 뷰로 이동
-                NavigationLink("",destination: AllMyCardList(socket: socket_manager).navigationBarTitle("", displayMode: .inline)
-                                .navigationBarHidden(true), isActive: self.$go_to_my_cards)
-            }
             VStack{
+        
                 /*
                  일반 채팅방: 카드 정보 보기 버튼x,
                  친구랑 카드 만들기 & 내가 만든 카드에 초대하기o
                  */
-                if SockMgr.socket_manager.current_chatroom_info_struct.kinds == "일반" && SockMgr.socket_manager.current_chatroom_info_struct.creator_idx == my_idx{
+                if SockMgr.socket_manager.current_chatroom_info_struct.kinds == "일반"{
                     Group{
-                    //친구와 카드 만들기: 카드 만드는 페이지로 이동 > 완료시 동적 링크 채팅방에 보내기
+                        //친구와 카드 만들기: 카드 만드는 페이지로 이동 > 완료시 동적 링크 채팅방에 보내기
                         make_card_with_friend_btn
-                    Divider()
-                    
-                    //내가 만든 카드에 초대하기 버튼 클릭시 내가 만든 카드 리스트 페이지로 이동, api서버에 내 모든 카드 리스트 가져오는 통신 진행.
+                
+                        
+                        //내가 만든 카드에 초대하기 버튼 클릭시 내가 만든 카드 리스트 페이지로 이동, api서버에 내 모든 카드 리스트 가져오는 통신 진행.
+                      
                         invite_my_card_btn
-                    Divider()
+                   
+                        Divider()
                     }
+                    
                 }else if SockMgr.socket_manager.current_chatroom_info_struct.kinds == "친구" ||  SockMgr.socket_manager.current_chatroom_info_struct.kinds.contains("모임"){
                     Group{
                         Spacer()
@@ -110,14 +95,14 @@ struct ChatroomDrawer: View {
                 else{
                 }
                 HStack{
-                  
-                Text("대화 상대")
-                    .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/18))
-                    .foregroundColor(.proco_black)
-                    .padding(.leading, UIScreen.main.bounds.width/20)
+                    Text("대화 상대")
+                        .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/18))
+                        .foregroundColor(.proco_black)
+                        .padding(.leading, UIScreen.main.bounds.width/20)
                     
                     Spacer()
                 }
+                .padding(.top)
                 //추방 당한 사람 메인 뷰로 이동시키기 위함.
                 NavigationLink("",destination: FriendVollehMainView().navigationBarTitle("", displayMode: .inline)
                                 .navigationBarHidden(true),
@@ -127,24 +112,46 @@ struct ChatroomDrawer: View {
                                 .navigationBarHidden(true), isActive: self.$go_main)
                 Group{
                     //방 참가자들 리스트
-                    List{
+                    ScrollView{
                         ForEach(SockMgr.socket_manager.user_drawer_struct){friend in
                             UserRow(socket: socket_manager, friend: friend, show_profile: self.$show_profile, selected_user_row: self.$selected_user_row, selected_friend_idx: self.$selected_friend_idx)
+                                
                         }
                     }
 
                     Spacer()
-                   
                 }
-                    //방 나가기, 설정 버튼
-           
+                
+                Group{
+                    //유저 프로필에서 신고하기 클릭시 신고하는 페이지 이동.
+                    NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_friend_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: self.group_main_vm), isActive: self.$show_report_view)
+                    
+                    //친구랑 볼래에서 카드 정보 보기클릭시 상세 화면으로 이동(방장만 수정하기 버튼 생성.)
+                    NavigationLink("",destination: FriendVollehCardDetail(main_vm: self.main_vm, group_main_vm: self.group_main_vm, socket: socket_manager, calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$see_card_detail)
+                    
+                    //모여볼래에서 카드 정보 보기 클릭시 상세 화면 이동.
+                    NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_main_vm, socket: socket_manager, calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$see_card_detail_group)
+                    
+                    //친구와 카드 만들기 클릭시 카드 만드는 화면 이동
+                    NavigationLink("",
+                                   destination: MakeCardView(main_viewmodel: self.main_vm, tag_category_struct: self.volleh_category_struct).navigationBarTitle("", displayMode: .inline)
+                                    .navigationBarHidden(true),
+                                   isActive: self.$lets_make_card)
+                    
+                    //친구 카드에 초대하기 클릭시 내가 만든 모든 카드 리스트 뷰로 이동
+                    NavigationLink("",destination: AllMyCardList(socket: SockMgr.socket_manager).navigationBarTitle("", displayMode: .inline)
+                                    .navigationBarHidden(true), isActive: self.$go_to_my_cards)
+                }
+                
+                //방 나가기, 설정 버튼
                 HStack{
                     exit_chatroom_btn
                     Spacer()
                     chatroom_setting_btn
                     chatroom_alarm_btn
+                        
                 }
-             
+                .padding(.trailing)
             }
             .padding()
             //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
@@ -161,9 +168,9 @@ struct ChatroomDrawer: View {
                 if check_banished as! String == "banished"{
                     print("추방 당한 이벤트 true: \(check_banished)")
                     
-                   // self.banished = true
+                    // self.banished = true
                     self.presentationMode.wrappedValue.dismiss()
-
+                    
                 }
             }else{
                 print("추방 이벤트 아님")
@@ -190,35 +197,35 @@ struct ChatroomDrawer: View {
 extension ChatroomDrawer{
     
     var exit_chatroom_btn : some View{
-       
-            //나가기 버튼
-            Button(action: {
-                //나갈 거냐고 한 번 더 묻는 알림창
-                self.alert_go_out.toggle()
-            }){
-                Image("out_room_btn")
-//                    .resizable()
-//                    .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
-            }
-            .alert(isPresented: self.$alert_go_out){
-                Alert(title: Text("채팅방 나가기"), message: Text("채팅방을 나가시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
-                   
-                    let nickname = UserDefaults.standard.string(forKey: "nickname")
-                    print("가져온 닉네임 확인: \(String(describing: nickname))")
-                    print("드로어에서 나가는 방 종류 확인: \(SockMgr.socket_manager.current_chatroom_info_struct.kinds)")
-                    //확인 눌렀을 때 통신 시작
-                    socket_manager.exit_room(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, idx: my_idx, nickname:nickname! ,profile_photo_path: "", kinds: SockMgr.socket_manager.current_chatroom_info_struct.kinds)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        
+        //나가기 버튼
+        Button(action: {
+            //나갈 거냐고 한 번 더 묻는 알림창
+            self.alert_go_out.toggle()
+        }){
+            Image("out_room_btn")
+            //                    .resizable()
+            //                    .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+        }
+        .alert(isPresented: self.$alert_go_out){
+            Alert(title: Text("채팅방 나가기"), message: Text("채팅방을 나가시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
+                
+                let nickname = UserDefaults.standard.string(forKey: "nickname")
+                print("가져온 닉네임 확인: \(String(describing: nickname))")
+                print("드로어에서 나가는 방 종류 확인: \(SockMgr.socket_manager.current_chatroom_info_struct.kinds)")
+                //확인 눌렀을 때 통신 시작
+                socket_manager.exit_room(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, idx: my_idx, nickname:nickname! ,profile_photo_path: "", kinds: SockMgr.socket_manager.current_chatroom_info_struct.kinds)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     if socket_manager.chatroom_exit_ok{
                         print("채팅방 나가기 됨.")
-                    //화면 닫기 이벤트
-                    self.go_main.toggle()
+                        //화면 닫기 이벤트
+                        self.go_main.toggle()
                     }
-                    }
-                }), secondaryButton: Alert.Button.default(Text("취소"), action: {
-                    self.alert_go_out.toggle()
-                }))
-            }
+                }
+            }), secondaryButton: Alert.Button.default(Text("취소"), action: {
+                self.alert_go_out.toggle()
+            }))
+        }
     }
     
     var chatroom_setting_btn: some View{
@@ -243,24 +250,24 @@ extension ChatroomDrawer{
         HStack{
             Button(action: {
                 if self.alarm_state{
-                
+                    
                     SockMgr.socket_manager.chatroom_alarm_setting_event(chatroom_idx: Int(chatroom_idx)!, state: 0)
                     
-//                    if alarm_result{
-//                    self.alarm_state = false
-//                        print("채팅방 알림 설정 서버 응답 완료 후 false로 변경: \(self.alarm_state)")
-//                    }
+                    //                    if alarm_result{
+                    //                    self.alarm_state = false
+                    //                        print("채팅방 알림 설정 서버 응답 완료 후 false로 변경: \(self.alarm_state)")
+                    //                    }
                     
                 }else{
                     
                     SockMgr.socket_manager.chatroom_alarm_setting_event(chatroom_idx: Int(chatroom_idx)!, state: 1)
                     
-
+                    
                 }
                 print("채팅방 알림 버튼 클릭")
             }, label: {
                 Image(self.alarm_state == true ? "chatroom_alarm" : "chatroom_alarm_off")
-                    
+                
             })
             .onReceive(NotificationCenter.default.publisher(for: Notification.alarm_changed), perform: { value in
                 print("알림 설정 결과 받음: \(value)")
@@ -268,16 +275,16 @@ extension ChatroomDrawer{
                     print("알림 설정 결과 받음: \(check_result)")
                     if check_result as! Int == 0 {
                         
-                       
-                            self.alarm_state = false
+                        
+                        self.alarm_state = false
                         
                     }else{
-                            self.alarm_state = true
-                        }
-                       
+                        self.alarm_state = true
+                    }
+                    
                     
                 }
-                })
+            })
         }
     }
     
@@ -288,63 +295,83 @@ extension ChatroomDrawer{
                 .resizable()
                 .frame(width: UIScreen.main.bounds.width/10, height: UIScreen.main.bounds.width/10)
             
-        Button(action: {
-            print("드로어에서 카드 주인 정보 데이터 있는지 확인: 내 닉네임: \(String(describing: ChatDataManager.shared.my_nickname)) 주인 닉네임 : \(SockMgr.socket_manager.creator_nickname), 주인 idx: \(SockMgr.socket_manager.creator_idx)")
-            
-            //메인에서 카드 상세 페이지 갈 때, 드로어에서 상세 페이지 갈 때 구분하기 위해 아래 값을 변경하는 것.
-            SockMgr.socket_manager.is_from_chatroom = true
-            
-            //방장이 카드 편집시 채팅방에서 편집한다는 것을 알리기 위함.
-            socket_manager.edit_from_chatroom = true
-            
-            //친구랑 볼래일 경우와 모여볼래일 경우 상세 페이지가 다르므로 페이지 이동 구분을 다르게 함.
-            if SockMgr.socket_manager.current_chatroom_info_struct.kinds == "친구"{
-                //카드 정보 상세 페이지에서 상세 데이터 가져오는 통신시 필요한 카드 idx
-                main_vm.selected_card_idx = SockMgr.socket_manager.current_chatroom_info_struct.card_idx
-                print("카드 정보보려는 카드 Idx: \(main_vm.selected_card_idx)")
+            Button(action: {
+                print("드로어에서 카드 주인 정보 데이터 있는지 확인: 내 닉네임: \(String(describing: ChatDataManager.shared.my_nickname)) 주인 닉네임 : \(SockMgr.socket_manager.creator_nickname), 주인 idx: \(SockMgr.socket_manager.creator_idx)")
                 
-                self.see_card_detail.toggle()
+                //메인에서 카드 상세 페이지 갈 때, 드로어에서 상세 페이지 갈 때 구분하기 위해 아래 값을 변경하는 것.
+                SockMgr.socket_manager.is_from_chatroom = true
                 
-            }else{
-                //이걸 설정해줘야 카드 상세페이지에서 해당 카드의 정보 가져오는 통신 가능.
-                group_main_vm.selected_card_idx = SockMgr.socket_manager.current_chatroom_info_struct.card_idx
+                //방장이 카드 편집시 채팅방에서 편집한다는 것을 알리기 위함.
+                socket_manager.edit_from_chatroom = true
                 
-                self.see_card_detail_group.toggle()
+                //친구랑 볼래일 경우와 모여볼래일 경우 상세 페이지가 다르므로 페이지 이동 구분을 다르게 함.
+                if SockMgr.socket_manager.current_chatroom_info_struct.kinds == "친구"{
+                    //카드 정보 상세 페이지에서 상세 데이터 가져오는 통신시 필요한 카드 idx
+                    main_vm.selected_card_idx = SockMgr.socket_manager.current_chatroom_info_struct.card_idx
+                    print("카드 정보보려는 카드 Idx: \(main_vm.selected_card_idx)")
+                    
+                    self.see_card_detail.toggle()
+                    
+                }else{
+                    //이걸 설정해줘야 카드 상세페이지에서 해당 카드의 정보 가져오는 통신 가능.
+                    group_main_vm.selected_card_idx = SockMgr.socket_manager.current_chatroom_info_struct.card_idx
+                    
+                    self.see_card_detail_group.toggle()
+                }
+                print("카드 정보 보기 클릭시 socket enter chatroom idx: \(SockMgr.socket_manager.enter_chatroom_idx)")
+            }){
+                Text("카드 정보 보기")
+                    .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/15))
+                    .foregroundColor(.proco_black)
             }
-            print("카드 정보 보기 클릭시 socket enter chatroom idx: \(SockMgr.socket_manager.enter_chatroom_idx)")
-        }){
-            Text("카드 정보 보기")
-                .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/15))
-                .foregroundColor(.proco_black)
-        }
             Spacer()
         }
     }
     
     var make_card_with_friend_btn: some View{
-        Button(action: {
-            //카드 만드는 페이지에서 드로어, 메인에서 카드 만드는 것 구분해서 카드 만들기 완료시 동적 링크 생성 구분값 나누기 위함.
-           socket_manager.is_from_chatroom = true
-            self.lets_make_card.toggle()
-        }){
+        HStack{
+    
+            
             Text("친구와 카드 만들기")
-                .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/10))
+                .font(.custom(Font.n_extra_bold, size:  UIScreen.main.bounds.width/15))
                 .foregroundColor(.proco_black)
+        
+            Spacer()
+            
+            Image("right_light")
+                .resizable()
+                .frame(width: UIScreen.main.bounds.width/30, height: UIScreen.main.bounds.width/30)
         }
+        .onTapGesture {
+            //카드 만드는 페이지에서 드로어, 메인에서 카드 만드는 것 구분해서 카드 만들기 완료시 동적 링크 생성 구분값 나누기 위함.
+            socket_manager.is_from_chatroom = true
+            self.lets_make_card.toggle()
+        }
+        .padding([.top,.leading, .trailing])
+
     }
     
     var invite_my_card_btn : some View{
-        Button(action: {
+        HStack{
+       
+            Text("내 카드에 초대하기")
+                .font(.custom(Font.n_extra_bold, size:  UIScreen.main.bounds.width/15))
+                .foregroundColor(.proco_black)
+            Spacer()
+            
+            Image("right_light")
+                .resizable()
+                .frame(width: UIScreen.main.bounds.width/30, height: UIScreen.main.bounds.width/30)
+            
+        }
+        .onTapGesture {
             
             SockMgr.socket_manager.is_from_chatroom = true
-
-            SockMgr.socket_manager.get_all_my_cards()
+            
+            //SockMgr.socket_manager.get_all_my_cards()
             self.go_to_my_cards.toggle()
-        }){
-            Text("내 카드에 초대하기")
-                .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/10))
-                .foregroundColor(.proco_black)
         }
+        .padding([.top,.leading, .trailing])
     }
     
 }
@@ -376,10 +403,11 @@ struct UserRow : View{
                         .frame(width: 60, height: 60)
                         .clipShape(Circle())
                 }
-             
+                
                 Text(friend.nickname!)
                     .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/15))
                     .foregroundColor(.proco_black)
+                Spacer()
                 
                 //클릭시 프로필 화면
             }.onTapGesture {
@@ -394,6 +422,7 @@ struct UserRow : View{
                 self.show_profile.toggle()
             }
         }
+        .padding([.top])
     }
 }
 //프로필 다이얼로그
@@ -409,7 +438,7 @@ struct ChatRoomUserProfileView: View{
     //신고하기 클릭시 나타날 모달창
     @Binding var show_report_view :Bool
     let my_idx = Int(ChatDataManager.shared.my_idx!)
-
+    
     var body: some View{
         
         ZStack{
@@ -421,20 +450,20 @@ struct ChatRoomUserProfileView: View{
             VStack {
                 VStack{
                     HStack{
-                    //프로필 닫기
-                    Image(systemName: "xmark.circle")
-                        .padding()
-                        .onTapGesture {
-                            withAnimation{
-                                self.show_profile.toggle()
+                        //프로필 닫기
+                        Image(systemName: "xmark.circle")
+                            .padding()
+                            .onTapGesture {
+                                withAnimation{
+                                    self.show_profile.toggle()
+                                }
                             }
-                        }
                         Spacer()
                         Menu {
                             Button(action: {
                                 //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
                                 self.show_profile.toggle()
-
+                                
                                 self.show_report_view.toggle()
                                 
                             }) {
