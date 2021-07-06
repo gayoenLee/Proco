@@ -238,7 +238,7 @@ struct BottomTabView: View {
                                 .padding(.trailing)
  
                         }
-                        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width*0.2)
+                        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.09)
                         .background(Color.tabbar_bg)
                     }
                 }
