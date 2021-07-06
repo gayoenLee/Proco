@@ -111,15 +111,15 @@ struct MakeCardView: View {
                     switch main_viewmodel.alert_type{
                     case .success:
                         return Alert(title: Text("카드"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
-                            if socket_manager.is_from_chatroom{
+                          //  if socket_manager.is_from_chatroom{
                                 //상세 정보 페이지로 바로 이동시키기
-                                self.go_to_share.toggle()
+                             //   self.go_to_share.toggle()
                                 
-                            }else{
+                            //}else{
                                 ////////////////////////////테스트
                                 //self.end_plus.toggle()
                                 self.presentationMode.wrappedValue.dismiss()
-                            }
+                            //}
                         }))
                     case .fail:
                         return Alert(title: Text("카드 추가"), message: Text("카드 추가를 다시 시도해주세요."), dismissButton: Alert.Button.default(Text("확인"), action:{
