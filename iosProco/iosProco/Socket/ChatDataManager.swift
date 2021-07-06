@@ -117,7 +117,7 @@ class ChatDataManager : ObservableObject{
     func get_last_num(read_last_idx: Int) -> Int{
         var unread_num : Int = 0
         print("마지막 메세지 계산 메소드 안")
-        for idx in self.message_idx_list.reversed(){
+        for idx in self.message_idx_list{
             print("read last idx: \(read_last_idx) vs 채팅방 idx: \(idx)")
             if read_last_idx >= idx{break}
             
@@ -1043,7 +1043,6 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 var content = String(cString: message_query_result)
                 print("마지막 채팅 메세지 확인: \(content)")
                 //마지막 채팅 보낸 시간
-             
                 let created_at = String(cString:sqlite3_column_text(get_statement,3))
                 var room_name : String? = ""
                 let roomname_query_result = sqlite3_column_text(get_statement, 4)
@@ -1115,7 +1114,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
      안읽은 메세지 갯수 : user에서 내 idx인 것의 read_last_idx가져오기 > chat 모델에서 메세지의 idx와 비교해서 안 읽은 메세지 갯수 구하기
      */
     func get_unread_num(chatroom_idx: Int){
-        open_db()
+       
         var statement : OpaquePointer? = nil
         let query = "SELECT chatroom_idx, user_idx, read_last_idx FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx) AND user_idx = \(self.my_idx!)"
         let errmsg = String(cString: sqlite3_errmsg(statement)!)
@@ -1144,64 +1143,66 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     
     //현재 채팅방의 메세지 idx리스트 가져오기.
     func get_current_message_num(chatroom_idx: Int, kinds: String){
-        open_db()
+        
         var select_statement: OpaquePointer? = nil
         let query = "SELECT chatroom_idx, chatting_idx FROM CHAT_CHATTING WHERE chatroom_idx = \(chatroom_idx) ORDER BY CHAT_CHATTING.front_created_at DESC"
         let errormsg = String(cString: sqlite3_errmsg(select_statement)!)
         self.message_idx_list.removeAll()
         print("쿼리문 확인: \(query)")
+        let sqlite_result = sqlite3_step(select_statement)
+
         if sqlite3_prepare_v2(self.db, query, -1, &select_statement, nil) == SQLITE_OK{
             
-            switch sqlite3_step(select_statement) {
-            case SQLITE_ROW:
+             while sqlite3_step(select_statement) ==  SQLITE_ROW{
+            
                 print("현재 채팅방 메세지 idx리스트 가져오기 row")
                 let message_idx = Int(sqlite3_column_int(select_statement, 1))
                 self.message_idx_list.append(message_idx)
                 print("메세지 idx: \(self.message_idx_list)")
-                //읽은 메세지 갯수 계산하는 메소드
-                let unread_num =  get_last_num(read_last_idx: self.read_last_message)
+           
+            }
+            
+            //읽은 메세지 갯수 계산하는 메소드
+            let unread_num =  get_last_num(read_last_idx: self.read_last_message)
+            
+            if kinds == "친구"{
+            //집어넣을 데이터의 index찾기
+            let insert_idx = SockMgr.socket_manager.friend_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
+            })
+            print("채팅방의 마지막 메세지 insert_idx 확인: \(String(describing: insert_idx))")
+            
+            //안읽은 메세지 갯수 넣음.
+            SockMgr.socket_manager.friend_chat_model[insert_idx!].message_num = String(unread_num)
+            
+            print("친구랑 볼래 채팅방의 안읽은 메세지 갯수 넣은 것 확인: \(SockMgr.socket_manager.friend_chat_model)")
                 
-                if kinds == "친구"{
+            }else if kinds == "모임"{
                 //집어넣을 데이터의 index찾기
-                let insert_idx = SockMgr.socket_manager.friend_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
+                let insert_idx = SockMgr.socket_manager.group_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
                 })
-                print("채팅방의 마지막 메세지 insert_idx 확인: \(String(describing: insert_idx))")
+                print("모임 채팅방의 마지막 메세지 insert_idx 확인: \(String(describing: insert_idx))")
                 
                 //안읽은 메세지 갯수 넣음.
-                SockMgr.socket_manager.friend_chat_model[insert_idx!].message_num = String(unread_num)
+                SockMgr.socket_manager.group_chat_model[insert_idx!].message_num = String(unread_num)
                 
-                print("친구랑 볼래 채팅방의 안읽은 메세지 갯수 넣은 것 확인: \(SockMgr.socket_manager.friend_chat_model)")
-                    
-                }else if kinds == "모임"{
-                    //집어넣을 데이터의 index찾기
-                    let insert_idx = SockMgr.socket_manager.group_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
-                    })
-                    print("모임 채팅방의 마지막 메세지 insert_idx 확인: \(String(describing: insert_idx))")
-                    
-                    //안읽은 메세지 갯수 넣음.
-                    SockMgr.socket_manager.group_chat_model[insert_idx!].message_num = String(unread_num)
-                    
-                    print("모여볼래에서 채팅방의 안읽은 메세지 갯수 넣은 것 확인: \(SockMgr.socket_manager.group_chat_model)")
-                }else{
-                    print("일반 채팅방 데이터 확인: \(SockMgr.socket_manager.normal_chat_model)")
-                    //집어넣을 데이터의 index찾기
-                    let insert_idx = SockMgr.socket_manager.normal_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
-                    })
-                    
-                    print("일반 채팅방의 마지막 메세지 insert_idx 확인: \(String(describing: insert_idx))")
-                    
-                    //안읽은 메세지 갯수 넣음.
-                    SockMgr.socket_manager.normal_chat_model[insert_idx!].message_num = String(unread_num)
-                    
-                    print("일반 채팅방의 안읽은 메세지 갯수 넣은 것 확인: \(SockMgr.socket_manager.normal_chat_model)")
-                }
-                break
-            case SQLITE_DONE:
-                print("현재 채팅방 메세지 idx리스트 가져오기 done")
-
-                break
-            default:
-                break
+                print("모여볼래에서 채팅방의 안읽은 메세지 갯수 넣은 것 확인: \(SockMgr.socket_manager.group_chat_model)")
+            }else{
+                print("일반 채팅방 데이터 확인: \(SockMgr.socket_manager.normal_chat_model)")
+                //집어넣을 데이터의 index찾기
+                let insert_idx = SockMgr.socket_manager.normal_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
+                })
+                
+                print("일반 채팅방의 마지막 메세지 insert_idx 확인: \(String(describing: insert_idx))")
+                
+                //안읽은 메세지 갯수 넣음.
+                SockMgr.socket_manager.normal_chat_model[insert_idx!].message_num = String(unread_num)
+                
+                print("일반 채팅방의 안읽은 메세지 갯수 넣은 것 확인: \(SockMgr.socket_manager.normal_chat_model)")
+            }
+            if sqlite_result == SQLITE_DONE{
+                print("현재 채팅방 메세지 idx 리스트 가져옴")
+            }else{
+                
             }
             
         }else{
@@ -1212,8 +1213,61 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     }
     
     //채팅방 주인 이름 가져오기
+    func get_normal_room_friend(chatroom: Int, kinds: String){
+        
+        let query = "SELECT * FROM CHAT_USER WHERE chatroom_idx = \(chatroom) AND (deleted_at IS NULL OR deleted_at = '') AND user_idx != \(self.my_idx!)"
+        
+        print("쿼리문 확인: \(query)")
+        var name_statement: OpaquePointer? = nil
+        let errormsg = String(cString: sqlite3_errmsg(name_statement)!)
+        
+        if sqlite3_prepare_v2(self.db, query, -1, &name_statement, nil) == SQLITE_OK{
+            print("방 이름 가져오는데 prepare ")
+            
+            switch sqlite3_step(name_statement) {
+            case SQLITE_ROW:
+                print("방 이름 가져올 때 채팅방 idx: \(chatroom)")
+                
+                //0은 첫번째 컬럼을 말함.
+                let chatroom_idx = Int(sqlite3_column_int(name_statement,0))
+                let user_idx = Int(sqlite3_column_int(name_statement, 1))
+                //created_at값이 널일 경우를 체크
+                guard let queryResultCol1 = sqlite3_column_text(name_statement, 2) else {
+                    print("유저데이터 가져오는데 nil 임")
+                    return
+                }
+                let nickname = String(cString: queryResultCol1)
+                
+                //deleted_at이 널일 경우 체크
+                guard let queryResultCol2 = sqlite3_column_text(name_statement, 3) else {
+                    print("creator_idx 데이터 가져오는데 nil 임")
+                    return
+                }
+                    //집어넣을 데이터의 index찾기
+                    let insert_idx = SockMgr.socket_manager.normal_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
+                    })
+                    //채팅방 주인 이름, 이미지 넣음
+                    SockMgr.socket_manager.normal_chat_model[insert_idx!].creator_name = nickname
+                    SockMgr.socket_manager.normal_chat_model[insert_idx!].image = ""
+                    print("방 이름 주인 이름, 이미지 넣었는지 확인: \(SockMgr.socket_manager.normal_chat_model[insert_idx!])")
+                
+            case SQLITE_DONE:
+                print("현재 채팅방 메세지 idx리스트 가져오기 done")
+                break
+            default:
+                break
+            }
+            }else{
+            print("마지막 메세지 가져오는데 에러 발생: \(errormsg)")
+        }
+        sqlite3_finalize(name_statement)
+        sqlite3_close(name_statement)
+        
+    }
+    
+    //채팅방 주인 이름 가져오기
     func get_creator_info(chatroom: Int, kinds: String){
-        open_db()
+        
         let query = "SELECT * FROM CHAT_USER WHERE chatroom_idx = \(chatroom) AND (deleted_at IS NULL OR deleted_at = '') "
         var name_statement: OpaquePointer? = nil
         let errormsg = String(cString: sqlite3_errmsg(name_statement)!)
@@ -1369,11 +1423,29 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 self.get_chatroom_last_message(chatroom_idx: idx, kinds: "일반")
                 self.get_unread_num(chatroom_idx: idx)
                 self.get_current_message_num(chatroom_idx: idx, kinds: "일반")
-                self.get_creator_info(chatroom: idx, kinds: "일반")
+                self.get_normal_room_friend(chatroom: idx, kinds: "일반")
                 self.get_members_in_chatroom(chatroom_idx: idx, kinds: "일반")
                 self.set_notify_state(chatroom_idx: idx, kinds: kinds)
-
+                self.read_chat_user(chatroom_idx: idx)
             }
+            
+            let date_formatter = DateFormatter()
+            date_formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            
+            print("분류 전 일반 채팅방 : \(SockMgr.socket_manager.normal_chat_model)")
+            SockMgr.socket_manager.normal_chat_model.sort{
+                if $0.chat_time == ""{
+                    return false
+                }else if $1.chat_time == ""{
+                    return true
+                }else{
+                let first_date = date_formatter.date(from: $0.chat_time!)
+                let second_date = date_formatter.date(from: $1.chat_time!)
+               return first_date! > second_date!
+                }
+            }
+            print("분류 후 일반 채팅방 : \(SockMgr.socket_manager.normal_chat_model)")
+
         }else{
             
         for idx in self.chatroom_idx_list{
@@ -1387,6 +1459,39 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
             //알림 설정 여부 저장하는 것.
             self.set_notify_state(chatroom_idx: idx, kinds: kinds)
         }
+            
+            let date_formatter = DateFormatter()
+            date_formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+         
+            print("분류 전 친구 채팅방 : \(SockMgr.socket_manager.friend_chat_model.map({$0.chat_time}))")
+            SockMgr.socket_manager.friend_chat_model.sort{
+             
+                if $0.chat_time == ""{
+                    return false
+                }else if $1.chat_time == ""{
+                    return true
+                }else{
+                    let first_date = date_formatter.date(from: $0.chat_time!)
+                    let second_date = date_formatter.date(from: $1.chat_time!)
+                    return first_date! > second_date!
+
+                }
+            }
+            print("분류 후 친구 채팅방 : \(SockMgr.socket_manager.friend_chat_model.map({$0.chat_time}))")
+            print("분류 전 모임 채팅방 : \(SockMgr.socket_manager.group_chat_model)")
+            SockMgr.socket_manager.group_chat_model.sort{
+                if $0.chat_time == ""{
+                    return false
+                }else if $1.chat_time == ""{
+                    return true
+                }else{
+                let first_date = date_formatter.date(from: $0.chat_time!)
+                let second_date = date_formatter.date(from: $1.chat_time!)
+               return first_date! > second_date!
+                }
+            }
+            print("분류 후 모임 채팅방 : \(SockMgr.socket_manager.group_chat_model)")
+            
         }
     }
     
@@ -1685,9 +1790,11 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     
     //채팅방 입장 후 서버에게서 user_read이벤트 받았을 때 읽음처리, 메세지 보내고 응답 success일 때 메세지 보낸 사람의 reada last idx 해당 메세지로 업데이트
     func update_user_read(chatroom_idx: Int, read_last_idx: Int, user_idx: Int, updated_at : String){
-                
+        open_db()
         var statement : OpaquePointer? = nil
-        let query = "UPDATE CHAT_USER SET read_last_idx = \(read_last_idx) , updated_at = '\(updated_at)' WHERE chatroom_idx = \(chatroom_idx) AND user_idx = \(user_idx)"
+        let query = """
+            UPDATE CHAT_USER SET read_last_idx = \(read_last_idx), updated_at = '\(updated_at)' WHERE chatroom_idx = \(chatroom_idx) AND user_idx = \(user_idx)
+            """
         let errmsg = String(cString: sqlite3_errmsg(statement)!)
         print("읽은 마지막 메세지 업데이트 하기위해 update_user_read에서 받은 read_last idx: \(read_last_idx), updated_at: \(updated_at)")
         print("update_user_read query: \(query)")
@@ -1696,7 +1803,6 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
             
             print("채팅방 입장시 update_user_read 업데이트 처리 user_idx: \(user_idx)")
             print("채팅방 입장시update_user_read  업데이트 처리  read_last_idx: \( read_last_idx)")
-            
             
             switch sqlite3_step(statement) {
                 case SQLITE_ROW:
@@ -2572,14 +2678,17 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
             let updated_at = String(cString:sqlite3_column_text(get_stmt, 14))
             let deleted_at = String(cString:sqlite3_column_text(get_stmt, 15))
             
+            var promise_day : String = ""
+            if expiration_at != ""{
             let year = expiration_at.split(separator: "-")[0]
             let month = expiration_at.split(separator: "-")[1]
             let date_and_time = expiration_at.split(separator: "-")[2]
             let date = date_and_time.split(separator: " ")[0]
             let time = date_and_time.split(separator: " ")[1]
-            let promise_day = year+"년"+month+"월 "+date+"일"
+            promise_day = year+"년"+month+"월 "+date+"일"
             print("카드 정보 가져오기 promise_day 확인: \(promise_day)")
-
+            }
+            
             socket_manager.card_struct.creator_idx = creator_idx
             socket_manager.card_struct.kinds = kinds
             socket_manager.card_struct.card_photo_path = card_photo_path
@@ -2905,6 +3014,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                         SockMgr.socket_manager.friend_chat_model[model_idx!].total_member_num = user_num
                         print("친구랑 볼래 데이터 넣은 것 확인: \(SockMgr.socket_manager.friend_chat_model)")
                         
+                       
                     }else if kinds == "모임"{
                         let model_idx = SockMgr.socket_manager.group_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx})
                         SockMgr.socket_manager.group_chat_model[model_idx!].total_member_num = user_num
