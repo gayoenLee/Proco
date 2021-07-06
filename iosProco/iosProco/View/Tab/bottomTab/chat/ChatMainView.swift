@@ -9,6 +9,7 @@ import SwiftUI
 import UserNotifications
 
 struct ChatMainView: View {
+    
     @State private var selectedTab = 0
     
     var body: some View {
@@ -41,7 +42,7 @@ struct ChatMainView: View {
                 }else if selectedTab == 2{
                     GatheringChatTab(socket: SockMgr.socket_manager)
                 }else{
-                    NormalChatTab(chat_data_mgr: ChatDataManager.shared, socket: SockMgr.socket_manager)
+                    NormalChatTab(socket: SockMgr.socket_manager)
                 }
                 Spacer()
             }.padding()
