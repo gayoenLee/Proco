@@ -640,6 +640,10 @@ class FriendVollehMainViewmodel: ObservableObject{
                         //동적링크 생성하기
 //                        socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: "", card_idx: card_idx, kinds: "friend")
                         
+                        let converted_time = String.time_to_kor_language(date: self.card_expire_time)
+                        let converted_date = String.kor_date_string(date_string: self.card_expire_time)
+                        
+                        SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: card_idx, kinds: "친구", meeting_date: converted_date, meeting_time: converted_time)
                         
                         print("메세지 보낼 때 링크 확인: \(socket_manager.invitation_link)")
                         print("메세지 보낼 때 링크 : \(SockMgr.socket_manager.invitation_link)")
