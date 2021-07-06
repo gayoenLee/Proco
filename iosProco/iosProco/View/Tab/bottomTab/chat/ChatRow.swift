@@ -114,7 +114,7 @@ struct ChatRow : View{
                     //같은 사람이 연속으로 보낸 메세지이지만 그 연속된 순서중 마지막이 아닌 경우
                     if msg.is_same_person_msg == true && msg.is_last_consecutive_msg == false{
                         Spacer()
-                            .frame(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/7)
+                            .frame(width: UIScreen.main.bounds.width/7)
                         message_view
 
                         VStack{
@@ -123,7 +123,7 @@ struct ChatRow : View{
                         //같은 사람이 연속으로 보냈고 연속된 순서의 마지막 메세지인 경우
                     }else if msg.is_same_person_msg == true && msg.is_last_consecutive_msg == true{
                         Spacer()
-                            .frame(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/7)
+                            .frame(width: UIScreen.main.bounds.width/7)
                         message_view
 
                         VStack{
@@ -175,59 +175,78 @@ private extension ChatRow{
         
         //메세지 버블, 텍스트뷰
         ZStack{
-            Image("my_big_bubble")
-                .resizable(capInsets: EdgeInsets(top: 20, leading: 27, bottom: 20, trailing: 27))
+//            Image("my_big_bubble")
+////                .resizable(capInsets: EdgeInsets(top: 20, leading: 27, bottom: 20, trailing: 27))
+//                .resizable(capInsets: EdgeInsets(top: UIScreen.main.bounds.width*0.35, leading: UIScreen.main.bounds.width*0.4, bottom: UIScreen.main.bounds.width*0.35, trailing: UIScreen.main.bounds.width*0.4))
             
             VStack{
                 HStack{
                     Spacer()
                     
-            Image("logo")
-                .resizable()
-                .frame(width:141, height:55)
+                    Image("logo")
+                        .resizable()
+                        .frame(width:141, height:55)
                     Spacer()
                 }
-        Divider()
-                HStack{
-        
-                Text("\(nickname)님의 ")
-                    .font(.custom(Font.n_bold, size: 14))
-                    .foregroundColor(.proco_black)
-                
-                    Text((msg.message?.split(separator: "-")[3]) ?? "")
-                        .font(.custom(Font.n_bold, size: 14))
-                        .foregroundColor(.proco_black)
-                        
-                        Text((msg.message?.split(separator: "-")[4]) ?? "")
-                            .font(.custom(Font.n_bold, size: 14))
-                            .foregroundColor(.proco_black)
-                        Text("약속카드 초대")
-                            .font(.custom(Font.n_bold, size: 14))
-                            .foregroundColor(.proco_black)
-                    }
-                
-                Text("아래 링크를 클릭해 \(nickname)님과 약속을 함께해 보세요!")
-                    .font(.custom(Font.n_regular, size: 10))
-                    .foregroundColor(.gray)
-                
-                //url링크
-                Text("약속카드 참여하러 가기")
+                Divider()
+                Rectangle()
+                    .frame(width: UIScreen.main.bounds.width*0.4, height: UIScreen.main.bounds.width*0.1, alignment: .center)
+                    .overlay(
+                        VStack{
+                            HStack{
+                                Spacer()
+                                Text("\(nickname)님의 ")
+                                    .font(.custom(Font.n_bold, size: 14))
+                                    .foregroundColor(.proco_white)
+                                Spacer()
+                            }
+                            
+                            HStack{
+                                Spacer()
+                                Text("약속카드 초대")
+                                    .font(.custom(Font.n_bold, size: 14))
+                                    .foregroundColor(.proco_white)
+                                Spacer()
+                            }
+                        }
+                        .padding()
+                        .background(Color.proco_blue)
+                        .cornerRadius(10)
+                    )
+                Text("약속을 함께해 보세요!")
                     .font(.custom(Font.n_regular, size: 12))
-                    .foregroundColor(.proco_blue)
-                    .onTapGesture {
-                        print("동적링크 메세지 클릭: \(String(describing: msg.message))")
-                        
-                        //초대하려는 채팅방idx
-                        let info = msg.message
-                        NotificationCenter.default.post(name: Notification.clicked_invite_link, object: nil, userInfo: ["clicked_invite_link" : "ok", "info": String(info!) ])
-                    }
+                    .foregroundColor(.proco_black)
+                    .padding(.top, UIScreen.main.bounds.width/30)
                 
+                HStack{
+                    Text("약속일 :")
+                        .font(.custom(Font.n_bold, size: 10))
+                        .foregroundColor(.gray)
+                    Text((msg.message?.split(separator: "-")[3]) ?? "")
+                        .font(.custom(Font.n_bold, size: 10))
+                        .foregroundColor(.gray)
+                }
+                HStack{
+                    Spacer()
+                    Text((msg.message?.split(separator: "-")[4]) ?? "")
+                        .font(.custom(Font.n_bold, size: 10))
+                        .foregroundColor(.gray)
+                    Spacer()
+                }
             }
+            .background(Color.white)
             .padding()
-            .background(Color.proco_white)
-            .padding()
+            .border(Color.proco_yellow, width: 2)
+            .cornerRadius(10)
         }
-        .frame(maxWidth: UIScreen.main.bounds.width*0.9, maxHeight: .infinity)
+        .frame(maxWidth: UIScreen.main.bounds.width*0.6, maxHeight: .infinity)
+        .onTapGesture {
+            print("동적링크 메세지 클릭: \(String(describing: msg.message))")
+            
+            //초대하려는 채팅방idx
+            let info = msg.message
+            NotificationCenter.default.post(name: Notification.clicked_invite_link, object: nil, userInfo: ["clicked_invite_link" : "ok", "info": String(info!) ])
+        }
     }
     
     var msg_send_error_case : some View{
