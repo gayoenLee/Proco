@@ -38,6 +38,15 @@ struct ChatFriendRoomView: View {
     @State private var error_msg_kind : String = ""
     @State private var go_back : Bool = false
     
+    //이미지 확대 뷰 띄우기 위한 구분값
+    @State private var show_img_bigger: Bool = false
+    //드로어 유저 한 명 클릭했을 때 다이얼로그 띄우기
+    @State private var show_profile : Bool = false
+    //친구 다이얼로그에서 신고하기 클릭시 다이얼로그 띄우는 구분값.
+    @State private var show_report_view : Bool = false
+    //드로어에서 유저 한 명 클릭한 idx값 바인딩 -> 채팅룸에서 전달받기 -> 프로필 띄우기
+    @State private var selected_user_idx: Int = -1
+    
     var body: some View {
         ZStack{
             VStack{
@@ -93,7 +102,7 @@ struct ChatFriendRoomView: View {
                 .padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
                 
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
-                ChatMessageListView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url: self.$image_url, open_gallery: self.$open_gallery, ui_image: self.$ui_image, too_big_img_size: self.$too_big_img_size, send_again_alert: self.$send_again_alert)
+                ChatMessageListView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url: self.$image_url, open_gallery: self.$open_gallery, ui_image: self.$ui_image, too_big_img_size: self.$too_big_img_size, send_again_alert: self.$send_again_alert, show_img_bigger : self.$show_img_bigger)
             }
             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.9)
             .alert(isPresented: self.$too_big_img_size){
@@ -288,7 +297,7 @@ struct ChatFriendRoomView: View {
             //채팅룸 드로어 부분.show_menu의 값에 따라서 열리고 닫힘.
             Spacer()
             HStack{
-                ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel())
+                ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(), show_profile: self.$show_profile,selected_user_idx: self.$selected_user_idx, show_menu: self.$show_menu)
                     .background(Color.proco_white)
                     .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)
                     .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.1: UIScreen.main.bounds.width)
