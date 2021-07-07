@@ -41,6 +41,9 @@ struct ChatRow : View{
     //카드 초대하기에서 모임카드 초대한 경우
     @State private var invited_group_card = false
     
+    @Binding var show_img_bigger : Bool
+    @Binding var image_url: String?
+    
     var body: some View{
         HStack{
             //1.내 메세지
@@ -77,6 +80,11 @@ struct ChatRow : View{
                             }
                             .onFailure{error in
                                 print("실패 이유: \(error)")
+                            }
+                            .onTapGesture{
+                                self.image_url = msg.message!
+                                self.show_img_bigger = true
+                                
                             }
                         
                         //일반 메세지일 때
@@ -175,9 +183,6 @@ private extension ChatRow{
         
         //메세지 버블, 텍스트뷰
         ZStack{
-//            Image("my_big_bubble")
-////                .resizable(capInsets: EdgeInsets(top: 20, leading: 27, bottom: 20, trailing: 27))
-//                .resizable(capInsets: EdgeInsets(top: UIScreen.main.bounds.width*0.35, leading: UIScreen.main.bounds.width*0.4, bottom: UIScreen.main.bounds.width*0.35, trailing: UIScreen.main.bounds.width*0.4))
             
             VStack{
                 HStack{
