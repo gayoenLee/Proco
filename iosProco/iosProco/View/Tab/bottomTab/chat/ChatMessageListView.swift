@@ -36,7 +36,9 @@ struct ChatMessageListView: View{
                 ScrollView(.vertical){
                     VStack(spacing: 10){
                         
-                        ForEach(SockMgr.socket_manager.chat_message_struct){msg in
+                        ForEach(SockMgr.socket_manager.chat_message_struct.filter({
+                            $0.message_idx! != -2
+                        })){msg in
                             
                             ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
                                 
@@ -55,6 +57,30 @@ struct ChatMessageListView: View{
                             reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
                             
                         })
+                        
+                        ForEach(SockMgr.socket_manager.chat_message_struct.filter({
+                            $0.message_idx! == -2
+                            
+                        })){msg in
+                            
+                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
+                                
+                                .onAppear{
+                                    
+                                    // 처음 스크롤
+                                    if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
+                                        
+                                        reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                                        scrolled = true
+                                    }
+                                }
+                        }
+                        .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
+                            
+                            reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                            
+                        })
+                        
                     }
                     .padding(.all)
                 }//스크롤뷰 끝
@@ -168,7 +194,7 @@ extension ChatMessageListView{
                 SockMgr.socket_manager.stored_front_created = String(front_created_at)
                 
                 
-                let image_data = ui_image?.jpegData(compressionQuality: 0.5)
+                let image_data = ui_image?.jpegData(compressionQuality: 1.0)
                 print("보낼 이미지 데이터 크기: \(image_data)")
                 if image_data!.count >= 10*1024*1024{
                     print("이미지 크기가 큼")
