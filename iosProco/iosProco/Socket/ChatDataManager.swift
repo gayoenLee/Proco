@@ -1831,6 +1831,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
         var statement : OpaquePointer? = nil
         let query = "SELECT * FROM CHAT_CHATTING WHERE chatroom_idx = \(chatroom_idx)"
         let errmsg = String(cString: sqlite3_errmsg(statement)!)
+        SockMgr.socket_manager.chat_message_struct.removeAll()
         SockMgr.socket_manager.chat_room_struct.removeAll()
         self.message_idx_list.removeAll()
         
@@ -2323,7 +2324,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
    
     //일반 채팅방 생성 후 대화에서 이미 대화를 하고 있던 내역이 있을 경우를 체크하기 위함.(1:1채팅)
     //TODO 널값 왔을 때 처리 추가적으로 해야함.
-    func check_chat_already(my_idx: Int, friend_idx: Int){
+    func check_chat_already(my_idx: Int, friend_idx: Int, nickname: String){
 
         let query = """
         SELECT CHAT_USER.chatroom_idx
@@ -2370,6 +2371,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 //메세지 보내기 이벤트에서 구분값 위해 값 토글
                 SockMgr.socket_manager.is_first_temp_room = true
                 print("채팅방 정보 없음 true")
+                SockMgr.socket_manager.creator_nickname = nickname
                 break
             default:
                 print("채팅방 정보 지우는 오류: \(errormsg)")
