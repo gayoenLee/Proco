@@ -25,6 +25,7 @@ struct NormalChatTab: View {
                 
                 ForEach(socket.normal_chat_model.filter({
                     $0.last_chat != "" && $0.total_member_num >= 1
+                    
                 })){normal_chat in
                     
                     NormalChatTabRow(normal_chat: normal_chat)
@@ -58,13 +59,13 @@ struct NormalChatTab: View {
         .navigationBarHidden(true)
         .onAppear{
             print("------------------------일반 채팅 목록 뷰 나옴--------------------------")
+            socket.normal_chat_model.removeAll()
+
             ChatDataManager.shared.set_room_data(kinds: "일반")
             
         }
         .onDisappear{
             print("-------------------------일반 채팅 목록 뷰 사라짐--------------------")
-            socket.normal_chat_model.removeAll()
-            
         }
     }
 }
