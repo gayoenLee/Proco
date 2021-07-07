@@ -49,6 +49,8 @@ struct ChatMainView: View {
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
             .onAppear{
+                
+                selectedTab = 0
                 //새로운 채팅 메세지가 왔을 때 어떤 뷰에 있느냐에 따라 노티피케이션을 띄워주는게 다르기 때문에 알기 위해 사용.
                 //채팅 목록 페이지 : 222, 채팅방 안: 333(기본: 111)
                 SockMgr.socket_manager.current_view = 222

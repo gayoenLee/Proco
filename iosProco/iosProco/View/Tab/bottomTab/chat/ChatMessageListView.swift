@@ -27,6 +27,8 @@ struct ChatMessageListView: View{
     
     //안보내진 메세지를 다시 보내려는 알림창 띄우는 것
     @Binding var send_again_alert : Bool
+    //이미지 확대 뷰 띄우는 것
+    @Binding var show_img_bigger : Bool
     
     var body: some View{
         VStack{
@@ -36,7 +38,7 @@ struct ChatMessageListView: View{
                         
                         ForEach(SockMgr.socket_manager.chat_message_struct){msg in
                             
-                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert)
+                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
                                 
                                 .onAppear{
                                     
@@ -47,7 +49,6 @@ struct ChatMessageListView: View{
                                         scrolled = true
                                     }
                                 }
-                            
                         }
                         .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
                             

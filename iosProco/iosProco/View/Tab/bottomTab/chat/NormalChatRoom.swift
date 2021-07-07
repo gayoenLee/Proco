@@ -11,7 +11,7 @@ struct NormalChatRoom: View {
     @Environment(\.presentationMode) var presentation
     @ObservedObject var main_vm : FriendVollehMainViewmodel
     @ObservedObject var group_main_vm : GroupVollehMainViewmodel
-    
+    @ObservedObject var calendar_vm = CalendarViewModel()
     @ObservedObject var socket : SockMgr
     //햄버거 메뉴 클릭 여부
     @State var show_menu = false
@@ -46,28 +46,67 @@ struct NormalChatRoom: View {
     @State private var error_msg_kind : String = ""
     @State private var go_back : Bool = false
     
+    //이미지 확대 뷰 띄우기 위한 구분값
+    @State private var show_img_bigger: Bool = false
+    //드로어 유저 한 명 클릭했을 때 다이얼로그 띄우기
+    @State private var show_profile : Bool = false
+    //친구 다이얼로그에서 신고하기 클릭시 다이얼로그 띄우는 구분값.
+    @State private var show_report_view : Bool = false
+    //드로어에서 유저 한 명 클릭한 idx값 바인딩 -> 채팅룸에서 전달받기 -> 프로필 띄우기
+    @State private var selected_user_idx: Int = -1
+    
+    //유저 한 명 클릭시 피드 페이지 이동값
+    @State private var go_feed: Bool = false
+    //유저 한 명 클릭시 일대일 채팅 페이지 이동값
+    @State private var go_private_chatroom: Bool = false
+    
     var creator_name : String{
+        if SockMgr.socket_manager.user_drawer_struct.count > 0{
+            
       let nickname =  SockMgr.socket_manager.user_drawer_struct.filter({
           
             return $0.user_idx != Int(ChatDataManager.shared.my_idx!)
             
         }).map({$0.nickname})
-        return nickname[0]!
+            
+            return nickname[0]!
+        }else{
+         let nickname = self.socket.temp_chat_friend_model.nickname
+           return nickname
+        }
+        
     }
+    
+    var user_profile_info : UserInDrawerStruct?{
+        
+        if self.show_profile{
+         let model =   SockMgr.socket_manager.user_drawer_struct.first(where: {
+                $0.user_idx! == self.selected_user_idx
+            })
+            print("드로어에서 클릭한 유저 정보: \(model)")
+            return model!
+        }else{
+            return nil
+        }
+    }
+    //하단 텝이 있는 뷰에서 왔는지 구분하는 변수 . 기본적으로 true이지만 탭이 없었던 곳에서 뷰를 선언한다면 인자로 false를 전달함.
+        var from_tab: Bool = true
+    
+    @ObservedObject var view_router = ViewRouter()
+    
     var body: some View {
         ZStack{
             VStack{
-                
                 //상단바
                 HStack{
                     Button(action: {
                         print("뒤로가기 클릭")
-                       // self.presentation.wrappedValue.dismiss()
-                        self.go_back = true
+                        if self.from_tab{  self.go_back = true}
+                        else{self.presentation.wrappedValue.dismiss()}
                     }){
-                    Image("left")
-                        .resizable()
-                        .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+                        Image("left")
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                     }
                     Spacer()
                     if SockMgr.socket_manager.current_chatroom_info_struct.room_name == ""{
@@ -89,7 +128,7 @@ struct NormalChatRoom: View {
                     Button(action: {
                         
                         withAnimation{
-                            self.show_menu.toggle()
+                            self.show_menu = true
                         }
                         print("드로어 보여주는 값: \(self.show_menu)")
                     }){
@@ -98,7 +137,7 @@ struct NormalChatRoom: View {
                             .frame(width: 20, height: 16)
                     }
                 }
-                .padding([.leading, .trailing, .top], UIScreen.main.bounds.width/20)
+                .padding([.leading, .trailing, .top], UIScreen.main.bounds.width/10)
                 //.padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
                 //동적링크에서 open눌렀을 때 카드 초대장으로 바로 이동시키기 위함.
                 NavigationLink("",
@@ -112,8 +151,21 @@ struct NormalChatRoom: View {
                 NavigationLink("",
                                destination: ChatMainView().navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
                                isActive: self.$go_back)
+//                NavigationLink("",
+//                               destination: TabbarView(view_router: self.view_router).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
+//                               isActive: self.$go_back)
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
-                NormalChatMessageView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url : self.$image_url, open_gallery : self.$open_gallery, ui_image: self.$ui_image, too_big_img_size : self.$too_big_img_size, send_again_alert: self.$send_again_click)
+                NormalChatMessageView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url : self.$image_url, open_gallery : self.$open_gallery, ui_image: self.$ui_image, too_big_img_size : self.$too_big_img_size, send_again_alert: self.$send_again_click, show_img_bigger: self.$show_img_bigger)
+                    .onTapGesture(perform: {
+                        withAnimation{
+                            if self.show_menu{
+                            self.show_menu = false
+                            }
+                        }
+                    })
+                //유저 프로필에서 신고하기 클릭시 신고하는 페이지 이동.
+                NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_user_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: self.group_main_vm), isActive: self.$show_report_view)
+                    
             }
             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.9)
             .alert(isPresented: self.$too_big_img_size){
@@ -169,9 +221,9 @@ struct NormalChatRoom: View {
                         
                             //서버에 이벤트 보내기 - 사진인 경우 인코딩한 content보내야 함.
                         if error_msg_kind == "P"{
-                            SockMgr.socket_manager.make_private_chatroom(my_idx: my_idx!, my_nickname: my_nickname, my_image: SockMgr.socket_manager.my_profile_photo, friend_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, friend_nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, friend_image: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path!, content: final_encoded, created_at: created_at, front_created_at: CLong(error_msg_front_created)!)
+                            SockMgr.socket_manager.make_private_chatroom(my_idx: my_idx!, my_nickname: my_nickname, my_image: SockMgr.socket_manager.my_profile_photo, friend_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, friend_nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, friend_image: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path!, content: final_encoded, created_at: created_at, front_created_at: CLong(error_msg_front_created)!, kinds: "P")
                         }else{
-                        SockMgr.socket_manager.make_private_chatroom(my_idx: my_idx!, my_nickname: my_nickname, my_image: SockMgr.socket_manager.my_profile_photo, friend_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, friend_nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, friend_image: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path!, content: self.error_msg_content, created_at: created_at, front_created_at: CLong(error_msg_front_created)!)
+                            SockMgr.socket_manager.make_private_chatroom(my_idx: my_idx!, my_nickname: my_nickname, my_image: SockMgr.socket_manager.my_profile_photo, friend_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, friend_nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, friend_image: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path!, content: self.error_msg_content, created_at: created_at, front_created_at: CLong(error_msg_front_created)!, kinds: "C")
                         }
                         //server idx가져오는 쿼리
                         ChatDataManager.shared.get_server_idx_to_chat_server(user_idx: my_idx!, chatroom_idx: chatroom_idx)
@@ -309,10 +361,14 @@ struct NormalChatRoom: View {
             .fullScreenCover( isPresented: self.$open_gallery, content: {
                 ImagePicker(image: self.$selected_image, image_url: self.$image_url, ui_image: self.$ui_image)
             })
+            .sheet(isPresented: self.$show_img_bigger){
+                BigImgMsgView(show_img_bigger: self.$show_img_bigger, img_url: self.$image_url)
+            }
             //채팅 읽음 처리 이벤트 수행.
             //서버에 unread이벤트 전달
             .onAppear{
-                print("현재 enter chatroom idx 채팅방 idx: \(SockMgr.socket_manager.enter_chatroom_idx)")
+             
+                print("현재 enter chatroom idx 채팅방 idx: \(SockMgr.socket_manager.enter_chatroom_idx), 뷰라우터의 현재 페이지 \(self.view_router.current_page)")
              
                 //새로운 채팅 메세지가 왔을 때 어떤 뷰에 있느냐에 따라 노티피케이션을 띄워주는게 다르기 때문에 알기 위해 사용.
                 //채팅 목록 페이지 : 222, 채팅방 안: 333(기본: 111)
@@ -322,6 +378,10 @@ struct NormalChatRoom: View {
                 if SockMgr.socket_manager.is_first_temp_room{
                     print("임시 채팅방인 경우 내 idx: \(String(describing: my_idx)) 친구: \(SockMgr.socket_manager.temp_chat_friend_model.idx)")
                     
+                    //여기에서 한 번 삭제해줘야 다른 채팅방 들어갔다가 임시 채팅방 들어왔을 때 중복 저장 안됨
+                    SockMgr.socket_manager.user_drawer_struct.removeAll()
+                    //임시 채팅방인 경우 kinds를 임시로 넣어줘야 드로어에서 카드 만들기, 초대하기 뷰 예외처리 가능
+                    SockMgr.socket_manager.current_chatroom_info_struct.kinds = "임시"
                     //채팅방 드로어 안 유저 리스트 보여주기 위해 모델에 저장.
                     SockMgr.socket_manager.user_drawer_struct.append(UserInDrawerStruct(nickname: ChatDataManager.shared.my_nickname!, profile_photo: "", state: "", user_idx: my_idx, deleted_at: ""))
                     SockMgr.socket_manager.user_drawer_struct.append(UserInDrawerStruct(nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, profile_photo: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path, state: "", user_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, deleted_at: ""))
@@ -347,7 +407,7 @@ struct NormalChatRoom: View {
                     if  ChatDataManager.shared.get_read_last_list(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx){
                         print("일반 채팅방에서  마지막 메세지 idx 가져옴: \(db.user_read_list)")
                     }
-                
+            
                 //채팅 메세지 데이터 가져오기
                 ChatDataManager.shared.get_message_data(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, user_idx: Int(ChatDataManager.shared.my_idx!)!)
                 
@@ -366,20 +426,32 @@ struct NormalChatRoom: View {
                 SockMgr.socket_manager.is_first_temp_room = false
 
                 SockMgr.socket_manager.exit_chatroom(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx)
-                SockMgr.socket_manager.chat_message_struct.removeAll()
+               // SockMgr.socket_manager.chat_message_struct.removeAll()
                 
             })
-            .background(Color.black.opacity(self.show_menu ? 0.28 : 0).edgesIgnoringSafeArea(.all).onTapGesture(perform: {
-                withAnimation{self.show_menu.toggle()}
+            .background(Color.black.opacity(self.show_menu ? 0.28 :0)
+            .edgesIgnoringSafeArea(.all)
+            .onTapGesture(perform: {
+                withAnimation{
+                    if self.show_menu{
+                    self.show_menu = false
+                    }
+                }
             }))
             .padding(.bottom, UIApplication.shared.windows.first?.safeAreaInsets.bottom)
             //채팅룸 드로어 부분.show_menu의 값에 따라서 열리고 닫힘.
             Spacer()
             HStack{
-                ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel())
+                ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(), show_profile: self.$show_profile,selected_user_idx: self.$selected_user_idx, show_menu: self.$show_menu)
                     .background(Color.white)
-                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)
-                    .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.1: UIScreen.main.bounds.width)
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.9)
+                    .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.20: UIScreen.main.bounds.width)
+            }
+            
+            //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
+            if show_profile{
+                ChatRoomUserProfileView(friend: user_profile_info!, show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_user_idx, show_report_view: self.$show_report_view, go_feed:self.$go_feed, calendar_vm: self.calendar_vm, go_private_chatroom: self.$go_private_chatroom)
+
             }
         }
         .edgesIgnoringSafeArea(.all)
