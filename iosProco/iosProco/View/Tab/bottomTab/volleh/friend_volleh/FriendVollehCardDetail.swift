@@ -58,7 +58,7 @@ struct FriendVollehCardDetail: View {
     @State private var invite_ok: Bool = false
     //카드 초대하기 후 알림창에 보여줄 텍스트뷰
     @State private var invite_result_txt : String = ""
-    
+     
     var body: some View{
 
         VStack{
@@ -117,7 +117,7 @@ struct FriendVollehCardDetail: View {
             
             //친구 카드 주인과 1대1 채팅방 화면으로 이동.
             NavigationLink("",
-                           destination: NormalChatRoom(main_vm:  self.main_vm,group_main_vm: self.group_main_vm,socket: SockMgr.socket_manager).navigationBarTitle("", displayMode: .inline)
+                           destination: NormalChatRoom(main_vm:  self.main_vm,group_main_vm: self.group_main_vm,socket: SockMgr.socket_manager, from_tab : false).navigationBarTitle("", displayMode: .inline)
                             .navigationBarHidden(true),
                            isActive: self.$go_to_chat)
             
@@ -161,7 +161,11 @@ struct FriendVollehCardDetail: View {
                         if  SockMgr.socket_manager.detail_to_invite{
                             invite_btn
                             
-                        }else{
+                            //내 카드인 경우 하단 버튼 안보임.
+                        }else if Int(self.main_vm.my_idx!) == self.main_vm.friend_volleh_card_detail.creator.idx{
+                            
+                        }
+                        else{
                             bottom_menu_btns
                         }
                     }
@@ -404,8 +408,8 @@ private extension FriendVollehCardDetail{
                 socket.temp_chat_friend_model = UserChatInListModel(idx: main_vm.friend_volleh_card_detail.creator.idx, nickname: main_vm.friend_volleh_card_detail.creator.nickname, profile_photo_path: main_vm.friend_volleh_card_detail.creator.profile_photo_path ?? "")
                 
                 //일대일 채팅방이 기존에 존재했는지 확인하는 쿼리문
-                ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_volleh_card_detail.creator.idx!)
-                
+                ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_volleh_card_detail.creator.idx!, nickname: main_vm.friend_volleh_card_detail.creator.nickname)
+
                 self.go_to_chat.toggle()
                 
             }){
