@@ -246,6 +246,11 @@ struct GroupVollehCardDetail: View {
                                 //신고하기 페이지 이동
                                 NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: FriendVollehMainViewmodel(), socket_manager: SockMgr(), group_main_vm: self.main_vm), isActive: self.$show_report_view)
                                 
+                                
+                                if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator!.idx{
+                                    
+                                }else{
+                                    
                                 apply_btn
                                     .alert(isPresented: self.$apply_result){
                                         switch self.apply_ok{
@@ -288,6 +293,7 @@ struct GroupVollehCardDetail: View {
                                             self.apply_result = true
                                         }
                                     }
+                                }
                             }
                         }.padding()
                     }
