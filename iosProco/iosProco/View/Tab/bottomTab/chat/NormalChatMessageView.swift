@@ -26,15 +26,21 @@ struct NormalChatMessageView: View{
     
     //안보내진 메세지를 다시 보내려는 알림창 띄우는 것
     @Binding var send_again_alert : Bool
+    //이미지 확대 뷰 띄우는 것
+    @Binding var show_img_bigger : Bool
     
     var body: some View{
         VStack{
             ScrollViewReader { reader in
                 ScrollView(.vertical){
                     VStack(spacing: 10){
-                        ForEach(SockMgr.socket_manager.chat_message_struct){msg in
+                        
+                        ForEach(SockMgr.socket_manager.chat_message_struct.filter({
+                            $0.message_idx! != -2
+                            
+                        })){msg in
                           
-                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert)
+                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
                                 .onAppear{
                                     // 처음 스크롤
                                     if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
@@ -45,9 +51,30 @@ struct NormalChatMessageView: View{
                                 }
                         }
                         .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
-                            
+                            if SockMgr.socket_manager.chat_message_struct.count > 0{
                             reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                            }
                         })
+                        
+                        ForEach(SockMgr.socket_manager.chat_message_struct.filter({
+                            $0.message_idx! == -2
+                        })){msg in
+                            
+                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
+                                .onAppear{
+                                    // 처음 스크롤
+                                    if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
+                                        
+                                        reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                                        scrolled = true
+                                    }
+                                }
+                                .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
+                                    if SockMgr.socket_manager.chat_message_struct.count > 0{
+                                    reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                                    }
+                                })
+                        }
                     }
                     .padding(.all)
                 }//스크롤뷰 끝
@@ -171,7 +198,7 @@ extension NormalChatMessageView{
                 ChatDataManager.shared.get_my_user_info(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, user_idx: my_idx!)
                 
                     //서버에 이벤트 보내기
-                SockMgr.socket_manager.make_private_chatroom(my_idx: my_idx!, my_nickname: my_nickname!, my_image: SockMgr.socket_manager.my_profile_photo, friend_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, friend_nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, friend_image: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path!, content: self.message, created_at: created_at, front_created_at: front_created_at)
+                SockMgr.socket_manager.make_private_chatroom(my_idx: my_idx!, my_nickname: my_nickname!, my_image: SockMgr.socket_manager.my_profile_photo, friend_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, friend_nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, friend_image: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path!, content: self.message, created_at: created_at, front_created_at: front_created_at, kinds: "C")
                 
                 //temp key 생성하기 위해 오름차순 정렬.
                  let idx_array = [Int(my_idx!), SockMgr.socket_manager.temp_chat_friend_model.idx].sorted()
@@ -309,7 +336,7 @@ extension NormalChatMessageView{
                         ChatDataManager.shared.get_my_user_info(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, user_idx: my_idx!)
                         
                             //서버에 이벤트 보내기
-                        SockMgr.socket_manager.make_private_chatroom(my_idx: my_idx!, my_nickname: my_nickname!, my_image: SockMgr.socket_manager.my_profile_photo, friend_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, friend_nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, friend_image: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path!, content: final_encoded, created_at: created_at, front_created_at: front_created_at)
+                        SockMgr.socket_manager.make_private_chatroom(my_idx: my_idx!, my_nickname: my_nickname!, my_image: SockMgr.socket_manager.my_profile_photo, friend_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, friend_nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, friend_image: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path!, content: final_encoded, created_at: created_at, front_created_at: front_created_at, kinds: "P")
                         
                         //temp key 생성하기 위해 오름차순 정렬.
                          let idx_array = [Int(my_idx!), SockMgr.socket_manager.temp_chat_friend_model.idx].sorted()
