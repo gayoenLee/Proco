@@ -28,11 +28,12 @@ struct ChatroomDrawer: View {
     @State private var alert_go_out: Bool = false
     //채팅화면으로 돌아갈 때 사용.
     @State private var go_main: Bool = false
-    @State private var show_profile : Bool = false
-    //드로어 친구 리스트에서 친구 한 명 선택했을 때 데이터 모델 행의 index
-    @State private var selected_user_row: Int = -1
-    //드로어 친구 리스트에서 친구 한 명 선택했을 때 그 친구의 user idx정보
-    @State private var selected_friend_idx: Int = -1
+    
+    //드로어 유저 한 명 클릭했을 때 다이얼로그 띄우기
+    @Binding var show_profile : Bool
+    //드로어에서 유저 한 명 클릭한 idx값 바인딩 -> 채팅룸에서 전달받기 -> 프로필 띄우기
+    @Binding var selected_user_idx: Int
+    
     //채팅방 주인에게만 추방하기 보여지기 위해 구분값을 주는데 사용.
     @State private var is_my_room : Bool = false
     //추방당한 사람을 메인으로 보내기 위해 이용하는 구분값
@@ -50,8 +51,6 @@ struct ChatroomDrawer: View {
     //친구, 모임카드 상세페이지 이동시 필요
     @StateObject var calendar_vm = CalendarViewModel()
     
-    //친구 다이얼로그에서 신고하기 클릭시 다이얼로그 띄우는 구분값.
-    @State private var show_report_view : Bool = false
     let my_idx = Int(ChatDataManager.shared.my_idx!)!
     
     @State private var chatroom_idx = String(SockMgr.socket_manager.enter_chatroom_idx)
@@ -60,11 +59,16 @@ struct ChatroomDrawer: View {
     
     @State private var alarm_result = SockMgr.socket_manager.chatroom_alarm_changed
     
+    //드로어 열리는 값
+    @Binding var show_menu : Bool
+    
+    let scale = UIScreen.main.scale
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 50, height: 50)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    
     var body: some View {
         
         ZStack{
             VStack{
-        
                 /*
                  일반 채팅방: 카드 정보 보기 버튼x,
                  친구랑 카드 만들기 & 내가 만든 카드에 초대하기o
@@ -73,12 +77,11 @@ struct ChatroomDrawer: View {
                     Group{
                         //친구와 카드 만들기: 카드 만드는 페이지로 이동 > 완료시 동적 링크 채팅방에 보내기
                         make_card_with_friend_btn
-                
+                        
                         
                         //내가 만든 카드에 초대하기 버튼 클릭시 내가 만든 카드 리스트 페이지로 이동, api서버에 내 모든 카드 리스트 가져오는 통신 진행.
-                      
                         invite_my_card_btn
-                   
+                        
                         Divider()
                     }
                     
@@ -108,23 +111,23 @@ struct ChatroomDrawer: View {
                                 .navigationBarHidden(true),
                                isActive: self.$banished)
                 
-                NavigationLink("",destination: FriendVollehMainView(main_vm: self.main_vm, volleh_category_struct: self.volleh_category_struct).navigationBarTitle("", displayMode: .inline)
+                NavigationLink("",destination: ChatMainView().navigationBarTitle("", displayMode: .inline)
                                 .navigationBarHidden(true), isActive: self.$go_main)
                 Group{
                     //방 참가자들 리스트
                     ScrollView{
                         ForEach(SockMgr.socket_manager.user_drawer_struct){friend in
-                            UserRow(socket: socket_manager, friend: friend, show_profile: self.$show_profile, selected_user_row: self.$selected_user_row, selected_friend_idx: self.$selected_friend_idx)
-                                
+                            UserRow(socket: socket_manager, friend: friend, show_profile: self.$show_profile, selected_friend_idx: self.$selected_user_idx, show_menu: self.$show_menu)
+                            
                         }
                     }
-
+                    
                     Spacer()
                 }
                 
                 Group{
-                    //유저 프로필에서 신고하기 클릭시 신고하는 페이지 이동.
-                    NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_friend_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: self.group_main_vm), isActive: self.$show_report_view)
+                    //                    //유저 프로필에서 신고하기 클릭시 신고하는 페이지 이동.
+                    //                    NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_user_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: self.group_main_vm), isActive: self.$show_report_view)
                     
                     //친구랑 볼래에서 카드 정보 보기클릭시 상세 화면으로 이동(방장만 수정하기 버튼 생성.)
                     NavigationLink("",destination: FriendVollehCardDetail(main_vm: self.main_vm, group_main_vm: self.group_main_vm, socket: socket_manager, calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$see_card_detail)
@@ -149,15 +152,15 @@ struct ChatroomDrawer: View {
                     Spacer()
                     chatroom_setting_btn
                     chatroom_alarm_btn
-                        
+                    
                 }
                 .padding(.trailing)
             }
             .padding()
-            //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
-            if show_profile{
-                ChatRoomUserProfileView(friend: SockMgr.socket_manager.user_drawer_struct[selected_user_row], show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_friend_idx, show_report_view: self.$show_report_view)
-            }
+            //            //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
+            //            if show_profile{
+            //                ChatRoomUserProfileView(friend: SockMgr.socket_manager.user_drawer_struct[selected_user_row], show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_friend_idx, show_report_view: self.$show_report_view)
+            //            }
             
         }.animation(.easeInOut)
         .onReceive( NotificationCenter.default.publisher(for: Notification.new_message)){value in
@@ -214,7 +217,7 @@ extension ChatroomDrawer{
                 print("가져온 닉네임 확인: \(String(describing: nickname))")
                 print("드로어에서 나가는 방 종류 확인: \(SockMgr.socket_manager.current_chatroom_info_struct.kinds)")
                 //확인 눌렀을 때 통신 시작
-                socket_manager.exit_room(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, idx: my_idx, nickname:nickname! ,profile_photo_path: "", kinds: SockMgr.socket_manager.current_chatroom_info_struct.kinds)
+                socket.exit_room(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, idx: my_idx, nickname:nickname! ,profile_photo_path: "", kinds: SockMgr.socket_manager.current_chatroom_info_struct.kinds)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     if socket_manager.chatroom_exit_ok{
                         print("채팅방 나가기 됨.")
@@ -330,12 +333,12 @@ extension ChatroomDrawer{
     
     var make_card_with_friend_btn: some View{
         HStack{
-    
+            
             
             Text("친구와 카드 만들기")
                 .font(.custom(Font.n_extra_bold, size:  UIScreen.main.bounds.width/15))
                 .foregroundColor(.proco_black)
-        
+            
             Spacer()
             
             Image("right_light")
@@ -348,12 +351,12 @@ extension ChatroomDrawer{
             self.lets_make_card.toggle()
         }
         .padding([.top,.leading, .trailing])
-
+        
     }
     
     var invite_my_card_btn : some View{
         HStack{
-       
+            
             Text("내 카드에 초대하기")
                 .font(.custom(Font.n_extra_bold, size:  UIScreen.main.bounds.width/15))
                 .foregroundColor(.proco_black)
@@ -382,10 +385,14 @@ struct UserRow : View{
     var friend : UserInDrawerStruct
     //친구 1명 선택했을 때 프로필 뷰 나타내기 위해 사용하는 구분값.
     @Binding var show_profile : Bool
-    //친구 1명 선택했을 때 데이터 모델 중에 가져올 인덱스 값 전달하기 위함.
-    @Binding var selected_user_row: Int
+    
     //선택한 친구의 user idx
     @Binding var selected_friend_idx: Int
+    
+    //드로어 열리는 값
+    @Binding var show_menu : Bool
+    let scale = UIScreen.main.scale
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 50, height: 50)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
     var body: some View{
         
@@ -411,13 +418,10 @@ struct UserRow : View{
                 
                 //클릭시 프로필 화면
             }.onTapGesture {
-                //클릭시 보여줄 사람의 정보 데이터를 프로필 화면에서 보여주기 위해 값 전달.
-                selected_user_row = SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {$0.id == friend.id
-                })!
                 
-                selected_friend_idx = friend.user_idx!
+                self.selected_friend_idx = friend.user_idx!
                 print("프로필 한 개 클릭 선택한 사람 인덱스: \(selected_friend_idx)")
-                
+                //self.show_menu = false
                 //프로필 뷰 보여주기
                 self.show_profile.toggle()
             }
@@ -439,41 +443,49 @@ struct ChatRoomUserProfileView: View{
     @Binding var show_report_view :Bool
     let my_idx = Int(ChatDataManager.shared.my_idx!)
     
+    let scale = UIScreen.main.scale
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 50, height: 50)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    @Binding var go_feed: Bool
+    @ObservedObject var calendar_vm : CalendarViewModel
+    @Binding var go_private_chatroom : Bool
+    
     var body: some View{
         
         ZStack{
             //다이얼로그 바탕 화면
             Rectangle()
-                .fill(Color.gray)
+                .fill(Color.black)
                 .opacity(0.5)
             
             VStack {
                 VStack{
+                    
                     HStack{
                         //프로필 닫기
-                        Image(systemName: "xmark.circle")
-                            .padding()
+                        Image("profile_close_btn")
+                            .resizable()
+                            .frame(width: 11, height: 11)
                             .onTapGesture {
                                 withAnimation{
                                     self.show_profile.toggle()
                                 }
                             }
-                        Spacer()
-                        Menu {
-                            Button(action: {
-                                //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
-                                self.show_profile.toggle()
-                                
-                                self.show_report_view.toggle()
-                                
-                            }) {
-                                Label("신고하기", systemImage: "")
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
-                        }
                         
+                        HStack{
+                            Spacer()
+                            Image("report_icon")
+                                .resizable()
+                                .frame(width: 18, height: 20)
+                                .onTapGesture{
+                            //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
+                                    self.show_profile.toggle()
+                                    
+                                    self.show_report_view.toggle()
+                          }
+                        }
                     }
+                    .padding()
+                    
                     //방장에게만 보이는 버튼(닉네임으로 비교)
                     if ChatDataManager.shared.my_nickname! == SockMgr.socket_manager.creator_nickname{
                         HStack{
@@ -483,15 +495,16 @@ struct ChatRoomUserProfileView: View{
                                 self.check_banish.toggle()
                                 //추방할 사람의 유저 모델 정보 가져오기
                                 print("추방하려는 사람의 idx: \(selected_friend_idx)")
+                                
                             }){
                                 Text("추방하기")
-                                    .foregroundColor(Color.black)
-                                    .font(.system(size: 18))
+                                    .foregroundColor(Color.proco_black)
+                                    .font(.custom(Font.t_extra_bold, size: 13))
                                     .padding()
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 25)
-                                            .stroke(Color.orange, lineWidth: 2)
+                                    .overlay(Capsule()
+                                                .stroke(Color.gray, lineWidth: 1.5)
                                     )
+                                    .cornerRadius(25.0)
                             }
                             .alert(isPresented: $check_banish){
                                 Alert(title: Text("추방하기"), message: Text("추방하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
@@ -515,42 +528,102 @@ struct ChatRoomUserProfileView: View{
                     }
                     //프로필 이미지, 이름
                     HStack{
-                        Image(friend.profile_photo ?? "")
-                            .padding()
-                        Text(friend.nickname!)
-                            .font(.callout)
+                        Spacer()
+                        if friend.profile_photo == "" || friend.profile_photo == nil{
+                            Image("main_profile_img")
+                                .resizable()
+                                .frame(width: 50, height: 50)
+                        }else{
+                            KFImage(URL(string: friend.profile_photo!))
+                                .placeholder{Image("main_profile_img")
+                                    .resizable()
+                                    .frame(width: 48, height: 48)
+                                }
+                                .loadDiskFileSynchronously()
+                                .cacheMemoryOnly()
+                                .fade(duration: 0.25)
+                                .setProcessor(img_processor)
+                                .onProgress{receivedSize, totalSize in
+                                    print("on progress: \(receivedSize), \(totalSize)")
+                                }
+                                .onSuccess{result in
+                                    print("성공 : \(result)")
+                                }
+                                .onFailure{error in
+                                    print("실패 이유: \(error)")
+                                    
+                                    Image("main_profile_img")
+                                        .resizable()
+                                        .frame(width: 48, height: 48)
+                                }
+                        }
+                        
                         Spacer()
                     }
+                    NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_feed)
                     
+                    HStack{
+                        Spacer()
+                        Text(friend.nickname!)
+                            .font(.custom(Font.n_bold, size: 15))
+                            .foregroundColor(.proco_black)
+                        Spacer()
+                    }
+                    Spacer()
                     //채팅하기, 심심풀이 보기, 추방하기 버튼
                     HStack{
                         Button(action: {
+                            
+                            calendar_vm.calendar_owner.user_idx = friend.user_idx!
+                            calendar_vm.calendar_owner.profile_photo_path = friend.profile_photo ?? ""
+                            calendar_vm.calendar_owner.user_nickname = friend.nickname!
+                            calendar_vm.calendar_owner.watch_user_idx = Int(ChatDataManager.shared.my_idx!)!
+                            SimSimFeedPage.calendar_owner_idx = friend.user_idx!
+                            self.go_feed = true
+                            
                         }){
-                            Text("심심풀이 보기")
-                                .foregroundColor(Color.black)
-                                .font(.system(size: 18))
-                                .padding()
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 25)
-                                        .stroke(Color.orange, lineWidth: 2)
-                                )
+                            HStack{
+                                
+                                Image("profile_calendar")
+                                    .resizable()
+                                    .frame(width: 17, height: 19)
+                                
+                                Text("심심풀이 보기")
+                                    .foregroundColor(Color.proco_black)
+                                    .font(.custom(Font.t_extra_bold, size: 13))
+                            }
                         }
+                        .padding(.leading, UIScreen.main.bounds.width/20)
+                        Spacer()
+                        Divider()
+                        Spacer()
                         Button(action: {
+                            print("채팅하기 클릭한 친구 정보: \(friend)")
+                            ChatDataManager.shared.check_chat_already(my_idx: Int(ChatDataManager.shared.my_idx!)!, friend_idx: friend.user_idx!, nickname: friend.nickname!)
+                            
+                            self.go_private_chatroom = true
                         }){
-                            Text("채팅하기")
-                                .foregroundColor(Color.black)
-                                .font(.system(size: 18))
-                                .padding()
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 25)
-                                        .stroke(Color.orange, lineWidth: 2)
-                                )
+                            HStack{
+                                
+                                Image("profile_chat_btn")
+                                    .resizable()
+                                    .frame(width: 17, height: 19)
+                                
+                                Text("채팅하기")
+                                    .foregroundColor(Color.proco_black)
+                                    .font(.custom(Font.t_extra_bold, size: 13))
+                            }
+                            .padding(.trailing, UIScreen.main.bounds.width/10)
                         }
                     }
                     .padding()
+                    
+                    NavigationLink("",destination:  NormalChatRoom(main_vm: FriendVollehMainViewmodel() ,group_main_vm: GroupVollehMainViewmodel(),socket: SockMgr.socket_manager), isActive: self.$go_private_chatroom)
                 }
-                .frame(minWidth: UIScreen.main.bounds.width*0.9, idealWidth: UIScreen.main.bounds.width*0.9, maxWidth: UIScreen.main.bounds.width*0.9, minHeight: UIScreen.main.bounds.width*0.5, idealHeight: UIScreen.main.bounds.width*0.5, maxHeight: UIScreen.main.bounds.width*0.5, alignment: .top).fixedSize(horizontal: true, vertical: true)
-                .background(RoundedRectangle(cornerRadius: 27).fill(Color.white.opacity(1)))
+                .frame(minWidth: UIScreen.main.bounds.width*0.9, idealWidth: UIScreen.main.bounds.width*0.9, maxWidth: UIScreen.main.bounds.width*0.9, minHeight: UIScreen.main.bounds.width*0.6, idealHeight: UIScreen.main.bounds.width*0.6, maxHeight: UIScreen.main.bounds.width*0.7, alignment: .top)
+                .fixedSize(horizontal: true, vertical: true)
+                .background(RoundedRectangle(cornerRadius: 27)
+                                .fill(Color.white.opacity(1)))
                 .overlay(RoundedRectangle(cornerRadius: 27).stroke(Color.black, lineWidth: 1))
             }
         }
