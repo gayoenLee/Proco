@@ -147,12 +147,11 @@ struct FriendVollehCardDetail: View {
                 if calendar_vm.from_calendar{
                 }
                 //동적링크를 통해 들어온 경우 참여하기 버튼.
-                else if socket_manager.is_dynamic_link{
+                else if SockMgr.socket_manager.is_dynamic_link{
                     accept_invitaion_btn
                 }
                 else{
                     HStack{
-                        
                         /*
                          드로어에서 넘어온 경우, 카드에 초대하기 버튼 클릭
                          - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
