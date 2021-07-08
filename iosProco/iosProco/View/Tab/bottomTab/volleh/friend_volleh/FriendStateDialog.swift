@@ -363,6 +363,9 @@ struct FriendStateDialogContents : View{
                         Button(action: {
                             print("일대일 채팅하기 클릭 내 idx: \(Int(main_vm.my_idx!)!), 친구: \(main_vm.friend_info_struct.idx!)")
                             ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_info_struct.idx!, nickname: main_vm.friend_info_struct.nickname!)
+                            
+                            SockMgr.socket_manager.temp_chat_friend_model = UserChatInListModel(idx: main_vm.friend_info_struct.idx!, nickname: main_vm.friend_info_struct.nickname!, profile_photo_path: main_vm.friend_info_struct.profile_photo ?? "")
+                            
                             self.go_to_chat.toggle()
                             
                         }){
