@@ -60,7 +60,7 @@ struct NormalChatRoom: View {
     //유저 한 명 클릭시 일대일 채팅 페이지 이동값
     @State private var go_private_chatroom: Bool = false
     
-    var creator_name : String{
+    var creator_name : String?{
         if SockMgr.socket_manager.user_drawer_struct.count > 0{
             
       let nickname =  SockMgr.socket_manager.user_drawer_struct.filter({
@@ -113,7 +113,7 @@ struct NormalChatRoom: View {
                     Spacer()
                     if SockMgr.socket_manager.current_chatroom_info_struct.room_name == ""{
                         //채팅방 주인 이름
-                        Text(creator_name)
+                        Text(creator_name ?? "채팅")
                             .padding()
                             .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/15))
                             .foregroundColor(.proco_black)
@@ -312,10 +312,6 @@ struct NormalChatRoom: View {
 
                     print("취소 클릭")
                 }))
-            }
-            .onReceive( NotificationCenter.default.publisher(for: Notification.new_message)){value in
-                print("일대일 채팅방에서 노티  받음")
-             
             }
             .onReceive(NotificationCenter.default.publisher(for: Notification.send_msg_again), perform: {value in
                 print("에러 메세지 다시 보내기 노티 받음")
