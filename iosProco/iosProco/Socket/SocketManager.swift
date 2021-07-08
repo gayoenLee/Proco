@@ -21,7 +21,7 @@ let nickname = UserDefaults.standard.string(forKey: "nickname")
 //config 옵션 주석 추가할 것.
 let manager = SocketManager(socketURL: URL(string: "https://3.37.11.107//")!, config: [.log(true), .compress, .forceWebsockets(true), .connectParams(["token" : access_token!, "nickname": nickname!]), .reconnectWaitMax(2), .reconnectWait(1), .forceNew(false)])
 let socket = manager.defaultSocket
-var db : ChatDataManager = ChatDataManager()
+var db : ChatDataManager = ChatDataManager.shared
 var packet : [Any] = []
 
 class SockMgr : ObservableObject {
@@ -2071,18 +2071,30 @@ class SockMgr : ObservableObject {
              2. 유저 모델중 채팅방 idx 조건 넣어서 클라이언트a정보 삭제.
              */
             else if second_data == "ExitUser"{
+                let user_data = JSON(data[2])
                 
+                let out_user_idx = user_data["idx"].intValue
+                print("엑시트 유저에서 서버에서 받은 모델: \(user_data)")
+                
+                //나간 유저의 read last idx도 제거해서 업데이트해야 읽음처리 가능.
+                db.get_friend_unread_num(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
                 //deleted_at 추가하는 것으로 변경. 1/17
-                db.delete_exit_user(chatroom_idx: chatroom_idx, user_idx: user_idx)
+                db.delete_exit_user(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
                 
-                if creator_idx == user_idx{
+                if creator_idx == out_user_idx{
                     //sqlite업데이트(채팅방, 유저, 카드)
                     ChatDataManager.shared.update_exit_user_table(chatroom_idx: chatroom_idx)
                     ChatDataManager.shared.update_exit_user_chatroom(chatroom_idx: chatroom_idx)
                     ChatDataManager.shared.update_exit_user_card(chatroom_idx: chatroom_idx)
                 }
                 
-                self.chat_message_struct.append(ChatMessage(created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
+                //채팅방 드로어에 대화상대 목록에서 삭제.
+                let stored_user_idx =  SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {
+                    $0.user_idx == out_user_idx
+                })
+                SockMgr.socket_manager.user_drawer_struct.remove(at: stored_user_idx!)
+                
+                self.chat_message_struct.append(ChatMessage(kinds: "S",created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                 
                 //뷰 업데이트 위해 보내기
                 NotificationCenter.default.post(name: Notification.new_message, object: nil, userInfo: ["new message" : "server"])
@@ -2108,7 +2120,7 @@ class SockMgr : ObservableObject {
                 if out_user_idx == Int(db.my_idx!){
                     print("추방 당하는 사람이 나일 때")
                     //~가 추방당했습니다 라는 메시지 추가
-                    self.chat_message_struct.append(ChatMessage(created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
+                    self.chat_message_struct.append(ChatMessage(kinds: "S",created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                     
                     let current_time = db.make_created_at()
                     //해당 채팅방, 메세지 정보 삭제
@@ -2258,7 +2270,7 @@ class SockMgr : ObservableObject {
                     //새로 들어온 참가자 정보 저장.
                     db.insert_user(chatroom_idx: chatroom_idx, user_idx: new_user_idx, nickname: nickname, profile_photo_path: profile_photo, read_last_idx: read_last_idx, read_start_idx: rad_start_idx, temp_key: "", server_idx: server_idx, updated_at: updated_at, deleted_at: deleted_at)
                 }
-                
+                print("뉴 유저 \(SockMgr.socket_manager.current_view), 현재 채팅방: 엔터 채팅방\(SockMgr.socket_manager.enter_chatroom_idx), 서버에서 받은 채팅방: \(chatroom_idx)")
                 if SockMgr.socket_manager.current_view == 333 && SockMgr.socket_manager.enter_chatroom_idx == chatroom_idx{
                     print("채팅방 안에 있을 때")
                     
@@ -2282,7 +2294,7 @@ class SockMgr : ObservableObject {
                         
                     }
                     
-                    self.chat_message_struct.append(ChatMessage(created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
+                    self.chat_message_struct.append(ChatMessage(kinds: "S",created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                     
                     let my_idx = Int(db.my_idx!)
                     
