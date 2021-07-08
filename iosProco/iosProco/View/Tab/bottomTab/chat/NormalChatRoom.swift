@@ -157,7 +157,7 @@ struct NormalChatRoom: View {
 //                               destination: TabbarView(view_router: self.view_router).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
 //                               isActive: self.$go_back)
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
-                NormalChatMessageView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url : self.$image_url, open_gallery : self.$open_gallery, ui_image: self.$ui_image, too_big_img_size : self.$too_big_img_size, send_again_alert: self.$send_again_click, show_img_bigger: self.$show_img_bigger)
+                NormalChatMessageView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url : self.$image_url, open_gallery : self.$open_gallery, ui_image: self.$ui_image, too_big_img_size : self.$too_big_img_size, send_again_alert: self.$send_again_click, show_img_bigger: self.$show_img_bigger, show_profile: self.$show_profile ,selected_user_idx: self.$selected_user_idx)
                     .onTapGesture(perform: {
                         withAnimation{
                             if self.show_menu{
@@ -338,6 +338,7 @@ struct NormalChatRoom: View {
                     if check_result as! String == "ok"{
                         
                         let data = user_info["info"] as! String
+                        print("동적링크 안 데이터: \(data)")
                         let chatroom_idx = data.split(separator: "-")[0]
                         let card_idx = data.split(separator: "-")[1]
                         let kinds = data.split(separator: "-")[2]
@@ -348,6 +349,7 @@ struct NormalChatRoom: View {
                         socket_manager.invite_chatroom_idx = Int(chatroom_idx)!
                         //초대된 카드 idx
                         socket_manager.selected_card_idx = Int(card_idx)!
+                        
                         //초대된 카드 종류에 따라 뷰 이동 처리
                         if kinds.contains("친구"){
                             self.invited_friend_card.toggle()
