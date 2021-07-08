@@ -123,10 +123,12 @@ struct NormalChatTabRow : View{
                         .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/22))
                         .foregroundColor(.gray)
                     //알림버튼
+                    if self.room_alarm_state == false{
                     Button(action: {
                         print("해당 채팅방 알림 상태: \(room_alarm_state)")
                     }){
-                        Image(room_alarm_state == true ? "chatroom_alarm" : "chatroom_alarm_off")
+                        Image("chatroom_alarm_off")
+                    }
                     }
                     Spacer()
                     Text(last_chat_time)
