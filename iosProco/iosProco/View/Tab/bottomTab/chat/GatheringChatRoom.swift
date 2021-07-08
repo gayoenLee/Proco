@@ -9,6 +9,8 @@ import SwiftUI
 
 struct GatheringChatRoom: View {
     @ObservedObject var socket : SockMgr
+    @ObservedObject var calendar_vm = CalendarViewModel()
+
     //햄버거 메뉴 클릭 여부
     @State var show_menu = false
     //추방당한 사람을 메인으로 보내기 위해 이용하는 구분값
@@ -43,6 +45,28 @@ struct GatheringChatRoom: View {
     //드로어에서 유저 한 명 클릭한 idx값 바인딩 -> 채팅룸에서 전달받기 -> 프로필 띄우기
     @State private var selected_user_idx: Int = -1
     
+    var user_profile_info : UserInDrawerStruct?{
+        
+        if self.show_profile{
+         let model =   SockMgr.socket_manager.user_drawer_struct.first(where: {
+                $0.user_idx! == self.selected_user_idx
+            })
+            print("드로어에서 클릭한 유저 정보: \(model)")
+            return model!
+        }else{
+            return nil
+        }
+    }
+    //하단 텝이 있는 뷰에서 왔는지 구분하는 변수 . 기본적으로 true이지만 탭이 없었던 곳에서 뷰를 선언한다면 인자로 false를 전달함.
+        var from_tab: Bool = true
+    //유저 한 명 클릭시 피드 페이지 이동값
+    @State private var go_feed: Bool = false
+    //유저 한 명 클릭시 일대일 채팅 페이지 이동값
+    @State private var go_private_chatroom: Bool = false
+    
+    //신고하기, 추방하기 컨텍스트 메뉴 띄우기
+    @State private var show_context_menu : Bool = false
+
     var body: some View {
         ZStack{
             VStack{
@@ -66,15 +90,19 @@ struct GatheringChatRoom: View {
                             .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                     }
                     Spacer()
-                    if socket.current_chatroom_info_struct.room_name == ""{
+                    if SockMgr.socket_manager.current_chatroom_info_struct.room_name == ""{
                         //채팅방 주인 이름
                         Text(socket.creator_nickname)
                             .padding()
+                            .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/18))
+                            .foregroundColor(.proco_black)
                         
                         //커스텀한 채팅방 이름이 있을 경우
                     }else{
-                        Text(socket.current_chatroom_info_struct.room_name)
+                        Text(SockMgr.socket_manager.current_chatroom_info_struct.room_name)
                             .padding()
+                            .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/15))
+                            .foregroundColor(.proco_black)
                     }
                     Spacer()
                     //드로어 여는 햄버거 메뉴 버튼.
@@ -85,14 +113,23 @@ struct GatheringChatRoom: View {
                         }
                         print("드로어 보여주는 값: \(self.show_menu)")
                     }){
-                        Image(systemName: "text.justify")
+                        Image("drawer_menu_icon")
                     }
                 }
                 .padding()
-                .padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
                 
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
                 ChatMessageListView( socket: self.socket, selected_image: self.$selected_image, image_url: self.$image_url, open_gallery: self.$open_gallery, ui_image: self.$ui_image, too_big_img_size: self.$too_big_img_size, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger)
+                    .onTapGesture(perform: {
+                        withAnimation{
+                            if self.show_menu{
+                            self.show_menu = false
+                            }
+                        }
+                    })
+                
+                //유저 프로필에서 신고하기 클릭시 신고하는 페이지 이동.
+                NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_user_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: GroupVollehMainViewmodel()), isActive: self.$show_report_view)
             }
             .alert(isPresented: self.$too_big_img_size){
                 Alert(title: Text("알림"), message: Text("10MB이상의 이미지는 보낼 수 없습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
@@ -290,15 +327,15 @@ struct GatheringChatRoom: View {
                 ChatroomDrawer(socket: self.socket, main_vm: FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(), show_profile: self.$show_profile,selected_user_idx: self.$selected_user_idx, show_menu: self.$show_menu)
                     .background(Color.white)
                     .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)
-                    .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.1: UIScreen.main.bounds.width)
+                    .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.08: UIScreen.main.bounds.width)
+            }
+            
+            //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
+            if show_profile{
+                ChatRoomUserProfileView(friend: user_profile_info!, show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_user_idx, show_report_view: self.$show_report_view, go_feed:self.$go_feed, calendar_vm: self.calendar_vm, go_private_chatroom: self.$go_private_chatroom, show_context_menu: self.$show_context_menu)
+
             }
         }
         .edgesIgnoringSafeArea(.all)
-    }
-}
-
-struct GatheringChatRoom_Previews: PreviewProvider {
-    static var previews: some View {
-        GatheringChatRoom(socket: SockMgr.socket_manager)
     }
 }

@@ -12,7 +12,7 @@ struct FriendStateDialog: View {
     @ObservedObject var main_vm: FriendVollehMainViewmodel
     @ObservedObject var group_main_vm: GroupVollehMainViewmodel
     @ObservedObject var  calendar_vm: CalendarViewModel
-
+    
     @Binding var show_friend_info: Bool
     @ObservedObject var socket : SockMgr
     //채팅하기 클릭시 채팅화면으로 이동.
@@ -84,23 +84,19 @@ struct FriendStateDialogContents : View{
                             self.show_friend_info.toggle()
                         }
                     }
-                Spacer()
+                    .padding(.leading)
                 
                 //채팅방 목록 안에서만 유저 신고 가능.
                 if is_from_chatroom{
-                HStack{
-                Image("context_menu_icon")
-                    .resizable()
-                    .frame(width: 3, height: 15)
-                }
-                    .contextMenu{
-                        Button(action: {
-                           print("신고하기 클릭")
-                            self.show_report_view = true
-                            
-                        }){
-                            Text("신고하기")
-                        }
+                    HStack{
+                        Spacer()
+                        Image("context_menu_icon")
+                            .resizable()
+                            .frame(width: 5, height: 15)
+                    }
+                    .onTapGesture{
+                        print("신고하기 클릭")
+                        self.show_report_view = true
                     }
                 }
             }
@@ -194,9 +190,9 @@ struct FriendStateDialogContents : View{
                 Spacer()
                 
                 if self.is_friend{
-                Text(self.main_vm.friend_info_struct.nickname!)
-                    .font(.custom(Font.n_bold, size: 15))
-                    .foregroundColor(.proco_black)
+                    Text(self.main_vm.friend_info_struct.nickname!)
+                        .font(.custom(Font.n_bold, size: 15))
+                        .foregroundColor(.proco_black)
                     
                 }else{
                     
@@ -206,47 +202,47 @@ struct FriendStateDialogContents : View{
                 }
                 
                 if is_friend{
-                //내 다이얼로그인 경우 관심친구 아이콘 보여주지 않는다.
-                if Int(self.main_vm.my_idx!) == main_vm.friend_info_struct.idx{
-                    
-                }else{
-                    
-                    Button(action: {
-                        if self.interest_friend == false{
-                            
-                            self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_info_struct.idx!, action: "관심친구")
-                            print("관심친구 지정하기 클릭")
-                            
-                        }else{
-                            print("관심친구 해제하기 클릭")
-                            
-                            self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_info_struct.idx!, action: "관심친구해제")
-                        }
-                    }){
-                        Image(self.interest_friend == true ? "star_fill" : "star")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: Notification.set_interest_friend), perform: {value in
+                    //내 다이얼로그인 경우 관심친구 아이콘 보여주지 않는다.
+                    if Int(self.main_vm.my_idx!) == main_vm.friend_info_struct.idx{
                         
-                        print("관심친구 설정 완료 노티 받음")
-                        if let user_info = value.userInfo, let check_result = user_info["set_interest_friend"]{
-                            print("알림 설정 결과 받음: \(check_result)")
-                            if check_result as! String == "set_ok_관심친구"{
+                    }else{
+                        
+                        Button(action: {
+                            if self.interest_friend == false{
                                 
-                                self.main_vm.friend_info_struct.kinds = "관심친구"
-                                self.interest_friend = true
+                                self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_info_struct.idx!, action: "관심친구")
+                                print("관심친구 지정하기 클릭")
                                 
                             }else{
+                                print("관심친구 해제하기 클릭")
                                 
-                                self.main_vm.friend_info_struct.kinds = "친구상태"
-                                self.interest_friend = false
+                                self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_info_struct.idx!, action: "관심친구해제")
                             }
+                        }){
+                            Image(self.interest_friend == true ? "star_fill" : "star")
+                                .resizable()
+                                .frame(width: 12, height: 12)
                         }
-                    })
+                        .onReceive(NotificationCenter.default.publisher(for: Notification.set_interest_friend), perform: {value in
+                            
+                            print("관심친구 설정 완료 노티 받음")
+                            if let user_info = value.userInfo, let check_result = user_info["set_interest_friend"]{
+                                print("알림 설정 결과 받음: \(check_result)")
+                                if check_result as! String == "set_ok_관심친구"{
+                                    
+                                    self.main_vm.friend_info_struct.kinds = "관심친구"
+                                    self.interest_friend = true
+                                    
+                                }else{
+                                    
+                                    self.main_vm.friend_info_struct.kinds = "친구상태"
+                                    self.interest_friend = false
+                                }
+                            }
+                        })
+                    }
+                    
                 }
-                
-            }
                 Spacer()
             }
             .padding(.bottom,UIScreen.main.bounds.width/50)
@@ -275,7 +271,7 @@ struct FriendStateDialogContents : View{
                         print("다른 사람 피드 보기 버튼 클릭")
                         //캘린더를 보려는 사람의 idx = 내 idx 저장.
                         if is_friend{
-                          print("친구인 경우")
+                            print("친구인 경우")
                             calendar_vm.calendar_owner.watch_user_idx = Int(calendar_vm.my_idx!)!
                             print("캘린더 보는 유저 idx: \(calendar_vm.calendar_owner.watch_user_idx), \(Int(calendar_vm.my_idx!)!)")
                             
@@ -296,7 +292,7 @@ struct FriendStateDialogContents : View{
                             calendar_vm.calendar_owner.user_nickname = group_main_vm.creator_info.nickname!
                             calendar_vm.calendar_owner.user_idx = group_main_vm.creator_info.idx!
                             SimSimFeedPage.calendar_owner_idx = group_main_vm.creator_info.idx!
-                                                        
+                            
                         }
                         self.go_to_feed.toggle()
                         
@@ -320,69 +316,69 @@ struct FriendStateDialogContents : View{
                 //모임 참여자들의 프로필 클릭시 심심풀이 보기만 보여짐.
                 if is_friend{
                     
-                Divider()
-                Spacer()
+                    Divider()
+                    Spacer()
                     
-                if Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
-                    
-                    Text("상태")
-                        .foregroundColor(Color.proco_black)
-                        .font(.custom(Font.t_extra_bold, size: 13))
-                    
-                    Button(action: {
+                    if Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
                         
-                        //본래 상태가 off였었으므로 on으로 바꿈.
-                        if self.state_on == 0{
-                            print("on임")
-                            self.state_on = 1
+                        Text("상태")
+                            .foregroundColor(Color.proco_black)
+                            .font(.custom(Font.t_extra_bold, size: 13))
+                        
+                        Button(action: {
                             
-                        }else{
-                            print("off임")
-                            self.state_on = 0
+                            //본래 상태가 off였었으므로 on으로 바꿈.
+                            if self.state_on == 0{
+                                print("on임")
+                                self.state_on = 1
+                                
+                            }else{
+                                print("off임")
+                                self.state_on = 0
+                            }
+                            
+                            SockMgr.socket_manager.click_on_off(user_idx: Int(self.main_vm.my_idx!)!, state: self.state_on!, state_data: "")
+                            
+                            UserDefaults.standard.set(self.state_on, forKey: "\(self.main_vm.my_idx!)_state")
+                            print("내 idx: \(self.main_vm.my_idx!)")
+                            print("온오프 버튼 클릭으로 바뀐 상태: \( self.state_on)")
+                            
+                        }){
+                            Text(self.state_on == 0 ? "오프라인" : "온라인")
+                                .font(.custom(Font.n_extra_bold, size: 13))
+                                .foregroundColor(self.state_on == 0 ? Color.gray : Color.white)
+                                .padding(UIScreen.main.bounds.width/30)
+                            
                         }
+                        .background(self.state_on == 0 ? Color.proco_white : Color.proco_green)
+                        .overlay(Capsule()
+                                    .stroke(self.state_on == 0 ? Color.gray : Color.proco_green, lineWidth: 1.5)
+                                 
+                        )
+                        .cornerRadius(25.0)
+                        .padding(.trailing, UIScreen.main.bounds.width/20)
                         
-                        SockMgr.socket_manager.click_on_off(user_idx: Int(self.main_vm.my_idx!)!, state: self.state_on!, state_data: "")
+                    }else{
                         
-                        UserDefaults.standard.set(self.state_on, forKey: "\(self.main_vm.my_idx!)_state")
-                        print("내 idx: \(self.main_vm.my_idx!)")
-                        print("온오프 버튼 클릭으로 바뀐 상태: \( self.state_on)")
-                        
-                    }){
-                        Text(self.state_on == 0 ? "오프라인" : "온라인")
-                            .font(.custom(Font.n_extra_bold, size: 13))
-                            .foregroundColor(self.state_on == 0 ? Color.gray : Color.white)
-                            .padding(UIScreen.main.bounds.width/30)
-                        
-                    }
-                    .background(self.state_on == 0 ? Color.proco_white : Color.proco_green)
-                    .overlay(Capsule()
-                                .stroke(self.state_on == 0 ? Color.gray : Color.proco_green, lineWidth: 1.5)
-                             
-                    )
-                    .cornerRadius(25.0)
-                    .padding(.trailing, UIScreen.main.bounds.width/20)
-                    
-                }else{
-                    
-                    Button(action: {
-                        print("일대일 채팅하기 클릭 내 idx: \(Int(main_vm.my_idx!)!), 친구: \(main_vm.friend_info_struct.idx!)")
-                        ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_info_struct.idx!)
-                        self.go_to_chat.toggle()
-                        
-                    }){
-                        HStack{
+                        Button(action: {
+                            print("일대일 채팅하기 클릭 내 idx: \(Int(main_vm.my_idx!)!), 친구: \(main_vm.friend_info_struct.idx!)")
+                            ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_info_struct.idx!, nickname: main_vm.friend_info_struct.nickname!)
+                            self.go_to_chat.toggle()
                             
-                            Image("profile_chat_btn")
-                                .resizable()
-                                .frame(width: 17, height: 19)
-                            
-                            Text("채팅하기")
-                                .foregroundColor(Color.proco_black)
-                                .font(.custom(Font.t_extra_bold, size: 13))
+                        }){
+                            HStack{
+                                
+                                Image("profile_chat_btn")
+                                    .resizable()
+                                    .frame(width: 17, height: 19)
+                                
+                                Text("채팅하기")
+                                    .foregroundColor(Color.proco_black)
+                                    .font(.custom(Font.t_extra_bold, size: 13))
+                            }
                         }
+                        .padding(.trailing, UIScreen.main.bounds.width/10)
                     }
-                    .padding(.trailing, UIScreen.main.bounds.width/10)
-                }
                 }
             }
             .padding(.bottom, UIScreen.main.bounds.width/50)
@@ -394,9 +390,9 @@ struct FriendStateDialogContents : View{
         .cornerRadius(15)
         .onAppear{
             if is_friend{
-            print("친구 한 명 다이얼로그 나옴: \(self.main_vm.friend_info_struct)")
-            self.interest_friend = self.main_vm.friend_info_struct.kinds == "관심친구" ? true : false
-            self.state_on = self.main_vm.friend_info_struct.state!
+                print("친구 한 명 다이얼로그 나옴: \(self.main_vm.friend_info_struct)")
+                self.interest_friend = self.main_vm.friend_info_struct.kinds == "관심친구" ? true : false
+                self.state_on = self.main_vm.friend_info_struct.state!
             }
         }
         .sheet(isPresented: self.$show_report_view) {

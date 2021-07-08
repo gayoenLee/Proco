@@ -80,7 +80,7 @@ struct AllMyCardList: View {
                             SockMgr.socket_manager.is_from_chatroom = true
                             //상세 페이지에서 친구 카드 초대하기에서 이동할 경우에는 확인 버튼 예외처리 위해 사용
                             SockMgr.socket_manager.detail_to_invite = true
-                            
+                            SockMgr.socket_manager.is_dynamic_link = false
                             //해당 카드의 상세 정보 가져오기 위한 쿼리.
                             //                        ChatDataManager.shared.get_card_by_card_idx(card_idx: card.card_idx!)
                             //이 값을 넣어줘야 상세페이지에서 데이터 가져오는 통신시 card idx값 사용가능.
@@ -115,6 +115,9 @@ struct AllMyCardList: View {
                             SockMgr.socket_manager.is_from_chatroom = true
                             //상세 페이지에서 친구 카드 초대하기에서 이동할 경우에는 확인 버튼
                             SockMgr.socket_manager.detail_to_invite = true
+                            SockMgr.socket_manager.is_dynamic_link = false
+
+                            
                             print("카드 한 개 클릭: \( SockMgr.socket_manager.detail_to_invite)")
                             //해당 카드의 상세 정보 가져오기 위한 쿼리.
                             //                            ChatDataManager.shared.get_card_by_card_idx(card_idx: card.card_idx!)

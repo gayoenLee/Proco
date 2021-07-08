@@ -35,8 +35,10 @@ struct ChatroomNameEditView: View {
                 Spacer()
                 //화면 타이틀
                 Text("채팅방 이름 변경")
-                    .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/10))
+                    .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/17))
                     .foregroundColor(.proco_black)
+                    .padding(.leading)
+                
                 Spacer()
                 
                 Button(action: {
@@ -62,10 +64,10 @@ struct ChatroomNameEditView: View {
                 }){
                     Text("확인")
                         .padding()
-                        .font(.custom(Font.t_extra_bold, size: UIScreen.main.bounds.width/17))
+                        .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/25))
                         .foregroundColor(.proco_white)
-                        .overlay(RoundedRectangle(cornerRadius: 25.0)
-                                    .foregroundColor(.proco_black))
+                        .background(Color.proco_black)
+                        .cornerRadius(20)
                 }
                 .alert(isPresented: self.$show_alert){
                     Alert(title: Text("채팅방 이름 설정") .font(.custom(Font.t_extra_bold, size: UIScreen.main.bounds.width/17))
@@ -75,19 +77,29 @@ struct ChatroomNameEditView: View {
                                                                                             .foregroundColor(.proco_black)))
                 }
             }
+            .padding([.leading, .trailing])
+           
             HStack{
                 //텍스트필드 기본값은 원래 채팅방 이름(왼쪽 placeholder)
                 TextField(SockMgr.socket_manager.current_chatroom_info_struct.room_name, text: self.$chatroom_name)
-                    .padding()
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding([.leading, .trailing, .top])
+                    //.textFieldStyle(RoundedBorderTextFieldStyle())
                 //취소 버튼.
                 Button(action: {
                     self.chatroom_name = ""
                 }){
                     Image("card_dialog_close_icon")
-                        .padding()
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width/25, height: UIScreen.main.bounds.width/25)
                 }
-            }.padding()
+            }.padding([.leading, .trailing])
+            
+            Divider()
+                .frame(width: UIScreen.main.bounds.width*0.9, height: 2, alignment: .center)
+                .foregroundColor(Color.proco_black)
+                .padding([.leading, .trailing])
+            
+            Spacer()
         }
     }
 }

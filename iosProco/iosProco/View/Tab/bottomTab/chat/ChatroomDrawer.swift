@@ -152,7 +152,6 @@ struct ChatroomDrawer: View {
                     Spacer()
                     chatroom_setting_btn
                     chatroom_alarm_btn
-                    
                 }
                 .padding(.trailing)
             }
@@ -193,6 +192,8 @@ struct ChatroomDrawer: View {
                     self.alarm_state = true
                 }
             }
+            
+            
         }
     }
 }
@@ -265,7 +266,6 @@ extension ChatroomDrawer{
                     
                     SockMgr.socket_manager.chatroom_alarm_setting_event(chatroom_idx: Int(chatroom_idx)!, state: 1)
                     
-                    
                 }
                 print("채팅방 알림 버튼 클릭")
             }, label: {
@@ -278,14 +278,14 @@ extension ChatroomDrawer{
                     print("알림 설정 결과 받음: \(check_result)")
                     if check_result as! Int == 0 {
                         
+                        UserDefaults.standard.set("0", forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(chatroom_idx)")
                         
                         self.alarm_state = false
                         
                     }else{
+                        UserDefaults.standard.set("1", forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(chatroom_idx)")
                         self.alarm_state = true
                     }
-                    
-                    
                 }
             })
         }
@@ -370,6 +370,8 @@ extension ChatroomDrawer{
         .onTapGesture {
             
             SockMgr.socket_manager.is_from_chatroom = true
+            SockMgr.socket_manager.detail_to_invite = true
+            SockMgr.socket_manager.is_dynamic_link = false
             
             //SockMgr.socket_manager.get_all_my_cards()
             self.go_to_my_cards.toggle()
@@ -448,6 +450,7 @@ struct ChatRoomUserProfileView: View{
     @Binding var go_feed: Bool
     @ObservedObject var calendar_vm : CalendarViewModel
     @Binding var go_private_chatroom : Bool
+    @Binding var show_context_menu : Bool
     
     var body: some View{
         
@@ -473,59 +476,66 @@ struct ChatRoomUserProfileView: View{
                         
                         HStack{
                             Spacer()
-                            Image("report_icon")
+                            Image("context_menu_btn")
                                 .resizable()
-                                .frame(width: 18, height: 20)
-                                .onTapGesture{
-                            //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
-                                    self.show_profile.toggle()
-                                    
-                                    self.show_report_view.toggle()
-                          }
+                                .frame(width: 4, height: 13)
                         }
-                    }
-                    .padding()
-                    
-                    //방장에게만 보이는 버튼(닉네임으로 비교)
-                    if ChatDataManager.shared.my_nickname! == SockMgr.socket_manager.creator_nickname{
-                        HStack{
-                            Spacer()
-                            Button(action: {
+                        .onTapGesture {
+                            self.show_context_menu = true
+                        }
+                        .actionSheet(isPresented: self.$show_context_menu){
+                            ActionSheet(title: Text("\(friend.nickname!)님을"), message: Text(""), buttons: //방장에게만 보이는 버튼(닉네임으로 비교)
+                                            ChatDataManager.shared.my_nickname! == SockMgr.socket_manager.creator_nickname ? [ .default(Text("추방하기"), action: {
                                 //추방하시겠습니까 알람 띄우기
                                 self.check_banish.toggle()
                                 //추방할 사람의 유저 모델 정보 가져오기
                                 print("추방하려는 사람의 idx: \(selected_friend_idx)")
-                                
-                            }){
-                                Text("추방하기")
-                                    .foregroundColor(Color.proco_black)
-                                    .font(.custom(Font.t_extra_bold, size: 13))
-                                    .padding()
-                                    .overlay(Capsule()
-                                                .stroke(Color.gray, lineWidth: 1.5)
-                                    )
-                                    .cornerRadius(25.0)
-                            }
-                            .alert(isPresented: $check_banish){
-                                Alert(title: Text("추방하기"), message: Text("추방하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
-                                    print("추방 확인 클릭")
-                                    self.check_banish = false
-                                    self.show_profile = false
-                                    
-                                    //추방하려는 사람의 정보 가져오기
-                                    ChatDataManager.shared.get_user_info(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, user_idx: selected_friend_idx)
-                                    
-                                    //내 유저 모델 가져오기
-                                    ChatDataManager.shared.get_my_user_info(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, user_idx: my_idx!)
-                                    
-                                    SockMgr.socket_manager.banish_user(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, my_idx: my_idx!, my_nickname: ChatDataManager.shared.my_nickname!, my_profile_photo_path: SockMgr.socket_manager.my_profile_photo, op_idx: SockMgr.socket_manager.banish_user_info.idx, op_nickname: SockMgr.socket_manager.banish_user_info.nickname, op_profile_photo_path: SockMgr.socket_manager.banish_user_info.profile_photo_path ?? "")
-                                    
-                                }), secondaryButton: Alert.Button.default(Text("취소"), action: {
-                                    self.check_banish.toggle()
-                                }))
-                            }
+                            }), .default(Text("신고하기"), action: {
+                                //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
+                                        self.show_profile.toggle()
+                                        
+                                        self.show_report_view.toggle()
+                                        }), .cancel(Text("취소"))] : [.default(Text("신고하기"), action: {
+                                        //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
+                                                //self.show_profile.toggle()
+                                                
+                                                self.show_report_view = true
+                                                }), .cancel(Text("취소"))])
                         }
+                        .alert(isPresented: $check_banish){
+                            Alert(title: Text("추방하기"), message: Text("추방하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
+                                print("추방 확인 클릭")
+                                self.check_banish = false
+                                self.show_profile = false
+                                
+                                //추방하려는 사람의 정보 가져오기
+                                ChatDataManager.shared.get_user_info(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, user_idx: selected_friend_idx)
+                                
+                                //내 유저 모델 가져오기
+                                ChatDataManager.shared.get_my_user_info(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, user_idx: my_idx!)
+                                
+                                SockMgr.socket_manager.banish_user(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, my_idx: my_idx!, my_nickname: ChatDataManager.shared.my_nickname!, my_profile_photo_path: SockMgr.socket_manager.my_profile_photo, op_idx: SockMgr.socket_manager.banish_user_info.idx, op_nickname: SockMgr.socket_manager.banish_user_info.nickname, op_profile_photo_path: SockMgr.socket_manager.banish_user_info.profile_photo_path ?? "")
+                                
+                            }), secondaryButton: Alert.Button.default(Text("취소"), action: {
+                                self.check_banish.toggle()
+                            }))
+                        }
+                        
+//                        HStack{
+//                            Spacer()
+//                            Image("report_icon")
+//                                .resizable()
+//                                .frame(width: 18, height: 20)
+//                                .onTapGesture{
+//                            //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
+//                                    self.show_profile.toggle()
+//
+//                                    self.show_report_view.toggle()
+//                          }
+//                        }
                     }
+                    .padding()
+
                     //프로필 이미지, 이름
                     HStack{
                         Spacer()

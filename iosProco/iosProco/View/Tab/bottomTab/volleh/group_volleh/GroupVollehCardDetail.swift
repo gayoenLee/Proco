@@ -62,6 +62,10 @@ struct GroupVollehCardDetail: View {
     @State private var apply_btn_txt : String = "참여하기"
     
     let card_img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)) |> RoundCornerImageProcessor(cornerRadius: 40)
+    //카드 초대하기 후 알림창 띄울 때 사용 구분값
+    @State private var invite_ok: Bool = false
+    //카드 초대하기 후 알림창에 보여줄 텍스트뷰
+    @State private var invite_result_txt : String = ""
     
     var body: some View {
       
@@ -246,6 +250,41 @@ struct GroupVollehCardDetail: View {
                                 //신고하기 페이지 이동
                                 NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: FriendVollehMainViewmodel(), socket_manager: SockMgr(), group_main_vm: self.main_vm), isActive: self.$show_report_view)
                                 
+                                
+                                if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator!.idx && SockMgr.socket_manager.detail_to_invite == false{
+                                    
+                                }
+                                else if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator!.idx && SockMgr.socket_manager.detail_to_invite ==
+                                            true{
+                                 
+                                    invite_btn
+                                        .onReceive(NotificationCenter.default.publisher(for: Notification.new_message), perform: {value in
+                                            
+                                            if let user_info = value.userInfo,let check_result = user_info["new_message_link"]{
+                                                
+                                                print("내 카드에 초대하기 동적링크 데이터 확인: \(String(describing: check_result))")
+                                                
+                                                //친구 신청 취소한 경우
+                                                if check_result as! String == "ok"{
+                                                    let chatroom_idx = user_info["chatroom_idx"] as! String
+                                                    if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
+                                                        self.invite_ok = true
+                                                        self.invite_result_txt = "초대가 완료됐습니다."
+                                                    }
+                                                }else if check_result as! String == "fail"{
+                                                    let chatroom_idx = user_info["chatroom_idx"] as! String
+                                                    if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
+                                                        self.invite_ok = true
+                                                        self.invite_result_txt = "다시 시도해주세요"
+                                                    }
+                                                }
+                                            }
+                                        })
+                                        .alert(isPresented: self.$invite_ok){
+                                            Alert(title: Text("초대하기"), message: Text(self.invite_result_txt), dismissButton: Alert.Button.default(Text("확인")))
+                                        }
+                                }else{
+                                    
                                 apply_btn
                                     .alert(isPresented: self.$apply_result){
                                         switch self.apply_ok{
@@ -288,6 +327,7 @@ struct GroupVollehCardDetail: View {
                                             self.apply_result = true
                                         }
                                     }
+                                }
                             }
                         }.padding()
                     }
@@ -455,6 +495,39 @@ extension GroupVollehCardDetail{
         })
     }
     
+    var invite_btn : some View{
+        Button(action: {
+            
+            socket_manager.which_type_room = "GROUP"
+            ChatDataManager.shared.get_card_by_card_idx(card_idx: main_vm.my_card_detail_struct.card_idx!)
+            let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
+            print("모여볼래로 초대하려는 채팅방 idx: \(chatroom_idx), 카드 idx: \(main_vm.my_card_detail_struct.card_idx!)")
+            
+            //동적링크 생성 - kinds, card idx, chatroom idx
+            //                        SockMgr.socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: "tab.grp.fill", card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: self.main_vm.my_card_detail_struct.kinds!)
+            
+            let meeting_date = self.main_vm.my_card_detail_struct.expiration_at
+            let converted_date = String.kor_date_string(date_string: meeting_date!)
+            let meeting_time = self.main_vm.my_card_detail_struct.expiration_at
+            let converted_time = String.time_to_kor_language(date: meeting_time!)
+            
+            SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: "모임", meeting_date: converted_date, meeting_time: converted_time)
+            
+            //본래의 일반 채팅방 화면으로 이동.
+            self.go_back_chatroom = true
+            print("go_back_chatroom: \(self.go_back_chatroom)")
+        }){
+            Text("초대하기")
+                .padding()
+                .foregroundColor(Color.proco_white)
+                .frame(maxWidth: .infinity)
+        }
+        .frame(minWidth: 0, maxWidth: .infinity)
+        .background(Color.main_green)
+        .cornerRadius(25)
+        .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
+    }
+    
     var apply_btn : some View{
         
         VStack{
@@ -465,39 +538,6 @@ extension GroupVollehCardDetail{
              - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
              - 주의 : 친구 채팅방 카드이므로 소켓 매니저 클래스의 which_type_room변수를 GROUP로 만들기.
              */
-            if  SockMgr.socket_manager.detail_to_invite{
-                
-                Button(action: {
-                    
-                    socket_manager.which_type_room = "GROUP"
-                    ChatDataManager.shared.get_card_by_card_idx(card_idx: main_vm.my_card_detail_struct.card_idx!)
-                    let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
-                    print("모여볼래로 초대하려는 채팅방 idx: \(chatroom_idx), 카드 idx: \(main_vm.my_card_detail_struct.card_idx!)")
-                    
-                    //동적링크 생성 - kinds, card idx, chatroom idx
-                    //                        SockMgr.socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: "tab.grp.fill", card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: self.main_vm.my_card_detail_struct.kinds!)
-                    
-                    let meeting_date = self.main_vm.my_card_detail_struct.expiration_at
-                    let converted_date = String.kor_date_string(date_string: meeting_date!)
-                    let meeting_time = self.main_vm.my_card_detail_struct.expiration_at
-                    let converted_time = String.time_to_kor_language(date: meeting_time!)
-                    
-                    SockMgr.socket_manager.make_invite_link(chatroom_idx: chatroom_idx, card_idx: main_vm.my_card_detail_struct.card_idx!, kinds: "모임", meeting_date: converted_date, meeting_time: converted_time)
-                    
-                    //본래의 일반 채팅방 화면으로 이동.
-                    self.go_back_chatroom = true
-                    print("go_back_chatroom: \(self.go_back_chatroom)")
-                }){
-                    Text("초대하기")
-                        .padding()
-                        .foregroundColor(Color.proco_white)
-                        .frame(maxWidth: .infinity)
-                }
-                .frame(minWidth: 0, maxWidth: .infinity)
-                .background(Color.main_green)
-                .cornerRadius(25)
-                .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
-            }else{
                 
                 if Int(self.main_vm.my_idx!) != self.main_vm.my_card_detail_struct.creator!.idx{
                     
@@ -525,7 +565,7 @@ extension GroupVollehCardDetail{
                 .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
                 //.disabled(main_vm.appply_end)
                 }
-            }
+            
         }
     }
     var report_btn : some View{

@@ -42,12 +42,14 @@ struct NormalChatMessageView: View{
                           
                             ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
                                 .onAppear{
+                                    if SockMgr.socket_manager.chat_message_struct.count > 0{
                                     // 처음 스크롤
                                     if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
                                         
                                         reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
                                         scrolled = true
                                     }
+                                }
                                 }
                         }
                         .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
@@ -62,11 +64,14 @@ struct NormalChatMessageView: View{
                             
                             ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
                                 .onAppear{
+                                    
+                                    if SockMgr.socket_manager.chat_message_struct.count > 0{
                                     // 처음 스크롤
                                     if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
                                         
                                         reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
                                         scrolled = true
+                                    }
                                     }
                                 }
                                 .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
@@ -76,7 +81,7 @@ struct NormalChatMessageView: View{
                                 })
                         }
                     }
-                    .padding(.all)
+                    //.padding(.all)
                 }//스크롤뷰 끝
             }//스크롤뷰 리더 끝
             //채팅 입력창
@@ -168,7 +173,6 @@ extension NormalChatMessageView{
     var msg_txtfield : some View{
         TextField("", text: $message)
             .padding(.vertical, UIScreen.main.bounds.width/40)
-            //.padding(.horizontal)
             .background(Color.white)
             .frame(width: UIScreen.main.bounds.width*0.7)
 
@@ -310,7 +314,7 @@ extension NormalChatMessageView{
                 guard let resized_img = img else{return}
                 print("리사이즈한 이미지 : \(resized_img)")
 
-                let image_data = ui_image?.jpegData(compressionQuality: 0.5)
+                let image_data = ui_image?.jpegData(compressionQuality: 1.0)
                 print("보낼 이미지 데이터 크기: \(image_data)")
                 if image_data!.count >= 10*1024*1024{
                     print("이미지 크기가 큼")

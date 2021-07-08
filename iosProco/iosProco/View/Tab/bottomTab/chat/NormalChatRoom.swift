@@ -93,6 +93,8 @@ struct NormalChatRoom: View {
         var from_tab: Bool = true
     
     @ObservedObject var view_router = ViewRouter()
+    //신고하기, 추방하기 컨텍스트 메뉴 띄우기
+    @State private var show_context_menu : Bool = false
     
     var body: some View {
         ZStack{
@@ -384,7 +386,10 @@ struct NormalChatRoom: View {
                     SockMgr.socket_manager.current_chatroom_info_struct.kinds = "임시"
                     //채팅방 드로어 안 유저 리스트 보여주기 위해 모델에 저장.
                     SockMgr.socket_manager.user_drawer_struct.append(UserInDrawerStruct(nickname: ChatDataManager.shared.my_nickname!, profile_photo: "", state: "", user_idx: my_idx, deleted_at: ""))
+                    
                     SockMgr.socket_manager.user_drawer_struct.append(UserInDrawerStruct(nickname: SockMgr.socket_manager.temp_chat_friend_model.nickname, profile_photo: SockMgr.socket_manager.temp_chat_friend_model.profile_photo_path, state: "", user_idx: SockMgr.socket_manager.temp_chat_friend_model.idx, deleted_at: ""))
+                    
+                    ChatDataManager.shared.user_read_list.removeAll()
                     
                 }else{
                     print("임시 채팅방이 아닌 일반 채팅방인 경우")
@@ -444,13 +449,13 @@ struct NormalChatRoom: View {
             HStack{
                 ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(), show_profile: self.$show_profile,selected_user_idx: self.$selected_user_idx, show_menu: self.$show_menu)
                     .background(Color.white)
-                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.9)
-                    .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.20: UIScreen.main.bounds.width)
+                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)
+                    .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.08: UIScreen.main.bounds.width)
             }
             
             //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
             if show_profile{
-                ChatRoomUserProfileView(friend: user_profile_info!, show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_user_idx, show_report_view: self.$show_report_view, go_feed:self.$go_feed, calendar_vm: self.calendar_vm, go_private_chatroom: self.$go_private_chatroom)
+                ChatRoomUserProfileView(friend: user_profile_info!, show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_user_idx, show_report_view: self.$show_report_view, go_feed:self.$go_feed, calendar_vm: self.calendar_vm, go_private_chatroom: self.$go_private_chatroom, show_context_menu: self.$show_context_menu)
 
             }
         }

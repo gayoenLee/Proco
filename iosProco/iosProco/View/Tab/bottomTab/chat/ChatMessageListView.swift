@@ -36,30 +36,65 @@ struct ChatMessageListView: View{
                 ScrollView(.vertical){
                     VStack(spacing: 10){
                         
-                        ForEach(SockMgr.socket_manager.chat_message_struct){msg in
+                        ForEach(SockMgr.socket_manager.chat_message_struct.filter({
+                            $0.message_idx! != -2
+                            
+                        })){msg in
                             
                             ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
                                 
                                 .onAppear{
-                                    
+                                    if SockMgr.socket_manager.chat_message_struct.count > 0{
                                     // 처음 스크롤
                                     if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
                                         
                                         reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
                                         scrolled = true
                                     }
+                                    }
                                 }
                         }
                         .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
-                            
+                            if SockMgr.socket_manager.chat_message_struct.count > 0{
                             reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                            }
                             
                         })
+                        
+                        ForEach(SockMgr.socket_manager.chat_message_struct.filter({
+                            $0.message_idx! == -2
+                            
+                        })){msg in
+                            
+                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
+                                
+                                .onAppear{
+                                    if SockMgr.socket_manager.chat_message_struct.count > 0{
+                                    // 처음 스크롤
+                                    if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
+                                        
+                                        reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                                        scrolled = true
+                                    }
+                                    }
+                                }
+                        }
+                        .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
+                            if SockMgr.socket_manager.chat_message_struct.count > 0{
+                                
+                            reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                            }
+                        })
+                        
                     }
                     .padding(.all)
                 }//스크롤뷰 끝
             }//스크롤뷰 리더 끝
             //채팅 입력창
+            //채팅 입력창
+            Divider()
+                .frame(width: UIScreen.main.bounds.width, height: 1)
+                .foregroundColor(Color.light_gray)
             VStack{
                 HStack{
                     if self.selected_image == nil{
@@ -69,7 +104,7 @@ struct ChatMessageListView: View{
                         HStack{
                                 send_msg_btn
                             
-                        }.padding()
+                        }.padding([.trailing])
                         //앨범에서 선택한 이미지가 있을 경우
                     }
                 }
@@ -103,9 +138,9 @@ struct ChatMessageListView: View{
                     
                 }
             }//채팅 입력창 끝
-            .padding()
             .animation(.easeOut)
         }
+        .KeyboardAwarePadding()
     }
 }
 
@@ -114,25 +149,10 @@ extension ChatMessageListView{
     var chat_input_field : some View{
         HStack{
             TextField("", text: $message)
-                .padding(.vertical, 12)
-                .padding(.horizontal)
+                .padding(.vertical, UIScreen.main.bounds.width/40)
                 .background(Color.white)
-                .clipShape(Capsule())
                 .frame(width: UIScreen.main.bounds.width*0.7)
-                .onAppear{
-                    // 키보드가 나타나면 placeholder값 지움
-                    NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (noti) in
-                        withAnimation {
-                            
-                        }
-                        // 사용자가 입력하지 않고 키보드를 다시 내렸을 경우 placeholder 다시 보여줌
-                        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (noti) in
-                            withAnimation {
-                                
-                            }
-                        }
-                    }
-                }
+
         }
         .animation(.default)
         .padding()
@@ -168,7 +188,7 @@ extension ChatMessageListView{
                 SockMgr.socket_manager.stored_front_created = String(front_created_at)
                 
                 
-                let image_data = ui_image?.jpegData(compressionQuality: 0.5)
+                let image_data = ui_image?.jpegData(compressionQuality: 1.0)
                 print("보낼 이미지 데이터 크기: \(image_data)")
                 if image_data!.count >= 10*1024*1024{
                     print("이미지 크기가 큼")
@@ -230,7 +250,8 @@ extension ChatMessageListView{
             
         }, label: {
             Image(systemName: "arrow.up")
-                .padding(.all)
+                .frame(width: UIScreen.main.bounds.width/15, height:  UIScreen.main.bounds.width/15)
+                .padding(.trailing)
                 .rotationEffect(.init(degrees: 45))
         })
     }

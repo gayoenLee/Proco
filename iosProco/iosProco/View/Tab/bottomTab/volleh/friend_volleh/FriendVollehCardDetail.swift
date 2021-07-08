@@ -19,7 +19,7 @@ struct FriendVollehCardDetail: View {
     @StateObject var group_main_vm: GroupVollehMainViewmodel
     
     @StateObject var socket :SockMgr = socket_manager
-
+    
     //일대일 채팅하기 화면 이동 구분값
     @State private var go_to_chat: Bool = false
     //드로어에서 카드 수정하기 화면으로 이동.
@@ -60,7 +60,7 @@ struct FriendVollehCardDetail: View {
     @State private var invite_result_txt : String = ""
     
     var body: some View{
-
+        
         VStack{
             Group{
                 top_nav_bar
@@ -117,7 +117,7 @@ struct FriendVollehCardDetail: View {
             
             //친구 카드 주인과 1대1 채팅방 화면으로 이동.
             NavigationLink("",
-                           destination: NormalChatRoom(main_vm:  self.main_vm,group_main_vm: self.group_main_vm,socket: SockMgr.socket_manager).navigationBarTitle("", displayMode: .inline)
+                           destination: NormalChatRoom(main_vm:  self.main_vm,group_main_vm: self.group_main_vm,socket: SockMgr.socket_manager, from_tab : false).navigationBarTitle("", displayMode: .inline)
                             .navigationBarHidden(true),
                            isActive: self.$go_to_chat)
             
@@ -147,12 +147,11 @@ struct FriendVollehCardDetail: View {
                 if calendar_vm.from_calendar{
                 }
                 //동적링크를 통해 들어온 경우 참여하기 버튼.
-                else if socket_manager.is_dynamic_link{
+                else if SockMgr.socket_manager.is_dynamic_link{
                     accept_invitaion_btn
                 }
                 else{
                     HStack{
-            
                         /*
                          드로어에서 넘어온 경우, 카드에 초대하기 버튼 클릭
                          - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
@@ -161,7 +160,11 @@ struct FriendVollehCardDetail: View {
                         if  SockMgr.socket_manager.detail_to_invite{
                             invite_btn
                             
-                        }else{
+                            //내 카드인 경우 하단 버튼 안보임.
+                        }else if Int(self.main_vm.my_idx!) == self.main_vm.friend_volleh_card_detail.creator.idx{
+                            
+                        }
+                        else{
                             bottom_menu_btns
                         }
                     }
@@ -169,13 +172,12 @@ struct FriendVollehCardDetail: View {
                 }
             }
         }.padding()
-        
         .sheet(isPresented: self.$show_report_view) {
             ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
         }
         .onAppear{
             print("-----------------친구랑 볼래 카드 상세 화면 카드 idx:\(main_vm.selected_card_idx) , 동적링크인지 여부 : \(socket.is_dynamic_link), 채팅방에서 내 카드에 초대하기인지: \(socket_manager.selected_card_idx)")
-   
+            
             //동적링크의 경우 뷰모델에 카드 idx저장이 안돼서 소켓매니저 클래스에 저장해놓음.
             if socket_manager.is_dynamic_link || socket_manager.detail_to_invite{
                 print("동적링크에서 상세페이지로 들어온 경우")
@@ -202,9 +204,9 @@ struct FriendVollehCardDetail: View {
             calendar_vm.from_calendar = false
         }
         //카드 상세 정보 가져왔을 때 no result인 경우 띄우는 알림창
-//        .alert(isPresented: self.$no_result_alert, content: {
-//            Alert(title: Text("알림"), message: Text("찾을 수 없는 정보입니다."), dismissButton: .default(Text("확인")))
-//        })
+        //        .alert(isPresented: self.$no_result_alert, content: {
+        //            Alert(title: Text("알림"), message: Text("찾을 수 없는 정보입니다."), dismissButton: .default(Text("확인")))
+        //        })
         .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
             print("친구카드 상세 데이터 통신 완료 노티 받음")
             if let user_info = value.userInfo, let data = user_info["get_friend_card_detail_finish"]{
@@ -225,9 +227,9 @@ struct FriendVollehCardDetail: View {
                 print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
             }
         }
-
+        
         .edgesIgnoringSafeArea(.all)
-  
+        
         
     }
 }
@@ -294,14 +296,14 @@ private extension FriendVollehCardDetail{
         })
         .alert(isPresented: self.$socket.show_dynamick_link_alert){
             if self.socket.accept_dynamic_link_result == "already exist"{
-              return  Alert(title: Text("참여"), message: Text("이미 참여한 약속입니다."), dismissButton: .default(Text("확인")))
+                return  Alert(title: Text("참여"), message: Text("이미 참여한 약속입니다."), dismissButton: .default(Text("확인")))
             }else if  self.socket.accept_dynamic_link_result == "not permitted"{
                 return  Alert(title: Text("참여"), message: Text("참여할 권한이 없습니다."), dismissButton: .default(Text("확인")))
             }else{
                 return  Alert(title: Text("참여"), message: Text("다시 시도해주세요"), dismissButton: .default(Text("확인")))
             }
         }
- 
+        
     }
     
     var invite_btn : some View{
@@ -341,23 +343,23 @@ private extension FriendVollehCardDetail{
         .onReceive(NotificationCenter.default.publisher(for: Notification.new_message), perform: {value in
             
             if let user_info = value.userInfo,let check_result = user_info["new_message_link"]{
-               
+                
                 print("내 카드에 초대하기 동적링크 데이터 확인: \(String(describing: check_result))")
                 
                 //친구 신청 취소한 경우
-                 if check_result as! String == "ok"{
+                if check_result as! String == "ok"{
                     let chatroom_idx = user_info["chatroom_idx"] as! String
                     if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
                         self.invite_ok = true
                         self.invite_result_txt = "초대가 완료됐습니다."
                     }
-                 }else if check_result as! String == "fail"{
+                }else if check_result as! String == "fail"{
                     let chatroom_idx = user_info["chatroom_idx"] as! String
                     if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
                         self.invite_ok = true
                         self.invite_result_txt = "다시 시도해주세요"
                     }
-                 }
+                }
             }
         })
         .alert(isPresented: self.$invite_ok){
@@ -404,7 +406,7 @@ private extension FriendVollehCardDetail{
                 socket.temp_chat_friend_model = UserChatInListModel(idx: main_vm.friend_volleh_card_detail.creator.idx, nickname: main_vm.friend_volleh_card_detail.creator.nickname, profile_photo_path: main_vm.friend_volleh_card_detail.creator.profile_photo_path ?? "")
                 
                 //일대일 채팅방이 기존에 존재했는지 확인하는 쿼리문
-                ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_volleh_card_detail.creator.idx!)
+                ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_volleh_card_detail.creator.idx!, nickname: main_vm.friend_volleh_card_detail.creator.nickname)
                 
                 self.go_to_chat.toggle()
                 
