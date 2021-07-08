@@ -21,12 +21,15 @@ struct ChatRow : View{
         return nickname ?? ""
     }
     
-    var msg_time_converted : String{
-        
+    var msg_time_converted : String?{
+        if msg.kinds == "S"{
+            return nil
+        }else{
         var time : String
         time = String.msg_time_formatter(date_string: msg.created_at!)
         print("시간 변환 확인: \(time)")
         return time
+        }
     }
     
     
@@ -376,7 +379,7 @@ private extension ChatRow{
                     }
                     HStack{
                         Spacer()
-                    Text("\(msg_time_converted)")
+                    Text("\(msg_time_converted ?? "")")
                         .font(.custom(Font.n_bold, size: 9))
                         .foregroundColor(.gray)
                     }
@@ -393,7 +396,7 @@ private extension ChatRow{
                     }
                     HStack{
                         Spacer()
-                    Text("\(msg_time_converted)")
+                    Text("\(msg_time_converted ?? "")")
                         .font(.custom(Font.n_bold, size: 9))
                         .foregroundColor(.gray)
                     }
@@ -469,7 +472,7 @@ private extension ChatRow{
     }
     
     var friend_send_time : some View{
-        Text("\(msg_time_converted)")
+        Text("\(msg_time_converted ?? "")")
             .font(.custom(Font.n_bold, size: 9))
             .foregroundColor(.gray)
     }
