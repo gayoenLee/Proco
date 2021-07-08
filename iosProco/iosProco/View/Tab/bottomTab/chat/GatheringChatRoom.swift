@@ -238,20 +238,27 @@ struct GatheringChatRoom: View {
                 }))
             }
             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.9)
-            .onReceive( NotificationCenter.default.publisher(for: Notification.new_message)){value in
-                print("모임 채팅방에서 노티  받음")
-                if let user_info = value.userInfo, let check_banished = user_info["banished"]{
-                    print("모임에서 추방 당한 이벤트: \(check_banished)")
+            .onReceive(NotificationCenter.default.publisher(for: Notification.new_message), perform: {value in
+                
+                if let user_info = value.userInfo, let check_result = user_info["banished"]{
+                    print("추방하기 이벤트 노티 친구 룸에서 받음")
                     
-                    if check_banished as! String == "banished"{
-                        print("모임에서 추방 당한 이벤트 true: \(check_banished)")
+                    if check_result as! String == "ok"{
                         
-                        self.banished = true
+                        let chatroom_idx = user_info["chatroom_idx"] as! String
+                        let chatroom_idx_int = Int(chatroom_idx)
+                        let user_idx = user_info["banished_user"] as! String
+                        
+                        //추방당한 채팅방 idx가 현재 채팅방인지 && 내가 추방당했는지 체크
+                        if SockMgr.socket_manager.enter_chatroom_idx == chatroom_idx_int && ChatDataManager.shared.my_idx! == user_idx{
+                            
+                            self.go_back = true
+                            
+                        }
                     }
-                }else{
-                    print("모임에서 추방 이벤트 아님")
+                    
                 }
-            }
+            })
             //채팅 읽음 처리 이벤트 수행.
             //서버에 unread이벤트 전달
             .onAppear{
