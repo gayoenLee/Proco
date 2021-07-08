@@ -49,7 +49,7 @@ class SockMgr : ObservableObject {
             objectWillChange.send()
         }
     }
-
+    
     //채팅 - 태그 모델
     @Published var tag_struct : [TagModel] = []{
         didSet{
@@ -99,7 +99,7 @@ class SockMgr : ObservableObject {
     //채팅 메세지 모델
     @Published var chat_message_struct :  [ChatMessage] = []
     {
-       didSet{
+        didSet{
             objectWillChange.send()
         }
     }
@@ -108,7 +108,7 @@ class SockMgr : ObservableObject {
     @Published var selected_card_idx : Int
     = -1
     {
-       didSet{
+        didSet{
             objectWillChange.send()
         }
     }
@@ -121,10 +121,10 @@ class SockMgr : ObservableObject {
         format.dateFormat = "yyyy-MM-dd HH:mm:ss"
         guard let startTime = format.date(from: prev_created) else { return false}
         print("메세지 계산 메소드 안 startTime: \(startTime)")
-
+        
         guard let endTime = format.date(from: current_created) else { return false}
         print("메세지 계산 메소드 안 endTime: \(endTime)")
-
+        
         //초를 리턴함.
         let send_interval_time = Int(endTime.timeIntervalSince(startTime))
         print("메세지 비교 결과: 시간 = \(send_interval_time) 이전에 보낸 사람 = \(prev_creator), 지금 보낸 사람: \(current_creator), 이전에 보낸 시간 = \(prev_created), 지금 보낸 시간: \(current_created)")
@@ -302,7 +302,7 @@ class SockMgr : ObservableObject {
             objectWillChange.send()
         }
     }
-            
+    
     func request_result_alert_func(_ active: ResultAlert) -> Void {
         DispatchQueue.main.async {
             self.request_result_alert = active
@@ -314,7 +314,7 @@ class SockMgr : ObservableObject {
         return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     }
     
-     func load(fileName: String) -> UIImage? {
+    func load(fileName: String) -> UIImage? {
         let fileURL = documentsUrl.appendingPathComponent(fileName)
         do {
             let imageData = try Data(contentsOf: fileURL)
@@ -329,24 +329,24 @@ class SockMgr : ObservableObject {
     func save(file_name : String, image_data : Data) -> String? {
         let fileName = "\(file_name)"
         let fileURL = documentsUrl.appendingPathComponent(fileName)
-       
-           try? image_data.write(to: fileURL, options: .atomic)
-            print("이미지 저장: \(fileURL)")
-           return fileName // ----> Save fileName
+        
+        try? image_data.write(to: fileURL, options: .atomic)
+        print("이미지 저장: \(fileURL)")
+        return fileName // ----> Save fileName
         
         print("Error saving image")
         return nil
     }
-        
+    
     func convert_img_base64(image_data : Data?) -> String{
         //compression quality : 압축 퀄리티. 1일수록 최고 품질
         //let image_data = ui_image.jpegData(compressionQuality: 0.2)
         print("이미지 크기: \(String(describing: image_data?.count))")
         print("이미지 데이터로 바꾼 것: \(String(describing: image_data))")
-       
+        
         return (image_data?.base64EncodedString(options:  Data.Base64EncodingOptions.lineLength64Characters))!
     }
-
+    
     //채팅방 드로어에서 회원 신고하기 기능
     func send_reports(kinds: String, unique_idx: String, report_kinds: String, content: String) {
         
@@ -361,11 +361,11 @@ class SockMgr : ObservableObject {
                 }
             }, receiveValue: {response in
                 print("채팅방 회원  신고하기 resopnse: \(response)")
-                                
+                
             })
     }
     
-
+    
     func string_to_date(expiration: String) -> Date{
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -386,7 +386,7 @@ class SockMgr : ObservableObject {
     
     func establish_connection(){
         socket.connect()
-    
+        
         socket.on(clientEvent: .connect){data, ack in
             print("소켓 연결됨 ")
             let state = UserDefaults.standard.integer(forKey: "\(db.my_idx!)_state")
@@ -395,10 +395,10 @@ class SockMgr : ObservableObject {
                 print("off임.")
             }else{
                 print("on이므로 상태 보냄.")
-            self.click_on_off(user_idx: Int(db.my_idx!)!, state: state, state_data: "")
+                self.click_on_off(user_idx: Int(db.my_idx!)!, state: state, state_data: "")
             }
             self.emit_get_chat()
-      
+            
         }
         
         print("establishConnection 완료")
@@ -409,7 +409,7 @@ class SockMgr : ObservableObject {
         db.change_message_status()
         
         //서버로부터 응답 받는 이벤트들을 등록하는 것. 소켓 연결시에 자동으로 진행되도록 함.
-       // handle_event()
+        // handle_event()
         get_update_read()
         get_new_message()
         get_state_update()
@@ -417,7 +417,7 @@ class SockMgr : ObservableObject {
         //get_join_room_event()
         get_join_card_ok()
     }
-
+    
     func stop_connect(){
         socket.on(clientEvent: .disconnect){data, ack in
             print("소켓 연결 끊는 이벤트: \(data)")
@@ -441,9 +441,9 @@ class SockMgr : ObservableObject {
     //소켓 연결시 get chat 이벤트
     func emit_get_chat(){
         db.open_db()
-
+        
         let last_msg_idx = db.get_last_stored_message_idx()
-         print("소켓으로 보내는 마지막 메세지 idx: \(last_msg_idx)")
+        print("소켓으로 보내는 마지막 메세지 idx: \(last_msg_idx)")
         db.create_tag_table()
         db.create_card_table()
         db.create_user_table()
@@ -467,7 +467,7 @@ class SockMgr : ObservableObject {
                     let json_data = try? json_encoder.encode(object)
                     let json = String(data: json_data!, encoding: String.Encoding.utf8)
                     socket.emitWithAck("\(event_name)", json!).timingOut(after: 300.0){ (data) in
-                       
+                        
                         //성공했는지 실패했는지 이 값에서 알 수 있음.
                         let check_ok = data[0]
                         print("메세지 보낸 후 응답0: \(data[0])")
@@ -550,17 +550,17 @@ class SockMgr : ObservableObject {
             db.get_all_chatroom_idx()
             print("소켓에서 채팅방 리스트 idx 확인: \(db.chatroom_idx_list)")
             //////////////////////////삭제
-//                                          db.delete_user_table()
-//                                              db.delete_chatroom()
-//                                                db.delete_tag_table()
-//                                                db.delete_card_table()
-//                                                 db.delete_chatting_table()
-//                db.delete_messages(chatroom_idx: 94)
+            //                                          db.delete_user_table()
+            //                                              db.delete_chatroom()
+            //                                                db.delete_tag_table()
+            //                                                db.delete_card_table()
+            //                                                 db.delete_chatting_table()
+            //                db.delete_messages(chatroom_idx: 94)
             let room_result = JSON(data[0])
             
             if room_result != "no_chatrooms"{
                 var count = 0
-    
+                
                 
                 self.chat_room_struct.removeAll()
                 //서버에서 채팅룸 idx가져온 것만 따로 리스트 만든 것.계산은 모든 데이터 저장 후에 진행함.
@@ -594,7 +594,7 @@ class SockMgr : ObservableObject {
                     let card_title = chat_room.1["card"]["title"].stringValue
                     let introduce = chat_room.1["card"]["introduce"].stringValue
                     let address = chat_room.1["card"]["address"].stringValue
-         
+                    
                     let cur_user = chat_room.1["card"]["cur_user"].intValue
                     let apply_user = chat_room.1["card"]["apply_user"].intValue
                     let map_lat = chat_room.1["card"]["map_lat"].stringValue
@@ -602,7 +602,7 @@ class SockMgr : ObservableObject {
                     let card_created_at = chat_room.1["card"]["created_at"].stringValue
                     let card_updated_at = chat_room.1["card"]["updated_at"].stringValue
                     let card_deleted_at = chat_room.1["card"]["deleted_at"].stringValue
-     
+                    
                     //카드 데이터 집어넣기
                     self.card_struct.creator_idx = card_creator_num
                     self.card_struct.expiration_at = expiration_at
@@ -614,7 +614,7 @@ class SockMgr : ObservableObject {
                     self.card_struct.title = card_title
                     self.card_struct.introduce = introduce
                     self.card_struct.address = address
-                   
+                    
                     self.card_struct.cur_user = cur_user
                     self.card_struct.apply_user = apply_user
                     self.card_struct.map_lat = map_lat
@@ -622,7 +622,7 @@ class SockMgr : ObservableObject {
                     self.card_struct.created_at = card_created_at
                     self.card_struct.updated_at = card_updated_at
                     self.card_struct.deleted_at = card_deleted_at
-
+                    
                     print("소켓에서 카드 데이터 확인: \(self.card_struct)")
                     //데이터 모델에 넣기 전에 삭제
                     self.tag_struct.removeAll()
@@ -637,7 +637,7 @@ class SockMgr : ObservableObject {
                         //태그 데이터 집어넣기
                         self.tag_struct.append(TagModel(idx: tag_idx, tag_name: tag_name))
                         print("태그 데이터 넣은 것 확인: \(self.tag_struct)")
-
+                        
                         //sqlite 태그 데이터 넣기
                         //새로운 채팅방 idx의 경우에는 idx가 000이 온다. 이때는 insert
                         if !db.chatroom_idx_list.contains(idx){
@@ -665,7 +665,7 @@ class SockMgr : ObservableObject {
                         self.chat_room_struct.insert(ChatRoomModel(idx: idx, card_idx: card_idx, created_at: created_at, creator_idx: creator_idx, deleted_at: deleted_at, kinds: kinds, updated_at: updated_at, card_tag_list: self.tag_struct, card: self.card_struct), at: count)
                         count = count + 1
                         
-                    //만약 채팅방 인덱스가 이미 저장된 경우 기존 저장한 데이터 지우고 다시 저장.
+                        //만약 채팅방 인덱스가 이미 저장된 경우 기존 저장한 데이터 지우고 다시 저장.
                     }else{
                         print("데이터 모델 안에 채팅방 인덱스 기존에 있었음")
                         self.chat_room_struct.remove(at: idx)
@@ -679,8 +679,8 @@ class SockMgr : ObservableObject {
                             print("채팅방이 새로 만들어진 경우의 채팅방, 카드 테이블 만들기")
                             
                             db.insert_chatroom_getchat(idx: idx, card_idx: card_idx, creator_idx: creator_idx, kinds: kinds, created_at: created_at, updated_at: updated_at, deleted_at: deleted_at, state: state)
-                          
-                        //이미 있던 채팅방의 경우 update
+                            
+                            //이미 있던 채팅방의 경우 update
                         }else{
                             print("채팅방이 이미 존재하는 경우의 채팅방, 카드 테이블 업데이트")
                             db.update_chatroom_table(chatroom_idx: idx, card_idx: card_idx, creator_idx: creator_idx, kinds: kinds, created_at: created_at, updated_at: updated_at, deleted_at: deleted_at, state: state)
@@ -706,7 +706,7 @@ class SockMgr : ObservableObject {
                         }
                     }
                 }
-
+                
                 print("채팅룸: \(self.chat_room_struct)")
             }else{
                 print("chat room 데이터 없음")
@@ -714,7 +714,7 @@ class SockMgr : ObservableObject {
             /*
              메시지 저장하기
              */
-           
+            
             if JSON(data[2]) == "no_messages"{
                 
             }else{
@@ -730,10 +730,10 @@ class SockMgr : ObservableObject {
                     print("현재 채팅방 idx: \(room)")
                     let one_room = response["\(room)"].arrayValue
                     print("현재 채팅방 idx 1개 뽑은 것: \(one_room)")
-
+                    
                     //한 채팅방 안에 메세지 리스트
                     for message in one_room{
-                      
+                        
                         print("메세지 user idx온 것: \(message["user_idx"])")
                         print("메세지 확인6: \(message["content"])")
                         
@@ -757,7 +757,7 @@ class SockMgr : ObservableObject {
                 print("채팅 모델 데이터 확인: \( self.chatting_model)")
             }
             
-           /*
+            /*
              유저 테이블에 저장시 나간 사람, 새로 들어온 사람, 기존 있던 사람 나눠 처리.
              1.서버에서 받은 한 채팅방의 유저 리스트 가져오기
              2.로컬 디비에 저장된 한 채팅방의 유저 리스트 가져오기
@@ -768,73 +768,73 @@ class SockMgr : ObservableObject {
             let user_data = JSON(data[1])
             print("유저 데이터: \(user_data)")
             if user_data != "no_users"{
-            let chat_user = user_data.array
-            
-                    self.user_chat_struct.removeAll()
-                    print("유저 데이터 뽑는 것 확인: \(String(describing: chat_user))")
+                let chat_user = user_data.array
                 
-                    //2.(로컬 디비)현재 idx의 채팅방에 있는 유저 정보들 리스트 가져오는 쿼리.
-                    db.get_client_server_idx_user()
-
-                    //2-1.위의 쿼리를 통해 저장한 해당 채팅방의 유저 리스트.
-            let sqlite_list = db.exist_chatroom_list
-
-                    print("로컬 디비에 저장됐던 유저 리스트: \(sqlite_list)")
-        
-                    for user in chat_user! {
-                        let server_idx = user["server_idx"].intValue
-                        let user_idx = user["idx"].intValue
-                        let nickname = user["nickname"].stringValue
-                        let read_last_idx = user["read_last_idx"].intValue
-                        let read_start_idx = user["read_start_idx"].intValue
-                        let chatroom_idx = user["chatroom_idx"].intValue
-                        let updated_at = user["updated_at"].stringValue
-                        let deleted_at = user["deleted_at"].stringValue
+                self.user_chat_struct.removeAll()
+                print("유저 데이터 뽑는 것 확인: \(String(describing: chat_user))")
+                
+                //2.(로컬 디비)현재 idx의 채팅방에 있는 유저 정보들 리스트 가져오는 쿼리.
+                db.get_client_server_idx_user()
+                
+                //2-1.위의 쿼리를 통해 저장한 해당 채팅방의 유저 리스트.
+                let sqlite_list = db.exist_chatroom_list
+                
+                print("로컬 디비에 저장됐던 유저 리스트: \(sqlite_list)")
+                
+                for user in chat_user! {
+                    let server_idx = user["server_idx"].intValue
+                    let user_idx = user["idx"].intValue
+                    let nickname = user["nickname"].stringValue
+                    let read_last_idx = user["read_last_idx"].intValue
+                    let read_start_idx = user["read_start_idx"].intValue
+                    let chatroom_idx = user["chatroom_idx"].intValue
+                    let updated_at = user["updated_at"].stringValue
+                    let deleted_at = user["deleted_at"].stringValue
+                    
+                    print("유저 데이터 뽑는 것 확인: \(user_idx)")
+                    print("유저 정보 닉네임 확인: \(nickname)")
+                    
+                    
+                    //유저 데이터 집어넣기(데이터 모델)
+                    self.user_chat_struct.append(UserChatModel(idx: user_idx, nickname: nickname, profile_photo_path: "", read_start_idx: read_start_idx, read_last_idx: read_last_idx, updated_at: updated_at, deleted_at: deleted_at))
+                    
+                    //sqlite
+                    //채팅방이 새로 만들어진 경우
+                    if !sqlite_list.contains(server_idx){
+                        print("채팅방이 새로 만들어진 경우의 유저 테이블 만들기")
+                        print("유저 테이블 저장 값 확인: read last idx \(read_last_idx)")
+                        print("유저 테이블 저장 값 확인 user idx: \(user_idx)")
                         
-                        print("유저 데이터 뽑는 것 확인: \(user_idx)")
-                        print("유저 정보 닉네임 확인: \(nickname)")
-
+                        //sqlite유저 데이터. 이미 있던 채팅방의 경우에는 update
+                        db.insert_user(chatroom_idx: chatroom_idx, user_idx: user_idx, nickname: nickname, profile_photo_path: "", read_last_idx: read_last_idx, read_start_idx: read_start_idx, temp_key: "", server_idx: server_idx, updated_at: updated_at, deleted_at: deleted_at)
                         
-                        //유저 데이터 집어넣기(데이터 모델)
-                        self.user_chat_struct.append(UserChatModel(idx: user_idx, nickname: nickname, profile_photo_path: "", read_start_idx: read_start_idx, read_last_idx: read_last_idx, updated_at: updated_at, deleted_at: deleted_at))
-                        
-                        //sqlite
-                        //채팅방이 새로 만들어진 경우
-                        if !sqlite_list.contains(server_idx){
-                            print("채팅방이 새로 만들어진 경우의 유저 테이블 만들기")
-                            print("유저 테이블 저장 값 확인: read last idx \(read_last_idx)")
-                            print("유저 테이블 저장 값 확인 user idx: \(user_idx)")
-
-                            //sqlite유저 데이터. 이미 있던 채팅방의 경우에는 update
-                            db.insert_user(chatroom_idx: chatroom_idx, user_idx: user_idx, nickname: nickname, profile_photo_path: "", read_last_idx: read_last_idx, read_start_idx: read_start_idx, temp_key: "", server_idx: server_idx, updated_at: updated_at, deleted_at: deleted_at)
-
                         //채팅방이 원래 있었을 경우
-                        }else{
-                            print("채팅방 원래 있었을 때")
-                            
-                            //원래 있던 사람 : 로컬 디비 & 서버 저장
-                                print("채팅방이 이미 있던 경우의 유저 테이블 업데이트")
-                                print("채팅방이 이미 있던 경우 유저 테이블 업데이트에서 채팅방 idx확인: \(chatroom_idx)")
-                                print("유저 테이블 저장 값 확인: read last idx \(read_last_idx)")
-                                print("유저 테이블 저장 값 확인 user idx: \(user_idx)")
-
-                                db.update_user_table(chatroom_idx: chatroom_idx, user_idx: user_idx, nickname: nickname, profile_photo_path: "", read_last_idx: read_last_idx, read_start_idx: read_start_idx, updated_at: updated_at, deleted_at: deleted_at)
-
-                        }
+                    }else{
+                        print("채팅방 원래 있었을 때")
+                        
+                        //원래 있던 사람 : 로컬 디비 & 서버 저장
+                        print("채팅방이 이미 있던 경우의 유저 테이블 업데이트")
+                        print("채팅방이 이미 있던 경우 유저 테이블 업데이트에서 채팅방 idx확인: \(chatroom_idx)")
+                        print("유저 테이블 저장 값 확인: read last idx \(read_last_idx)")
+                        print("유저 테이블 저장 값 확인 user idx: \(user_idx)")
+                        
+                        db.update_user_table(chatroom_idx: chatroom_idx, user_idx: user_idx, nickname: nickname, profile_photo_path: "", read_last_idx: read_last_idx, read_start_idx: read_start_idx, updated_at: updated_at, deleted_at: deleted_at)
+                        
                     }
-                    print("유저 데이터 집어넣은 것 확인: \(self.user_chat_struct)")
+                }
+                print("유저 데이터 집어넣은 것 확인: \(self.user_chat_struct)")
             }
-           //key: 유저 idx, value: 현재 시간 "2020-01-01 01:01:01"
+            //key: 유저 idx, value: 현재 시간 "2020-01-01 01:01:01"
             let prev_updated_at = UserDefaults.standard.string(forKey: "\(db.my_idx!)")
             let current_time = db.make_created_at()
-           print("현재 시간 확인: \(String(current_time))")
+            print("현재 시간 확인: \(String(current_time))")
             let current_time_string = String(current_time)
             UserDefaults.standard.set(current_time_string,forKey: "\(db.my_idx!)")
             
             //채팅방 알리 ㅁ데이터
             let chatroom_alarm_data = JSON(data[3])
             print("서버에게 받은 알림 데이터 확인: \(chatroom_alarm_data)")
-           //update at이 null일 경우에만 서버에게 알림 데이터 받음.
+            //update at이 null일 경우에만 서버에게 알림 데이터 받음.
             if chatroom_alarm_data != "no_notifys" {
                 
                 let notify_data = chatroom_alarm_data.arrayValue
@@ -902,9 +902,9 @@ class SockMgr : ObservableObject {
         if is_same{
             //이번 메세지가 마지막 연속 순서의 메세지이므로
             is_last_consecutive_msg = true
-
-                //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
-                self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
+            
+            //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
+            self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
         }
         
         //메세지 보내기 후 여기에 일단 보여주기 위해 데이터 모델에 넣기...idx가 -1일 때 아닐 때로 보여주는 ui변경하기.
@@ -913,8 +913,8 @@ class SockMgr : ObservableObject {
         
         self.invitation_link = "\(chatroom_idx)-\(card_idx)-\(kinds)-\(meeting_date)-\(meeting_time)"
         
-    //채팅 서버에 메세지 보내기 이벤트 실행.
-      self.send_message(message_idx: -1, chatroom_idx: current_room, user_idx: idx!, content: self.invitation_link, kinds: "D", created_at: created_at, front_created_at: front_created_at)
+        //채팅 서버에 메세지 보내기 이벤트 실행.
+        self.send_message(message_idx: -1, chatroom_idx: current_room, user_idx: idx!, content: self.invitation_link, kinds: "D", created_at: created_at, front_created_at: front_created_at)
         print("서버에 보내는 메세지: \(self.invitation_link)")
         print("서버에 보내는 채팅방 : \(chatroom_idx)")
         
@@ -932,7 +932,7 @@ class SockMgr : ObservableObject {
     @Published var show_dynamick_link_alert: Bool = false{
         didSet{
             print("show_dynamick_link_alert \(self.show_dynamick_link_alert)")
-
+            
             objectWillChange.send()
         }
     }
@@ -946,14 +946,14 @@ class SockMgr : ObservableObject {
                 switch result{
                 case .failure(let error):
                     print("동적링크 카드 참가 신청 수락 에러 발생 : \(error)")
-                    //self.alert_type = .fail
-                    
+                //self.alert_type = .fail
+                
                 case .finished:
                     break
                 }
             }, receiveValue: {response in
                 print("동적링크 참가신청 수락 결과 : \(response)")
-              
+                
                 //동적링크 참가 신청 통신이 result ok로 왔을 경우 채팅서버와도 통신 진행.
                 if response["result"] == "ok"{
                     print("동적 링크 참가 신청 api 서버 ok ")
@@ -970,7 +970,7 @@ class SockMgr : ObservableObject {
                     //참가 신청 완료 알림 나타내기
                     //self.alert_type = .success
                 }else if response["result"] == "already exist"{
-                 print("이미 참가한 경우")
+                    print("이미 참가한 경우")
                     self.accept_dynamic_link_result = "already exist"
                     self.show_dynamick_link_alert = true
                 }else if response["result"] == "not permitted"{
@@ -982,7 +982,7 @@ class SockMgr : ObservableObject {
                     self.accept_dynamic_link_result = "error"
                     self.show_dynamick_link_alert = true
                 }
-               
+                
             })
     }
     
@@ -1002,7 +1002,7 @@ class SockMgr : ObservableObject {
         //TODO 링크 이미지는 보류
         if link_img == nil{
             query_item_image = URLQueryItem(name: "link_img", value: "tab_friend_fill")
-        //모임 카드의 이미지는 카드 이미지.
+            //모임 카드의 이미지는 카드 이미지.
         }else{
             query_item_image = URLQueryItem(name: "link_img", value: "tab_grp_fill")
         }
@@ -1010,7 +1010,7 @@ class SockMgr : ObservableObject {
         let query_item_kinds = URLQueryItem(name: "kinds", value: kinds)
         components.queryItems = [query_item_room, query_item_image, query_item_card, query_item_kinds]
         print("component 쿼리 파라미터 만듬")
-
+        
         guard let link_param = components.url else{return}
         print("공유하려는 파라미터: \(link_param.absoluteString)")
         
@@ -1024,10 +1024,10 @@ class SockMgr : ObservableObject {
             share_link.iOSParameters = DynamicLinkIOSParameters(bundleID: "com.proco.iosProco")
         }
         print("동적링크 bundle id")
-
+        
         //안드로이드 패키지
         share_link.androidParameters = DynamicLinkAndroidParameters(packageName: "com.example.proco")
-   
+        
         //TODO 앱스토어 아이디 내 것으로 바꿀 것.
         share_link.iOSParameters?.appStoreID = "962194608"
         share_link.socialMetaTagParameters = DynamicLinkSocialMetaTagParameters()
@@ -1036,20 +1036,20 @@ class SockMgr : ObservableObject {
         share_link.socialMetaTagParameters?.imageURL = URL(string: "https://search.muz.li/ZmE4MzVjOTY5")
         
         share_link.shorten(completion: {(url, warnings, error) in
-                print("단축 링크 만들기")
-                if let error = error{
-                    print("단축 링크 만드는데 오류 발생: \(error)")
+            print("단축 링크 만들기")
+            if let error = error{
+                print("단축 링크 만드는데 오류 발생: \(error)")
                 return
-                    }
-                if let warnings = warnings{
-                    for warning in warnings{
-                        print("단축 링크 만드는데 경고: \(warning)")
-                    }
+            }
+            if let warnings = warnings{
+                for warning in warnings{
+                    print("단축 링크 만드는데 경고: \(warning)")
                 }
-                guard let url = url else{return}
-                print("단축 링크 만들어짐: \(url.absoluteString)")
-                //self.invitation_link = url
-                print("저장한 링크 확인: \(self.invitation_link)")
+            }
+            guard let url = url else{return}
+            print("단축 링크 만들어짐: \(url.absoluteString)")
+            //self.invitation_link = url
+            print("저장한 링크 확인: \(self.invitation_link)")
             
             let front_created_at = ChatDataManager.shared.get_current_time()
             let created_at = ChatDataManager.shared.make_created_at()
@@ -1073,17 +1073,17 @@ class SockMgr : ObservableObject {
             if is_same{
                 //이번 메세지가 마지막 연속 순서의 메세지이므로
                 is_last_consecutive_msg = true
-
-                    //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
-                    self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
+                
+                //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
+                self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
             }
             
             //메세지 보내기 후 여기에 일단 보여주기 위해 데이터 모델에 넣기...idx가 -1일 때 아닐 때로 보여주는 ui변경하기.
             self.chat_message_struct.append(ChatMessage(created_at: created_at,message: "\(self.invitation_link)",message_idx: -1, myMsg: true, front_created_at: String(front_created_at), is_same_person_msg: is_same, is_last_consecutive_msg: is_last_consecutive_msg))
             print("동적링크 보낸 후 chat_message_struct: \(self.chat_message_struct) ")
             
-        //채팅 서버에 메세지 보내기 이벤트 실행.
-           self.send_message(message_idx: -1, chatroom_idx: current_room, user_idx: idx!, content: "\(self.invitation_link)!!\(chatroom_idx)", kinds: "D", created_at: created_at, front_created_at: front_created_at)
+            //채팅 서버에 메세지 보내기 이벤트 실행.
+            self.send_message(message_idx: -1, chatroom_idx: current_room, user_idx: idx!, content: "\(self.invitation_link)!!\(chatroom_idx)", kinds: "D", created_at: created_at, front_created_at: front_created_at)
             print("서버에 보내는 메세지: \(self.invitation_link)")
             print("서버에 보내는 채팅방 : \(chatroom_idx)")
             
@@ -1106,7 +1106,7 @@ class SockMgr : ObservableObject {
         
         let new_link = URLComponents(string: link!)?.queryItems
         print("뉴링크: \(String(describing: new_link))")
-
+        
         let chatroom_idx = new_link?.filter({$0.name == "chatroom_idx"}).first!.value
         print("chatroom_idx 확인: \(String(describing: chatroom_idx))")
         
@@ -1125,7 +1125,7 @@ class SockMgr : ObservableObject {
         
         return result
     }
-
+    
     /*
      일반 채팅방 - 친구 내 카드에 초대하기페이지 - 내 모든 카드 리스트 가져오는 통신(api서버)
      1. 데이터 디코딩
@@ -1186,9 +1186,9 @@ class SockMgr : ObservableObject {
                         
                         self.group_card = card!
                     }
-                    }
-                })
-            }
+                }
+            })
+    }
     
     /*
      새 채팅방 참여 수락 버튼을 누른 사람이 받는 이벤트(동적 링크)
@@ -1208,8 +1208,8 @@ class SockMgr : ObservableObject {
             //1.채팅룸, 채팅 모델 데이터 저장, 2.enter chatroom idx 저장.
             if result == "success"{
                 
-            let chatroom_model = JSON(data[1])
-            let user_model = JSON(data[2])
+                let chatroom_model = JSON(data[1])
+                let user_model = JSON(data[2])
                 print("조인 유저 이벤트 data 응답: \(data)")
                 
                 //채팅룸 모델 저장.
@@ -1232,7 +1232,7 @@ class SockMgr : ObservableObject {
                 for user in users_list{
                     let user_idx = user["idx"].intValue
                     print("동적링크 채팅방 생성 후 유저 저장.: \(user_idx)")
-
+                    
                     let nickname = user["nickname"].stringValue
                     let read_last_idx = user["read_last_idx"].intValue
                     let read_start_idx = user["read_start_idx"].intValue
@@ -1242,10 +1242,10 @@ class SockMgr : ObservableObject {
                     ChatDataManager.shared.insert_user(chatroom_idx: chatroom_idx, user_idx: user_idx, nickname: nickname, profile_photo_path: profile_photo_path, read_last_idx: read_last_idx, read_start_idx: read_start_idx, temp_key: "", server_idx: server_idx, updated_at: updated_at ?? "", deleted_at: room_deleted_at ?? "")
                 }
                 
-              //카드 모델 저장하기
-             
+                //카드 모델 저장하기
+                
                 let card_creator_idx = chatroom_model["card"]["creator_idx"].intValue
-
+                
                 let expiration_at = chatroom_model["card"]["expiration_at"].stringValue
                 let card_photo_path = chatroom_model["card"]["card_photo_path"].stringValue
                 let card_kinds = chatroom_model["card"]["kinds"].stringValue
@@ -1253,7 +1253,7 @@ class SockMgr : ObservableObject {
                 let card_title = chatroom_model["card"]["title"].stringValue
                 let introduce = chatroom_model["card"]["introduce"].stringValue
                 let address = chatroom_model["card"]["address"].stringValue
-               
+                
                 let cur_user = chatroom_model["card"]["cur_user"].intValue
                 let apply_user = chatroom_model["card"]["apply_user"].intValue
                 let map_lat = chatroom_model["card"]["map_lat"].stringValue
@@ -1274,22 +1274,22 @@ class SockMgr : ObservableObject {
                     //태그 데이터 집어넣기
                     self.tag_struct.append(TagModel(idx: tag_idx, tag_name: tag_name))
                     print("태그 데이터 넣은 것 확인: \(self.tag_struct)")
-
+                    
                     //sqlite 태그 데이터 넣기
                     ChatDataManager.shared.insert_tag(chatroom_idx: chatroom_idx, tag_idx: tag_idx, tag_name: tag_name)
                 }
-                    //2.채팅룸 idx 저장.
-                    self.enter_chatroom_idx = chatroom_idx
-                    print("동적링크 수락 된 후 이동하려는 채팅방 idx: \(self.enter_chatroom_idx)")
-                    
+                //2.채팅룸 idx 저장.
+                self.enter_chatroom_idx = chatroom_idx
+                print("동적링크 수락 된 후 이동하려는 채팅방 idx: \(self.enter_chatroom_idx)")
+                
                 //뷰에 어떤 종류 채팅방으로 이동시킬지(친구/모임), 채팅방 idx전달
                 let data = "chatroom: \(chatroom_idx)"
-                    //3.수락이 완료됐으므로 채팅방으로 이동시키기 위함.
+                //3.수락이 완료됐으므로 채팅방으로 이동시키기 위함.
                 NotificationCenter.default.post(name: Notification.dynamic_link_move_view, object: nil, userInfo: ["dynamic_link_move_view" : chatroom_idx, "kind" : kinds])
-                    
-                    print("채팅방으로 이동시키기 위해 값 true 확인: \(self.server_invite_accepted)")
-                    
-             //fail인 경우
+                
+                print("채팅방으로 이동시키기 위해 값 true 확인: \(self.server_invite_accepted)")
+                
+                //fail인 경우
             }else{
                 print("동적 링크 통해 참여 후 서버에 응답 오류:\(result)")
             }
@@ -1323,12 +1323,12 @@ class SockMgr : ObservableObject {
             
             let users_list = user_model.arrayValue
             print("임시 채팅방 생성 후 유저 리스트: \(users_list)")
-
+            
             //유저 모델 저장하기
             for user in users_list{
                 let user_idx = user["idx"].intValue
                 print("임시 채팅방 생성 후 유저 저장.: \(user_idx)")
-
+                
                 let user_image = user["profile_photo_path"].stringValue
                 let nickname = user["nickname"].stringValue
                 let read_last_idx = user["read_last_idx"].intValue
@@ -1337,7 +1337,7 @@ class SockMgr : ObservableObject {
                 let server_idx = user["server_idx"].intValue
                 let updated_at = user["updated_at"].string
                 let deleted_at = user["deleted_at"].string
-
+                
                 
                 db.insert_user(chatroom_idx: chatroom_idx, user_idx: user_idx, nickname: nickname, profile_photo_path: profile_photo_path ?? "", read_last_idx: read_last_idx, read_start_idx: read_start_idx, temp_key: "", server_idx: server_idx,updated_at: updated_at ?? "", deleted_at: deleted_at ?? "")
             }
@@ -1374,7 +1374,7 @@ class SockMgr : ObservableObject {
                 }else if self.current_view == 222{
                     print("join room이벤트를 채팅 목록을 보고 있을 때 받은 경우")
                     self.create_noti()
-
+                    
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.new_message_in_room_normal, object: nil, userInfo: ["new_message_in_room_normal" : chatroom_idx])
                     
@@ -1396,13 +1396,13 @@ class SockMgr : ObservableObject {
                 do{
                     let card_decode = try! JSONDecoder().decode(ChatRoomModel.self, from: json_data!)
                     print("card decode: \(card_decode)")
-                 
+                    
                     db.insert_card(chatroom_idx: chatroom_idx, creator_idx: card_decode.card!.creator_idx, kinds: card_decode.card!.kinds, card_photo_path:card_decode.card!.card_photo_path ?? "", lock_state: card_decode.card!.lock_state, title: card_decode.card!.title, introduce: card_decode.card!.introduce, address: card_decode.card!.address, map_lat: card_decode.card!.map_lat, map_lng: card_decode.card!.map_lng, current_people_count: card_decode.card!.cur_user, apply_user: card_decode.card!.apply_user, expiration_at: card_decode.card!.expiration_at, created_at: card_decode.card!.created_at, updated_at: card_decode.card!.updated_at ?? "", deleted_at: card_decode.card!.deleted_at ?? "")
-              
+                    
                 }catch let jsonError as NSError {
                     print("JSON decode failed: \(jsonError.localizedDescription)")
-                  }
                 }
+            }
             self.send_join_room_event(chatroom_idx: chatroom_idx)
         }
     }
@@ -1410,24 +1410,24 @@ class SockMgr : ObservableObject {
     //모임 카드 참여 이벤트(방장이 수락했을 때 보내는 것.) - api서버 통신 결과 받은 후 이 이벤트 보냄.
     func send_join_card_ok(user_idx: Int, chatroom_idx: Int){
         print("모임 카드 참여 이벤트 들어온 값 확인: \(user_idx), 채팅방 : \(chatroom_idx)")
-
+        
         socket.emit("client_to_serverjoin_user", user_idx, chatroom_idx)
     }
     
     
     //카드 정보 수정...서버 응답을 받는 클라b는 message이벤트로 응답 받음.
     func edit_card_info_event(chatroom: ChatRoomModel){
-         print("카드 편집 이벤트 들어옴 : \(chatroom)")
-
+        print("카드 편집 이벤트 들어옴 : \(chatroom)")
+        
         let json_encoder = JSONEncoder()
         let json_data = try? json_encoder.encode(chatroom)
         let json = String(data: json_data!, encoding: String.Encoding.utf8)
         print("제이슨 확인: \(String(describing: json))")
         
         socket.emit("client_to_serverupdate_card", json!)
-      print("서버에 카드 수정 이벤트 보냄: 데이터 확인 : \(chatroom)")
+        print("서버에 카드 수정 이벤트 보냄: 데이터 확인 : \(chatroom)")
     }
-
+    
     //일대일 채팅하기(일반 채팅방 생성 후 대화) - 기존에 채팅방이 없었을 경우
     /*
      1.보내는 데이터
@@ -1452,7 +1452,7 @@ class SockMgr : ObservableObject {
         let idx_array = [my_idx, self.temp_chat_friend_model.idx].sorted()
         let temp_key = "a\(idx_array[0])i\(idx_array[1])"
         print("임시 채팅방 데이터 보내기에서 idx_array: \(idx_array)")
-                
+        
         //채팅 모델: 메세지 idx, 채팅방 idx, 보낸사람 idx, 채팅메세지 종류(kinds), 메세지 내용, 서버에서 보낸 시간, 프론트에서 보낸 시간
         let chat_model = ["idx": -1, "chatroom_idx": -1, "user_idx": my_idx, "content": content, "kinds": kinds, "created_at": created_at, "front_created_at": front_created_at] as [String : Any]
         let chat_model_object = try? JSONSerialization.data(withJSONObject: chat_model, options: [])
@@ -1488,18 +1488,18 @@ class SockMgr : ObservableObject {
                 for user in users_list{
                     let user_idx = user["idx"].intValue
                     print("임시 채팅방 생성 후 유저 저장.: \(user_idx)")
-
+                    
                     let user_image = user["profile_photo_path"].stringValue
                     let nickname = user["nickname"].stringValue
                     let read_last_idx = user["read_last_idx"].intValue
                     let read_start_idx = user["read_start_idx"].intValue
                     let profile_photo_path = user["profile_photo_path"].stringValue
                     let server_idx = user["server_idx"].intValue
-
+                    
                     print("임시 채팅방 생성 후 read last idx: \(read_last_idx)")
                     print("임시 채팅방 생성 후 read_start_idx: \(read_start_idx)")
                     print("임시 채팅방 생성 후 server_idx: \(server_idx)")
-
+                    
                     //임시 유저 찾기 : temp_key이용 (내것, 상대방 것)/ 업데이트 때는 temp_key를 null로 변경.
                     db.update_temp_user_row(user_idx: user_idx, chatroom_idx: chatroom_idx, nickname: nickname, profile_photo_path:profile_photo_path , read_last_idx: read_last_idx, read_start_idx: read_start_idx, temp_key: String(kinds), server_idx: server_idx)
                     
@@ -1515,7 +1515,7 @@ class SockMgr : ObservableObject {
                 let chatting_created_at = chatting_model["created_at"].stringValue
                 let front_created_at = chatting_model["front_created_at"].stringValue
                 let chatting_user_idx = chatting_model["user_idx"].intValue
-
+                
                 //임시 채팅방 찾기 : kinds이용해서 가져오기
                 db.update_temp_chatroom(chatroom_idx: chatroom_idx, creator_idx: creator_idx, before_kinds: "일반\(temp_key)", created_at: created_at, new_kinds: "일반")
                 //임시 메세지테이블 찾기 : front_created_at이용해서 가져오기
@@ -1526,20 +1526,20 @@ class SockMgr : ObservableObject {
                 //바로 전 메세지를 보낸 시각
                 var is_same : Bool = false
                 if self.chat_message_struct.count > 1{
-                var prev_msg_created : String?
-                prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
-               
-                //바로 전 메세지를 보낸 사람
-                var prev_msg_user : String?
-                prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
-               is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(chatting_user_idx))
+                    var prev_msg_created : String?
+                    prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
+                    
+                    //바로 전 메세지를 보낸 사람
+                    var prev_msg_user : String?
+                    prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
+                    is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(chatting_user_idx))
                 }
                 
                 var is_last_consecutive_msg : Bool = true
                 if is_same{
-                  //  is_last_consecutive_msg = true
-                        //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
-                        self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
+                    //  is_last_consecutive_msg = true
+                    //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
+                    self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
                 }
                 
                 if message_kinds == "P"{
@@ -1556,8 +1556,8 @@ class SockMgr : ObservableObject {
                     self.chat_message_struct[index!].is_last_consecutive_msg = is_last_consecutive_msg
                     
                 }else{
-                //뷰에 보여주기 위해 데이터 모델에 추가
-                self.chat_message_struct.append(ChatMessage( created_at: chatting_created_at, sender: ChatDataManager.shared.my_idx!, message: content, message_idx: message_idx, myMsg: true, profilePic: self.my_profile_photo, read_num: num, front_created_at: String(front_created_at), is_same_person_msg: is_same, is_last_consecutive_msg: is_last_consecutive_msg))
+                    //뷰에 보여주기 위해 데이터 모델에 추가
+                    self.chat_message_struct.append(ChatMessage( created_at: chatting_created_at, sender: ChatDataManager.shared.my_idx!, message: content, message_idx: message_idx, myMsg: true, profilePic: self.my_profile_photo, read_num: num, front_created_at: String(front_created_at), is_same_person_msg: is_same, is_last_consecutive_msg: is_last_consecutive_msg))
                 }
                 print("임시 채팅방 메세지 보낸 후 데이터 추가한 것 확인: \(self.chat_message_struct)")
                 
@@ -1567,14 +1567,14 @@ class SockMgr : ObservableObject {
                 //뷰 업데이트 위해 보내기
                 NotificationCenter.default.post(name: Notification.normal_new_message, object: nil, userInfo: ["normal new message" : send])
                 
-             //5분 타이밍 아웃으로 에러 났을 때
+                //5분 타이밍 아웃으로 에러 났을 때
             }else if response == "No Ack"{
-            print("임시 채팅방 타임 아웃 에러: \(response)")
+                print("임시 채팅방 타임 아웃 에러: \(response)")
                 
-            //그 외 에러 발생시
+                //그 외 에러 발생시
             }else{
                 print("임시 채팅방 에러: \(response)")
-
+                
             }
         }
     }
@@ -1606,7 +1606,7 @@ class SockMgr : ObservableObject {
                 
                 
             }else{
-            print("추방 이벤트 처리 실패: \(detail_response)")
+                print("추방 이벤트 처리 실패: \(detail_response)")
                 
                 if detail_response == "server_error" {
                     print("서버 에러 발생. 로그 확인 요청할 것.")
@@ -1643,7 +1643,7 @@ class SockMgr : ObservableObject {
             ChatDataManager.shared.delete_messages(chatroom_idx: chatroom_idx)
             print("일반 채팅방 목록 확인: \(SockMgr.socket_manager.normal_chat_model)")
             print("일반 채팅방 목록 확인2222: \(self.normal_chat_model)")
-
+            
             //일반 채팅방 목록 데이터에서 삭제
             var model_idx : Int
             model_idx = SockMgr.socket_manager.normal_chat_model.firstIndex(where: {
@@ -1654,30 +1654,30 @@ class SockMgr : ObservableObject {
             self.chatroom_exit_ok = true
             
         }else{
-        //emitWithAck사용시 무조건 timingout을 적용해야 emit이 가능함.
-        socket.emitWithAck("client_to_serverleave_room", object!, chatroom_idx).timingOut(after: 0){data in
-            
-         print("채팅방 나갈 때 이벤트 받은 응답: \(data[0])")
-            let result = JSON(data[0])
-            //퇴장 처리 완료
-            if result == "success"{
-                let server_message = JSON(data[1])
-                print("서버 응답 문자: \(server_message)")
-                //저장된 채팅방 idx -1로 만듬.
-                self.enter_chatroom_idx = -1
+            //emitWithAck사용시 무조건 timingout을 적용해야 emit이 가능함.
+            socket.emitWithAck("client_to_serverleave_room", object!, chatroom_idx).timingOut(after: 0){data in
                 
-                //sqlite업데이트(채팅방, 유저, 카드)
-                ChatDataManager.shared.update_exit_user_table(chatroom_idx: chatroom_idx)
-                ChatDataManager.shared.update_exit_user_chatroom(chatroom_idx: chatroom_idx)
-                ChatDataManager.shared.update_exit_user_card(chatroom_idx: chatroom_idx)
-                
-                self.chatroom_exit_ok = true
-                
-                print("채팅방 나가기 토글값: \(self.chatroom_exit_ok)")
-            }else{
-                print("퇴장 처리 이벤트 소켓 클래스에서 fail.")
+                print("채팅방 나갈 때 이벤트 받은 응답: \(data[0])")
+                let result = JSON(data[0])
+                //퇴장 처리 완료
+                if result == "success"{
+                    let server_message = JSON(data[1])
+                    print("서버 응답 문자: \(server_message)")
+                    //저장된 채팅방 idx -1로 만듬.
+                    self.enter_chatroom_idx = -1
+                    
+                    //sqlite업데이트(채팅방, 유저, 카드)
+                    ChatDataManager.shared.update_exit_user_table(chatroom_idx: chatroom_idx)
+                    ChatDataManager.shared.update_exit_user_chatroom(chatroom_idx: chatroom_idx)
+                    ChatDataManager.shared.update_exit_user_card(chatroom_idx: chatroom_idx)
+                    
+                    self.chatroom_exit_ok = true
+                    
+                    print("채팅방 나가기 토글값: \(self.chatroom_exit_ok)")
+                }else{
+                    print("퇴장 처리 이벤트 소켓 클래스에서 fail.")
+                }
             }
-        }
         }
     }
     
@@ -1705,7 +1705,7 @@ class SockMgr : ObservableObject {
             UserDefaults.standard.set(state,forKey: "\(db.my_idx!)_state")
         }
     }
-
+    
     //친구랑 볼래에서 카드 만들었을 경우 진행하는 이벤트
     func make_chat_room_friend(chatroom_idx: Int, idx: Int, nickname: String){
         let parameters = ["idx": idx, "nickname": nickname, "profile_photo_path": ""] as [String : Any]
@@ -1713,7 +1713,7 @@ class SockMgr : ObservableObject {
         
         socket.emit("client_to_servermake_chatroom", object!, chatroom_idx)
         print("채팅 서버에 친구랑 볼래에서 만든 카드 유저 모델과 채팅룸 idx 보냄: \(chatroom_idx), 파라미터: \(parameters)")
-
+        
     }
     
     /*
@@ -1735,20 +1735,20 @@ class SockMgr : ObservableObject {
     
     //메세지 보내기 이벤트
     func send_message(message_idx: Int, chatroom_idx: Int, user_idx: Int, content: String, kinds: String, created_at: String, front_created_at: CLong){
-
+        
         //에러가 난 경우 에러난 메세지를 찾기 위해 front_created_at을 보내는 것.
         let parameters = ["idx": message_idx, "chatroom_idx": chatroom_idx, "user_idx": user_idx, "content": content, "kinds": kinds, "created_at": created_at, "front_created_at": front_created_at] as [String : Any]
-       // print("메세지 보내기 이벤트에서 파라미터들 확인: \(parameters)")
+        // print("메세지 보내기 이벤트에서 파라미터들 확인: \(parameters)")
         
         let send_object = try? JSONSerialization.data(withJSONObject: parameters, options: [])
         if  socket.status == .connected {
             print("연결된 상태: \(content.count)")
             socket.emitWithAck("client_to_servermessage", send_object!).timingOut(after: 20.0) { (data) in
-
+                
                 //성공했는지 실패했는지 이 값에서 알 수 있음.
                 let check_ok = data[0]
                 print("메세지 보낸 후 응답0: \(data[0])")
-              
+                
                 //1. sqlite에 메세지 데이터 업데이트해서 저장.
                 //2.read last idx 이번에 보낸 메세지 idx로 업데이트해서 저장.
                 if check_ok as! String == "success"{
@@ -1804,10 +1804,10 @@ class SockMgr : ObservableObject {
                     self.chat_message_struct[index!].message = content
                     let send = "\(String(describing: index)) \(chatting_idx)"
                     
-                   var data_array =  self.make_noti_data(message_idx: chatting_idx, user_idx: user_idx, chatroom_idx: chatroom_idx, content: content, front_created_at: front_created_at, created_at: created_at)
+                    var data_array =  self.make_noti_data(message_idx: chatting_idx, user_idx: user_idx, chatroom_idx: chatroom_idx, content: content, front_created_at: front_created_at, created_at: created_at)
                     
                     let json_object = try? JSONSerialization.data(withJSONObject: data_array, options: [])
-
+                    
                     if kinds == "D"{
                         //뷰 업데이트 위해 보내기
                         NotificationCenter.default.post(name: Notification.new_message, object: nil, userInfo: ["new_message_link" : "ok", "chatroom_idx" : String(chatroom_idx)])
@@ -1829,7 +1829,7 @@ class SockMgr : ObservableObject {
                         self.chat_message_struct[index!].message_idx = -2
                         self.chat_message_struct[index!].kinds = kinds
                         self.chat_message_struct[index!].message = content
-                       
+                        
                     }
                     ChatDataManager.shared.update_send_message(chatroom_idx: chatroom_idx, chatting_idx: -2, front_created_at: String(front_created_at), content: content)
                     
@@ -1854,7 +1854,7 @@ class SockMgr : ObservableObject {
         let array = ["idx": message_idx, "user_idx": user_idx, "chatroom_idx": chatroom_idx,"content": content , "front_created_at": front_created_at, "created_at": created_at] as [String : Any]
         
         print("만든 배열 확인: \(array)")
-       return array
+        return array
         
     }
     
@@ -1874,7 +1874,7 @@ class SockMgr : ObservableObject {
             print("메세지 이벤트: \(data)")
             let chatting_model = JSON(data[0])
             print("메세지 받기 이벤트 chatting_model: \(chatting_model)")
-
+            
             let second_data = JSON(data[1])
             
             let chatroom_idx = chatting_model["chatroom_idx"].intValue
@@ -1907,7 +1907,7 @@ class SockMgr : ObservableObject {
                     is_mine = true
                     
                 }else{is_mine = false}
-
+                
                 print("서버 메세지 이벤트 받았을 때 enter: \(SockMgr.socket_manager.enter_chatroom_idx)")
                 print("메세지 받았을 때 보고 있는 곳: \(SockMgr.socket_manager.current_view)")
                 //3-1. 채팅방 안에 있을 경우, 들어간 채팅방이 같을 경우(current_view=333)
@@ -1917,18 +1917,18 @@ class SockMgr : ObservableObject {
                     //바로 전 메세지를 보낸 시각
                     var prev_msg_created : String?
                     prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
-
+                    
                     //바로 전 메세지를 보낸 사람
                     var prev_msg_user : String?
                     prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
-                   let is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(user_idx))
+                    let is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(user_idx))
                     print("메세지 받기 이벤트에서 is_same: \(is_same)")
                     var is_last_consecutive_msg : Bool = true
                     if is_same{
                         is_last_consecutive_msg = true
-      
-                            //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
-                            self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
+                        
+                        //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
+                        self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
                     }
                     print("메세지 받기 이벤트에서 las consecutive: \(self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg)")
                     
@@ -1945,10 +1945,10 @@ class SockMgr : ObservableObject {
                     //누가 메세지를 보냈다는 이벤트를 받은 후 내가 그 메세지를 읽었다는 user read 이벤트 보내기..read start idx는 select로 꺼내오기
                     //read start idx가져오기 위함
                     let read_start_idx = db.get_read_start_idx(user_idx: my_idx!, chatroom_idx: chatroom_idx)
-                   //sever idx 가져오는 쿼리
+                    //sever idx 가져오는 쿼리
                     ChatDataManager.shared.get_server_idx_to_chat_server(user_idx:  my_idx!, chatroom_idx: chatroom_idx)
                     let got_server_idx = ChatDataManager.shared.user_server_idx
-                   
+                    
                     //서버에 user read이벤트 보냄.
                     self.update_other_message_read(server_idx: got_server_idx, user_idx: my_idx!, chatroom_idx: chatroom_idx, nickname: UserDefaults.standard.string(forKey: "nickname")!, profile_photo_path: "", read_start_idx: read_start_idx, read_last_idx: chatting_idx, updated_at: current_time, deleted_at: "")
                     /*
@@ -1981,22 +1981,22 @@ class SockMgr : ObservableObject {
                     var is_same : Bool = false
                     print("채팅방 목록 보고 있을 때 chat message struct: \(self.chat_message_struct)")
                     if self.chat_message_struct.count > 1{
-                    //바로 전 메세지를 보낸 시각
-                    var prev_msg_created : String?
-                    prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
-                   
-                    //바로 전 메세지를 보낸 사람
-                    var prev_msg_user : String?
-                    prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
-                   is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(user_idx))
+                        //바로 전 메세지를 보낸 시각
+                        var prev_msg_created : String?
+                        prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
+                        
+                        //바로 전 메세지를 보낸 사람
+                        var prev_msg_user : String?
+                        prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
+                        is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(user_idx))
                     }
                     
                     var is_last_consecutive_msg : Bool = true
                     if is_same{
                         is_last_consecutive_msg = true
-                       
-                            //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
-                            self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
+                        
+                        //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
+                        self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
                         
                     }
                     
@@ -2007,16 +2007,16 @@ class SockMgr : ObservableObject {
                     //친구, 모임, 일반인지 타입 확인하기 위해 디비 쿼리 & 마지막 메시지, 안읽은 메시지, 시간 업데이트
                     ChatDataManager.shared.read_chatroom(chatroom_idx: chatroom_idx)
                     if self.current_chatroom_info_struct.kinds == "친구"{
-                    print("채팅방 목록 보고 있을 때friend_chat_model확인: \(self.friend_chat_model)")
-
-                    let index = self.friend_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx})
-                    self.friend_chat_model[index!].last_chat = content
-                    self.friend_chat_model[index!].chat_time = created_at
-                    
-                    //안읽은 메세지 갯수 업데이트
-                    let before = Int(self.friend_chat_model[index!].message_num!)
-                    let after = before! + 1
-                    self.friend_chat_model[index!].message_num = String(after)
+                        print("채팅방 목록 보고 있을 때friend_chat_model확인: \(self.friend_chat_model)")
+                        
+                        let index = self.friend_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx})
+                        self.friend_chat_model[index!].last_chat = content
+                        self.friend_chat_model[index!].chat_time = created_at
+                        
+                        //안읽은 메세지 갯수 업데이트
+                        let before = Int(self.friend_chat_model[index!].message_num!)
+                        let after = before! + 1
+                        self.friend_chat_model[index!].message_num = String(after)
                         
                         //최근 온 메세지가 포함된 채팅방 목록을 가장 상단으로 올리기 위함.
                         self.friend_chat_model.insert(self.friend_chat_model.remove(at: index!), at: 0)
@@ -2048,9 +2048,9 @@ class SockMgr : ObservableObject {
                         
                         //최근 온 메세지가 포함된 채팅방 목록을 가장 상단으로 올리기 위함.
                         var temp_data = self.normal_chat_model[index!]
-                       
+                        
                         self.normal_chat_model.insert(self.normal_chat_model.remove(at: index!), at: 0)
-                      
+                        
                     }
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.new_message_in_room, object: nil, userInfo: ["new_message_in_room" : chatroom_idx])
@@ -2072,9 +2072,9 @@ class SockMgr : ObservableObject {
              */
             else if second_data == "ExitUser"{
                 
-                //delted_at 추가하는 것으로 변경. 1/17
+                //deleted_at 추가하는 것으로 변경. 1/17
                 db.delete_exit_user(chatroom_idx: chatroom_idx, user_idx: user_idx)
-                                
+                
                 if creator_idx == user_idx{
                     //sqlite업데이트(채팅방, 유저, 카드)
                     ChatDataManager.shared.update_exit_user_table(chatroom_idx: chatroom_idx)
@@ -2102,7 +2102,7 @@ class SockMgr : ObservableObject {
                 //유저 모델에 저장된 유저 idx
                 var out_user_idx = user_model["idx"].intValue
                 print("내 idx: \(String(describing: Int(db.my_idx!))), 추방 당한 사람: \(out_user_idx)")
-              
+                
                 
                 //추방 당하는 사람이 나라면
                 if out_user_idx == Int(db.my_idx!){
@@ -2117,7 +2117,7 @@ class SockMgr : ObservableObject {
                     db.delete_my_user(chatroom_idx: chatroom_idx, deleted_at: current_time, user_idx: out_user_idx)
                     
                     //채팅방 드로어에 대화상대 목록에서 삭제.
-                  let stored_user_idx =  SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {
+                    let stored_user_idx =  SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {
                         $0.user_idx == Int(db.my_idx!)
                     })
                     SockMgr.socket_manager.user_drawer_struct.remove(at: stored_user_idx!)
@@ -2128,12 +2128,12 @@ class SockMgr : ObservableObject {
                         //뷰 업데이트 위해 보내기, 서버 메세지 보여주고 다른 뷰로 이동시키기
                         NotificationCenter.default.post(name: Notification.new_message, object: nil, userInfo: ["banished" : "banished"])
                         
-                    //채팅방 목록을 보고 있었다면
+                        //채팅방 목록을 보고 있었다면
                     }else if current_view == 222{
                         print("내가 추방 당할 때 채팅방 목록을 보고 있었을 때")
                         
-                    //채팅방 드로어에 대화상대 목록에서 삭제.
-                      let stored_user_idx =  SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {
+                        //채팅방 드로어에 대화상대 목록에서 삭제.
+                        let stored_user_idx =  SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {
                             $0.user_idx == out_user_idx
                         })
                         SockMgr.socket_manager.user_drawer_struct.remove(at: stored_user_idx!)
@@ -2144,8 +2144,8 @@ class SockMgr : ObservableObject {
                     
                     //서버에 다시 추방 알림 이벤트 보내기.
                     self.send_banished_again(chatroom_idx: chatroom_idx)
-                        
-                 //추방 당하는 사람이 아닌 사람들
+                    
+                    //추방 당하는 사람이 아닌 사람들
                 }else{
                     
                     //deleted at유저 테이블에 추가하는 것.(쿼리 안에서 deleted at 만듬.)
@@ -2155,7 +2155,7 @@ class SockMgr : ObservableObject {
                     self.chat_message_struct.append(ChatMessage(created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                     
                     //추방당한 유저 모델에서 삭제
-                  let model_idx =  self.user_drawer_struct.firstIndex(where: {
+                    let model_idx =  self.user_drawer_struct.firstIndex(where: {
                         $0.user_idx == out_user_idx
                     })
                     self.user_drawer_struct.remove(at: model_idx!)
@@ -2168,7 +2168,7 @@ class SockMgr : ObservableObject {
                         
                     }else if current_view == 222{
                         print("추방 당하는 사람이 아닌 유저가 채팅방 목록 보고 있었을 때")
-
+                        
                         //뷰 업데이트 위해 보내기
                         NotificationCenter.default.post(name: Notification.new_message_in_room, object: nil, userInfo: ["new_message_in_room" : chatroom_idx])
                     }
@@ -2182,7 +2182,7 @@ class SockMgr : ObservableObject {
              */
             else if second_data == "UpdateCard"{
                 
-               let chat_room = JSON(data[2])
+                let chat_room = JSON(data[2])
                 print("카드 업데이트 이벤트 받음, 채팅룸 데이터: \(chat_room)")
                 let json_string = """
                 \(chat_room)
@@ -2195,28 +2195,28 @@ class SockMgr : ObservableObject {
                     //카드 데이터 집어넣기
                     self.card_struct = CardModel(creator_idx: room_data!.card!.creator_idx, expiration_at: room_data!.card!.expiration_at, card_photo_path: room_data!.card!.card_photo_path, kinds: room_data!.card!.kinds, lock_state: room_data!.card!.lock_state, title: room_data!.card!.title, introduce: room_data!.card!.introduce, address: room_data!.card!.address, cur_user: room_data!.card!.cur_user, apply_user: room_data!.card!.apply_user, map_lat: room_data!.card!.map_lat, map_lng: room_data!.card!.map_lng, created_at: room_data!.card!.created_at, updated_at: room_data!.card!.updated_at, deleted_at: room_data!.card!.deleted_at)
                     print("카드 데이터 넣은 것 확인: \(self.card_struct)")
-                                        
+                    
                     let card_tags = room_data!.card_tag_list
                     //카드 태그
                     for tag in card_tags!{
                         self.tag_struct.append(TagModel(idx: tag.idx, tag_name: tag.tag_name))
-
+                        
                         print("태그 데이터 넣은 것 확인: \(self.tag_struct)")
-
+                        
                         //sqlite 태그 데이터 넣기
-                            print("채팅방이 이미 있던 경우의 태그 테이블 업데이트")
-                            db.update_tag_table(chatroom_idx: chatroom_idx, tag_idx: tag.idx, tag_name: tag.tag_name)
+                        print("채팅방이 이미 있던 경우의 태그 테이블 업데이트")
+                        db.update_tag_table(chatroom_idx: chatroom_idx, tag_idx: tag.idx, tag_name: tag.tag_name)
                     }
-
-                   // if room_data!.card!.creator_idx != Int(db.my_idx!){
+                    
+                    // if room_data!.card!.creator_idx != Int(db.my_idx!){
                     db.update_chatroom_card(chatroom_idx: room_data!.idx, card_idx: room_data!.card_idx, creator_idx: room_data!.creator_idx, kinds: room_data!.kinds, created_at: room_data!.created_at, updated_at: room_data!.updated_at ?? "", deleted_at: room_data!.deleted_at ?? "",room_name: room_data!.room_name, state: 0)
                     
                     db.update_card_table(chatroom_idx: room_data!.idx, creator_idx: room_data!.creator_idx, kinds: room_data!.kinds, card_photo_path: room_data!.card!.card_photo_path ?? "", lock_state: room_data!.card!.lock_state, title: room_data!.card!.title, introduce: room_data!.card!.introduce, address: room_data!.card!.address, map_lat: room_data!.card!.map_lat, map_lng: room_data!.card!.map_lng, current_people_count: room_data!.card!.cur_user, apply_user: room_data!.card!.apply_user, expiration_at: room_data!.card!.expiration_at, created_at: room_data!.card!.created_at, updated_at: room_data!.card!.updated_at ?? "", deleted_at: room_data!.card!.deleted_at ?? "")
-                   // }
+                    // }
                 }catch{
                     print("카드 업데이트 이벤트 디코딩 오류: \(error.localizedDescription)")
                 }
- 
+                
                 //서버로부터 카드 정보 수정되었다는 메세지 받은 것 추가.
                 self.chat_message_struct.append(ChatMessage(created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                 
@@ -2253,10 +2253,10 @@ class SockMgr : ObservableObject {
                 let server_idx = user_model["server_idx"].intValue
                 let updated_at = user_model["updated_at"].stringValue
                 let deleted_at = user_model["deleted_at"].stringValue
-
+                
                 if new_user_idx != Int(ChatDataManager.shared.my_idx!){
-                //새로 들어온 참가자 정보 저장.
-                db.insert_user(chatroom_idx: chatroom_idx, user_idx: new_user_idx, nickname: nickname, profile_photo_path: profile_photo, read_last_idx: read_last_idx, read_start_idx: rad_start_idx, temp_key: "", server_idx: server_idx, updated_at: updated_at, deleted_at: deleted_at)
+                    //새로 들어온 참가자 정보 저장.
+                    db.insert_user(chatroom_idx: chatroom_idx, user_idx: new_user_idx, nickname: nickname, profile_photo_path: profile_photo, read_last_idx: read_last_idx, read_start_idx: rad_start_idx, temp_key: "", server_idx: server_idx, updated_at: updated_at, deleted_at: deleted_at)
                 }
                 
                 if SockMgr.socket_manager.current_view == 333 && SockMgr.socket_manager.enter_chatroom_idx == chatroom_idx{
@@ -2264,21 +2264,21 @@ class SockMgr : ObservableObject {
                     
                     var is_same : Bool = false
                     if self.chat_message_struct.count > 1{
-                    //바로 전 메세지를 보낸 시각
-                    var prev_msg_created : String?
-                    prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
-                   
-                    //바로 전 메세지를 보낸 사람
-                    var prev_msg_user : String?
-                    prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
-                    is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(user_idx))
+                        //바로 전 메세지를 보낸 시각
+                        var prev_msg_created : String?
+                        prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
+                        
+                        //바로 전 메세지를 보낸 사람
+                        var prev_msg_user : String?
+                        prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
+                        is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(user_idx))
                     }
                     var is_last_consecutive_msg : Bool = true
                     if is_same{
                         is_last_consecutive_msg = true
-      
-                            //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
-                            self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
+                        
+                        //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
+                        self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
                         
                     }
                     
@@ -2294,10 +2294,10 @@ class SockMgr : ObservableObject {
                     //누가 메세지를 보냈다는 이벤트를 받은 후 내가 그 메세지를 읽었다는 user read 이벤트 보내기..read start idx는 select로 꺼내오기
                     //read start idx가져오기 위함
                     let read_start_idx = db.get_read_start_idx(user_idx: my_idx!, chatroom_idx: chatroom_idx)
-                   //sever idx 가져오는 쿼리
+                    //sever idx 가져오는 쿼리
                     ChatDataManager.shared.get_server_idx_to_chat_server(user_idx:  my_idx!, chatroom_idx: chatroom_idx)
                     let got_server_idx = ChatDataManager.shared.user_server_idx
-                   
+                    
                     //서버에 user read이벤트 보냄.
                     self.update_other_message_read(server_idx: got_server_idx, user_idx: my_idx!, chatroom_idx: chatroom_idx, nickname: UserDefaults.standard.string(forKey: "nickname")!, profile_photo_path: "", read_start_idx: read_start_idx, read_last_idx: chatting_idx, updated_at: current_time, deleted_at: "")
                     /*
@@ -2330,22 +2330,22 @@ class SockMgr : ObservableObject {
                     var is_same : Bool = false
                     print("채팅방 목록 보고 있을 때 chat message struct: \(self.chat_message_struct)")
                     if self.chat_message_struct.count > 1{
-                    //바로 전 메세지를 보낸 시각
-                    var prev_msg_created : String?
-                    prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
-                   
-                    //바로 전 메세지를 보낸 사람
-                    var prev_msg_user : String?
-                    prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
-                   is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(user_idx))
+                        //바로 전 메세지를 보낸 시각
+                        var prev_msg_created : String?
+                        prev_msg_created = self.chat_message_struct[self.chat_message_struct.endIndex-1].created_at ?? ""
+                        
+                        //바로 전 메세지를 보낸 사람
+                        var prev_msg_user : String?
+                        prev_msg_user  = self.chat_message_struct[self.chat_message_struct.endIndex-1].sender ?? ""
+                        is_same =  self.is_consecutive(prev_created: prev_msg_created!, prev_creator: prev_msg_user!, current_created: created_at, current_creator: String(user_idx))
                     }
                     
                     var is_last_consecutive_msg : Bool = true
                     if is_same{
                         is_last_consecutive_msg = true
-                       
-                            //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
-                            self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
+                        
+                        //그 이전 순서의 메세지의 is last consecutive를 false로 바꿔줘야 함.
+                        self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
                         
                     }
                     
@@ -2355,16 +2355,16 @@ class SockMgr : ObservableObject {
                     //친구, 모임, 일반인지 타입 확인하기 위해 디비 쿼리 & 마지막 메시지, 안읽은 메시지, 시간 업데이트
                     ChatDataManager.shared.read_chatroom(chatroom_idx: chatroom_idx)
                     if self.current_chatroom_info_struct.kinds == "친구"{
-                    print("채팅방 목록 보고 있을 때friend_chat_model확인: \(self.friend_chat_model)")
-
-                    let index = self.friend_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx})
-                    self.friend_chat_model[index!].last_chat = content
-                    self.friend_chat_model[index!].chat_time = created_at
-                    
-                    //안읽은 메세지 갯수 업데이트
-                    let before = Int(self.friend_chat_model[index!].message_num!)
-                    let after = before! + 1
-                    self.friend_chat_model[index!].message_num = String(after)
+                        print("채팅방 목록 보고 있을 때friend_chat_model확인: \(self.friend_chat_model)")
+                        
+                        let index = self.friend_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx})
+                        self.friend_chat_model[index!].last_chat = content
+                        self.friend_chat_model[index!].chat_time = created_at
+                        
+                        //안읽은 메세지 갯수 업데이트
+                        let before = Int(self.friend_chat_model[index!].message_num!)
+                        let after = before! + 1
+                        self.friend_chat_model[index!].message_num = String(after)
                         
                     }else if self.current_chatroom_info_struct.kinds == "모임"{
                         
@@ -2403,7 +2403,7 @@ class SockMgr : ObservableObject {
             }
         }
     }
-
+    
     //메세지 받기 이벤트에서
     //다른 사람이 메시지 보낸 걸 내가 채팅방 안에서 봤을 때(채팅방 입장시 보내는 user read 아님)
     func update_other_message_read(server_idx:Int,user_idx: Int, chatroom_idx: Int, nickname: String, profile_photo_path: String, read_start_idx: Int, read_last_idx: Int, updated_at: String, deleted_at : String){
@@ -2436,17 +2436,17 @@ class SockMgr : ObservableObject {
             let read_start_idx = user_chat["read_start_idx"].intValue
             let chatroom_idx = user_chat["chatroom_idx"].intValue
             let server_idx = user_chat["server_idx"].intValue
-
-        print("현재 있는 채팅방 idx: \(SockMgr.socket_manager.enter_chatroom_idx)")
+            
+            print("현재 있는 채팅방 idx: \(SockMgr.socket_manager.enter_chatroom_idx)")
             print("서버한테 받은 채팅방 idx: \(chatroom_idx)")
             
             //현재 사용자가 채팅방안에 있을 때
-         if SockMgr.socket_manager.current_view == 333 && SockMgr.socket_manager.enter_chatroom_idx == chatroom_idx{
+            if SockMgr.socket_manager.current_view == 333 && SockMgr.socket_manager.enter_chatroom_idx == chatroom_idx{
                 print("클라b가 채팅을 보고 있었을 때 읽은 마지막 메세지 idx업데이트")
-            
-            let currenet_time = ChatDataManager.shared.make_created_at()
+                
+                let currenet_time = ChatDataManager.shared.make_created_at()
                 //클라b에서 클라a의 read last idx업데이트
-            ChatDataManager.shared.update_user_read(chatroom_idx: chatroom_idx, read_last_idx: read_last_idx, user_idx: user_idx, updated_at: currenet_time)
+                ChatDataManager.shared.update_user_read(chatroom_idx: chatroom_idx, read_last_idx: read_last_idx, user_idx: user_idx, updated_at: currenet_time)
                 
                 print("받은 user idx: \(user_idx), 내 idx\(Int(db.my_idx!)!)")
                 /*
@@ -2467,7 +2467,7 @@ class SockMgr : ObservableObject {
                     
                 }else if past_read_idx == read_last_idx{
                     print("past read idx와 read last idx가 같은 경우")
-
+                    
                     let unread_num =  db.unread_num_first(message_idx: read_last_idx)
                     
                     let index = self.chat_message_struct.firstIndex(where: {$0.message_idx ==  read_last_idx})
@@ -2479,7 +2479,7 @@ class SockMgr : ObservableObject {
                     print("past read idx와 read last idx가 다른 경우")
                     var past_index = self.chat_message_struct.firstIndex(where: {$0.message_idx! >  past_read_idx})
                     
-                let last_index = self.chat_message_struct.firstIndex(where: {$0.message_idx ==  read_last_idx})
+                    let last_index = self.chat_message_struct.firstIndex(where: {$0.message_idx ==  read_last_idx})
                     print("클라b읽음처리 할 때 메세지 데이터 모델 확인: \(self.chat_message_struct)")
                     print("클라b읽음처리 할 때 메세지 데이터 모델 카운트 확인2: \(self.chat_message_struct.count)")
                     if past_index == nil{
@@ -2487,19 +2487,19 @@ class SockMgr : ObservableObject {
                     }
                     print("past index 확인: \(past_index)")
                     
-                for idx in past_index!...last_index!{
-                      print("클라b에서 읽음처리 idx: \(idx) ")
-                    self.chat_message_struct[idx].read_num -= 1
+                    for idx in past_index!...last_index!{
+                        print("클라b에서 읽음처리 idx: \(idx) ")
+                        self.chat_message_struct[idx].read_num -= 1
+                    }
+                    //notification center 사용해 메시지 실시간 읽은 것 구현.
+                    NotificationCenter.default.post(name: Notification.new_message, object: nil)
                 }
-                //notification center 사용해 메시지 실시간 읽은 것 구현.
-                NotificationCenter.default.post(name: Notification.new_message, object: nil)
+            }else{
+                print("클라b가 채팅방, 채팅방 목록을 보고 있지 않을 경우 읽은 마지막 메세지 idx업데이트")
+                let current_time = ChatDataManager.shared.make_created_at()
+                //클라b에서 클라a의 read last idx업데이트.
+                ChatDataManager.shared.update_user_read(chatroom_idx: chatroom_idx, read_last_idx: read_last_idx, user_idx: user_idx, updated_at: current_time)
             }
-         }else{
-            print("클라b가 채팅방, 채팅방 목록을 보고 있지 않을 경우 읽은 마지막 메세지 idx업데이트")
-            let current_time = ChatDataManager.shared.make_created_at()
-            //클라b에서 클라a의 read last idx업데이트.
-            ChatDataManager.shared.update_user_read(chatroom_idx: chatroom_idx, read_last_idx: read_last_idx, user_idx: user_idx, updated_at: current_time)
-         }
         }
     }
     
