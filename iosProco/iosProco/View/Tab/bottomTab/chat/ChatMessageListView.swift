@@ -38,23 +38,26 @@ struct ChatMessageListView: View{
                         
                         ForEach(SockMgr.socket_manager.chat_message_struct.filter({
                             $0.message_idx! != -2
+                            
                         })){msg in
                             
                             ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
                                 
                                 .onAppear{
-                                    
+                                    if SockMgr.socket_manager.chat_message_struct.count > 0{
                                     // 처음 스크롤
                                     if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
                                         
                                         reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
                                         scrolled = true
                                     }
+                                    }
                                 }
                         }
                         .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
-                            
+                            if SockMgr.socket_manager.chat_message_struct.count > 0{
                             reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
+                            }
                             
                         })
                         
@@ -66,19 +69,21 @@ struct ChatMessageListView: View{
                             ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
                                 
                                 .onAppear{
-                                    
+                                    if SockMgr.socket_manager.chat_message_struct.count > 0{
                                     // 처음 스크롤
                                     if msg.id == SockMgr.socket_manager.chat_message_struct.last!.id && !scrolled{
                                         
                                         reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
                                         scrolled = true
                                     }
+                                    }
                                 }
                         }
                         .onChange(of: SockMgr.socket_manager.chat_message_struct, perform: { value in
-                            
+                            if SockMgr.socket_manager.chat_message_struct.count > 0{
+                                
                             reader.scrollTo(SockMgr.socket_manager.chat_message_struct.last!.id,anchor: .bottom)
-                            
+                            }
                         })
                         
                     }
@@ -86,6 +91,10 @@ struct ChatMessageListView: View{
                 }//스크롤뷰 끝
             }//스크롤뷰 리더 끝
             //채팅 입력창
+            //채팅 입력창
+            Divider()
+                .frame(width: UIScreen.main.bounds.width, height: 1)
+                .foregroundColor(Color.light_gray)
             VStack{
                 HStack{
                     if self.selected_image == nil{
@@ -95,7 +104,7 @@ struct ChatMessageListView: View{
                         HStack{
                                 send_msg_btn
                             
-                        }.padding()
+                        }.padding([.trailing])
                         //앨범에서 선택한 이미지가 있을 경우
                     }
                 }
@@ -129,9 +138,9 @@ struct ChatMessageListView: View{
                     
                 }
             }//채팅 입력창 끝
-            .padding()
             .animation(.easeOut)
         }
+        .KeyboardAwarePadding()
     }
 }
 
@@ -140,25 +149,10 @@ extension ChatMessageListView{
     var chat_input_field : some View{
         HStack{
             TextField("", text: $message)
-                .padding(.vertical, 12)
-                .padding(.horizontal)
+                .padding(.vertical, UIScreen.main.bounds.width/40)
                 .background(Color.white)
-                .clipShape(Capsule())
                 .frame(width: UIScreen.main.bounds.width*0.7)
-                .onAppear{
-                    // 키보드가 나타나면 placeholder값 지움
-                    NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (noti) in
-                        withAnimation {
-                            
-                        }
-                        // 사용자가 입력하지 않고 키보드를 다시 내렸을 경우 placeholder 다시 보여줌
-                        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (noti) in
-                            withAnimation {
-                                
-                            }
-                        }
-                    }
-                }
+
         }
         .animation(.default)
         .padding()
@@ -256,7 +250,8 @@ extension ChatMessageListView{
             
         }, label: {
             Image(systemName: "arrow.up")
-                .padding(.all)
+                .frame(width: UIScreen.main.bounds.width/15, height:  UIScreen.main.bounds.width/15)
+                .padding(.trailing)
                 .rotationEffect(.init(degrees: 45))
         })
     }
