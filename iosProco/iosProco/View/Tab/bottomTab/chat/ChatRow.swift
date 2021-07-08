@@ -43,6 +43,9 @@ struct ChatRow : View{
     
     @Binding var show_img_bigger : Bool
     @Binding var image_url: String?
+    @Binding var show_profile: Bool
+    //드로어에서 유저 한 명 클릭한 idx값 바인딩 -> 채팅룸에서 전달받기 -> 프로필 띄우기
+    @Binding var selected_user_idx: Int
     
     var body: some View{
         HStack(alignment: .bottom){
@@ -112,7 +115,7 @@ struct ChatRow : View{
                 }
             }
             //2.서버 메세지
-            else if msg.kinds == "S"{
+            else if msg.kinds == "S" || msg.sender == "server"{
                 Spacer()
                 Text(msg.message!)
                     .padding(.all)
@@ -477,6 +480,11 @@ private extension ChatRow{
                 .resizable()
                 .frame(width: 47.46, height: 47.46)
             Spacer()
+        }
+        .onTapGesture {
+            print("상대방 프로필 클릭: \(msg.sender!)")
+            self.selected_user_idx = Int(msg.sender!)!
+            self.show_profile = true
         }
     }
     

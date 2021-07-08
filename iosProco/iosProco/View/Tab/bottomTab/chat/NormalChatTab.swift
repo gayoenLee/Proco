@@ -85,6 +85,15 @@ struct NormalChatTabRow : View{
         }
     }
     
+    var room_alarm_state : Bool{
+        let alarm_state = UserDefaults.standard.string(forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(normal_chat.chatroom_idx)")
+        
+        if alarm_state == "" || alarm_state == "1"{
+            return true
+        }else{
+            return false
+        }
+    }
     
     var body: some View{
         
@@ -115,9 +124,9 @@ struct NormalChatTabRow : View{
                         .foregroundColor(.gray)
                     //알림버튼
                     Button(action: {
-                        
+                        print("해당 채팅방 알림 상태: \(room_alarm_state)")
                     }){
-                        Image(systemName: "bell.fill")
+                        Image(room_alarm_state == true ? "chatroom_alarm" : "chatroom_alarm_off")
                     }
                     Spacer()
                     Text(last_chat_time)

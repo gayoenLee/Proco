@@ -29,6 +29,10 @@ struct ChatMessageListView: View{
     @Binding var send_again_alert : Bool
     //이미지 확대 뷰 띄우는 것
     @Binding var show_img_bigger : Bool
+    //드로어 유저 한 명 클릭했을 때 다이얼로그 띄우기
+    @Binding var show_profile : Bool
+    //채팅방 메세지 보낸 유저 한 명 클릭한 idx값 바인딩 -> 채팅룸에서 전달받기 -> 프로필 띄우기
+    @Binding var selected_user_idx: Int
     
     var body: some View{
         VStack{
@@ -41,7 +45,7 @@ struct ChatMessageListView: View{
                             
                         })){msg in
                             
-                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
+                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url, show_profile: self.$show_profile, selected_user_idx: self.$selected_user_idx)
                                 
                                 .onAppear{
                                     if SockMgr.socket_manager.chat_message_struct.count > 0{
@@ -66,7 +70,7 @@ struct ChatMessageListView: View{
                             
                         })){msg in
                             
-                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url)
+                            ChatRow(msg: msg, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, image_url: self.$image_url, show_profile: self.$show_profile, selected_user_idx: self.$selected_user_idx)
                                 
                                 .onAppear{
                                     if SockMgr.socket_manager.chat_message_struct.count > 0{

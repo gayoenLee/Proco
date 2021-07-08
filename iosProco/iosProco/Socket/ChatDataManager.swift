@@ -2102,11 +2102,12 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     //채팅방을 나간 유저 정보 삭제 -> delted at추가하는 것으로 변경함. 1/17
     func delete_exit_user(chatroom_idx: Int, user_idx: Int){
 
-        let deleted_at = self.get_current_time()
-        let query = "UPDATE CHAT_USER SET deleted_at = \(deleted_at) WHERE user_idx = ? AND chatroom_idx = ?"
+       // let deleted_at = self.get_current_time()
+        let query = "UPDATE CHAT_USER SET deleted_at = CURRENT_TIMESTAMP WHERE user_idx = ? AND chatroom_idx = ?"
         var statement: OpaquePointer? = nil
         let errormsg = String(cString: sqlite3_errmsg(statement)!)
         
+        print("채팅방 나간 후 deleted at 추가하기 메소드: \(query)")
         if sqlite3_prepare_v2(self.db, query, -1, &statement, nil) == SQLITE_OK{
             print("채팅방 나간 유저 지우는 쿼리: \(user_idx) prepare안")
             
@@ -2936,7 +2937,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
         var statement : OpaquePointer? = nil
         let query = "UPDATE CHAT_USER SET deleted_at = CURRENT_TIMESTAMP WHERE chatroom_idx = \(chatroom_idx)"
         let errmsg = String(cString: sqlite3_errmsg(statement)!)
-        print("업데이트하려는 채팅유저 테이블 chatroom idx: \(chatroom_idx)")
+        print("업데이트하려는 채팅유저 테이블 query\(query)")
         
         if sqlite3_prepare_v2(self.db, query, -1, &statement, nil) == SQLITE_OK{
             
@@ -3188,6 +3189,43 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
             }
         }
         sqlite3_finalize(statement)
+    }
+    
+    //유저 한 명의 read last idx가져오기
+    func get_friend_unread_num(chatroom_idx: Int, user_idx: Int){
+       
+        var statement : OpaquePointer? = nil
+        let query = "SELECT chatroom_idx, user_idx, read_last_idx FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx) AND user_idx = \(user_idx) AND deleted_at IS ''"
+        let errmsg = String(cString: sqlite3_errmsg(statement)!)
+        
+        if sqlite3_prepare_v2(self.db, query, -1, &statement, nil) == SQLITE_OK{
+            print("유저 한 명의 read last idx가져오기 prepare들어옴: \(query)")
+           
+            switch sqlite3_step(statement) {
+            case SQLITE_ROW:
+                
+                let read_last_idx = Int(sqlite3_column_int(statement, 2))
+                print("업데이트 전 user read list: \(self.user_read_list)")
+
+                if self.user_read_list.contains(read_last_idx){
+                  let remove_idx =  self.user_read_list.firstIndex(where: {
+                        $0 == read_last_idx
+                  })!
+                    self.user_read_list.remove(at: remove_idx)
+                }
+                print("업데이트한 user read list: \(self.user_read_list)")
+                
+            case SQLITE_DONE:
+                print("유저 한 명의 read last idx가져오기 DONE")
+                break
+            default:
+                print("유저 한 명의 read last idx가져오기에러: \(errmsg)")
+            }
+            }else{
+                print("유저 한 명의 read last idx가져오기 결과: \(errmsg)")
+            }
+        sqlite3_finalize(statement)
+        sqlite3_close(statement)
     }
 }
     

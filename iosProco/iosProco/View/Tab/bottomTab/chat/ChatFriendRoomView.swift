@@ -124,7 +124,7 @@ struct ChatFriendRoomView: View {
                
                 
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
-                ChatMessageListView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url: self.$image_url, open_gallery: self.$open_gallery, ui_image: self.$ui_image, too_big_img_size: self.$too_big_img_size, send_again_alert: self.$send_again_alert, show_img_bigger : self.$show_img_bigger)
+                ChatMessageListView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url: self.$image_url, open_gallery: self.$open_gallery, ui_image: self.$ui_image, too_big_img_size: self.$too_big_img_size, send_again_alert: self.$send_again_alert, show_img_bigger : self.$show_img_bigger, show_profile: self.$show_profile ,selected_user_idx: self.$selected_user_idx)
                     .onTapGesture(perform: {
                         withAnimation{
                             if self.show_menu{
@@ -298,6 +298,7 @@ struct ChatFriendRoomView: View {
                 ChatDataManager.shared.get_creator_nickname(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx)
                 
                 print("현재 채팅방 데이터 확인: \(SockMgr.socket_manager.current_chatroom_info_struct)")
+                print("읽음 처리 위한 user read list: \(ChatDataManager.shared.user_read_list)")
                 
             }
             .onDisappear(perform: {
@@ -330,6 +331,7 @@ struct ChatFriendRoomView: View {
             //채팅룸 드로어 부분.show_menu의 값에 따라서 열리고 닫힘.
             Spacer()
             HStack{
+                
                 ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(), show_profile: self.$show_profile,selected_user_idx: self.$selected_user_idx, show_menu: self.$show_menu)
                     .background(Color.proco_white)
                     .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)

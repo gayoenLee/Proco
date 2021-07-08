@@ -204,6 +204,7 @@ extension ChatroomDrawer{
         
         //나가기 버튼
         Button(action: {
+            print("읽음 처리 위한 user read list: \(ChatDataManager.shared.user_read_list)")
             //나갈 거냐고 한 번 더 묻는 알림창
             self.alert_go_out.toggle()
         }){

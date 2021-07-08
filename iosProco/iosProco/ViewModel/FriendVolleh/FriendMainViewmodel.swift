@@ -689,7 +689,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                     
                 }
                else{
-                    print("카드 있는 경우")
+                print("카드 있는 경우: \(self.my_idx!)")
                     //let result = response.arrayValue
                     var my_count = 0
                 let friend_cards = response.arrayValue
