@@ -102,7 +102,7 @@ struct FriendDialogContents : View{
                     socket.temp_chat_friend_model = UserChatInListModel(idx: main_vm.friend_volleh_card_detail.creator.idx, nickname: main_vm.friend_volleh_card_detail.creator.nickname, profile_photo_path: main_vm.friend_volleh_card_detail.creator.profile_photo_path ?? "")
                     
                     //일대일 채팅방이 기존에 존재했는지 확인하는 쿼리문
-                    ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.card_detail_struct.creator!.idx!)
+                    ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.card_detail_struct.creator!.idx!, nickname: main_vm.friend_volleh_card_detail.creator.nickname)
                     
                     self.go_to_chat.toggle()
                     
