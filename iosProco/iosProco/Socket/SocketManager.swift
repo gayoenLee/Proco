@@ -21,7 +21,7 @@ let nickname = UserDefaults.standard.string(forKey: "nickname")
 //config 옵션 주석 추가할 것.
 let manager = SocketManager(socketURL: URL(string: "https://3.37.11.107//")!, config: [.log(true), .compress, .forceWebsockets(true), .connectParams(["token" : access_token!, "nickname": nickname!]), .reconnectWaitMax(2), .reconnectWait(1), .forceNew(false)])
 let socket = manager.defaultSocket
-var db : ChatDataManager = ChatDataManager.shared
+var db : ChatDataManager = ChatDataManager()
 var packet : [Any] = []
 
 class SockMgr : ObservableObject {
@@ -1735,7 +1735,9 @@ class SockMgr : ObservableObject {
     
     //메세지 보내기 이벤트
     func send_message(message_idx: Int, chatroom_idx: Int, user_idx: Int, content: String, kinds: String, created_at: String, front_created_at: CLong){
-        
+        print("user read list확인: \(ChatDataManager.shared.user_read_list)")
+        print("user read list확인22: \(db.user_read_list)")
+
         //에러가 난 경우 에러난 메세지를 찾기 위해 front_created_at을 보내는 것.
         let parameters = ["idx": message_idx, "chatroom_idx": chatroom_idx, "user_idx": user_idx, "content": content, "kinds": kinds, "created_at": created_at, "front_created_at": front_created_at] as [String : Any]
         // print("메세지 보내기 이벤트에서 파라미터들 확인: \(parameters)")
@@ -2075,11 +2077,13 @@ class SockMgr : ObservableObject {
                 
                 let out_user_idx = user_data["idx"].intValue
                 print("엑시트 유저에서 서버에서 받은 모델: \(user_data)")
-                
-                //나간 유저의 read last idx도 제거해서 업데이트해야 읽음처리 가능.
-                db.get_friend_unread_num(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
                 //deleted_at 추가하는 것으로 변경. 1/17
-                db.delete_exit_user(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
+                ChatDataManager.shared.delete_exit_user(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
+                //나간 유저의 read last idx도 제거해서 업데이트해야 읽음처리 가능.
+             db.get_friend_unread_num(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
+                
+                print("업데이트한 user read list: \(ChatDataManager.shared.user_read_list)")
+                print("업데이트한 user read list:2 \(db.user_read_list)")
                 
                 if creator_idx == out_user_idx{
                     //sqlite업데이트(채팅방, 유저, 카드)
@@ -2087,12 +2091,14 @@ class SockMgr : ObservableObject {
                     ChatDataManager.shared.update_exit_user_chatroom(chatroom_idx: chatroom_idx)
                     ChatDataManager.shared.update_exit_user_card(chatroom_idx: chatroom_idx)
                 }
+                print("채팅방 드로어 모델:22 \(SockMgr.socket_manager.user_drawer_struct)")
+                print("채팅방 드로어 모델:333 \(self.user_drawer_struct)")
                 
                 //채팅방 드로어에 대화상대 목록에서 삭제.
-                let stored_user_idx =  SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {
+                let stored_user_idx =  self.user_drawer_struct.firstIndex(where: {
                     $0.user_idx == out_user_idx
                 })
-                SockMgr.socket_manager.user_drawer_struct.remove(at: stored_user_idx!)
+                self.user_drawer_struct.remove(at: stored_user_idx!)
                 
                 self.chat_message_struct.append(ChatMessage(kinds: "S",created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                 
@@ -2106,19 +2112,19 @@ class SockMgr : ObservableObject {
              2.추방 당하는 사람, 알림을 받는 사람 구분
              */
             else if second_data == "BanishUser"{
-                print("추방 당하기 이벤트일 경우")
+                print("--[추방] 추방 이벤트 시작!!--")
                 
                 let user_model = JSON(data[2])
-                print("추방 당하기 이벤트에서 받은 유저 모델: \(user_model)")
+                print("[추방] 추방 당하기 이벤트에서 받은 유저 모델: \(user_model)")
                 
                 //유저 모델에 저장된 유저 idx
                 var out_user_idx = user_model["idx"].intValue
-                print("내 idx: \(String(describing: Int(db.my_idx!))), 추방 당한 사람: \(out_user_idx)")
+                print("[추방] 내 idx: \(String(describing: Int(db.my_idx!))), 추방 당한 사람: \(out_user_idx)")
                 
                 
                 //추방 당하는 사람이 나라면
                 if out_user_idx == Int(db.my_idx!){
-                    print("추방 당하는 사람이 나일 때")
+                    print("[추방] : 추방 당하는 사람이 나일 때")
                     //~가 추방당했습니다 라는 메시지 추가
                     self.chat_message_struct.append(ChatMessage(kinds: "S",created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                     
@@ -2128,58 +2134,75 @@ class SockMgr : ObservableObject {
                     db.delete_my_chatting(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
                     db.delete_my_user(chatroom_idx: chatroom_idx, deleted_at: current_time, user_idx: out_user_idx)
                     
-                    //채팅방 드로어에 대화상대 목록에서 삭제.
-                    let stored_user_idx =  SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {
-                        $0.user_idx == Int(db.my_idx!)
-                    })
-                    SockMgr.socket_manager.user_drawer_struct.remove(at: stored_user_idx!)
-                    
                     //만약 채팅방안에 있었다면
                     if current_view == 333 && SockMgr.socket_manager.enter_chatroom_idx == chatroom_idx{
-                        print("내가 추방 당할 때 채팅방 안에 있었을 때")
-                        //뷰 업데이트 위해 보내기, 서버 메세지 보여주고 다른 뷰로 이동시키기
-                        NotificationCenter.default.post(name: Notification.new_message, object: nil, userInfo: ["banished" : "banished"])
-                        
-                        //채팅방 목록을 보고 있었다면
-                    }else if current_view == 222{
-                        print("내가 추방 당할 때 채팅방 목록을 보고 있었을 때")
+                        print("[추방] 내가 추방 당할 때 채팅방 안에 있었을 때 -> 노티피케이션 전달 및 채팅방에서 나가지도록  ")
                         
                         //채팅방 드로어에 대화상대 목록에서 삭제.
                         let stored_user_idx =  SockMgr.socket_manager.user_drawer_struct.firstIndex(where: {
-                            $0.user_idx == out_user_idx
+                            $0.user_idx == Int(db.my_idx!)
                         })
+                        
+                        print("[추방] 드로어의 유저데이터\(SockMgr.socket_manager.user_drawer_struct)")
                         SockMgr.socket_manager.user_drawer_struct.remove(at: stored_user_idx!)
                         
-                        //뷰 업데이트 위해 보내기
-                        NotificationCenter.default.post(name: Notification.new_message_in_room, object: nil, userInfo: ["new_message_in_room" : chatroom_idx])
+                        let banished_room = String(chatroom_idx)
+                        let banished_user = String(out_user_idx)
+                        //뷰 업데이트 위해 보내기, 서버 메세지 보여주고 다른 뷰로 이동시키기
+                        NotificationCenter.default.post(name: Notification.new_message, object: nil, userInfo: ["banished" : "ok", "chatroom_idx" : banished_room, "banished_user" : banished_user])
+                        
+                        //채팅방 목록을 보고 있었다면
+                    }else if current_view == 222{
+                        print("[추방] 내가 추방 당할 때 채팅방 목록을 보고 있었을 때 -> 채팅방목록에서 채팅방 안보이도록 제거" )
+                        
+                        var remove_idx : Int?
+                            remove_idx = SockMgr.socket_manager.group_chat_model.firstIndex(where: {
+                            $0.chatroom_idx == chatroom_idx
+                        }) ?? -1
+                        
+                        if remove_idx != -1{
+                            print("모임 채팅방에서 추방당한 경우 ")
+
+                            SockMgr.socket_manager.group_chat_model.remove(at: remove_idx!)
+                        }else{
+                            print("친구 채팅방에서 추방당한 경우 ")
+                            remove_idx = SockMgr.socket_manager.friend_chat_model.firstIndex(where: {
+                            $0.chatroom_idx == chatroom_idx
+                        })!
+                            SockMgr.socket_manager.friend_chat_model.remove(at: remove_idx!)
+                        }
                     }
                     
                     //서버에 다시 추방 알림 이벤트 보내기.
                     self.send_banished_again(chatroom_idx: chatroom_idx)
                     
                     //추방 당하는 사람이 아닌 사람들
-                }else{
-                    
+                }
+                else{
+                    print("[추방] 내가 추방당하는게 아닌 경우 ")
                     //deleted at유저 테이블에 추가하는 것.(쿼리 안에서 deleted at 만듬.)
                     db.delete_exit_user(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
                     
-                    //~가 추방당했습니다 라는 메시지 추가
-                    self.chat_message_struct.append(ChatMessage(created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
-                    
-                    //추방당한 유저 모델에서 삭제
-                    let model_idx =  self.user_drawer_struct.firstIndex(where: {
-                        $0.user_idx == out_user_idx
-                    })
-                    self.user_drawer_struct.remove(at: model_idx!)
-                    
                     //만약 채팅방안에 있었다면
                     if current_view == 333{
-                        print("추방 당하는 사람이 아닌 유저가 채팅방 안에 있었을 때")
+                        print("[추방] 추방 당하는 사람이 아닌 유저가 채팅방 안에 있었을 때")
+                        
+                        //~가 추방당했습니다 라는 메시지 추가
+                        self.chat_message_struct.append(ChatMessage(kinds: "S",created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
+                        
+                        //추방당한 유저 모델에서 삭제
+                        let model_idx =  self.user_drawer_struct.firstIndex(where: {
+                            $0.user_idx == out_user_idx
+                        })
+                        self.user_drawer_struct.remove(at: model_idx!)
+                        
                         //뷰 업데이트 위해 보내기
                         NotificationCenter.default.post(name: Notification.new_message, object: nil, userInfo: ["new message" : "server"])
                         
                     }else if current_view == 222{
-                        print("추방 당하는 사람이 아닌 유저가 채팅방 목록 보고 있었을 때")
+                        print(" [추방] 추방 당하는 사람이 아닌 유저가 채팅방 목록 보고 있었을 때")
+                        //~가 추방당했습니다 라는 메시지 추가
+                        self.chat_message_struct.append(ChatMessage(kinds: "S",created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                         
                         //뷰 업데이트 위해 보내기
                         NotificationCenter.default.post(name: Notification.new_message_in_room, object: nil, userInfo: ["new_message_in_room" : chatroom_idx])
@@ -2293,6 +2316,8 @@ class SockMgr : ObservableObject {
                         self.chat_message_struct[self.chat_message_struct.endIndex-1].is_last_consecutive_msg = false
                         
                     }
+                    
+                    self.user_drawer_struct.append(UserInDrawerStruct(nickname: nickname, profile_photo: profile_photo, user_idx: new_user_idx, deleted_at: ""))
                     
                     self.chat_message_struct.append(ChatMessage(kinds: "S",created_at: created_at, sender: "server", message: content, message_idx: chatting_idx, myMsg: false, profilePic: "", read_num: 0, front_created_at: front_created_at, is_same_person_msg: false, is_last_consecutive_msg: false))
                     
