@@ -119,7 +119,7 @@ struct GatheringChatRoom: View {
                 .padding()
                 
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
-                ChatMessageListView( socket: self.socket, selected_image: self.$selected_image, image_url: self.$image_url, open_gallery: self.$open_gallery, ui_image: self.$ui_image, too_big_img_size: self.$too_big_img_size, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger)
+                ChatMessageListView( socket: self.socket, selected_image: self.$selected_image, image_url: self.$image_url, open_gallery: self.$open_gallery, ui_image: self.$ui_image, too_big_img_size: self.$too_big_img_size, send_again_alert: self.$send_again_alert, show_img_bigger: self.$show_img_bigger, show_profile: self.$show_profile ,selected_user_idx: self.$selected_user_idx)
                     .onTapGesture(perform: {
                         withAnimation{
                             if self.show_menu{
