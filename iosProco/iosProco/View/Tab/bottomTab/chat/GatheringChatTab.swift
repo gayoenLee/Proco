@@ -88,6 +88,18 @@ struct GatheringChatRow : View{
     var promise_day: String{
         String.dot_form_date_string(date_string: gathering_chat.promise_day!)
     }
+    
+    //채팅방 알림 설정
+    var room_alarm_state : Bool{
+        let alarm_state = UserDefaults.standard.string(forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(gathering_chat.chatroom_idx)")
+        
+        if alarm_state == "" || alarm_state == "1"{
+            return true
+        }else{
+            return false
+        }
+    }
+    
     var body: some View{
         
         //카드 1개
@@ -122,12 +134,15 @@ struct GatheringChatRow : View{
                             Text(String(gathering_chat.total_member_num))
                                 .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/22))
                                 .foregroundColor(.gray)
-                            //즐겨찾기, 알림 버튼
+                            
+                            //즐겨찾기, 알림 버튼(알림을 꺼놓은 경우에만 보여줌)
+                            if self.room_alarm_state == false{
                             Button(action: {
                                 
                             }){
-                                Image(systemName: "bell.fill")
+                                Image("chatroom_alarm_off")
                                    
+                            }
                             }
                             Spacer()
                             Text(last_chat_time)
