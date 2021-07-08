@@ -82,6 +82,16 @@ struct FriendChatTabRow : View{
     var promise_day : String{
         String.dot_form_date_string(date_string: friend_chat.promise_day!)
     }
+    //채팅방 알림 설정
+    var room_alarm_state : Bool{
+        let alarm_state = UserDefaults.standard.string(forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(friend_chat.chatroom_idx)")
+        
+        if alarm_state == "" || alarm_state == "1"{
+            return true
+        }else{
+            return false
+        }
+    }
     var body: some View{
         
         //카드 1개
@@ -112,6 +122,7 @@ struct FriendChatTabRow : View{
  
                 }
                 HStack{
+            
                     Text(self.friend_chat.room_name == ""  ? "\(String(describing: self.friend_chat.creator_name!))님과의 약속" : friend_chat.room_name!)
                         .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/20))
                         .foregroundColor(.proco_black)
@@ -121,15 +132,19 @@ struct FriendChatTabRow : View{
                         .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/22))
                         .foregroundColor(.gray)
                     
+                    //채팅방 알림(꺼놓은 경우에만 보여주기)
+                    if self.room_alarm_state == false{
                      Button(action: {
                      }){
-                         Image(systemName: "bell.fill")
+                        Image("chatroom_alarm_off")
                      }
+                    }
                     Spacer()
                 }
                         HStack{
+                            
                                 //마지막 채팅 메시지
-                            Text(friend_chat.last_chat ?? "")
+                            Text(friend_chat.last_chat == "" ? "채팅 내역이 없습니다.": friend_chat.last_chat!)
                                     .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/28))
                                     .foregroundColor(.gray)
                                     .lineLimit(1)
