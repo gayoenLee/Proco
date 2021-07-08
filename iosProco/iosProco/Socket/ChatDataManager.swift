@@ -866,7 +866,8 @@ class ChatDataManager : ObservableObject{
     func read_chat_user(chatroom_idx: Int) {
         SockMgr.socket_manager.user_drawer_struct.removeAll()
         open_db()
-        let query = "SELECT * FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx)"
+        //나가기 이벤트 후 나간 사람은 deleted_at이 추가되는데 이 사람 빼고 가져오는 것
+        let query = "SELECT * FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx) AND deleted_at IS ''"
         var statement: OpaquePointer? = nil
         
         if sqlite3_prepare_v2(self.db, query, -1, &statement, nil) == SQLITE_OK {
@@ -2355,6 +2356,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                     print("-1일떼")
                     //채팅방 정보가 없을 경우 채팅방 idx = -1
                     SockMgr.socket_manager.enter_chatroom_idx = -1
+                   
                     //메세지 보내기 이벤트에서 구분값 위해 값 토글
                     SockMgr.socket_manager.is_first_temp_room = true
                 }else{
@@ -2368,6 +2370,8 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 print("채팅방 정보 존재하는지 가져오는 쿼리에서 SQLITE_DONE: \(sqlite3_step(statement))")
                 //채팅방 정보가 없을 경우 채팅방 idx = -1
                 SockMgr.socket_manager.enter_chatroom_idx = -1
+                //채팅방 메세지 데이터 삭제
+                SockMgr.socket_manager.chat_message_struct.removeAll()
                 //메세지 보내기 이벤트에서 구분값 위해 값 토글
                 SockMgr.socket_manager.is_first_temp_room = true
                 print("채팅방 정보 없음 true")
