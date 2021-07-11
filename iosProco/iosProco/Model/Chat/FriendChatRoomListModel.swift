@@ -12,6 +12,7 @@ import Combine
 struct FriendChatRoomListModel: Identifiable{
     let id = UUID()
     var chatroom_idx : Int
+    var creator_idx : Int? = -1
     var creator_name : String? = ""
     var room_name : String? = ""
     var image : String? = ""
