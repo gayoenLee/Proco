@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 import SQLite3
+import Kingfisher
 
 struct FriendChatTab: View {
     
@@ -92,6 +93,10 @@ struct FriendChatTabRow : View{
             return false
         }
     }
+    
+    let img_processor = DownsamplingImageProcessor(size:CGSize(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/7))
+        |> RoundCornerImageProcessor(cornerRadius: 25)
+    
     var body: some View{
         
         //카드 1개
@@ -99,37 +104,58 @@ struct FriendChatTabRow : View{
             VStack{
                 Spacer()
                 //프로필 이미지
-                Image(friend_chat.image=="" ? "main_profile_img" : friend_chat.image == nil ? "main_profile_img" : friend_chat.image!)
-                    .resizable()
-                    .frame(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/7)
-                    .scaledToFit()
+                if friend_chat.image == "" || friend_chat.image == nil{
+                    Image("main_profile_img")
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width/6.5, height: UIScreen.main.bounds.width/6.5)
+                        .scaledToFit()
+                }else{
+                    KFImage(URL(string: friend_chat.image!))
+                        .loadDiskFileSynchronously()
+                        .cacheMemoryOnly()
+                        .fade(duration: 0.25)
+                        .setProcessor(img_processor)
+                        .onProgress{receivedSize, totalSize in
+                            print("on progress: \(receivedSize), \(totalSize)")
+                        }
+                        .onSuccess{result in
+                            print("성공 : \(result)")
+                        }
+                        .onFailure{error in
+                            print("실패 이유: \(error)")
+                        }
+                }
 
                 Spacer()
             }
           
             //카드 배경 위에 약속 날짜, 프로필 이미지, 이름, 마지막 채팅 메세지, 시간
             VStack{
+                
                 HStack{
-                    Text(promise_day)
-                        .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/27))
-                        .foregroundColor(.proco_black)
+                    if friend_chat.creator_idx! == Int(ChatDataManager.shared.my_idx!){
+                    Image("crown")
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                     
+                 
+                        Text("나(\(friend_chat.creator_name!))의")
+                            .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/28))
+                            .foregroundColor(.proco_black)
+                    }else{
+                        Text("\(friend_chat.creator_name!)의")
+                            .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/28))
+                            .foregroundColor(.proco_black)
+                    }
                     Spacer()
-                    
-                    Text(last_chat_time)
-                        .font(.custom(Font.n_regular, size: UIScreen.main.bounds.width/28))
-                        .foregroundColor(.gray)
- 
                 }
                 HStack{
-            
-                    Text(self.friend_chat.room_name == ""  ? "\(String(describing: self.friend_chat.creator_name!))님과의 약속" : friend_chat.room_name!)
-                        .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/20))
+                    Text("\(promise_day)약속")
+                        .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/23))
                         .foregroundColor(.proco_black)
-                    
                     //채팅방 인원
                     Text(String(friend_chat.total_member_num))
-                        .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/22))
+                        .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/23))
                         .foregroundColor(.gray)
                     
                     //채팅방 알림(꺼놓은 경우에만 보여주기)
@@ -141,23 +167,28 @@ struct FriendChatTabRow : View{
                     }
                     Spacer()
                 }
+         
                         HStack{
                             
                                 //마지막 채팅 메시지
-                            Text(friend_chat.last_chat == "" ? "채팅 내역이 없습니다.": friend_chat.last_chat!)
+                            Text(friend_chat.last_chat == "" ? "채팅내역이 없습니다.": friend_chat.last_chat!)
                                     .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/28))
                                     .foregroundColor(.gray)
                                     .lineLimit(1)
                             
                             Spacer()
                             
+                            Text(last_chat_time)
+                                .font(.custom(Font.n_regular, size: UIScreen.main.bounds.width/32))
+                                .foregroundColor(.gray)
+         
                             //안읽은 메세지 갯수가 없을 때는 보여주지 않는다.
                             if friend_chat.message_num == "" || friend_chat.message_num == "0"{
                                 
                             }else{
                                 Text(friend_chat.message_num!)
                                     .foregroundColor(.proco_white)
-                                    .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/28))
+                                    .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/32))
                                     .frame(width: UIScreen.main.bounds.width/18, height: UIScreen.main.bounds.width/18, alignment: .center)
                                     .background(RoundedRectangle(cornerRadius: 50).foregroundColor(.proco_red))
                             }
