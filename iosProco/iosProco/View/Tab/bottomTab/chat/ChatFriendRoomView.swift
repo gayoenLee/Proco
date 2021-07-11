@@ -49,13 +49,17 @@ struct ChatFriendRoomView: View {
     @State private var selected_user_idx: Int = -1
     
     var user_profile_info : UserInDrawerStruct?{
-        
+
         if self.show_profile{
          let model =   SockMgr.socket_manager.user_drawer_struct.first(where: {
                 $0.user_idx! == self.selected_user_idx
             })
             print("드로어에서 클릭한 유저 정보: \(model)")
-            return model!
+            if model != nil{
+    return model!
+            }else{
+            return nil
+        }
         }else{
             return nil
         }
@@ -85,7 +89,8 @@ struct ChatFriendRoomView: View {
                     Button(action: {
                         print("뒤로가기 클릭")
                         //self.presentation.wrappedValue.dismiss()
-                        self.go_back = true
+                        if self.from_tab{  self.go_back = true}
+                        else{self.presentation.wrappedValue.dismiss()}
                     }){
                         Image("left")
                             .resizable()
@@ -105,7 +110,6 @@ struct ChatFriendRoomView: View {
                             .padding()
                             .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/15))
                             .foregroundColor(.proco_black)
-                        
                     }
                     
                     Spacer()
@@ -118,11 +122,12 @@ struct ChatFriendRoomView: View {
                         print("드로어 보여주는 값: \(self.show_menu)")
                     }){
                         Image("drawer_menu_icon")
+                            .resizable()
+                            .frame(width: 20, height: 16)
                     }
                 }
-                .padding()
+                .padding([.leading, .trailing, .top], UIScreen.main.bounds.width/10)
                
-                
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
                 ChatMessageListView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url: self.$image_url, open_gallery: self.$open_gallery, ui_image: self.$ui_image, too_big_img_size: self.$too_big_img_size, send_again_alert: self.$send_again_alert, show_img_bigger : self.$show_img_bigger, show_profile: self.$show_profile ,selected_user_idx: self.$selected_user_idx)
                     .onTapGesture(perform: {
@@ -137,6 +142,27 @@ struct ChatFriendRoomView: View {
                 NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_user_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: GroupVollehMainViewmodel()), isActive: self.$show_report_view)
                 
             }
+            .onReceive(NotificationCenter.default.publisher(for: Notification.new_message), perform: {value in
+                
+                if let user_info = value.userInfo, let check_result = user_info["banished"]{
+                    print("추방하기 이벤트 노티 친구 룸에서 받음")
+                    
+                    if check_result as! String == "ok"{
+                        
+                        let chatroom_idx = user_info["chatroom_idx"] as! String
+                        let chatroom_idx_int = Int(chatroom_idx)
+                        let user_idx = user_info["banished_user"] as! String
+                        
+                        //추방당한 채팅방 idx가 현재 채팅방인지 && 내가 추방당했는지 체크
+                        if SockMgr.socket_manager.enter_chatroom_idx == chatroom_idx_int && ChatDataManager.shared.my_idx! == user_idx{
+                            
+                            self.go_back = true
+                            
+                        }
+                    }
+                    
+                }
+            })
             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.9)
             .alert(isPresented: self.$too_big_img_size){
                 Alert(title: Text("알림"), message: Text("10MB이상의 이미지는 보낼 수 없습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
@@ -337,7 +363,6 @@ struct ChatFriendRoomView: View {
                     .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)
                     .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.08: UIScreen.main.bounds.width)
             }
-            
             
             //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
             if show_profile{

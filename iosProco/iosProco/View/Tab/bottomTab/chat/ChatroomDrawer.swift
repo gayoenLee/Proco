@@ -474,19 +474,20 @@ struct ChatRoomUserProfileView: View{
                                     self.show_profile.toggle()
                                 }
                             }
-                        
+                        if Int(ChatDataManager.shared.my_idx!) != friend.user_idx!{
                         HStack{
                             Spacer()
                             Image("context_menu_btn")
                                 .resizable()
-                                .frame(width: 4, height: 13)
+                                .frame(width: 15, height: 15)
                         }
                         .onTapGesture {
+                            print("추방하기, 신고하기 액션시트 띄우기 클릭")
                             self.show_context_menu = true
                         }
                         .actionSheet(isPresented: self.$show_context_menu){
                             ActionSheet(title: Text("\(friend.nickname!)님을"), message: Text(""), buttons: //방장에게만 보이는 버튼(닉네임으로 비교)
-                                            ChatDataManager.shared.my_nickname! == SockMgr.socket_manager.creator_nickname ? [ .default(Text("추방하기"), action: {
+                                            Int(ChatDataManager.shared.my_idx!) == SockMgr.socket_manager.creator_idx ? [ .default(Text("추방하기"), action: {
                                 //추방하시겠습니까 알람 띄우기
                                 self.check_banish.toggle()
                                 //추방할 사람의 유저 모델 정보 가져오기
@@ -520,6 +521,7 @@ struct ChatRoomUserProfileView: View{
                             }), secondaryButton: Alert.Button.default(Text("취소"), action: {
                                 self.check_banish.toggle()
                             }))
+                        }
                         }
                         
 //                        HStack{

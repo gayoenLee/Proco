@@ -1300,14 +1300,18 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 let insert_idx = SockMgr.socket_manager.friend_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
                 })
                 //채팅방 주인 이름, 이미지 넣음
+                    SockMgr.socket_manager.friend_chat_model[insert_idx!].creator_idx = user_idx
                 SockMgr.socket_manager.friend_chat_model[insert_idx!].creator_name = nickname
                 SockMgr.socket_manager.friend_chat_model[insert_idx!].image = ""
                 print("방 이름 주인 이름, 이미지 넣었는지 확인: \(SockMgr.socket_manager.friend_chat_model[insert_idx!])")
+                    
                 }else if kinds == "모임"{
                     //집어넣을 데이터의 index찾기
                     let insert_idx = SockMgr.socket_manager.group_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
                     })
                     //채팅방 주인 이름, 이미지 넣음
+                    //채팅방 주인 이름, 이미지 넣음
+                        SockMgr.socket_manager.group_chat_model[insert_idx!].creator_idx = user_idx
                     SockMgr.socket_manager.group_chat_model[insert_idx!].creator_name = nickname
                     SockMgr.socket_manager.group_chat_model[insert_idx!].image = ""
                     print("방 이름 주인 이름, 이미지 넣었는지 확인: \(SockMgr.socket_manager.group_chat_model[insert_idx!])")
@@ -1357,6 +1361,13 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 }
                 let expiration_at = String(cString: expiration_query)
                 
+                //모임 이미지 가져오기
+                guard let image_query = sqlite3_column_text(card_statement, 3) else {
+                    print("친구랑 볼래 채팅방 kinds데이터 가져오는데 nil 임")
+                    return
+                }
+                let card_image = String(cString: image_query)
+                
                 //kinds값이 널일 경우를 체크
                 guard let kinds_query = sqlite3_column_text(card_statement, 4) else {
                     print("친구랑 볼래 채팅방 kinds데이터 가져오는데 nil 임")
@@ -1391,7 +1402,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                     //채팅방 약속날짜, 모임 제목
                     SockMgr.socket_manager.group_chat_model[insert_idx!].promise_day = expiration_at
                     SockMgr.socket_manager.group_chat_model[insert_idx!].room_name = title
-                    
+                    SockMgr.socket_manager.group_chat_model[insert_idx!].image = card_image
                     print("친구랑 볼래 채팅방 모임 제목 넣었는지 확인: \(title)")
                 }
             }else{
@@ -1929,7 +1940,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
 
         self.user_read_list.removeAll()
         var statement : OpaquePointer? = nil
-        let query = "SELECT read_last_idx, user_idx FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx)"
+        let query = "SELECT read_last_idx, user_idx FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx) AND deleted_at IS ''"
         let errmsg = String(cString: sqlite3_errmsg(statement)!)
         
         defer {sqlite3_finalize(statement)}
@@ -2103,7 +2114,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     func delete_exit_user(chatroom_idx: Int, user_idx: Int){
 
        // let deleted_at = self.get_current_time()
-        let query = "UPDATE CHAT_USER SET deleted_at = CURRENT_TIMESTAMP WHERE user_idx = ? AND chatroom_idx = ?"
+        let query = "UPDATE CHAT_USER SET deleted_at = CURRENT_TIMESTAMP WHERE user_idx = \(user_idx) AND chatroom_idx = \(chatroom_idx)"
         var statement: OpaquePointer? = nil
         let errormsg = String(cString: sqlite3_errmsg(statement)!)
         
@@ -2327,7 +2338,8 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     //일반 채팅방 생성 후 대화에서 이미 대화를 하고 있던 내역이 있을 경우를 체크하기 위함.(1:1채팅)
     //TODO 널값 왔을 때 처리 추가적으로 해야함.
     func check_chat_already(my_idx: Int, friend_idx: Int, nickname: String){
-
+        print("임시  채팅방인지 체크에서 파라미터 : 내거: \(my_idx), 친구: \(friend_idx), \(nickname)")
+        
         let query = """
         SELECT CHAT_USER.chatroom_idx
     FROM CHAT_USER LEFT JOIN CHAT_ROOM
@@ -2343,8 +2355,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
         let errormsg = String(cString: sqlite3_errmsg(statement)!)
         
         if sqlite3_prepare_v2(self.db, query, -1, &statement, nil) == SQLITE_OK{
-            print("채팅방 정보 존재하는지 가져오는 쿼리 my_idx: \(my_idx)")
-            print("채팅방 정보 존재하는지 가져오는 쿼리 friend_idx: \(friend_idx)")
+            print("채팅방 정보 존재하는지 가져오는 쿼리 my_idx: \(my_idx), friend_idx \(friend_idx)")
             
             switch sqlite3_step(statement) {
             case SQLITE_ROW:
@@ -2369,6 +2380,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 break
             case SQLITE_DONE:
                 print("채팅방 정보 존재하는지 가져오는 쿼리에서 SQLITE_DONE: \(sqlite3_step(statement))")
+               
                 //채팅방 정보가 없을 경우 채팅방 idx = -1
                 SockMgr.socket_manager.enter_chatroom_idx = -1
                 //채팅방 메세지 데이터 삭제
@@ -3003,7 +3015,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     
     //채팅방별 총 인원수 가져오기
     func get_members_in_chatroom(chatroom_idx: Int, kinds: String){
-        let query = "SELECT COUNT(user_idx) FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx)"
+        let query = "SELECT COUNT(user_idx) FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx) AND deleted_at = ''"
         print("쿼리문 확인: \(query)")
         var stmt: OpaquePointer? = nil
         let errormsg = String(cString: sqlite3_errmsg(stmt)!)
@@ -3192,12 +3204,12 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     }
     
     //유저 한 명의 read last idx가져오기
-    func get_friend_unread_num(chatroom_idx: Int, user_idx: Int){
+    func get_friend_unread_num(chatroom_idx: Int, user_idx: Int) {
        
         var statement : OpaquePointer? = nil
         let query = "SELECT chatroom_idx, user_idx, read_last_idx FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx) AND user_idx = \(user_idx) AND deleted_at IS ''"
         let errmsg = String(cString: sqlite3_errmsg(statement)!)
-        
+      //  var unread_num: Int? = -1
         if sqlite3_prepare_v2(self.db, query, -1, &statement, nil) == SQLITE_OK{
             print("유저 한 명의 read last idx가져오기 prepare들어옴: \(query)")
            
@@ -3206,7 +3218,9 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 
                 let read_last_idx = Int(sqlite3_column_int(statement, 2))
                 print("업데이트 전 user read list: \(self.user_read_list)")
-
+                
+               // unread_num = read_last_idx
+                
                 if self.user_read_list.contains(read_last_idx){
                   let remove_idx =  self.user_read_list.firstIndex(where: {
                         $0 == read_last_idx
@@ -3214,7 +3228,6 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                     self.user_read_list.remove(at: remove_idx)
                 }
                 print("업데이트한 user read list: \(self.user_read_list)")
-                
             case SQLITE_DONE:
                 print("유저 한 명의 read last idx가져오기 DONE")
                 break
@@ -3223,9 +3236,12 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
             }
             }else{
                 print("유저 한 명의 read last idx가져오기 결과: \(errmsg)")
+                //..return nil
             }
         sqlite3_finalize(statement)
         sqlite3_close(statement)
+        
+            //  return unread_num
     }
 }
     

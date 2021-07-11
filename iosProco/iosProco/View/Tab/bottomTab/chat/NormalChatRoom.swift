@@ -62,15 +62,29 @@ struct NormalChatRoom: View {
     
     var creator_name : String?{
         if SockMgr.socket_manager.user_drawer_struct.count > 0{
+            print("유저 드로어 모델 데이터 : \(SockMgr.socket_manager.user_drawer_struct)")
             
-      let nickname =  SockMgr.socket_manager.user_drawer_struct.filter({
+            let nickname : [UserInDrawerStruct]?
+            nickname  =  SockMgr.socket_manager.user_drawer_struct.filter({
           
             return $0.user_idx != Int(ChatDataManager.shared.my_idx!)
             
-        }).map({$0.nickname})
+            })
             
-            return nickname[0]!
+            if nickname?.count ?? 0 > 0{
+                print("닉네임값 있을 때: \(nickname)")
+                let friend_nickname = SockMgr.socket_manager.user_drawer_struct.filter({
+                    
+                    return $0.user_idx != Int(ChatDataManager.shared.my_idx!)
+                    
+                    }).map({$0.nickname ?? ""})
+                return friend_nickname[0]
+            }else{
+                print("닉네임값 없을 때)")
+                return nil
+            }
         }else{
+            print("user drawer struct데이터 없을 때")
          let nickname = self.socket.temp_chat_friend_model.nickname
            return nickname
         }
@@ -84,7 +98,11 @@ struct NormalChatRoom: View {
                 $0.user_idx! == self.selected_user_idx
             })
             print("드로어에서 클릭한 유저 정보: \(model)")
-            return model!
+            if model != nil{
+    return model!
+            }else{
+            return nil
+        }
         }else{
             return nil
         }

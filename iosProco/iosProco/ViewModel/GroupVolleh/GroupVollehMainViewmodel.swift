@@ -710,7 +710,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     }
                     //card
                     let created_at = ChatDataManager.shared.make_created_at()
-                    ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: type as! String, card_photo_path: "", lock_state: 0, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
+                    ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: type as! String, card_photo_path: response.card_photo_path ?? "", lock_state: 0, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
                     
                     //3.소켓으로 데이터 보내기
                     SockMgr.socket_manager.make_chat_room_friend(chatroom_idx: response.chatroom_idx, idx: idx!, nickname: self.my_nickname)

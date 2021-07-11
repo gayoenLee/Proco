@@ -285,7 +285,15 @@ private extension FriendVollehCardDetail{
                 let kind = user_info["kind"]  as! String
                 print("참여 수락 완료 이벤트 받음: \(check_result)")
                 if kind == "친구"{
-                    print("친구 카드에 초대한 경우 뷰 이동 노티 받음")
+                    print("친구 카드에 초대한 경우 뷰 이동 노티 받음: \(socket_manager.enter_chatroom_idx)")
+                    socket_manager.enter_chatroom_idx = socket_manager.invite_chatroom_idx
+                    print("초대돼서 이동하는 채팅방: \(socket_manager.enter_chatroom_idx), \(socket_manager.invite_chatroom_idx)")
+                    //2.chat_user테이블에서 데이터 꺼내오기(채팅방입장시 user read이벤트 보낼 때 사용.)
+                    ChatDataManager.shared.get_info_for_unread(chatroom_idx: socket_manager.invite_chatroom_idx)
+                    //친구랑 볼래 - 채팅방 읽음 처리 위해서 해당 채팅방의 마지막 메세지의 idx 가져오기(채팅방 1개 클릭시 입장하기 전에)
+                    ChatDataManager.shared.get_last_message_idx(chatroom_idx: socket_manager.invite_chatroom_idx)
+                    
+                    ChatDataManager.shared.read_chatroom(chatroom_idx: socket_manager.invite_chatroom_idx)
                     self.go_invited_room.toggle()
                     
                 }else{
@@ -401,7 +409,7 @@ private extension FriendVollehCardDetail{
             Button(action: {
                 
                 print("일대일 채팅하기 클릭 내 idx: \(Int(main_vm.my_idx!)!)")
-                print("일대일 채팅하기 클릭 친구 idx: \(String(describing: main_vm.friend_volleh_card_detail.creator.idx))")
+                print("일대일 채팅하기 클릭 친구 idx: \(String(describing: main_vm.friend_volleh_card_detail.creator.idx)), 닉네임: \(main_vm.friend_volleh_card_detail.creator.nickname)")
                 //채팅하려는 친구의 idx값 저장해두기
                 socket.temp_chat_friend_model = UserChatInListModel(idx: main_vm.friend_volleh_card_detail.creator.idx, nickname: main_vm.friend_volleh_card_detail.creator.nickname, profile_photo_path: main_vm.friend_volleh_card_detail.creator.profile_photo_path ?? "")
                 
