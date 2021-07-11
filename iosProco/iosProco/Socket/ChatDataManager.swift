@@ -1300,14 +1300,18 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 let insert_idx = SockMgr.socket_manager.friend_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
                 })
                 //채팅방 주인 이름, 이미지 넣음
+                    SockMgr.socket_manager.friend_chat_model[insert_idx!].creator_idx = user_idx
                 SockMgr.socket_manager.friend_chat_model[insert_idx!].creator_name = nickname
                 SockMgr.socket_manager.friend_chat_model[insert_idx!].image = ""
                 print("방 이름 주인 이름, 이미지 넣었는지 확인: \(SockMgr.socket_manager.friend_chat_model[insert_idx!])")
+                    
                 }else if kinds == "모임"{
                     //집어넣을 데이터의 index찾기
                     let insert_idx = SockMgr.socket_manager.group_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx
                     })
                     //채팅방 주인 이름, 이미지 넣음
+                    //채팅방 주인 이름, 이미지 넣음
+                        SockMgr.socket_manager.group_chat_model[insert_idx!].creator_idx = user_idx
                     SockMgr.socket_manager.group_chat_model[insert_idx!].creator_name = nickname
                     SockMgr.socket_manager.group_chat_model[insert_idx!].image = ""
                     print("방 이름 주인 이름, 이미지 넣었는지 확인: \(SockMgr.socket_manager.group_chat_model[insert_idx!])")
@@ -1357,6 +1361,13 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                 }
                 let expiration_at = String(cString: expiration_query)
                 
+                //모임 이미지 가져오기
+                guard let image_query = sqlite3_column_text(card_statement, 3) else {
+                    print("친구랑 볼래 채팅방 kinds데이터 가져오는데 nil 임")
+                    return
+                }
+                let card_image = String(cString: image_query)
+                
                 //kinds값이 널일 경우를 체크
                 guard let kinds_query = sqlite3_column_text(card_statement, 4) else {
                     print("친구랑 볼래 채팅방 kinds데이터 가져오는데 nil 임")
@@ -1391,7 +1402,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
                     //채팅방 약속날짜, 모임 제목
                     SockMgr.socket_manager.group_chat_model[insert_idx!].promise_day = expiration_at
                     SockMgr.socket_manager.group_chat_model[insert_idx!].room_name = title
-                    
+                    SockMgr.socket_manager.group_chat_model[insert_idx!].image = card_image
                     print("친구랑 볼래 채팅방 모임 제목 넣었는지 확인: \(title)")
                 }
             }else{
@@ -3004,7 +3015,7 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     
     //채팅방별 총 인원수 가져오기
     func get_members_in_chatroom(chatroom_idx: Int, kinds: String){
-        let query = "SELECT COUNT(user_idx) FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx)"
+        let query = "SELECT COUNT(user_idx) FROM CHAT_USER WHERE chatroom_idx = \(chatroom_idx) AND deleted_at = ''"
         print("쿼리문 확인: \(query)")
         var stmt: OpaquePointer? = nil
         let errormsg = String(cString: sqlite3_errmsg(stmt)!)
