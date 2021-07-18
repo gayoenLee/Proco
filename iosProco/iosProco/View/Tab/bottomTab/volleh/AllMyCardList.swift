@@ -61,7 +61,7 @@ struct AllMyCardList: View {
                     
                 }.padding(.leading)
                 
-                
+                if SockMgr.socket_manager.friend_card.count > 0 {
                 ForEach(SockMgr.socket_manager.friend_card){card in
                     RoundedRectangle(cornerRadius: 25.0)
                         .foregroundColor(.proco_white)
@@ -88,6 +88,11 @@ struct AllMyCardList: View {
                             self.see_freind_card_detail.toggle()
                         }
                 }
+                }else{
+                    Text("내가 만든 친구 카드가 없어요")
+                        .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/20))
+                        .foregroundColor(.proco_black)
+                }
                 
                 
                 HStack{
@@ -98,7 +103,7 @@ struct AllMyCardList: View {
                     
                 }
                 .padding(.leading)
-                
+                if SockMgr.socket_manager.group_card.count > 0 {
                 ForEach(SockMgr.socket_manager.group_card){card in
                     
                     RoundedRectangle(cornerRadius: 25.0)
@@ -126,6 +131,11 @@ struct AllMyCardList: View {
                             self.see_group_card_detail.toggle()
                             
                         }
+                }
+                }else{
+                    Text("내가 만든 모임 카드가 없어요")
+                        .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/20))
+                        .foregroundColor(.proco_black)
                 }
             }
             
