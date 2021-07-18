@@ -24,8 +24,6 @@ struct FriendStateDialog: View {
     var is_friend : Bool
     //신고하기 클릭시 신고하는 팝업창 띄우기
     @State private var show_report_view : Bool = false
-    //채팅방 목록에서 회원 클릭 후 다이얼로그에서만 신고 가능함.
-    var is_from_chatroom : Bool
     
     var body: some View {
         
@@ -38,7 +36,7 @@ struct FriendStateDialog: View {
                         //모달 컨텐츠를 포함하고 있는 큰 사각형. 색깔 투명하게 하기 위함.
                         .foregroundColor(.clear)
                         .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.07)
-                        .overlay(FriendStateDialogContents(calendar_vm: self.calendar_vm, main_vm: self.main_vm,group_main_vm: self.group_main_vm, show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed, state_on: self.$state_on, is_friend: self.is_friend, show_report_view: self.$show_report_view, is_from_chatroom: is_from_chatroom)
+                        .overlay(FriendStateDialogContents(calendar_vm: self.calendar_vm, main_vm: self.main_vm,group_main_vm: self.group_main_vm, show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed, state_on: self.$state_on, is_friend: self.is_friend, show_report_view: self.$show_report_view)
                                     .offset(x: UIScreen.main.bounds.width*0.009, y: UIScreen.main.bounds.height * 0.05))
                 )
         }
@@ -71,7 +69,6 @@ struct FriendStateDialogContents : View{
     let scale = UIScreen.main.scale
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 50, height: 50)) |> RoundCornerImageProcessor(cornerRadius: 25)
     @Binding var show_report_view : Bool
-    var is_from_chatroom : Bool
     
     var body: some View{
         VStack{
@@ -86,19 +83,17 @@ struct FriendStateDialogContents : View{
                     }
                     .padding(.leading)
                 
-                //채팅방 목록 안에서만 유저 신고 가능.
-                if is_from_chatroom{
-                    HStack{
-                        Spacer()
-                        Image("context_menu_icon")
-                            .resizable()
-                            .frame(width: 5, height: 15)
-                    }
-                    .onTapGesture{
-                        print("신고하기 클릭")
-                        self.show_report_view = true
-                    }
+                HStack{
+                    Spacer()
+                    Image("context_menu_icon")
+                        .resizable()
+                        .frame(width: 5, height: 15)
                 }
+                .onTapGesture{
+                    print("신고하기 클릭")
+                    self.show_report_view = true
+                }
+                
             }
             .padding([.leading, .trailing])
             
@@ -319,7 +314,7 @@ struct FriendStateDialogContents : View{
                     Divider()
                     Spacer()
                     
-                    if Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
+                    if Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx! && self.main_vm.friend_info_struct.state != nil{
                         
                         Text("상태")
                             .foregroundColor(Color.proco_black)
