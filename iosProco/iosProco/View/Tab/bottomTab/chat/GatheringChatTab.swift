@@ -94,10 +94,11 @@ struct GatheringChatRow : View{
     var room_alarm_state : Bool{
         let alarm_state = UserDefaults.standard.string(forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(gathering_chat.chatroom_idx)")
         
-        if alarm_state == "" || alarm_state == "1"{
-            return true
-        }else{
+        //알람 꺼진 상태일 때
+        if alarm_state == "0"{
             return false
+        }else{
+            return true
         }
     }
     let img_processor = DownsamplingImageProcessor(size:CGSize(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/7))
