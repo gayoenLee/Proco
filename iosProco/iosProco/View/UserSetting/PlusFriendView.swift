@@ -9,7 +9,8 @@ import SwiftUI
 import Kingfisher
 
 struct PlusFriendView: View {
-    
+    @Environment(\.presentationMode) var presentation
+
     @ObservedObject var manage_vm : ManageFriendViewModel
     @State private var go_add_phone_number_view : Bool = false
 
@@ -23,7 +24,7 @@ struct PlusFriendView: View {
                 
                 Button(action: {
                     print("돌아가기 클릭")
-                    
+                    self.presentation.wrappedValue.dismiss()
                 }){
                     Image("left")
                         .resizable()
@@ -62,6 +63,10 @@ struct PlusFriendView: View {
             }.padding()
             ScrollView{
                 VStack{
+                    
+                    if self.manage_vm.enrolled_friends_model.count > 0 && self.manage_vm.contacts_model.count > 0{
+                        
+                    
                     //친구 요청 보낼 친구 리스트
                     ForEach(self.manage_vm.enrolled_friends_model){friend in
                         ManageEnrolledFriendRow(manage_vm: self.manage_vm, friend_model: friend, request_fail: self.$request_fail)
@@ -70,6 +75,21 @@ struct PlusFriendView: View {
                     //초대문자 보낼 친구 리스트
                     ForEach(self.manage_vm.contacts_model){friend in
                         ManageAddressBookFriendRow(manage_vm: self.manage_vm, friend_model: friend, request_fail: self.$request_fail)
+                    }
+                    }else{
+                        Spacer()
+
+                        HStack{
+                            Spacer()
+                        Text("추천 친구가 없습니다.")
+                            .font(.custom(Font.n_extra_bold, size: 18))
+                            .foregroundColor(Color.proco_black)
+                            
+                            Spacer()
+
+                        }
+                        Spacer()
+
                     }
                 }
             }
