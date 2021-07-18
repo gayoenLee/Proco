@@ -11,7 +11,7 @@ import Combine
 
 struct PlusFriendNumber: View {
     @Environment(\.presentationMode) var presentationMode
-
+    
     @ObservedObject var viewmodel: ManageFriendViewModel
     
     //추가할 친구를 검색한 후 결과를 보여줄 데이터 모델
@@ -57,7 +57,7 @@ struct PlusFriendNumber: View {
                             //해당 번호가 내 번호인지, 이미 친구인 사람인지, 없는 번호인지 체크
                             viewmodel.add_friend_number_check()
                             //
-                            self.viewmodel.request_result_alert_func(viewmodel.request_result_alert)
+                            //                            self.viewmodel.request_result_alert_func(viewmodel.request_result_alert)
                             
                             
                         }){
@@ -107,8 +107,8 @@ struct PlusFriendNumber: View {
             }
             
             //아직 통신을 하지 않아서 데이터가 들어가지 않은 경우 아무것도 보여주지 않는 예외처리 진행해야 처음 뷰 그릴 때 오류 안뜸
-            if self.plus_friend_search_result.idx
-                == nil{
+            if self.viewmodel.add_friend_check_struct.idx
+                == -1{
                 
             }else{
                 HStack{
@@ -180,7 +180,7 @@ struct PlusFriendNumber: View {
                                     
                                     viewmodel.add_friend_number_last()
                                     print("친구추가하기 버튼 클릭")
-                                    viewmodel.request_result_alert_func(viewmodel.request_result_alert)
+                                    //                                    viewmodel.request_result_alert_func(viewmodel.request_result_alert)
                                 }){
                                     
                                     HStack{
@@ -195,7 +195,7 @@ struct PlusFriendNumber: View {
                                     
                                 }
                             )
-                         
+                        
                     }
                 }
             }
@@ -232,6 +232,11 @@ struct PlusFriendNumber: View {
             case .fail:
                 return Alert(title: Text("친구 추가하기"), message: Text("다시 시도해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
                     self.requested_friend = false
+                    
+                }))
+            default:
+                return Alert(title: Text("친구 추가하기"), message: Text("완료"), dismissButton: Alert.Button.default(Text("확인"), action: {
+                    
                 }))
             }
         }
@@ -254,7 +259,22 @@ struct PlusFriendNumber: View {
                 print("친구 리스트 모두 가져온 노티 응답 실패: .")
             }
         }
-        
+        .onReceive(NotificationCenter.default.publisher(for: Notification.request_friend), perform: {value in
+            
+            if let user_info = value.userInfo{
+                let check_result = user_info["request_friend_manage"]
+                print("친구 취소 데이터 확인: \(String(describing: check_result))")
+                
+                if check_result as! String == "canceled_ok"{
+                    //친구 취소가 완료되면 다시 친구요청버튼이 보이도록 하기위해 false로변경
+                    requested_friend  = false
+                }
+                else{
+                    requested_friend = true
+                }
+            }
+            
+        })
     }
 }
 
