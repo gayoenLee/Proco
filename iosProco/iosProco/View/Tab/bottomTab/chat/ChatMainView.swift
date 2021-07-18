@@ -10,7 +10,7 @@ import UserNotifications
 
 struct ChatMainView: View {
     
-    @State private var selectedTab = 0
+    @State private var selectedTab = SockMgr.socket_manager.selected_tab
     
     var body: some View {
         NavigationView{
@@ -50,7 +50,7 @@ struct ChatMainView: View {
             .navigationBarHidden(true)
             .onAppear{
                 
-                selectedTab = 0
+                selectedTab = SockMgr.socket_manager.selected_tab
                 //새로운 채팅 메세지가 왔을 때 어떤 뷰에 있느냐에 따라 노티피케이션을 띄워주는게 다르기 때문에 알기 위해 사용.
                 //채팅 목록 페이지 : 222, 채팅방 안: 333(기본: 111)
                 SockMgr.socket_manager.current_view = 222

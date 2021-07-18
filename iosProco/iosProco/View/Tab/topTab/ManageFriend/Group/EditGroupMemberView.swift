@@ -40,6 +40,7 @@ struct EditGroupMemberView: View {
     @State var end_add_group_member = false
     
     var body: some View {
+        NavigationView{
         VStack {
             
             HStack{
@@ -62,9 +63,6 @@ struct EditGroupMemberView: View {
                 Spacer()
                 
             }
-            //아래 코드 필요 없는 것 같음*************************그냥 presentaion사용하기 때문.
-            //그룹 멤버 편집 성공시 그룹 상세 페이지로 돌아감.
-            NavigationLink("",destination: GroupDetailView(detail_group_vm: self.detail_vm, manage_vm: self.manage_vm, friend_model: self.friend_model), isActive: $end_add_group_member)
             
             Group{
                 
@@ -94,15 +92,13 @@ struct EditGroupMemberView: View {
         }
             Button(action: {
                 //뷰모델의 값에 선택한 친구들 배열 값 넣기
-                self.detail_vm.updated_friend_list = Array(detail_vm.selected_friend_set)
-                print("그룹 멤버 편집 뷰에서 업데이트한 친구 리스트 확인 : \(self.detail_vm.updated_friend_list)")
+                self.detail_vm.updated_friend_list = Array(detail_vm.temp_selected_friend_set)
                 
                 //***************************편집 통신 편집하려는 그룹의 idx값은 상세 페이지 뷰모델에 저장했던 값 사용.
                 detail_vm.edit_group_member(group_idx: self.current_group_idx, friends_idx: detail_vm.updated_friend_list)
                 
-                print("그룹 멤버 편집 화면 전환 토글 값 true")
-                self.presentationMode.wrappedValue.dismiss()
-                
+                    print("그룹 멤버 편집 화면 전환 토글 값 true")
+                    self.presentationMode.wrappedValue.dismiss()
               //통신 성공해서 ok가 아닐 경우 예외처리 해야함.**********************************
             }) {
                 Text("확인")
@@ -125,11 +121,11 @@ struct EditGroupMemberView: View {
             
             //내 모든 친구 목록 가져오기 통신
             detail_vm.get_friend_list_and_fetch()
-            
         }
         .onDisappear{
            // detail_vm.get_friend_list_and_fetch()
             
+        }
         }
     }
 }
@@ -144,7 +140,7 @@ struct EditFriendRow : View{
     //친구를 선택했는지 알 수 있는 변수 - selected_friend_set은 그룹 상세 데이터 가져왔을 때 저장해놓은 것.
     var is_selected: Bool {
         //선택했는지는 selected리스트 안에 담겨 있냐에 따라 결정됨.
-        self.viewmodel.selected_friend_set.contains(friend_model.idx ?? -1)
+        self.viewmodel.temp_selected_friend_set.contains(friend_model.idx ?? -1)
     }
     
     //친구 검색창에 사용하는 변수
@@ -201,15 +197,15 @@ struct EditFriendRow : View{
                             Button(action: {
                                 print("버튼 클릭")
                                 if self.is_selected{
-                                    print("제거된 값 확인 : \(self.viewmodel.selected_friend_set)")
+                                    print("제거된 값 확인 : \(self.viewmodel.temp_selected_friend_set)")
                                     print("제거된 이름 확인 : \(String(describing: self.friend_model.nickname))")
-                                    self.viewmodel.selected_friend_set.remove(self.friend_model.idx ?? 88)
+                                    self.viewmodel.temp_selected_friend_set.remove(self.friend_model.idx ?? -1)
                                 }
                                 else if self.is_selected == false{
-                                    print("추가된 값 확인 : \(self.viewmodel.selected_friend_set)")
+                                    print("추가된 값 확인 : \(self.viewmodel.temp_selected_friend_set)")
                                     print("추가된 이름 확인 : \(String(describing: self.friend_model.nickname))")
                                     
-                                    self.viewmodel.selected_friend_set.insert(self.friend_model.idx ?? 77)
+                                    self.viewmodel.temp_selected_friend_set.insert(self.friend_model.idx ?? -1)
                                 }
                             }){
                                 if self.is_selected{
@@ -277,10 +273,10 @@ struct EditFriendRow : View{
                         Button(action: {
                             print("버튼 클릭")
                             if self.is_selected{
-                                self.viewmodel.selected_friend_set.remove(self.friend_model.idx ?? 0 )
+                                self.viewmodel.temp_selected_friend_set.remove(self.friend_model.idx ?? 0 )
                             }
                             else if self.is_selected == false{
-                                self.viewmodel.selected_friend_set.insert(self.friend_model.idx ?? 0 )
+                                self.viewmodel.temp_selected_friend_set.insert(self.friend_model.idx ?? 0 )
                             }
                         }){
                             if self.is_selected{

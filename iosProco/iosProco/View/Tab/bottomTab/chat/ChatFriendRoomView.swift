@@ -89,7 +89,11 @@ struct ChatFriendRoomView: View {
                     Button(action: {
                         print("뒤로가기 클릭")
                         //self.presentation.wrappedValue.dismiss()
-                        if self.from_tab{  self.go_back = true}
+                        if self.from_tab{
+                            SockMgr.socket_manager.selected_tab = 1
+                            self.go_back = true
+                            
+                        }
                         else{self.presentation.wrappedValue.dismiss()}
                     }){
                         Image("left")
@@ -301,6 +305,10 @@ struct ChatFriendRoomView: View {
                 
                 //내가 마지막으로 읽은 메세지 최신 메세지idx로 업데이트(나)
                 ChatDataManager.shared.update_user_read(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx, read_last_idx: ChatDataManager.shared.last_message_idx, user_idx: my_idx!, updated_at: updated_at)
+                
+                
+                //뷰모델에도 내가 가장 마지막으로 읽은 메세지 업데이트 하기
+                ChatDataManager.shared.read_last_message = ChatDataManager.shared.last_message_idx
                 
                 //새로운 채팅 메세지가 왔을 때 어떤 뷰에 있느냐에 따라 노티피케이션을 띄워주는게 다르기 때문에 알기 위해 사용.
                 //채팅 목록 페이지 : 222, 채팅방 안: 333(기본: 111)

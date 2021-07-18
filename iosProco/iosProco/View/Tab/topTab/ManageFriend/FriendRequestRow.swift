@@ -25,31 +25,13 @@ struct FriendRequestRow: View{
             
             Spacer()
             HStack{
-                if request_struct.processed == ""{
+                if request_struct.processed == "" || request_struct.processed == nil{
                     //수락, 거절 버튼
                     accept_btn
+              
                     
                     decline_btn
-                        .alert(isPresented: $manage_viewmodel.show_alert_now){
-                            switch manage_viewmodel.active_alert{
-                            case .accept:
-                                return Alert(title: Text("친구 신청"), message: Text("친구 신청을 수락하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
-                                    //확인 눌렀을 때 통신 시작
-                                    manage_viewmodel.accept_friend_request()
-                                    //후에 통신이 끝났을 때 다시 alert창 띄우기
-                                    
-                                }), secondaryButton: Alert.Button.default(Text("취소"), action: {
-                                    
-                                }))
-                            case .decline:
-                                return Alert(title: Text("친구 신청"), message: Text("친구 신청을 거절하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
-                                    //확인 눌렀을 때 통신 시작
-                                    manage_viewmodel.decline_friend_request()
-                                }), secondaryButton: Alert.Button.default(Text("취소"), action: {
-                                    
-                                }))
-                            }
-                        }
+                 
                 }else{
                     if request_struct.processed == "수락됨"{
                         accepted_btn
@@ -126,12 +108,12 @@ extension FriendRequestRow{
             .overlay(
                 Button(action: {
                     //신청한 친구의 idx값 뷰모델에 저장하고 다시 한 번 alert창 띄우기
-                    manage_viewmodel.selected_friend_request_idx = self.request_struct.idx!
-                    print("수락하려는 친구의 idx저장했는지 확인 : \(manage_viewmodel.selected_friend_request_idx)")
-                    
-                    print("수락하려는 리스트 row idx값 받았는지 확인  \(row_index)")
-                    manage_viewmodel.selected_friend_request_row = row_index
-                    print("수락하려는 리스트 row의 idx값 저장했는지 확인 : \(manage_viewmodel.selected_friend_request_row)")
+                                       manage_viewmodel.selected_friend_request_idx = self.request_struct.idx!
+                                       print("수락하려는 친구의 idx저장했는지 확인 : \(manage_viewmodel.selected_friend_request_idx)")
+                                       
+                                       print("수락하려는 리스트 row idx값 받았는지 확인  \(row_index)")
+                                       manage_viewmodel.selected_friend_request_row = row_index
+                                       print("수락하려는 리스트 row의 idx값 저장했는지 확인 : \(manage_viewmodel.selected_friend_request_row)")
                     //수락하려는 리스트의 row값 저장해서 delete할 때 사용
                     manage_viewmodel.show_alert(.accept)
                     
@@ -140,6 +122,27 @@ extension FriendRequestRow{
                         .font(.custom(Font.n_bold, size: 13))
                         .foregroundColor(Color.proco_blue)
                 })
+            .alert(isPresented: $manage_viewmodel.show_alert_now){
+                switch manage_viewmodel.active_alert{
+                case .accept:
+                    return Alert(title: Text("친구 신청"), message: Text("친구 신청을 수락하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
+                        //확인 눌렀을 때 통신 시작
+                        manage_viewmodel.accept_friend_request()
+                        //후에 통신이 끝났을 때 다시 alert창 띄우기
+                        
+                    }), secondaryButton: Alert.Button.default(Text("취소"), action: {
+                        
+                    }))
+                case .decline:
+                    return Alert(title: Text("친구 신청"), message: Text("친구 신청을 거절하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
+                        //확인 눌렀을 때 통신 시작
+                        manage_viewmodel.decline_friend_request()
+                    }), secondaryButton: Alert.Button.default(Text("취소"), action: {
+                        
+                    }))
+                }
+            }
+        
     }
     
     var decline_btn : some View{
@@ -180,5 +183,25 @@ extension FriendRequestRow{
                     .font(.custom(Font.n_bold, size: 13))
                     .foregroundColor(Color.gray)
             )
+            .alert(isPresented: $manage_viewmodel.show_alert_now){
+                switch manage_viewmodel.active_alert{
+                case .accept:
+                    return Alert(title: Text("친구 신청"), message: Text("친구 신청을 수락하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
+                        //확인 눌렀을 때 통신 시작
+                        manage_viewmodel.accept_friend_request()
+                        //후에 통신이 끝났을 때 다시 alert창 띄우기
+                        
+                    }), secondaryButton: Alert.Button.default(Text("취소"), action: {
+                        
+                    }))
+                case .decline:
+                    return Alert(title: Text("친구 신청"), message: Text("친구 신청을 거절하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
+                        //확인 눌렀을 때 통신 시작
+                        manage_viewmodel.decline_friend_request()
+                    }), secondaryButton: Alert.Button.default(Text("취소"), action: {
+                        
+                    }))
+                }
+            }
     }
 }

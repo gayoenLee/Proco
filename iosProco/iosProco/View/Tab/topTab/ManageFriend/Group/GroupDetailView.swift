@@ -42,11 +42,11 @@ struct GroupDetailView: View {
     
     @State private var ask_delete_group : Bool = false
     
+    //친구 목록 보여주는데 텀 주기 위해 사용.
+    @State private var show_friends_list : Bool = false
+    
     var body: some View {
         VStack{
-            
-            //친구 추가하기 클릭시
-            NavigationLink("",destination: EditGroupMemberView(manage_vm: self.manage_vm, detail_vm: self.detail_group_vm, friend_model: friend_model, current_group_idx: manage_vm.detail_group_idx), isActive: self.$go_to_edit_member)
             
             //그룹 삭제하기 후 친구관리 메인 페이지로 이동
             NavigationLink("",destination: ManageFriendListView(detail_group_vm: self.detail_group_vm), isActive: self.$delete_group_ok)
@@ -108,12 +108,24 @@ struct GroupDetailView: View {
                             .foregroundColor(.gray)
                         
                     }else{
-                        //그룹에 속한 친구들의 데이터 갯수만큼 foreach반복
-                        ForEach(self.group_detail_friends){ friend in
-                            
-                            GroupMemberRowView(group_detail_struct: friend)
-                                .padding(.leading)
+                        if show_friends_list{
+                            if detail_group_vm.selected_friend_set.count > 0{
+                            //그룹에 속한 친구들의 데이터 갯수만큼 foreach반복
+                            ForEach(detail_group_vm.show_selected_member()){ friend in
+                                
+                                GroupMemberRowView(group_detail_struct: friend)
+                                    .padding(.leading)
+                            }
+                            }else{
+                                Text("아직 멤버가 없습니다.")
+                                    .font(.custom(Font.n_bold, size: 16))
+                                    .foregroundColor(.gray)
+                            }
+                        }else{
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
                         }
+             
                     }
             
             //그룹 멤버 편집하기로 이동하는 버튼
@@ -150,6 +162,9 @@ struct GroupDetailView: View {
             .padding(.leading)
             Spacer()
         }
+        .sheet(isPresented: self.$go_to_edit_member, content: {
+            EditGroupMemberView(manage_vm: self.manage_vm, detail_vm: self.detail_group_vm, friend_model: friend_model, current_group_idx: manage_vm.detail_group_idx)
+        })
         .popover(isPresented: self.$go_to_edit_name, content: {
             
             EditManageGroupNameView(main_vm: self.detail_group_vm, manage_vm: self.manage_vm, current_group_idx: self.manage_vm.detail_group_idx, friend_model: self.friend_model, edit_group_name_ok: self.$go_to_edit_name)
@@ -174,7 +189,7 @@ struct GroupDetailView: View {
             }
         })
         .onReceive(NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
-            print("그룹관리 - 친구 리스트 가져온 이벤트 받음")
+            print("그룹관리 - 그룹 삭제 완료 이벤트 받음")
             
             if let user_info = value.userInfo, let data = user_info["delete_group"]{
                 print("그룹 삭제 완료 노티 받음")
@@ -201,16 +216,33 @@ struct GroupDetailView: View {
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
         .onAppear{
+            print("*******그룹 상세 페이지 나타남****이전 페이지에서 받은 그룹 이름: \(detail_group_vm.edit_group_name)********************************, 모든 친구 리스트: \(self.detail_group_vm.friend_list_struct)")
             
-            print("*******그룹 상세 페이지 나타남****이전 페이지에서 받은 그룹 이름: \(detail_group_vm.edit_group_name)********************************")
-            
-            //그룹 상세 페이지 데이터 - 해당 그룹에 속한 친구 리스트 가져오는 통신
-            detail_group_vm.get_group_detail_and_fetch(group_idx: manage_vm.detail_group_idx)
+            self.detail_group_vm.get_friend_list_and_fetch()
         }
         .onDisappear{
             print("*******그룹 상세 페이지 사라짐****************************************************")
+            //self.manage_vm.detail_group_idx = -1
+            self.detail_group_vm.selected_friend_set.removeAll()
+            self.detail_group_vm.temp_selected_friend_set.removeAll()
+            self.detail_group_vm.group_details.removeAll()
         }
+        .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
+            
+            if let user_info = value.userInfo, let data = user_info["got_all_friend_detail"]{
+                print("그룹 상세 페이지에서 친구 리스트 모두 가져온 통신 완료 받았음: \(data)")
+                            //그룹 상세 페이지 데이터 - 해당 그룹에 속한 친구 리스트 가져오는 통신
+                            detail_group_vm.get_group_detail_and_fetch(group_idx: manage_vm.detail_group_idx)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0){
+                    self.show_friends_list = true
+                }
+            }else{
+                print("친구 리스트 모두 가져온 노티 아님")
+            }
+        })
     }
+    
 }
 
 struct GroupMemberRowView: View{

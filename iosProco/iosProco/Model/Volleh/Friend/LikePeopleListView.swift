@@ -25,7 +25,7 @@ struct LikePeopleListView : View{
         .onAppear{
             main_vm.get_like_card_users(card_idx: card_idx)
         }
-        .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: CalendarViewModel(),show_friend_info: $show_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true, is_from_chatroom: false))
+        .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: CalendarViewModel(),show_friend_info: $show_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true))
         .navigationBarTitle("좋아요한 사람", displayMode: .inline)
         .navigationBarItems(leading:
         Button(action: {

@@ -301,7 +301,7 @@ struct FriendVollehMainView: View {
             //여기에 다이얼로그 오버레이해야 스크롤뷰 위치에 따라 오버레이 높이 결정되는 문제 해결됨.
         }
         .background(Color.proco_dark_white)
-        .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: self.calendar_vm,show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true, is_from_chatroom: false))
+        .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: self.calendar_vm,show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true))
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
     }

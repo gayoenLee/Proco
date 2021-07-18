@@ -77,7 +77,11 @@ class AddGroupViewmodel: ObservableObject{
             case .success(let result):
                 print("그룹 추가 결과 : \(result)")
                 if result.result == "ok"{
+                    
                     self.add_group_ok = true
+                    self.input_group_name = ""
+                    self.selected_friend_set.removeAll()
+                    
                     //그룹 추가에 실패했을 경우 예외처리
                 }else{
                     self.add_group_ok = false

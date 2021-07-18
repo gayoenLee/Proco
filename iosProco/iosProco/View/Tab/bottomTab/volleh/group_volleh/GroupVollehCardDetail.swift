@@ -397,7 +397,7 @@ struct GroupVollehCardDetail: View {
                     print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
                 }
             }
-            .overlay(FriendStateDialog(main_vm: FriendVollehMainViewmodel(),group_main_vm: self.main_vm, calendar_vm: CalendarViewModel(), show_friend_info: self.$show_creator_dialog, socket: SockMgr.socket_manager, state_on: self.$creator_state_on, is_friend : false, is_from_chatroom: false))
+            .overlay(FriendStateDialog(main_vm: FriendVollehMainViewmodel(),group_main_vm: self.main_vm, calendar_vm: CalendarViewModel(), show_friend_info: self.$show_creator_dialog, socket: SockMgr.socket_manager, state_on: self.$creator_state_on, is_friend : false))
         
     }
 }

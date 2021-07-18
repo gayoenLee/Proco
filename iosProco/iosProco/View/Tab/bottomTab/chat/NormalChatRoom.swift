@@ -121,7 +121,11 @@ struct NormalChatRoom: View {
                 HStack{
                     Button(action: {
                         print("뒤로가기 클릭")
-                        if self.from_tab{  self.go_back = true}
+                        //일반, 모임, 친구 채팅방에서 각각 뒤로가기시 보이는 탭 설정하기 위함, from_tab :  채팅탭에서 왔는지 여부
+                        if self.from_tab{
+                            SockMgr.socket_manager.selected_tab = 0
+
+                            self.go_back = true}
                         else{self.presentation.wrappedValue.dismiss()}
                     }){
                         Image("left")

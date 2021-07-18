@@ -17,8 +17,10 @@ enum ActiveAlert {
 enum FriendSearchAlert{
     case no_friends, myself
 }
+
+//연락처로 추가시 친구 찾은 결과가 있을 경우: find_ok
 enum FriendRequestAlert{
-    case no_friends, request_wait, requested, already_friend, denied, myself, success, fail
+    case no_friends, request_wait, requested, already_friend, denied, myself, success, fail, find_ok
 }
 enum AddFriendGroupAlert{
     case ok, duplicated, fail
@@ -168,7 +170,7 @@ class ManageFriendViewModel: ObservableObject{
             objectWillChange.send()
         }
     }
-    //***********alert창 그룹에 친구 추가한 후*********
+    //***********alert창 그룹에 친구 추가한 후 & 친구 삭제 실패 후 fail인 경우에만*********
     @Published var show_add_friend_group_alert : Bool  = false{
         didSet{
             objectWillChange.send()
@@ -223,28 +225,16 @@ class ManageFriendViewModel: ObservableObject{
     
     
     func request_result_alert_func(_ active: FriendRequestAlert) -> Void {
+        
         DispatchQueue.main.async {
             self.request_result_alert = active
-            self.show_request_result_alert = true
-        }
-    }
-    //친구 해제 요청 실패시 사용.
-    @Published var show_fail_alert : Bool  = false{
-        didSet{
-            objectWillChange.send()
-        }
-    }
-    
-    @Published var active_fail_alert : RequestResultFail  = .fail{
-        didSet{
-            objectWillChange.send()
-        }
-    }
-    
-    func show_fail_alert_func(_ active: RequestResultFail) -> Void {
-        DispatchQueue.main.async {
-            self.active_fail_alert = active
-            self.show_fail_alert = true
+            
+            //친구를 검색해서 찾은 경우에는 다이얼로그 띄우지 않기 위해 사용
+            if self.request_result_alert == .find_ok{
+                self.show_request_result_alert = false
+            }else{
+                self.show_request_result_alert = true
+            }
         }
     }
     
@@ -509,29 +499,34 @@ class ManageFriendViewModel: ObservableObject{
                     self.add_friend_check_struct.nickname = response.nickname
                     self.add_friend_check_struct.profile_photo_path = response.profile_photo_path
                     
+                    self.request_result_alert = .find_ok
                     print("친구 번호로 찾기에서 뷰모델에 result nil 들어옴")
                     
+                }else{
+                    //다른 예외상황 발생했을때는 검색한 친구정보를 초기화 시켜야됨
+                    self.add_friend_check_struct = FriendRequestListStruct()
+                    
+                    switch response.result {
+                    case "no signed friends":
+                        self.request_result_alert = .no_friends
+                        print("없는 사용자")
+                    case "자기자신" :
+                        self.request_result_alert = .myself
+                        print("내 번호 검색함")
+                    case "친구요청대기" :
+                        self.request_result_alert = .request_wait
+                    case "친구요청받음" :
+                        self.request_result_alert = .requested
+                    case "차단당한 친구" :
+                        self.request_result_alert = .no_friends
+                    case "친구상태" :
+                        self.request_result_alert = .already_friend
+                    default :
+                        self.request_result_alert = .no_friends
+                    }
+                    self.request_result_alert_func(self.request_result_alert)
                 }
-                else if response.result == "no signed friends"{
-                    
-                    self.request_result_alert = .no_friends
-                    print("없는 사용자")
-                    
-                }else if response.result == "자기자신"{
-                    
-                    self.request_result_alert = .myself
-                    print("내 번호 검색함")
-                }else if response.result == "친구요청대기"{
-                    self.request_result_alert = .request_wait
-                    
-                }else if response.result == "친구요청받음"{
-                    self.request_result_alert = .requested
-                    
-                }else if response.result == "차단당한 친구"{
-                    self.request_result_alert = .no_friends
-                }else if response.result == "친구상태"{
-                    self.request_result_alert = .already_friend
-                }
+           
             })
     }
     
@@ -569,7 +564,7 @@ class ManageFriendViewModel: ObservableObject{
     
     //번호로 친구추가하기 최종
     func add_friend_number_last(){
-        cancellation = APIClient.add_friend_number_last_api(f_idx: self.add_friend_idx_value)
+        cancellation = APIClient.add_friend_number_last_api(f_idx: self.add_friend_check_struct.idx!)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { result in
                 print("sink 결과 : \(result)")
@@ -656,6 +651,9 @@ class ManageFriendViewModel: ObservableObject{
                     print("실패")
                     self.request_result_alert = .fail
                 }
+                
+                //alert보내기 위해 사용
+                self.request_result_alert_func(self.request_result_alert)
             })
     }
     
@@ -715,7 +713,7 @@ class ManageFriendViewModel: ObservableObject{
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["remove_friend" : "fail", "friend": String(f_idx)])
                     
-                    self.active_fail_alert = .fail
+                    self.active_friend_group_alert = .fail
                 }
             })
     }

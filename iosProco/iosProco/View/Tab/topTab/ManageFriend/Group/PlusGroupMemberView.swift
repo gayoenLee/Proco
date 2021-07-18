@@ -18,7 +18,7 @@ struct PlusGroupMemberView: View {
     
     //친구 선택했는지 여부 값에 친구의 idx값 저장할 때 사용
     @State var friend_model : GetFriendListStruct
-
+    
     //친구 선택시 사용하는 변수
     var is_selected: Bool {
         //친구를 선택했는지는 selected리스트 안에 담겨 있냐에 따라 결정됨.
@@ -32,7 +32,7 @@ struct PlusGroupMemberView: View {
     @State var isSearching = false
     //키보드에서 엔터 버튼 클릭시 검색 완료를 알리기 위한 변수
     @State var end_search = false
-
+    
     var body: some View {
         
         VStack {
@@ -50,53 +50,56 @@ struct PlusGroupMemberView: View {
                 }
                 
                 Spacer()
-            Text("친구 편집")
-                .font(.custom(Font.t_extra_bold, size: 18))
-                .foregroundColor(.proco_black)
+                Text("친구 편집")
+                    .font(.custom(Font.t_extra_bold, size: 18))
+                    .foregroundColor(.proco_black)
                 Spacer()
             }
             .padding()
             //친구 검색바.
             SearchFriendBarInManage(viewmodel: self.viewmodel, searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
-          
-            //검색바에서 완료 버튼을 누른 경우의 뷰
-            if end_search{
-                HStack{
-                Text("검색 결과")
-                    .font(.custom(Font.n_regular, size: 11))
-                    .foregroundColor(.gray)
-                    
-                    Spacer()
-                }.padding()
+            ScrollView{
+                //검색바에서 완료 버튼을 누른 경우의 뷰
+                if end_search{
+                    HStack{
+                        Text("검색 결과")
+                            .font(.custom(Font.n_regular, size: 11))
+                            .foregroundColor(.gray)
+                        
+                        Spacer()
+                    }.padding()
                     ForEach((viewmodel.friend_list_struct).filter({"\($0)".contains(searchText)}), id: \.self){
                         friend in
                         PlusFriendRow(viewmodel: self.viewmodel, friend_model: friend, searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
                             .padding()
                     }
-                
-                //검색을 하지 않을 때 뷰. 모든 친구 리스트를 보여준다.
-            }else if (isSearching == false && end_search == false){
-                
-                Text("친구")
-                    .font(.custom(Font.n_regular, size: 11))
-                    .foregroundColor(.gray)
-
+                    
+                    //검색을 하지 않을 때 뷰. 모든 친구 리스트를 보여준다.
+                }else if (isSearching == false && end_search == false){
+                    
+                    Text("친구")
+                        .font(.custom(Font.n_regular, size: 11))
+                        .foregroundColor(.gray)
+                    
                     ForEach(self.viewmodel.friend_list_struct){friend in
                         VStack(alignment: .leading){
                             
                             PlusFriendRow(viewmodel: self.viewmodel, friend_model: friend, searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
                         }
                     }
-                
+                    
+                }
+                Spacer()
             }
-            Spacer()
+            
             //그룹 추가하는 통신이 성공하면 뷰모델의 add_group에서 add_group_ok값을 true로 바꿈.
             //값이 트루가 되면 버튼이 활성화되고 그룹관리 메인페이지로 이동함. 따라서 button의 액션 안에서 값 toggle해줄 필요 없음.
             Button(action: {
                 print("확인 클릭함")
-                self.presentation.wrappedValue.dismiss()
+                
                 self.viewmodel.added_friend_list = Array(self.viewmodel.selected_friend_set)
                 print("친구 추가 뷰에서 저장한 친구 리스트 확인 : \(self.viewmodel.added_friend_list)")
+                self.presentation.wrappedValue.dismiss()
                 
             }) {
                 Text("확인")
@@ -109,7 +112,7 @@ struct PlusGroupMemberView: View {
                     .padding([.leading, .trailing], UIScreen.main.bounds.width/25)
             }
             .padding()
-
+            
         }
         .navigationBarHidden(true)
         .navigationBarTitle("", displayMode: .inline)
@@ -123,7 +126,7 @@ struct PlusGroupMemberView: View {
             print("친구 추가 화면에서 선택한 친구 set들 확인 : \(viewmodel.selected_friend_set)")
             print("친구 추가 화면에서 선택한친구 set> 배열 변환확인 : \(viewmodel.added_friend_list) ")
         }
-        .padding(.bottom, 50)
+        .padding(.all)
         
     }
 }
@@ -178,7 +181,7 @@ struct PlusFriendRow : View{
                                 .onFailure{error in
                                     print("실패 이유: \(error)")
                                 }
-
+                            
                         }
                         HStack(spacing: UIScreen.main.bounds.width/10){
                             //친구 이름
@@ -247,7 +250,7 @@ struct PlusFriendRow : View{
                             .onFailure{error in
                                 print("실패 이유: \(error)")
                             }
-
+                        
                     }
                     
                     HStack(spacing: UIScreen.main.bounds.width/10){
@@ -256,7 +259,7 @@ struct PlusFriendRow : View{
                             .font(.custom(Font.n_bold, size: 14))
                             .foregroundColor(.proco_black)
                             .lineLimit(1)
-                            
+                        
                         Spacer()
                     }
                     
