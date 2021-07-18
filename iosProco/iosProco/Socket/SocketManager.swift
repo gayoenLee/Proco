@@ -114,7 +114,7 @@ class SockMgr : ObservableObject {
     }
     
     //채팅방별로 뒤로가기시 원하는 채팅탭 보여주기 위해 사용. 1: 친구, 2: 모임, 0: 일반
-    var selected_tab = 0
+    var selected_tab : Int = 0
     
     //채팅 메세지를 같은 사람이 1분 내에 여러개 보낼 경우 프로필 이미지, 닉네임 한 번만 보여주기 위해 계산
     func is_consecutive(prev_created : String, prev_creator: String, current_created: String, current_creator: String) -> Bool{
