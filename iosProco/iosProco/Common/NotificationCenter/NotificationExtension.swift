@@ -70,4 +70,7 @@ extension Notification{
     
     //캘린더 내 일정 추가하기 후
     static let calendar_personal_schedule = Notification.Name.init("calendar_personal_schedule")
+    
+    //친구 관리 페이지에서 온오프라인 이벤트를 받았을 경우
+        static let update_user_state = Notification.Name.init("update_user_state")
 }
