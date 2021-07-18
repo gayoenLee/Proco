@@ -1697,18 +1697,21 @@ class SockMgr : ObservableObject {
     }
     
     //상태 업데이트 이벤트 응답 서버에서 받은 경우
-    func get_state_update(){
-        socket.on("server_to_clientupdate_user_state"){data, ack in
-            print("상태 온오프 변경한 이벤트 받음 : \(data)")
-            
-            let result = JSON(data)
-            let user_idx = result["user_idx"].intValue
-            let state = result["state"].intValue
-            let state_data = result["state_data"].stringValue
-            
-            UserDefaults.standard.set(state,forKey: "\(db.my_idx!)_state")
+        func get_state_update(){
+            socket.on("server_to_clientupdate_user_state"){data, ack in
+                print("상태 온오프 변경한 이벤트 받음 : \(data)")
+                
+                let result = JSON(data).arrayValue[0]
+               
+                
+                let user_idx = result["user_idx"].intValue
+                let state = result["state"].intValue
+                let state_data = result["state_data"].stringValue
+                      
+                //뷰 업데이트 위해 보내기
+                NotificationCenter.default.post(name: Notification.update_user_state, object: nil, userInfo: ["user_idx" : String(user_idx) , "state" : String(state)])
+            }
         }
-    }
     
     //친구랑 볼래에서 카드 만들었을 경우 진행하는 이벤트
     func make_chat_room_friend(chatroom_idx: Int, idx: Int, nickname: String){
