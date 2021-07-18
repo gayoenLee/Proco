@@ -21,6 +21,7 @@ struct ManageFriendRow: View{
     @Binding var ask_delete_friend_model: Bool
     //삭제하려는 친구 idx
     @Binding var delete_frined_idx: Int
+    @State private var show_delete_alert : Bool = false
     
     let img_processor = DownsamplingImageProcessor(size:CGSize(width: 44.86, height: 44.86))
         |> RoundCornerImageProcessor(cornerRadius: 25)
@@ -33,53 +34,42 @@ struct ManageFriendRow: View{
             user_nickname
             
             interest_btn
-            
             Spacer()
-            HStack{
-                Image("context_menu_icon")
-                    .resizable()
-                    .frame(width: 3.52, height: 15.16)
-            }
-            .frame(width: UIScreen.main.bounds.width*0.3)
-            .padding(.trailing)
-            .contextMenu{
-                Button(action: {
-                    
-                    //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
-                    self.manage_viewmodel.selected_friend_idx = self.friend_model.idx!
-                    print("추가하려는 친구 idx 저장 확인 : \(self.manage_viewmodel.selected_friend_idx)")
-                    self.show_group_list_modal.toggle()
-                    
-                }){
-                    Label("그룹에 추가", systemImage: "")
-                }
-                
-                Button(action: {
-                    
-                    print("친구 삭제하기 클릭: \(friend_model.idx!)")
-                    self.delete_frined_idx = friend_model.idx!
-                    
-                    //삭제 여부 확인 알림창 한 번 더 띄운 후 삭제 통신 진행
-                    self.ask_delete_friend_model = true
-                    
-                    //추가한 후 통신 결과에 따라 alert창 띄우기 위함
-                manage_viewmodel.show_fail_alert_func(manage_viewmodel.active_fail_alert)
-                    
-                }) {
-                    Label("친구 삭제", systemImage: "")
-                }
-                .alert(isPresented: self.$manage_viewmodel.show_fail_alert){
-                    switch manage_viewmodel.active_fail_alert{
-                    case .fail:
-                        return Alert(title: Text("친구삭제"), message: Text("다시 시도해주세요"), dismissButton: .default(Text("확인")))
-                    }
+
+            Button(action: {
+                self.show_delete_alert = true
+
+            }){
+                HStack{
+                    Spacer()
+                    Image("context_menu_icon")
+                        .resizable()
+                        .frame(width: 3.52, height: 15.16)
                 }
             }
-            
-            //hstack 끝
+            .frame(width: UIScreen.main.bounds.width*0.2)
+            .padding(.trailing, UIScreen.main.bounds.width/40)
         }
         .padding()
-  
+        .actionSheet(isPresented: self.$show_delete_alert, content: {
+            ActionSheet(title: Text("\(friend_model.nickname!)"), message: Text(""), buttons: [ActionSheet.Button.default(Text("그룹에 추가"), action: {
+                
+                //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
+                self.manage_viewmodel.selected_friend_idx = self.friend_model.idx!
+                print("추가하려는 친구 idx 저장 확인 : \(self.manage_viewmodel.selected_friend_idx)")
+                self.show_group_list_modal.toggle()
+            }), ActionSheet.Button.default(Text("친구 삭제"), action: {
+                
+                print("친구 삭제하기 클릭: \(friend_model.idx!)")
+                self.delete_frined_idx = friend_model.idx!
+                
+                //삭제 여부 확인 알림창 한 번 더 띄운 후 삭제 통신 진행
+                self.ask_delete_friend_model = true
+                
+                //추가한 후 통신 결과에 따라 alert창 띄우기 위함
+            manage_viewmodel.show_ok_alert(manage_viewmodel.active_friend_group_alert)
+            }), ActionSheet.Button.cancel(Text("취소"))])
+        })
     }
 }
 
