@@ -113,6 +113,9 @@ class SockMgr : ObservableObject {
         }
     }
     
+    //채팅방별로 뒤로가기시 원하는 채팅탭 보여주기 위해 사용. 1: 친구, 2: 모임, 0: 일반
+    var selected_tab = 0
+    
     //채팅 메세지를 같은 사람이 1분 내에 여러개 보낼 경우 프로필 이미지, 닉네임 한 번만 보여주기 위해 계산
     func is_consecutive(prev_created : String, prev_creator: String, current_created: String, current_creator: String) -> Bool{
         print("메세지 계산 메소드 안 : \(prev_created), \(prev_creator), \(current_created), \(current_creator) ")
@@ -662,14 +665,15 @@ class SockMgr : ObservableObject {
                     if check_exist_idx == nil{
                         
                         print("데이터 모델 안에 채팅방 인덱스 기존에 없었음")
-                        self.chat_room_struct.insert(ChatRoomModel(idx: idx, card_idx: card_idx, created_at: created_at, creator_idx: creator_idx, deleted_at: deleted_at, kinds: kinds, updated_at: updated_at, card_tag_list: self.tag_struct, card: self.card_struct), at: count)
+                        self.chat_room_struct.append(ChatRoomModel(idx: idx, card_idx: card_idx, created_at: created_at, creator_idx: creator_idx, deleted_at: deleted_at, kinds: kinds, updated_at: updated_at, card_tag_list: self.tag_struct, card: self.card_struct))
                         count = count + 1
                         
                         //만약 채팅방 인덱스가 이미 저장된 경우 기존 저장한 데이터 지우고 다시 저장.
                     }else{
                         print("데이터 모델 안에 채팅방 인덱스 기존에 있었음")
-                        self.chat_room_struct.remove(at: idx)
-                        self.chat_room_struct.insert(ChatRoomModel(idx: idx, card_idx: card_idx, created_at: created_at, creator_idx: creator_idx, deleted_at: deleted_at, kinds: kinds,  updated_at: updated_at, card_tag_list: self.tag_struct, card: self.card_struct), at: count)
+                        //기존 인덱스 지울떄 idx가 아닌 chatroom_idx를 지웠어서 아웃오브레인지 에러 수정
+                        self.chat_room_struct.remove(at: check_exist_idx!)
+                        self.chat_room_struct.insert(ChatRoomModel(idx: idx, card_idx: card_idx, created_at: created_at, creator_idx: creator_idx, deleted_at: deleted_at, kinds: kinds,  updated_at: updated_at, card_tag_list: self.tag_struct, card: self.card_struct), at: check_exist_idx!)
                         count = count + 1
                     }
                     //--------------sqlite 채팅방, 카드 테이블
@@ -1770,6 +1774,10 @@ class SockMgr : ObservableObject {
                     print("front_created_at 새로 온것 확인: \(front_created_at)")
                     print("채팅 메세지 새로 온것 확인: \(content)")
                     
+                    
+                    //뷰모델에도 내가 가장 마지막으로 읽은 메시지 업데이트 하기
+                    ChatDataManager.shared.read_last_message = chatting_idx
+                    
                     //-1.메세지 성공적으로 보낸 후 sqlite에 다시 업데이트해서 저장.
                     ChatDataManager.shared.update_send_message(chatroom_idx: chatroom_idx, chatting_idx: chatting_idx, front_created_at: String(front_created_at), content: content)
                     
@@ -2015,6 +2023,15 @@ class SockMgr : ObservableObject {
                         self.friend_chat_model[index!].last_chat = content
                         self.friend_chat_model[index!].chat_time = created_at
                         
+                        switch kinds {
+                        case "D":
+                            self.friend_chat_model[index!].last_chat = "초대링크를 보냈습니다."
+                        case "P":
+                            self.friend_chat_model[index!].last_chat = "사진을 보냈습니다."
+                        default:
+                            self.friend_chat_model[index!].last_chat = content
+                        }
+                        
                         //안읽은 메세지 갯수 업데이트
                         let before = Int(self.friend_chat_model[index!].message_num!)
                         let after = before! + 1
@@ -2029,6 +2046,15 @@ class SockMgr : ObservableObject {
                         self.group_chat_model[index!].last_chat = content
                         self.group_chat_model[index!].chat_time = created_at
                         
+                        switch kinds {
+                        case "D":
+                            self.group_chat_model[index!].last_chat = "초대링크를 보냈습니다."
+                        case "P":
+                            self.group_chat_model[index!].last_chat = "사진을 보냈습니다."
+                        default:
+                            self.group_chat_model[index!].last_chat = content
+                        }
+                        
                         //안읽은 메세지 갯수 업데이트
                         let before = Int(self.group_chat_model[index!].message_num!)
                         let after = before! + 1
@@ -2042,6 +2068,15 @@ class SockMgr : ObservableObject {
                         let index = self.normal_chat_model.firstIndex(where: {$0.chatroom_idx == chatroom_idx})
                         self.normal_chat_model[index!].last_chat = content
                         self.normal_chat_model[index!].chat_time = created_at
+                        
+                        switch kinds {
+                        case "D":
+                            self.normal_chat_model[index!].last_chat = "초대링크를 보냈습니다."
+                        case "P":
+                            self.normal_chat_model[index!].last_chat = "사진을 보냈습니다."
+                        default:
+                            self.normal_chat_model[index!].last_chat = content
+                        }
                         
                         //안읽은 메세지 갯수 업데이트
                         let before = Int(self.normal_chat_model[index!].message_num!)
