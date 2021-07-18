@@ -121,6 +121,10 @@ struct PlusFriendID: View {
                             return Alert(title: Text("친구 추가하기"), message: Text("다시 시도해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
                                 
                             }))
+                        default:
+                            return Alert(title: Text("친구 추가하기"), message: Text("완료"), dismissButton: Alert.Button.default(Text("확인"), action: {
+                                
+                            }))
                         }
                     }
                 }
