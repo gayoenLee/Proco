@@ -86,11 +86,13 @@ struct FriendChatTabRow : View{
     //채팅방 알림 설정
     var room_alarm_state : Bool{
         let alarm_state = UserDefaults.standard.string(forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(friend_chat.chatroom_idx)")
-        
-        if alarm_state == "" || alarm_state == "1"{
-            return true
-        }else{
+        //알람을 꺼진 상태일때
+        if alarm_state == "0" {
             return false
+        }
+        //그 외에는 알람을 전부 킨것으로 간주
+        else{
+            return true
         }
     }
     
@@ -199,6 +201,3 @@ struct FriendChatTabRow : View{
         .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.15)
     }
 }
-
-
-
