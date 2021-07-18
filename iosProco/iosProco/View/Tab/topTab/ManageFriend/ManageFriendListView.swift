@@ -12,6 +12,9 @@ import Kingfisher
 struct ManageFriendListView: View {
     @Environment(\.presentationMode) var presentation
     
+    //친구 클릭시 다이얼로그 띄울 때 친구 정보 저장 후 보여줄 때 사용하기 위함.
+    @ObservedObject var friend_vm = FriendVollehMainViewmodel()
+    
     //친구 편집, 삭제시 나오는 action sheet 구분자
     @State var show_friend_action: Bool = false
     @ObservedObject  var viewmodel = AddGroupViewmodel()
@@ -50,6 +53,11 @@ struct ManageFriendListView: View {
     @State private var got_all_groups: Bool = false
     
     @State private var got_all_friends : Bool = false
+    
+    //친구 한 명 클릭시 다이얼로그 보여주기
+    @State private var show_friend_profile: Bool = false
+    //친구 한 명 클릭시 state 상태
+    @State private var friend_state : Int? = nil
     
     var body: some View {
         
@@ -133,21 +141,74 @@ struct ManageFriendListView: View {
                         .padding()
                         
                         if self.got_all_friends{
-                        //친구 리스트
-                        ForEach(self.friend_list_model, id: \.self){friend in
                             
-                            VStack(alignment: .leading){
+                            if friend_list_model.count > 0{
+                                //친구 리스트 - 온라인
+                                ForEach(self.friend_list_model.filter({
+                                    $0.state == 1
+                                }), id: \.self){friend in
+                                    
+                                    VStack(alignment: .leading){
+                                        
+                                        RoundedRectangle(cornerRadius: 25.0)
+                                            .foregroundColor(.proco_white)
+                                            .shadow(color: .gray, radius: 2, x: 0, y: 2)
+                                            .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
+                                            .overlay(
+                                                ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx)
+                                                    .padding()
+                                                    .onTapGesture {
+                                                        self.friend_vm.friend_info_struct.profile_photo = friend.profile_photo ?? ""
+                                                        self.friend_vm.friend_info_struct.nickname = friend.nickname!
+                                                        
+                                                        self.friend_vm.friend_info_struct.idx
+                                                            = friend.idx
+                                                      //state값을 오버레이시 뷰에 넘겨줘야 하므로 값 따로 저장
+                                                        self.friend_state = friend.state
+                                                        
+                                                        self.friend_vm.friend_info_struct.state = friend.state
+                                                        
+                                                        self.friend_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo ?? "", state: friend.state, kinds: friend.kinds)
+                                                        
+                                                        self.show_friend_profile = true
+                                                    }
+                                                )
+                                        }
+                                    }
                                 
-                                RoundedRectangle(cornerRadius: 25.0)
-                                    .foregroundColor(.proco_white)
-                                    .shadow(color: .gray, radius: 2, x: 0, y: 2)
-                                    .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
-                                    .overlay(
-                                        ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx)
-                                            .padding()
-                                    )
+                                ForEach(self.friend_list_model.filter({
+                                    $0.state == 0
+                                }), id: \.self){friend in
+                                    
+                                    VStack(alignment: .leading){
+                                        
+                                        RoundedRectangle(cornerRadius: 25.0)
+                                            .foregroundColor(.proco_white)
+                                            .shadow(color: .gray, radius: 2, x: 0, y: 2)
+                                            .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
+                                            .overlay(
+                                                ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx)
+                                                    .padding()
+                                                    .onTapGesture {
+                                                        self.friend_vm.friend_info_struct.profile_photo = friend.profile_photo ?? ""
+                                                        self.friend_vm.friend_info_struct.nickname = friend.nickname!
+                                                        
+                                                        self.friend_vm.friend_info_struct.idx
+                                                            = friend.idx
+                                                      //state값을 오버레이시 뷰에 넘겨줘야 하므로 값 따로 저장
+                                                        self.friend_state = friend.state
+                                                        
+                                                        self.friend_vm.friend_info_struct.state = friend.state
+                                                        
+                                                        self.friend_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo ?? "", state: friend.state, kinds: friend.kinds)
+                                                        
+                                                        self.show_friend_profile = true
+                                                    }
+                                                )
+                                        }
+                                    }
                             }
-                        }
+                       
                         }else{
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
@@ -160,6 +221,23 @@ struct ManageFriendListView: View {
                         GroupListModal(manage_viewmodel: self.manage_vm, manage_group_struct: self.manage_vm.manage_groups, show_modal: self.$show_group_list_modal)
                     }
                 }
+                //친구의 온오프라인 상태가 변경되었을 경우 0718변경
+                .onReceive(NotificationCenter.default.publisher(for: Notification.update_user_state), perform: {value in
+                    print("사용자 상태 업데이트")
+                    
+                    if let user_info = value.userInfo, let check_result = user_info["user_idx"]{
+                        let user_idx = user_info["user_idx"] as! String
+                        let state  = user_info["state"] as! String
+                        
+                        print("바꾸기 전 \(friend_list_model)")
+                        var index = friend_list_model.firstIndex(where: {
+                            $0.idx == Int(user_idx)
+                        }) ?? -1
+                        if index != -1{
+                            friend_list_model[index].state = Int(state)}
+                        print("바꾼 후 \(friend_list_model)")
+                    }
+                })
                 .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
                     
                     if let user_info = value.userInfo, let data = user_info["remove_friend"]{
@@ -219,8 +297,8 @@ struct ManageFriendListView: View {
                             
                         }))
                     case .fail:
-                        print("그룹 추가 알림 이벤트 들어옴")
-                        return Alert(title: Text("그룹 추가"), message: Text("그룹 추가에 실패했습니다. 다시 시도해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
+                        print("그룹 추가 알림 이벤트 들어옴 또는 친구 삭제 실패시 띄우는 알림 들어옴")
+                        return Alert(title: Text("오류"), message: Text("오류가 발생했습니다. 다시 시도해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
                             
                         }))
                     }
@@ -254,6 +332,7 @@ struct ManageFriendListView: View {
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
         }
+        .overlay(FriendStateDialog(main_vm: self.friend_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: CalendarViewModel(),show_friend_info: self.$show_friend_profile, socket: SockMgr.socket_manager, state_on: self.$friend_state, is_friend : true))
     }
 }
 
