@@ -1396,12 +1396,12 @@ class FriendVollehMainViewmodel: ObservableObject{
                 let result = response["result"].string
                 if result == "ok"{
                     print("관심친구 설정 완료")
-                    NotificationCenter.default.post(name: Notification.set_interest_friend, object: nil, userInfo: ["set_interest_friend" : "set_ok_\(action)"])
+                    NotificationCenter.default.post(name: Notification.set_interest_friend, object: nil, userInfo: ["set_interest_friend" : "set_ok_\(action)", "friend_idx": String(f_idx)])
                     
                     
                 }else {
                     print("관심친구설정 오류")
-                    NotificationCenter.default.post(name: Notification.set_interest_friend, object: nil, userInfo: ["set_interest_friend" : "error"])
+                    NotificationCenter.default.post(name: Notification.set_interest_friend, object: nil, userInfo: ["set_interest_friend" : "error", "friend_idx": String(f_idx)])
                 }
     })
     }
