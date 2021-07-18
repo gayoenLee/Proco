@@ -70,7 +70,15 @@ class GroupDetailViewmodel: ObservableObject{
         }
     }
     
-    //그룹 멤버 편집 후 업데이트된 친구 리스트
+    //그룹 멤버 편집시 우선 여기에 담아놓은 후 확인 버튼 클릭했을 대 selected_friend_set에 넣기. 그래야 index out of range에러 안뜸
+    @Published var temp_selected_friend_set = Set<Int>(){
+        didSet{
+            objectWillChange.send()
+            
+        }
+    }
+    
+    //그룹 멤버 편집 후 업데이트된 친구 리스트.. 서버에 보낼 데이터 형식
     @Published var updated_friend_list : [Int] = []{
         didSet{
             objectWillChange.send()
@@ -82,6 +90,15 @@ class GroupDetailViewmodel: ObservableObject{
             objectWillChange.send()
             
         }
+    }
+    
+    //그룹 멤버 편집에서 선택한 친구들만 보여줄 때 foreach에서 갯수와 리스트를 알기 위해 사용함.
+    func show_selected_member() ->  [GroupDetailStruct]{
+        var filtered_array :  [GroupDetailStruct] = []
+        filtered_array = self.group_details.filter{(selected_friend_set.contains($0.idx!)
+        )}
+        print("필터된 편집하는 친구 목록 확인: \(filtered_array)")
+         return filtered_array
     }
     
     //그룹관리 - 그룹 이름 편집통신
@@ -124,6 +141,7 @@ class GroupDetailViewmodel: ObservableObject{
                     print("그룹 상세 데이터 가져오는 데 받은 value값 : \(response)")
                     //이부분 안 넣어서 계속 오류 났었음. 기존의 친구들은 삭제하고 다시 넣는 식으로 로직 구성.
                     self!.selected_friend_set.removeAll()
+                    self?.temp_selected_friend_set.removeAll()
                     self!.group_details.removeAll()
                     
                     for item in response{
@@ -132,12 +150,15 @@ class GroupDetailViewmodel: ObservableObject{
                             
                             //그룹내 속한 친구 목록이 친구 편집시 필요하므로 이때 저장.
                             self!.selected_friend_set.insert(item.idx!)
+                            self!.temp_selected_friend_set.insert(item.idx!)
+                            
                             print("그룹 상세 데이터 추가 되는 것 확인 : \(String(describing: item.nickname!))")
                         }
                     }
                     print("그룹 상세 데이터 추가됐는지 다시 확인하기 : \(String(describing: self?.group_details))")
-                    print("그룹 관리 상세 페이지에서 selected_friend_set: \(self?.selected_friend_set)")
+                    print("그룹 관리 상세 페이지에서 temp_selected_friend_set: \(self?.temp_selected_friend_set)")
                     
+                    print("그룹 관리 상세 페이지에서 selected_friend_set: \(self?.selected_friend_set)")
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_group_friend" : "ok"])
                   })
         
@@ -163,9 +184,15 @@ class GroupDetailViewmodel: ObservableObject{
                 for friend in response{
                     if friend.nickname != nil{
                         self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo, state: friend.state))
-                        print("통신 후 set에 데이터 추가 확인 : \(self.selected_friend_set)")
+                        
+                        self.group_details.append(GroupDetailStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo ?? ""))
                     }
+                    print("통신 후 set에 데이터 추가 확인 : \(self.selected_friend_set)")
                 }
+                
+                //친구 수를 노티를 이용하는 이유는 친구 수락 또는 거절시 친구 수를 state로 동적으로 변화시키기 위함.
+                NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["got_all_friend_detail" : "ok"])
+
             })
     }
     
@@ -183,6 +210,12 @@ class GroupDetailViewmodel: ObservableObject{
             }, receiveValue:{ (response)in
                 print("그룹 멤버 편집 통신 확인 : \(response)")
                 if response["result"].string == "ok"{
+                    //temp_selected_friend_set에 넣었던 것 다시 selected_friend_set에 넣기
+                    print("temp_selected_friend_set 확인: \(self.temp_selected_friend_set)")
+                    
+                    self.selected_friend_set.removeAll()
+                    self.selected_friend_set = self.temp_selected_friend_set
+                    print("그룹 멤버 편집 뷰에서 업데이트한 친구 리스트 확인 : \(self.selected_friend_set)")
                     
                     self.edit_group_member_ok.toggle()
                     print("그룹 멤버 편집 통신 완료, 토글 값 : \( self.edit_group_member_ok)")
