@@ -21,7 +21,7 @@ struct SettingView: View {
     //채팅알림 on, off상태 나타내주기 위한 value
     @State private var chat_alarm_state: Bool = false
     //카드알림 on, off상태 나타내주기 위한 value
-    @State private var feed_alarm_state: Bool = false
+    @State private var card_notify_state: Bool = false
     //공지사항 이동
     @State private var go_notice = false
     
@@ -59,7 +59,7 @@ struct SettingView: View {
             }
             NavigationLink("", destination: NoticeView(vm: GroupVollehMainViewmodel()), isActive: self.$go_notice)
             
-            NavigationLink("",destination: ServiceCenterView(main_vm: self.main_vm).navigationBarBackButtonHidden(true), isActive: self.$go_service_center)
+            NavigationLink("",destination: ServiceCenterView(main_vm: self.main_vm), isActive: self.$go_service_center)
             
             NavigationLink("",destination: ManageAccountView(main_vm: self.main_vm), isActive: self.$go_manage_accout)
             
@@ -87,22 +87,22 @@ struct SettingView: View {
                     }
                     
                     if self.main_vm.user_info_model.card_notify_state == 1{
-                        self.feed_alarm_state = false
+                        self.card_notify_state = false
                     }else{
-                        self.feed_alarm_state = true
+                        self.card_notify_state = true
                     }
                     
                     //카드 공개 범위 유저가 설정해놓은 상태 보여주는 텍스트값 저장.
                     if self.main_vm.user_info_model.calendar_public_state == 0{
                         
-                        self.current_calendar_state = "전체공개"
+                        self.current_calendar_state = "비공개"
                         
                     }else if self.main_vm.user_info_model.calendar_public_state == 1{
                         
-                        self.current_calendar_state = "카드만 공개"
+                        self.current_calendar_state = "전체공개"
                         
                     }else{
-                        self.current_calendar_state = "비공개"
+                        self.current_calendar_state = "카드만 공개"
                     }
                 }
             }else{
@@ -126,16 +126,16 @@ struct SettingView: View {
                         self.chat_alarm_state = false
                     }
                     
-                }else if data as! String == "feed_alarm"{
-                    print("설정 - 피드 알림 변경 노티")
+                }else if data as! String == "card_alarm"{
+                    print("설정 - 카드 알림 변경 노티")
                     
                     let state = user_info["state"]
                     
-                    //피드 알림 값 데이터 넣기
+                    //카드 알림 값 데이터 넣기
                     if state as! String == "true"{
-                        self.feed_alarm_state = true
+                        self.card_notify_state = true
                     }else {
-                        self.feed_alarm_state = false
+                        self.card_notify_state = false
                     }
                 }
             }else{
@@ -219,7 +219,7 @@ private extension SettingView{
             Toggle("채팅 알림",isOn: self.$chat_alarm_state)
                 .onChange(of: self.chat_alarm_state, perform: {state in
                     print("채팅 알림 상태 변경")
-                    if self.chat_alarm_state == false{
+                    if self.chat_alarm_state == true{
                         print("현재: \(self.chat_alarm_state), 채팅 알림 on으로 상태 바꿈.")
                         self.main_vm.edit_chat_alarm_setting(chat_notify_state: 1)
                         
@@ -237,21 +237,17 @@ private extension SettingView{
     var FeedAlarmSettingMenuView: some View{
         
         HStack{
-            Text("피드 알림")
-                .font(.custom(Font.n_bold, size: 18))
-                .foregroundColor(Color.proco_black)
-            Spacer()
             
-            Toggle("피드 알림",isOn: self.$feed_alarm_state)
-                .onChange(of: self.feed_alarm_state, perform: {state in
-                    print("피드 알림 상태 변경")
-                    if self.feed_alarm_state == false{
-                        print("현재: \(self.feed_alarm_state), 피드 알림 on으로 상태 바꿈.")
-                        self.main_vm.edit_feed_alarm_setting(feed_notify_state: 1)
+            Toggle("카드 알림",isOn: self.$card_notify_state)
+                .onChange(of: self.card_notify_state, perform: {state in
+                    print("카드 알림 상태 변경")
+                    if self.card_notify_state == true{
+                        print("현재: \(self.card_notify_state), 카드 알림 on으로 상태 바꿈.")
+                        self.main_vm.edit_card_alarm_setting(card_notify_state: 1)
                         
                     }else{
-                        print("현재: \(self.feed_alarm_state), 피드알림 off로 상태 바꿈.")
-                        self.main_vm.edit_feed_alarm_setting(feed_notify_state: 0)
+                        print("현재: \(self.card_notify_state), 카드알림 off로 상태 바꿈.")
+                        self.main_vm.edit_card_alarm_setting(card_notify_state: 0)
                     }
                     
                 }).font(.custom(Font.n_bold, size: 18))
