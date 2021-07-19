@@ -100,11 +100,20 @@ struct MyWebView: UIViewRepresentable, WebViewHandlerDelegate {
         
         //웹뷰 로드
         if let url = URL(string: url) {
+            //공지사항 웹뷰일 경우 비동기 할 필요가 없어서 바로 실행
+                        if self.url == "https://withproco.com/notice"{
+                            webView.load(URLRequest(url: url))    //
+                        }
+                        else{
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 ) {
                 webView.load(URLRequest(url: url))    // 지정된 URL 요청 개체에서 참조하는 웹 콘텐츠를로드하고 탐색
             }
         }
-        
+        }
+        //공지사항 웹뷰일 경우 아래의 지도 웹뷰 처리를 할 필요가 없어서 바로 웹뷰 리턴
+                if self.url == "https://withproco.com/notice"{
+                    return webView
+                }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0){
             
             if self.got_send_location{
