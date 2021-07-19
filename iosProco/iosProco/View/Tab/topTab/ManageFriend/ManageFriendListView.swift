@@ -284,6 +284,29 @@ struct ManageFriendListView: View {
                         print("그룹 리스트 모두 가져온 노티  아님")
                     }
                 })
+                .onReceive( NotificationCenter.default.publisher(for: Notification.set_interest_friend)){value in
+                                        
+                                        if let user_info = value.userInfo, let data = user_info["set_interest_friend"]{
+                                            print("친구 관심친구 설정 노티 받았음: \(value)")
+                                                     
+                                            if data as! String == "set_ok_관심친구"{
+                                                let friend_idx = Int(user_info["friend_idx"] as! String)
+                                                let index =
+                                                    self.friend_list_model.firstIndex(where: {$0.idx == friend_idx}) ?? -1
+                                                if index != -1 { self.friend_list_model[index].kinds = "관심친구"}
+                                            }else if data as! String == "set_ok_관심친구해제"{
+                                                let friend_idx = Int(user_info["friend_idx"] as! String)
+                                                let index =
+                                                    self.friend_list_model.firstIndex(where: {$0.idx == friend_idx}) ?? -1
+                                                if index != -1 { self.friend_list_model[index].kinds = "관심친구해제"}
+                                            }else{
+                                                print("관심친구 이벤트 오류 발생")
+                                            }
+                                            
+                                        }else{
+                                            print("관심친구 설정 노티 아님")
+                                        }
+                                }
                 .alert(isPresented: $manage_vm.show_add_friend_group_alert){
                     switch manage_vm.active_friend_group_alert{
                     case .ok:
@@ -327,6 +350,7 @@ struct ManageFriendListView: View {
                     print("********************************친구관리 메인 사라짐*****************************")
                     self.got_all_groups = false
                 }
+                
             }
             .animation(.easeOut(duration: 0.3), value: manage_vm.friend_list_struct)
             .navigationBarTitle("", displayMode: .inline)
