@@ -58,7 +58,7 @@ class ManageFriendViewModel: ObservableObject{
     @Published var friend_request_struct = [FriendRequestListStruct](){
         
         didSet{
-            didChange.send(self.friend_request_struct)
+            objectWillChange.send()
             print("친구 신청 목록 didset들어옴 : \(friend_request_struct)")
         }
     }
@@ -158,12 +158,6 @@ class ManageFriendViewModel: ObservableObject{
         }
     }
     
-    //친구 신청 수락하려는 행의 idx값 저장
-    @Published var selected_friend_request_row : Int = -1{
-        didSet{
-            objectWillChange.send()
-        }
-    }
     //친구 신청에 대한 통신 끝났는지 여부 알기 위한 변수
     @Published var accept_friend_request_end : Bool = false{
         didSet{
@@ -283,7 +277,7 @@ class ManageFriendViewModel: ObservableObject{
                 }
             }, receiveValue: {(response) in
                 print("친구 요청 리스트 뷰모델의 receive value값 : \(String(describing: response))")
-                
+                self.friend_request_struct.removeAll()
                 //요청 결과가 없을 경우 result만 딕셔너리 형태로 와서 예외처리 해줘야 함.
                 let result: String?
                 result = response["result"].string
@@ -304,8 +298,9 @@ class ManageFriendViewModel: ObservableObject{
                     
                     //있는 데이터 제거 후 추가
                     self.friend_request_struct.removeAll()
+                    print("친구 요청 리스트 모델 넣기 전: \(self.friend_request_struct)")
                     self.friend_request_struct = friend!
-                    print("친구 요청 리스트 모델 : \(self.friend_request_struct)")
+                    print("친구 요청 리스트 모델 넣은 후 : \(self.friend_request_struct)")
                     self.get_friend_ok.toggle()
                     
                 }
@@ -386,7 +381,6 @@ class ManageFriendViewModel: ObservableObject{
                     break
                 }
             }, receiveValue: {(response) in
-                
                 print("친구관리에서 친구 리스트 가져오는 response: \(String(describing: response))")
                 //있는 데이터 제거 후 추가
                 self.friend_list_struct.removeAll()
@@ -451,7 +445,7 @@ class ManageFriendViewModel: ObservableObject{
                 let result : String?
                 if response["result"].string == "ok"{
                     
-                    NotificationCenter.default.post(name: Notification.friend_request_event, object: nil, userInfo: ["friend_request_event" : "canceled", "friend_idx": String(friend_idx) ])
+                    NotificationCenter.default.post(name: Notification.friend_request_event, object: nil, userInfo: ["friend_request_event" : "declined", "friend_idx": String(friend_idx) ])
                 }else{
                     NotificationCenter.default.post(name: Notification.friend_request_event, object: nil, userInfo: ["friend_request_event" : "failed", "friend_idx": String(friend_idx) ])
                 }
