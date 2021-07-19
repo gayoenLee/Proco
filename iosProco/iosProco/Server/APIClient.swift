@@ -716,9 +716,9 @@ class APIClient {
     }
     
     //설정 - 피드알림
-    static func edit_feed_alarm_setting(feed_notify_state: Int)-> AnyPublisher<JSON,AFError>{
+    static func edit_card_alarm_setting(card_notify_state: Int)-> AnyPublisher<JSON,AFError>{
         
-        let publisher = AF.request(APIRouter.edit_feed_alarm_setting(feed_notify_state: feed_notify_state), interceptor: RequestInterceptorClass())
+        let publisher = AF.request(APIRouter.edit_card_alarm_setting(card_notify_state: card_notify_state), interceptor:  RequestInterceptorClass())
             
             .publishDecodable(type: JSON.self)
         
