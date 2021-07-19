@@ -14,7 +14,7 @@ struct GetFriendListStruct : Codable, Hashable, Identifiable{
     //idx인데 identifiable 프로토콜 따르기 위해 id로 바꿈
     var idx: Int? = nil
     var nickname: String? = nil
-    var profile_photo: String? = nil
+    var profile_photo_path: String? = nil
     var state: Int? = nil
     var kinds : String = ""
     //identifiable프로토콜 따르기 위해 추가함.

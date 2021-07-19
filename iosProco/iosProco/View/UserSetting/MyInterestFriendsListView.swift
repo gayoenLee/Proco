@@ -38,14 +38,14 @@ struct MyInterestFriendsRow : View{
     var body: some View{
         
         HStack{
-            if friend_struct.profile_photo == "" || friend_struct.profile_photo == nil{
+            if friend_struct.profile_photo_path == "" || friend_struct.profile_photo_path == nil{
                 
                 Image("main_profile_img")
                     .resizable()
                     .frame(width: 41.5, height: 41.5)
                 
             }else{
-                KFImage(URL(string:friend_struct.profile_photo!))
+                KFImage(URL(string:friend_struct.profile_photo_path!))
                     .loadDiskFileSynchronously()
                     .cacheMemoryOnly()
                     .fade(duration: 0.25)

@@ -72,7 +72,7 @@ struct AllFriendRequestView: View {
                                         })!
                                         
                                         //친구 요청 리스트에서 제거는 안하고(index out of range에러 발생) 수락됨으로 뷰 변경, 친구 리스트에 추가
-                                        manage_vm.friend_list_struct.append(GetFriendListStruct(idx: model_data.idx, nickname: model_data.nickname, profile_photo: model_data.profile_photo_path, state: 0, kinds: "친구상태"))
+                                        manage_vm.friend_list_struct.append(GetFriendListStruct(idx: model_data.idx, nickname: model_data.nickname, profile_photo_path: model_data.profile_photo_path, state: 0, kinds: "친구상태"))
                                             
                                             let model_data_idx = self.manage_vm.friend_request_struct.firstIndex(where: {
                                                 $0.idx! == Int(friend_idx)

@@ -12,15 +12,11 @@ struct NoticeView: View {
 
     var body: some View {
         VStack{
-            Button(action: {
-                print("클릭")
-            }){
-                Image(systemName: "arrowshape.turn.up.right")
-            }
            
-            MyWebView(vm: vm, url: "https://218.101.130.126:5336/notices/client")
-            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.7)
+            MyWebView(vm: vm, url: "https://withproco.com/notice")
+            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
    
         }
+        .navigationBarTitle("공지사항")
     }
 }

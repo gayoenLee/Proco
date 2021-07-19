@@ -126,7 +126,7 @@ private extension ManageAccountView{
                     UserDefaults.standard.removeObject(forKey: "\(self.main_vm.my_idx!)_user_id")
                     UserDefaults.standard.removeObject(forKey: "\(self.main_vm.my_idx!)_nickname")
                     UserDefaults.standard.removeObject(forKey: "\(self.main_vm.my_idx!)_profile_photo_path")
-                    
+                    SockMgr.socket_manager.close_connection()
                 }), secondaryButton: Alert.Button.cancel(Text("취소"), action: {
                     self.ask_logout = false
                 }))

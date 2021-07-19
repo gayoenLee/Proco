@@ -482,7 +482,10 @@ class SettingViewModel: ObservableObject{
                 let result = response["result"].stringValue
                 if result == "ok"{
                     print("ok")
-                //result ok 아닐 때 처리 필요한지 생각해보기.
+                    
+                    //뒤로가기 시 설정 메인뷰에서 공개범위 텍스트 바꾸도록 설정하기 위해 사용
+                    NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["got_user_info" : "ok"])
+                    //result ok 아닐 때 처리 필요한지 생각해보기.
                 }else{
                     
                 }
@@ -507,6 +510,8 @@ class SettingViewModel: ObservableObject{
                 let result = response["result"].stringValue
                 if result == "ok"{
                     print("ok")
+                    self.user_info_model.chat_notify_state = chat_notify_state
+                    
                     if chat_notify_state == 0{
                         NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["alarm_changed" : "chat_alarm", "state" : "false"])
                     }else{
@@ -519,28 +524,31 @@ class SettingViewModel: ObservableObject{
             })
     }
     
-    //피드알림 설정
-    func edit_feed_alarm_setting(feed_notify_state: Int){
-        cancellation = APIClient.edit_feed_alarm_setting(feed_notify_state: feed_notify_state)
+    //카드알림 설정
+    func edit_card_alarm_setting(card_notify_state: Int){
+        cancellation = APIClient.edit_card_alarm_setting(card_notify_state: card_notify_state)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: {result in
                 switch result{
                 case .failure(let error):
-                    print("피드알림 설정 에러 발생 : \(error)")
+                    print("카드알림 설정 에러 발생 : \(error)")
                 case .finished:
                     break
                 }
                 
             }, receiveValue: {response in
-                print("피드알림 설정 response: \(response)")
+                print("카드알림 설정 response: \(response)")
                 
                 let result = response["result"].stringValue
                 if result == "ok"{
                     print("ok")
-                    if feed_notify_state == 0{
-                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["alarm_changed" : "feed_alarm", "state" : "false"])
+                    
+                    self.user_info_model.card_notify_state = card_notify_state
+                    
+                    if card_notify_state == 0{
+                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["alarm_changed" : "card_alarm", "state" : "false"])
                     }else{
-                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["alarm_changed" : "feed_alarm", "state" : "true"])
+                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["alarm_changed" : "card_alarm", "state" : "true"])
                     }
                 //result ok 아닐 때 처리 필요한지 생각해보기.
                 }else{

@@ -84,7 +84,7 @@ struct LikeUserRow : View{
         .onTapGesture {
             
             if like_user_model.idx == Int(self.main_vm.my_idx!){}else{
-            self.main_vm.friend_info_struct = GetFriendListStruct(idx: like_user_model.idx,nickname: like_user_model.nickname, profile_photo: like_user_model.profile_photo_path ?? "", state: 0, kinds:  "")
+            self.main_vm.friend_info_struct = GetFriendListStruct(idx: like_user_model.idx,nickname: like_user_model.nickname, profile_photo_path: like_user_model.profile_photo_path ?? "", state: 0, kinds:  "")
             self.show_dialog = true
             }
         }

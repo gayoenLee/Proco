@@ -73,7 +73,6 @@ struct MyQuestionDetailView: View {
         }
         .padding()
         .navigationBarTitle("문의 내역")
-        .navigationBarBackButtonHidden(false)
         .toolbar(content: {
             ToolbarItem(placement: .navigationBarLeading, content: {
                 if (.active == self.editMode?.wrappedValue){
@@ -88,71 +87,64 @@ struct MyQuestionDetailView: View {
                             .cornerRadius(5)
                     }
                 }else{
-//                    //돌아가기 버튼
-//                    Button(action: {
-//
-//                        self.presentation.wrappedValue.dismiss()
-//                    }){
-//                        Image("left")
-//                            .resizable()
-//                            .frame(width: 8.51, height: 17)
-//                    }
+                    //leading에 값이 있어야 뒤에 toolbar item과 백버튼이 같이 보임.
+                    Text("")
                 }
             })
             ToolbarItem(placement: .navigationBarTrailing){
-                
-            if (.active == self.editMode?.wrappedValue){
-                
-                Button(action: {
-                    print("편집 완료 버튼 클릭")
-                    let question_idx = question_model.idx
-                    let content = ask_content
-                    //편집 통신
-                    self.main_vm.edit_question(question_idx: question_idx, content: content)
-                    //편집 완료 알림
-                    main_vm.request_result_alert_func(main_vm.request_result_alert)
-                    
-                }){
-                    Text("완료")
-                        .font(.custom(Font.n_extra_bold, size: 16))
-                        .foregroundColor(Color.proco_white)
-                        .background(Color.proco_blue)
-                        .cornerRadius(5)
-                }
-                .alert(isPresented: $main_vm.show_result_alert){
-                            switch main_vm.request_result_alert{
-                            case .make, .edit:
-                                return Alert(title: Text("문의하기"), message: Text("등록되었습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
-
-                                    self.editMode?.wrappedValue = .active == self.editMode?.wrappedValue ? .inactive : .active
-
-                                }))
-                            case .delete:
-                                return Alert(title: Text("문의하기"), message: Text("삭제되었습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
-
-                                    self.go_to_setting.toggle()
-
-                                }))
-                            case .fail:
-                                return Alert(title: Text("문의하기"), message: Text("다시 시도해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
-
-                                }))
+                            
+                            if (.active == self.editMode?.wrappedValue){
+                                
+                                Button(action: {
+                                    print("편집 완료 버튼 클릭")
+                                    let question_idx = question_model.idx
+                                    let content = ask_content
+                                    //편집 통신
+                                    self.main_vm.edit_question(question_idx: question_idx, content: content)
+                                    //편집 완료 알림
+                                    main_vm.request_result_alert_func(main_vm.request_result_alert)
+                                    
+                                }){
+                                    Text("완료")
+                                        .font(.custom(Font.n_extra_bold, size: 16))
+                                        .foregroundColor(Color.proco_white)
+                                        .background(Color.proco_blue)
+                                        .cornerRadius(5)
+                                }
+                                .alert(isPresented: $main_vm.show_result_alert){
+                                    switch main_vm.request_result_alert{
+                                    case .make, .edit:
+                                        return Alert(title: Text("문의하기"), message: Text("등록되었습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
+                                            
+                                            self.editMode?.wrappedValue = .active == self.editMode?.wrappedValue ? .inactive : .active
+                                            
+                                        }))
+                                    case .delete:
+                                        return Alert(title: Text("문의하기"), message: Text("삭제되었습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
+                                            
+                                            self.go_to_setting.toggle()
+                                            
+                                        }))
+                                    case .fail:
+                                        return Alert(title: Text("문의하기"), message: Text("다시 시도해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
+                                            
+                                        }))
+                                    }
+                                }
+                            }
+                            //답변대기시에만 수정, 삭제가 가능하다.
+                            if question_model.process_content == ""{
+                                
+                                Button(action: {
+                                    print("컨텍스트 메뉴 클릭")
+                                    self.show_menus = true
+                                    
+                                }){
+                                    Image(systemName: "ellipsis")
+                                        .foregroundColor(Color.proco_black)
+                                }
                             }
                         }
-            }
-            //답변대기시에만 수정, 삭제가 가능하다.
-            if question_model.process_content == ""{
-                
-                Button(action: {
-                    print("컨텍스트 메뉴 클릭")
-                    self.show_menus = true
-                    
-                }){
-                    Image(systemName: "ellipsis")
-                        .foregroundColor(Color.proco_black)
-                }
-            }
-            }
         })
         .actionSheet(isPresented: self.$show_menus, content: {
             ActionSheet(title: Text("내 문의내역"), message: nil, buttons: [.default(Text("수정하기"), action: {
@@ -206,44 +198,45 @@ private extension MyQuestionDetailView{
     }
     
     var my_question_content : some View{
-        
-        VStack{
-            HStack{
-                Text("문의 내용")
-                    .font(.custom(Font.t_extra_bold, size: 16))
-                    .foregroundColor(Color.proco_black)
-                Spacer()
-            }
-            if  (.active == self.editMode?.wrappedValue){
-                
-                TextEditor(text: $ask_content)
-                    .font(.custom(Font.n_bold, size: 14))
-                    .foregroundColor(Color.proco_black)
-                    .colorMultiply(Color.light_gray)
-                    .cornerRadius(3)
-                    .background(Color.light_gray)
-                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width, alignment: .center)
-                
-            }else{
-                ScrollView{
+            
+            VStack{
+                HStack{
+                    Text("문의 내용")
+                        .font(.custom(Font.t_extra_bold, size: 16))
+                        .foregroundColor(Color.proco_black)
+                    Spacer()
+                }
+                if  (.active == self.editMode?.wrappedValue){
                     
-                               
-                                    Rectangle()
-                            .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width, alignment: .center)
+                    TextEditor(text: $ask_content)
+                        .font(.custom(Font.n_bold, size: 14))
+                        .foregroundColor(Color.proco_black)
+                        .colorMultiply(Color.light_gray)
+                        .cornerRadius(3)
+                        .background(Color.light_gray)
+                        .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width, alignment: .topLeading)
+                    
+                }else{
+                    ScrollView{
+                        Rectangle()
+                            .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width, alignment: .topLeading)
                             .cornerRadius(3)
                             .foregroundColor(Color.light_gray)
-                                        .overlay(
-                    Text(self.ask_content)
-                        //텍스트를 맨 앞에서부터 정렬시키는 것.
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(nil)
-                        .font(.system(size: 20, weight: .regular, design: .default))
-                        .foregroundColor(.proco_black)
+                            .overlay(
+                                Text(self.ask_content)
+                                    //텍스트를 맨 앞에서부터 정렬시키는 것.
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(nil)
+                                    .font(.system(size: 20, weight: .regular, design: .default))
+                                    .foregroundColor(.proco_black)
+                                
+                                ,
+                                alignment: .topLeading
                             )
+                    }
                 }
             }
         }
-    }
     
     var answer_date: some View{
         HStack{
@@ -258,25 +251,36 @@ private extension MyQuestionDetailView{
     }
     
     var answer_content: some View{
-        
-        VStack{
-            HStack{
-                Text("답변 내용")
-                    .font(.custom(Font.t_extra_bold, size: 14))
-                    .foregroundColor(Color.proco_black)
-                Spacer()
-            }
             
-            ScrollView{
-                VStack{
-                    Text(question_model.process_content!)
-                        .lineLimit(nil)
-                        .font(.system(size: 20, weight: .regular, design: .default))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .foregroundColor(.proco_black)
-                }.frame(maxWidth: .infinity)
+            VStack{
+                HStack{
+                    Text("답변 내용")
+                        .font(.custom(Font.t_extra_bold, size: 14))
+                        .foregroundColor(Color.proco_black)
+                    Spacer()
+                    
+                }
+                
+                ScrollView{
+                    VStack{
+                        Rectangle()
+                            .frame(minHeight: 50)
+                            .cornerRadius(3)
+                            .foregroundColor(Color.light_gray)
+                            .overlay(
+                                Text(question_model.process_content!)
+                                    .lineLimit(nil)
+                                    .font(.system(size: 20, weight: .regular, design: .default))
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .foregroundColor(.proco_black)
+                                    .padding([.top,.bottom])
+                                ,alignment: .topLeading
+                            )
+                            
+                        
+                    }
+                }
+                
             }
-            
         }
-    }
 }

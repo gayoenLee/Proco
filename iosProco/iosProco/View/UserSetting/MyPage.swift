@@ -43,6 +43,7 @@ struct MyPage: View {
     @State private var go_to_edit_name : Bool = false
     
     var body: some View {
+        NavigationView{
         VStack {
             NavigationLink("",destination: MyInterestFriendsListView(main_vm: self.main_vm), isActive: self.$go_interest_friends)
             
@@ -92,6 +93,7 @@ struct MyPage: View {
             print("마이페이지에서 프로필 이미지 확인: \(String(describing: self.main_vm.user_info_model.profile_photo_path))")
         }
         .onDisappear{
+        }
         }
     }
 }

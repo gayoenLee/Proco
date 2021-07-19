@@ -17,7 +17,7 @@ struct FriendStateRow: View {
             HStack{
                 ZStack{
                    
-                    if (card_struct.profile_photo == "" || card_struct.profile_photo == nil){
+                    if (card_struct.profile_photo_path == "" || card_struct.profile_photo_path == nil){
                     Image(systemName: "person")
                             .resizable()
                             .frame(width: UIScreen.main.bounds.width/5, height: UIScreen.main.bounds.width/5)
@@ -29,7 +29,7 @@ struct FriendStateRow: View {
                             )
                     }else{
                    
-                        Image(card_struct.profile_photo!)
+                        Image(card_struct.profile_photo_path!)
                             .resizable()
                             .frame(width: UIScreen.main.bounds.width/5, height: UIScreen.main.bounds.width/5)
                             .cornerRadius(50)

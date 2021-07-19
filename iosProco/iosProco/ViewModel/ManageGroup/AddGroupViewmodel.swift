@@ -122,7 +122,7 @@ class AddGroupViewmodel: ObservableObject{
                 
                 for friend in response{
                     if friend.nickname != nil{
-                        self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo, state: friend.state))
+                        self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path, state: friend.state))
                         print("add group viewmodel에서 데이터 추가 확인 : \(friend.nickname!)")
                     }
                 }
