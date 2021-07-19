@@ -606,6 +606,9 @@ class ManageFriendViewModel: ObservableObject{
                     print("실패")
                     self.request_result_alert = .fail
                 }
+                
+                //alert보내기 위해 사용
+                self.request_result_alert_func(self.request_result_alert)
             })
     }
     
@@ -652,8 +655,6 @@ class ManageFriendViewModel: ObservableObject{
                     self.request_result_alert = .fail
                 }
                 
-                //alert보내기 위해 사용
-                self.request_result_alert_func(self.request_result_alert)
             })
     }
     
@@ -736,6 +737,9 @@ class ManageFriendViewModel: ObservableObject{
                 }
             }, receiveValue: {response in
                 print("이미 앱에 가입한 친구리스트 가져오기 response: \(response)")
+                self.contacts_model.removeAll()
+                self.enrolled_friends_model.removeAll()
+                
                 let result = response["result"].string
                 if result == "ok"{
                     print("가입된 친구 없음")
@@ -771,6 +775,7 @@ class ManageFriendViewModel: ObservableObject{
     
     //연락처가져오기
     func fetchContacts() {
+                
         // 1.
         let store = CNContactStore()
         store.requestAccess(for: .contacts) { (granted, error) in
@@ -791,9 +796,28 @@ class ManageFriendViewModel: ObservableObject{
                         let my_friend_phone = contact.phoneNumbers.first?.value.stringValue.replacingOccurrences(of: "-", with: "")
                         print("형식 통일한 전화번호: \(String(describing: my_friend_phone))")
                         
+                        let my_idx = UserDefaults.standard.string(forKey: "user_id")!
+                        
+                        //이미 초대 문자 보낸 친구 저장된 값 꺼내오기
+                        let sent_invite_friends = UserDefaults.standard.array(forKey: "\(my_idx)_invited_friends") as? [String] ?? []
+                  
                         //주소록에 등록된 정보중 전화번호가 없는 경우도 있음.
                         if my_friend_phone != nil{
+                            print("쉐어드에 저장됐던 연락처: \(sent_invite_friends), 비교하는 전화번호: \(my_friend_phone!)")
+                            //이미 초대 문자 보낸 친구 : sent invite msg값 true
+                            if sent_invite_friends.contains(where: {
+                                                                print("값 확이니ㅣㅣ: \($0)")
+                                                              return  $0 == my_friend_phone!}){
+                                
+                                print("전화번호 포함하고 있음: \(my_friend_phone!)")
+
+                                self.contacts_model.append(FetchedContactModel(firstName: contact.givenName, lastName: contact.familyName, telephone: my_friend_phone ?? "", profile_photo_path: "", sent_invite_msg: true))
+                                print("데이터 바꼈는지: \(self.contacts_model)")
+                                
+                            }else{
+                            
                             self.contacts_model.append(FetchedContactModel(firstName: contact.givenName, lastName: contact.familyName, telephone: my_friend_phone ?? "", profile_photo_path: "", sent_invite_msg: false))
+                            }
                         }
                         
                         for enrolled_friend in self.enrolled_friends_model{
@@ -805,7 +829,7 @@ class ManageFriendViewModel: ObservableObject{
                             }
                         }
                     })
-                    print("최종으로 분류한 모델 - 1. 새로 초대해야하는 친구 리스트: \(self.contacts_model)")
+                    print("최종으로 분류한 모델 - 1. 새로 초대해야하는 친구 리스트 or 초대 문자 보낸 친구들 \(self.contacts_model)")
                     print("2.친구 요청할 수 있는 친구 리스트: \(self.enrolled_friends_model)")
                     
                 } catch let error {
@@ -818,7 +842,7 @@ class ManageFriendViewModel: ObservableObject{
     }
     
     //회원가입시 친구들에게 초대 문자 보내기
-    func send_invite_message(contacts: Array<Any>){
+    func send_invite_message(contacts: Array<String>){
         cancellation = APIClient.send_invite_message(contacts: contacts)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: {result in
@@ -834,6 +858,16 @@ class ManageFriendViewModel: ObservableObject{
                 let result = response["result"].string
                 if result == "message sended"{
                     print("메세지 보내짐")
+                    //userdefaults에서 저장된 데이터 꺼내오기 -> 다시 저장하기
+                    let my_idx = UserDefaults.standard.string(forKey: "user_id")
+                    let sent_addresses = UserDefaults.standard.array(forKey: "\(String(describing: my_idx))_invited_addresses") as? [String] ?? [String]()
+                    var updated_data : [String] = []
+                                
+                    updated_data = sent_addresses
+                    //한 번에 한사람에게만 초대 문자 보내기 가능하므로 0번째 값만 가져와서 저장하면 됨.
+                    updated_data.append(contacts[0])
+                    //새로 보낸 번호
+                    UserDefaults.standard.set(updated_data,forKey: "\(String(describing: my_idx))_invited_addresses")
                     
                     //전화번호도 노티에 보내야 받아서 비교해서 뷰 변경 가능.
                     let contact = contacts[0] as! String
