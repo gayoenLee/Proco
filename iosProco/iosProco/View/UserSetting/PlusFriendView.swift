@@ -16,6 +16,8 @@ struct PlusFriendView: View {
 
     //친구 요청 통신 실패시 알림 띄우기 위함.
     @State private var request_fail : Bool = false
+    //추천 친구 리스트 많을 경우 시간 소요-> 프로그래스바 띄우기
+    @State private var show_friend_list : Bool = false
     
     var body: some View {
         VStack{
@@ -61,11 +63,17 @@ struct PlusFriendView: View {
                     .foregroundColor(Color.proco_black)
                 Spacer()
             }.padding()
+            
+            if !show_friend_list{
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+                Spacer()
+                
+            }else{
+            
             ScrollView{
                 VStack{
-                    
-                    if self.manage_vm.enrolled_friends_model.count > 0 && self.manage_vm.contacts_model.count > 0{
-                        
+                    if self.manage_vm.enrolled_friends_model.count > 0 || self.manage_vm.contacts_model.count > 0{
                     
                     //친구 요청 보낼 친구 리스트
                     ForEach(self.manage_vm.enrolled_friends_model){friend in
@@ -93,6 +101,7 @@ struct PlusFriendView: View {
                     }
                 }
             }
+            }
             
         }
         .navigationBarTitle("", displayMode: .inline)
@@ -100,6 +109,11 @@ struct PlusFriendView: View {
         .onAppear{
             print("친구 추가하기 뷰 나타남")
             self.manage_vm.get_enrolled_friends(contacts: ["01048077540"])
+            
+            DispatchQueue.main.asyncAfter(deadline: .now()+1.0){
+                self.show_friend_list = true
+            }
+            
         }
         //친구 요청 실패시 띄움
         .alert(isPresented: self.$request_fail){
@@ -206,16 +220,22 @@ struct ManageAddressBookFriendRow: View{
                     let friend_contact = user_info["contact"] as! String
                     //초대 문자 보낸 사람 전화번호와 노티에서 받은 전화번호가 같을 경우에만 뷰 변경.
                     if friend_contact == friend_model.telephone{
+                        print("데이터 확인: \(friend_contact), \(friend_model.telephone)")
                         
                         //userdefaults에 저장돼 있던 초대 보낸 리스트 꺼내와서 값 할당. -> 이번에 초대한 친구 append해서 다시 저장
-                        let my_idx = UserDefaults.standard.string(forKey: "user_id")
-                        var invited_friends =  UserDefaults.standard.array(forKey: "\(String(describing: my_idx))_invited_friends")
-                          invited_friends?.append(friend_model.telephone)
+                        let my_idx = UserDefaults.standard.string(forKey: "user_id")!
+                        
+                        var invited_friends =  UserDefaults.standard.array(forKey: "\(my_idx)_invited_friends") as? [String] ?? [String]()
+                        
+                        print("노티 받은 후 저장하기 전 데이터: \(invited_friends)")
+                        if !invited_friends.contains(where: {$0 == friend_contact}){
+                        invited_friends.append(friend_model.telephone)
                           //다시 저장
-                        UserDefaults.standard.set(invited_friends, forKey: "\(String(describing: my_idx))_invited_friends")
+                        UserDefaults.standard.set(invited_friends, forKey: "\(my_idx)_invited_friends")
                         
                     print("초대 문자 이벤트 초대 완료로 변경하기")
                         friend_model.sent_invite_msg = true
+                        }
 
                     }else{
                         friend_model.sent_invite_msg = false
