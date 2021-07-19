@@ -31,8 +31,7 @@ struct GroupDetailView: View {
     //----화면 이동 사용 변수들----
     //친구관리 메인 페이지로 이동시 사용하는 구분값
     @State private var go_to_manage_main : Bool = false
-    //그룹 삭제하기 후 화면 이동 위해사용.
-    @State private var delete_group_ok : Bool = false
+
     @State private var go_to_edit_name : Bool = false
     @State private var go_to_edit_member : Bool = false
     
@@ -46,9 +45,6 @@ struct GroupDetailView: View {
     
     var body: some View {
         VStack{
-            
-            //그룹 삭제하기 후 친구관리 메인 페이지로 이동
-            NavigationLink("",destination: ManageFriendListView(detail_group_vm: self.detail_group_vm), isActive: self.$delete_group_ok)
             
             HStack{
                 //돌아가기 버튼
@@ -194,13 +190,8 @@ struct GroupDetailView: View {
                 print("그룹 삭제 완료 노티 받음")
                 
                 if data as! String == "ok"{
-                    
-                    self.delete_group_ok = true
-                    
-                    //페이지 이동 텀 주기
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
-                        print("그룹 삭제 후 페이지 이동 텀 주기")
-                    }
+                
+                    self.presentation.wrappedValue.dismiss()
                     
                 }else{
                     print("그룹 삭제 실패")
