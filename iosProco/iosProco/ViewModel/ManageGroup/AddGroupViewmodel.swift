@@ -95,10 +95,11 @@ class AddGroupViewmodel: ObservableObject{
     }
     
     //그룹 추가에서 선택한 친구들만 보여줄 때 foreach에서 갯수와 리스트를 알기 위해 사용함.
-    func show_selected_member() -> Array<Any> {
-        
-        let filtered_array = friend_list_struct.filter{(selected_friend_set.contains($0.idx!)
+    func show_selected_member() -> [GetFriendListStruct] {
+        var filtered_array :  [GetFriendListStruct] = []
+         filtered_array = friend_list_struct.filter{(selected_friend_set.contains($0.idx!)
         )}
+        print("필터된 친구 리스트: \(filtered_array)")
         return filtered_array
     }
     
