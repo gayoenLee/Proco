@@ -46,7 +46,6 @@ struct ServiceCenterView: View, ServiceCenterProtocol {
             Spacer()
         }
         .navigationBarTitle("문의하기")
-        .navigationBarBackButtonHidden(false)
         .font(.custom(Font.n_extra_bold, size: 22))
         .foregroundColor(Color.proco_black)
         .onAppear{
