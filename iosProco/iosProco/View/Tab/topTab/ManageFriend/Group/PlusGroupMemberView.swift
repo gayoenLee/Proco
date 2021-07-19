@@ -140,7 +140,7 @@ struct PlusFriendRow : View{
     //row를 선택했는지 알 수 있는 변수
     var is_selected: Bool {
         //선택했는지는 selected리스트 안에 담겨 있냐에 따라 결정됨.
-        viewmodel.selected_friend_set.contains(friend_model.idx ?? 99)
+        viewmodel.selected_friend_set.contains(friend_model.idx ?? -1)
     }
     
     //친구 검색창에 사용하는 변수
@@ -194,14 +194,14 @@ struct PlusFriendRow : View{
                         HStack{
                             //선택 박스
                             Button(action: {
-                                print("버튼 클릭")
+                                print("그룹 멤버 추가 버튼 클릭: \(friend_model.idx!)")
                                 if self.is_selected{
                                     print("제거된 값 확인 : \(self.viewmodel.selected_friend_set)")
-                                    self.viewmodel.selected_friend_set.remove(self.friend_model.idx ?? 88)
+                                    self.viewmodel.selected_friend_set.remove(self.friend_model.idx ?? -1)
                                 }
                                 else if self.is_selected == false{
                                     print("추가된 값 확인 : \(self.viewmodel.selected_friend_set)")
-                                    self.viewmodel.selected_friend_set.insert(self.friend_model.idx ?? 77)
+                                    self.viewmodel.selected_friend_set.insert(self.friend_model.idx ?? -1)
                                 }
                             }){
                                 if self.is_selected{
@@ -267,12 +267,18 @@ struct PlusFriendRow : View{
                         //선택 박스
                         Button(action: {
                             
-                            print("버튼 클릭")
+                            print("버튼 클릭: \(self.friend_model.idx)")
                             if self.is_selected{
-                                self.viewmodel.selected_friend_set.remove(self.friend_model.idx ?? 0 )
+                                print("제거한 친구 전: \(self.viewmodel.selected_friend_set)")
+                                self.viewmodel.selected_friend_set.remove(self.friend_model.idx ?? -1 )
+                                
+                                print("제거한 친구 후: \(self.viewmodel.selected_friend_set)")
                             }
                             else if self.is_selected == false{
-                                self.viewmodel.selected_friend_set.insert(self.friend_model.idx ?? 0 )
+                                print("추가한 친구 전: \(self.viewmodel.selected_friend_set)")
+                                
+                                self.viewmodel.selected_friend_set.insert(self.friend_model.idx ?? -1 )
+                                print("추가한 친구 후: \(self.viewmodel.selected_friend_set)")
                             }
                         }){
                             if self.is_selected{
