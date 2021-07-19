@@ -86,7 +86,7 @@ struct SettingView: View {
                         self.chat_alarm_state = true
                     }
                     
-                    if self.main_vm.user_info_model.card_notify_state == 1{
+                    if self.main_vm.user_info_model.card_notify_state == 0{
                         self.card_notify_state = false
                     }else{
                         self.card_notify_state = true
