@@ -88,10 +88,14 @@ struct EditManageGroupNameView: View {
                 .padding([.leading, .trailing])
                 Spacer()
                 
+                Button(action: {
+                    self.group_name = ""
+                }){
                 Image("x_btn")
                     .resizable()
                     .frame(width: 9.69, height: 9.7)
                     .padding(.trailing)
+                }
             }
             Divider()
                 .foregroundColor(Color.proco_black)

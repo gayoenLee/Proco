@@ -590,6 +590,11 @@ struct Keys{
         static let param = "param"
         static let photo_file = "photo_file"
     }
+    
+    //친구관리 - 내가 친구 신청한 친구 목록
+    struct  GetMyRequestFriendList {
+        static let friend_type = "friend_type"
+    }
 }
 
 enum HTTPHeaderField: String{

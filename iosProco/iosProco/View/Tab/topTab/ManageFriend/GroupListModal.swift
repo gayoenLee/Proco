@@ -18,10 +18,11 @@ struct GroupListModal: View{
     
     var body: some View{
         VStack{
-            
+            ScrollView{
             ForEach(self.manage_group_struct){group in
                 //그룹1개 뷰
                 GroupModalRow(manage_viewmodel: self.manage_viewmodel, manage_group_struct: group, show_modal: self.$show_modal)
+            }
             }
             
             HStack{
@@ -41,7 +42,7 @@ struct GroupListModal: View{
                 }
             }
             .padding()
-            .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width*0.3, alignment: .center)
+        
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)
@@ -72,6 +73,8 @@ struct GroupModalRow: View{
         print("추가하려는 친구 확인 : \(self.manage_viewmodel.selected_friend_idx)")
         //추가한 후 통신 결과에 따라 alert창 띄우기 위함
         manage_viewmodel.show_ok_alert(manage_viewmodel.active_friend_group_alert)
+        
+        
     }
     
     var body: some View{

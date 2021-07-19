@@ -35,7 +35,7 @@ struct FriendStateDialog: View {
                     RoundedRectangle(cornerRadius: 16)
                         //모달 컨텐츠를 포함하고 있는 큰 사각형. 색깔 투명하게 하기 위함.
                         .foregroundColor(.clear)
-                        .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.07)
+                        .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.08)
                         .overlay(FriendStateDialogContents(calendar_vm: self.calendar_vm, main_vm: self.main_vm,group_main_vm: self.group_main_vm, show_friend_info: self.$show_friend_info, socket: socket, go_to_chat: self.$go_to_chat, go_to_feed: self.$go_to_feed, state_on: self.$state_on, is_friend: self.is_friend, show_report_view: self.$show_report_view)
                                     .offset(x: UIScreen.main.bounds.width*0.009, y: UIScreen.main.bounds.height * 0.05))
                 )
@@ -87,7 +87,7 @@ struct FriendStateDialogContents : View{
                     Spacer()
                     Image("context_menu_icon")
                         .resizable()
-                        .frame(width: 5, height: 15)
+                        .frame(width: 3, height: 15)
                 }
                 .onTapGesture{
                     print("신고하기 클릭")
@@ -96,6 +96,7 @@ struct FriendStateDialogContents : View{
                 
             }
             .padding([.leading, .trailing])
+            .padding(.top, UIScreen.main.bounds.width/30)
             
             //일반 채팅방 화면으로 이동.
             NavigationLink("",
