@@ -66,10 +66,9 @@ struct ManageFriendRow: View{
                 //삭제 여부 확인 알림창 한 번 더 띄운 후 삭제 통신 진행
                 self.ask_delete_friend_model = true
                 
-                //추가한 후 통신 결과에 따라 alert창 띄우기 위함
-            manage_viewmodel.show_ok_alert(manage_viewmodel.active_friend_group_alert)
             }), ActionSheet.Button.cancel(Text("취소"))])
         })
+        
     }
 }
 
