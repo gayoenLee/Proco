@@ -438,8 +438,8 @@ struct Keys{
     }
     
     //설정 - 피드 알림
-    struct EditFeedAlarmSetting{
-        static let feed_notify_state = "feed_notify_state"
+    struct EditCardAlarmSetting{
+        static let card_notify_state = "card_notify_state"
     }
     //신고하기
     struct SendReports{
