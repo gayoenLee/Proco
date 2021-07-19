@@ -62,6 +62,14 @@ class ManageFriendViewModel: ObservableObject{
             print("친구 신청 목록 didset들어옴 : \(friend_request_struct)")
         }
     }
+    
+    //내가 신청한 친구 목록 모델
+    @Published var my_friend_request_struct = [MyRequestFriendModel](){
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
     //친구 추가 진짜로 하기 전에 서버에 이 사람이 있는지 확인하는 통신 후 받는 response
     @Published var add_friend_check_struct = FriendRequestListStruct(){
         didSet {
@@ -73,14 +81,6 @@ class ManageFriendViewModel: ObservableObject{
     
     //2.그룹 리스트 가져오는 통신이 성공한 경우
     @Published var get_group_ok : Bool = false{
-        didSet{
-            objectWillChange.send()
-            
-        }
-    }
-    
-    //친구 리스트 가져온 후 친구 신청 목록 가져오는 통신 위해 사용하는 값.
-    @Published var get_friend_ok : Bool = false{
         didSet{
             objectWillChange.send()
             
@@ -259,12 +259,53 @@ class ManageFriendViewModel: ObservableObject{
                     }
                     
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["got_all_groups" : "ok"])
-                    self.get_friend_list_and_request()
+                    self.fetch_all_friend_list()
                   })
     }
     
-    
-    //친구관리 - 친구 신청 목록 가져온 후 친구 신청 목록 가져오기
+    //내가 신청한 친구 요청 목록
+    func get_my_request_friend_list(){
+        cancellation = APIClient.get_my_request_friend_list(friend_type: "친구요청중")
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: {result in
+                switch result{
+                case .failure(let error):
+                    print("내가 친구 요청한 리스트 가져오는데 fail")
+                case .finished:
+                    break
+                }
+            }, receiveValue: {response in
+                print("내가 친구 신청한 리스트 가져오기 response: \(response)")
+                
+                self.my_friend_request_struct.removeAll()
+                //요청 결과가 없을 경우 result만 딕셔너리 형태로 와서 예외처리 해줘야 함.
+                let result: String?
+                result = response["result"].string
+                if result == "no result"{
+                    print("내 친구 요청 리스트 없음")
+                }
+                else{
+                    print("내 친구 요청 존재")
+                    let data = JSON(response)
+                    let json_string = """
+                        \(data)
+                        """
+                    print("내 친구 요청 리스트 string변환: \(json_string)")
+                    
+                    let json_data = json_string.data(using: .utf8)
+                    
+                    let friend = try? JSONDecoder().decode([MyRequestFriendModel].self, from: json_data!)
+                    
+                    //있는 데이터 제거 후 추가
+                    self.my_friend_request_struct.removeAll()
+                    print("내 친구 요청 리스트 모델 넣기 전: \(self.my_friend_request_struct)")
+                    self.my_friend_request_struct = friend!
+                    print("내 친구 요청 리스트 모델 넣은 후 : \(self.my_friend_request_struct)")
+                    
+                }
+            })
+    }
+    //친구관리 - 친구 신청 목록 가져온 후 내가 신청한 친구 목록 가져오기
     func get_friend_list_and_request(){
         cancellation = APIClient.get_friend_request_api(friend_type: "친구요청대기")
             .receive(on: DispatchQueue.main)
@@ -301,10 +342,9 @@ class ManageFriendViewModel: ObservableObject{
                     print("친구 요청 리스트 모델 넣기 전: \(self.friend_request_struct)")
                     self.friend_request_struct = friend!
                     print("친구 요청 리스트 모델 넣은 후 : \(self.friend_request_struct)")
-                    self.get_friend_ok.toggle()
                     
                 }
-                self.fetch_all_friend_list()
+                self.get_my_request_friend_list()
             })
     }
     
