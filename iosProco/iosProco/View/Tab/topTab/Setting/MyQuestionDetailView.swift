@@ -282,5 +282,5 @@ private extension MyQuestionDetailView{
                 }
                 
             }
-        }\
+        }
 }
