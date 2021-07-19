@@ -59,34 +59,35 @@ struct ManageFriendListView: View {
     //친구 한 명 클릭시 state 상태
     @State private var friend_state : Int? = nil
     
+    //친구 요청 모아놓은 목록 페이지 이동값
+    @State private var go_friend_request_list : Bool = false
+    
     var body: some View {
         
         VStack{
             title_bar
             
+            NavigationLink("",destination: AllFriendRequestView(manage_vm: self.manage_vm, friend_total_num: self.$total_friend_num), isActive: self.$go_friend_request_list)
+            
             ScrollView{
                 VStack{
                     HStack{
-                        Text("친구 신청 목록")
+                        Text("친구 요청 목록")
                             .font(.custom(Font.n_extra_bold, size: 16))
                             .foregroundColor(Color.proco_black)
-                        
+                            .padding(.trailing)
                         Spacer()
+                        
+                        Image("right_light")
+                            .resizable()
+                            .frame(width: 5.38, height: 9.09)
                     }
                     .padding()
-                    
-                    if manage_vm.friend_request_struct.count <= 0{
-                        Text("친구 신청한 사람이 없습니다.")
-                            .font(.custom(Font.t_regular, size: 13))
-                            .foregroundColor(Color.proco_black)
-                        
-                    }else{
-                        ForEach(manage_vm.friend_request_struct){request in
-                            
-                            FriendRequestRow(manage_viewmodel: self.manage_vm, request_struct: request, friend_total_num: self.$total_friend_num)
-                                .padding([.leading, .trailing])
-                        }
+                    .onTapGesture {
+                        print("친구 요청 목록 가기 클릭")
+                        self.go_friend_request_list = true
                     }
+                    
                     Group{
                         HStack{
                             Text("그룹")
@@ -217,7 +218,7 @@ struct ManageFriendListView: View {
                         Spacer()
                         
                     }
-                
+                    
                 }
                 //친구의 온오프라인 상태가 변경되었을 경우
                 .onReceive(NotificationCenter.default.publisher(for: Notification.update_user_state), perform: {value in
@@ -340,12 +341,12 @@ struct ManageFriendListView: View {
         }
         .overlay(FriendStateDialog(main_vm: self.friend_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: CalendarViewModel(),show_friend_info: self.$show_friend_profile, socket: SockMgr.socket_manager, state_on: self.$friend_state, is_friend : true))
         .overlay(overlayView:
-             manage_vm.active_friend_group_alert ==
-         .ok ?
-              Toast.init(dataModel: Toast.ToastDataModel.init(title: "그룹에 추가되었습니다.", image: "checkmark"), show: $manage_vm.show_add_friend_group_alert)
+                    manage_vm.active_friend_group_alert ==
+                    .ok ?
+                    Toast.init(dataModel: Toast.ToastDataModel.init(title: "그룹에 추가되었습니다.", image: "checkmark"), show: $manage_vm.show_add_friend_group_alert)
                     :   manage_vm.active_friend_group_alert == .duplicated ?
                     Toast.init(dataModel: Toast.ToastDataModel.init(title: "이미 그룹에 있습니다.", image: "checkmark"), show: $manage_vm.show_add_friend_group_alert) :
-        manage_vm.active_friend_group_alert == .fail ?
+                    manage_vm.active_friend_group_alert == .fail ?
                     Toast.init(dataModel: Toast.ToastDataModel.init(title: "오류가 발생했습니다. 다시 시도해주세요", image: "checkmark"), show: $manage_vm.show_add_friend_group_alert) : nil, show: $manage_vm.show_add_friend_group_alert)
     }
 }
@@ -364,37 +365,34 @@ struct ManageGroupRowView : View{
     var name: String?
     
     var body: some View{
-        VStack{
+        
+        HStack{
+            Text(manage_group_struct.name!)
+                .font(.custom(Font.n_bold, size: 16))
+                .foregroundColor(Color.proco_black)
             
-            HStack{
-                Text(manage_group_struct.name!)
-                    .font(.custom(Font.n_bold, size: 16))
-                    .foregroundColor(Color.proco_black)
-                
-                Spacer()
-                //클릭시 그룹 상세 페이지로 이동, 서버에 정보 요청 통신 코드, 뷰모델에 클릭한 그룹 이름 저장.
-                Button(action: {
-                    
-                    //1. 그룹 이름 Groupdetailviewmodel의 published에 저장(그룹 이름은 서버에서 안줌)
-                    detail_group_viewmodel.edit_group_name = self.manage_group_struct.name!
-                    print("상세 페이지 이동시 뷰모델에 이름 저장하는 값 확인 : \(detail_group_viewmodel.edit_group_name)")
-                    
-                    //2.선택한 그룹 인덱스 상세 페이지 뷰모델의 published에 문자로 변환해서 저장.
-                    manage_viewmodel.detail_group_idx = self.manage_group_struct.idx!
-                    print("선택한 그룹 인덱스값 저장됐는지 확인 : \(manage_viewmodel.detail_group_idx)")
-                    
-                    
-                    //3.상세 페이지 이동
-                    go_to_detail.toggle()
-                }){
-                    Image("right_light")
-                        .resizable()
-                        .frame(width: 5.38, height: 9.09)
-                }
-                .frame(width: 10, height: 10)
-            }
-            .padding()
+            Spacer()
+            //클릭시 그룹 상세 페이지로 이동, 서버에 정보 요청 통신 코드, 뷰모델에 클릭한 그룹 이름 저장.
+            Image("right_light")
+                .resizable()
+                .frame(width: 5.38, height: 9.09)
+            
         }
+        .padding()
+        .onTapGesture {
+            //1. 그룹 이름 Groupdetailviewmodel의 published에 저장(그룹 이름은 서버에서 안줌)
+            detail_group_viewmodel.edit_group_name = self.manage_group_struct.name!
+            print("상세 페이지 이동시 뷰모델에 이름 저장하는 값 확인 : \(detail_group_viewmodel.edit_group_name)")
+            
+            //2.선택한 그룹 인덱스 상세 페이지 뷰모델의 published에 문자로 변환해서 저장.
+            manage_viewmodel.detail_group_idx = self.manage_group_struct.idx!
+            print("선택한 그룹 인덱스값 저장됐는지 확인 : \(manage_viewmodel.detail_group_idx)")
+            
+            
+            //3.상세 페이지 이동
+            go_to_detail.toggle()
+        }
+        
     }
 }
 
