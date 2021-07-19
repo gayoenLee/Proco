@@ -81,9 +81,9 @@ struct ManageFriendListView: View {
                             .foregroundColor(Color.proco_black)
                         
                     }else{
-                        ForEach(0..<manage_vm.friend_request_struct.count, id: \.self){row_index in
+                        ForEach(manage_vm.friend_request_struct){request in
                             
-                            FriendRequestRow(manage_viewmodel: self.manage_vm, request_struct: self.manage_vm.friend_request_struct[row_index], row_index: row_index, friend_total_num: self.$total_friend_num)
+                            FriendRequestRow(manage_viewmodel: self.manage_vm, request_struct: request, friend_total_num: self.$total_friend_num)
                                 .padding([.leading, .trailing])
                         }
                     }
@@ -112,11 +112,11 @@ struct ManageFriendListView: View {
                         
                         //그룹 리스트를 모두 가져왔을 때만 리스트 보여주기
                         if self.got_all_groups{
-                         
-                                ForEach(manage_vm.manage_groups, id: \.self){group in
-                                    
-                                    ManageGroupRowView(manage_viewmodel: self.manage_vm, detail_group_viewmodel: self.detail_group_vm, manage_group_struct: group, go_to_detail: self.$go_to_detail, idx: group.idx, name: group.name)
-                                }
+                            
+                            ForEach(manage_vm.manage_groups, id: \.self){group in
+                                
+                                ManageGroupRowView(manage_viewmodel: self.manage_vm, detail_group_viewmodel: self.detail_group_vm, manage_group_struct: group, go_to_detail: self.$go_to_detail, idx: group.idx, name: group.name)
+                            }
                         }else{
                             
                             ProgressView()
@@ -127,7 +127,7 @@ struct ManageFriendListView: View {
                     //친구 목록
                     Group{
                         HStack{
-                           
+                            
                             NavigationLink("", destination: PlusFriendView(manage_vm: self.manage_vm).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$go_plus_friend)
                             
                             Text("친구 총\(total_friend_num)명")
@@ -163,7 +163,7 @@ struct ManageFriendListView: View {
                                                         
                                                         self.friend_vm.friend_info_struct.idx
                                                             = friend.idx
-                                                      //state값을 오버레이시 뷰에 넘겨줘야 하므로 값 따로 저장
+                                                        //state값을 오버레이시 뷰에 넘겨줘야 하므로 값 따로 저장
                                                         self.friend_state = friend.state
                                                         
                                                         self.friend_vm.friend_info_struct.state = friend.state
@@ -172,9 +172,9 @@ struct ManageFriendListView: View {
                                                         
                                                         self.show_friend_profile = true
                                                     }
-                                                )
-                                        }
+                                            )
                                     }
+                                }
                                 
                                 ForEach(self.friend_list_model.filter({
                                     $0.state == 0
@@ -195,7 +195,7 @@ struct ManageFriendListView: View {
                                                         
                                                         self.friend_vm.friend_info_struct.idx
                                                             = friend.idx
-                                                      //state값을 오버레이시 뷰에 넘겨줘야 하므로 값 따로 저장
+                                                        //state값을 오버레이시 뷰에 넘겨줘야 하므로 값 따로 저장
                                                         self.friend_state = friend.state
                                                         
                                                         self.friend_vm.friend_info_struct.state = friend.state
@@ -204,11 +204,11 @@ struct ManageFriendListView: View {
                                                         
                                                         self.show_friend_profile = true
                                                     }
-                                                )
-                                        }
+                                            )
                                     }
+                                }
                             }
-                       
+                            
                         }else{
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
@@ -217,11 +217,9 @@ struct ManageFriendListView: View {
                         Spacer()
                         
                     }
-                    .popover(isPresented: self.$show_group_list_modal){
-                        GroupListModal(manage_viewmodel: self.manage_vm, manage_group_struct: self.manage_vm.manage_groups, show_modal: self.$show_group_list_modal)
-                    }
+                
                 }
-                //친구의 온오프라인 상태가 변경되었을 경우 0718변경
+                //친구의 온오프라인 상태가 변경되었을 경우
                 .onReceive(NotificationCenter.default.publisher(for: Notification.update_user_state), perform: {value in
                     print("사용자 상태 업데이트")
                     
@@ -259,7 +257,7 @@ struct ManageFriendListView: View {
                     
                     if let user_info = value.userInfo, let data = user_info["got_all_friend"]{
                         print("친구 리스트 모두 가져온 통신 완료 받았음: \(data)")
-                                    
+                        
                         self.friend_list_model = self.manage_vm.friend_list_struct
                         
                         let friend_num = user_info["friend_num"] as! String
@@ -278,52 +276,33 @@ struct ManageFriendListView: View {
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0){
                             
-                        self.got_all_groups = true
+                            self.got_all_groups = true
                         }
                     }else{
                         print("그룹 리스트 모두 가져온 노티  아님")
                     }
                 })
                 .onReceive( NotificationCenter.default.publisher(for: Notification.set_interest_friend)){value in
-                                        
-                                        if let user_info = value.userInfo, let data = user_info["set_interest_friend"]{
-                                            print("친구 관심친구 설정 노티 받았음: \(value)")
-                                                     
-                                            if data as! String == "set_ok_관심친구"{
-                                                let friend_idx = Int(user_info["friend_idx"] as! String)
-                                                let index =
-                                                    self.friend_list_model.firstIndex(where: {$0.idx == friend_idx}) ?? -1
-                                                if index != -1 { self.friend_list_model[index].kinds = "관심친구"}
-                                            }else if data as! String == "set_ok_관심친구해제"{
-                                                let friend_idx = Int(user_info["friend_idx"] as! String)
-                                                let index =
-                                                    self.friend_list_model.firstIndex(where: {$0.idx == friend_idx}) ?? -1
-                                                if index != -1 { self.friend_list_model[index].kinds = "관심친구해제"}
-                                            }else{
-                                                print("관심친구 이벤트 오류 발생")
-                                            }
-                                            
-                                        }else{
-                                            print("관심친구 설정 노티 아님")
-                                        }
-                                }
-                .alert(isPresented: $manage_vm.show_add_friend_group_alert){
-                    switch manage_vm.active_friend_group_alert{
-                    case .ok:
-                        print("그룹 추가 알림 이벤트 들어옴")
-                        return Alert(title: Text("그룹 추가"), message: Text("그룹에 추가되었습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
-                            
-                        }))
-                    case .duplicated:
-                        print("그룹 추가 알림 이벤트 들어옴")
-                        return  Alert(title: Text("그룹 추가"), message: Text("이미 그룹에 있습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
-                            
-                        }))
-                    case .fail:
-                        print("그룹 추가 알림 이벤트 들어옴 또는 친구 삭제 실패시 띄우는 알림 들어옴")
-                        return Alert(title: Text("오류"), message: Text("오류가 발생했습니다. 다시 시도해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
-                            
-                        }))
+                    
+                    if let user_info = value.userInfo, let data = user_info["set_interest_friend"]{
+                        print("친구 관심친구 설정 노티 받았음: \(value)")
+                        
+                        if data as! String == "set_ok_관심친구"{
+                            let friend_idx = Int(user_info["friend_idx"] as! String)
+                            let index =
+                                self.friend_list_model.firstIndex(where: {$0.idx == friend_idx}) ?? -1
+                            if index != -1 { self.friend_list_model[index].kinds = "관심친구"}
+                        }else if data as! String == "set_ok_관심친구해제"{
+                            let friend_idx = Int(user_info["friend_idx"] as! String)
+                            let index =
+                                self.friend_list_model.firstIndex(where: {$0.idx == friend_idx}) ?? -1
+                            if index != -1 { self.friend_list_model[index].kinds = "관심친구해제"}
+                        }else{
+                            print("관심친구 이벤트 오류 발생")
+                        }
+                        
+                    }else{
+                        print("관심친구 설정 노티 아님")
                     }
                 }
                 .alert(isPresented: self.$ask_delete_friend_model){
@@ -356,7 +335,18 @@ struct ManageFriendListView: View {
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
         }
+        .sheet(isPresented: self.$show_group_list_modal){
+            GroupListModal(manage_viewmodel: self.manage_vm, manage_group_struct: self.manage_vm.manage_groups, show_modal: self.$show_group_list_modal)
+        }
         .overlay(FriendStateDialog(main_vm: self.friend_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: CalendarViewModel(),show_friend_info: self.$show_friend_profile, socket: SockMgr.socket_manager, state_on: self.$friend_state, is_friend : true))
+        .overlay(overlayView:
+             manage_vm.active_friend_group_alert ==
+         .ok ?
+              Toast.init(dataModel: Toast.ToastDataModel.init(title: "그룹에 추가되었습니다.", image: "checkmark"), show: $manage_vm.show_add_friend_group_alert)
+                    :   manage_vm.active_friend_group_alert == .duplicated ?
+                    Toast.init(dataModel: Toast.ToastDataModel.init(title: "이미 그룹에 있습니다.", image: "checkmark"), show: $manage_vm.show_add_friend_group_alert) :
+        manage_vm.active_friend_group_alert == .fail ?
+                    Toast.init(dataModel: Toast.ToastDataModel.init(title: "오류가 발생했습니다. 다시 시도해주세요", image: "checkmark"), show: $manage_vm.show_add_friend_group_alert) : nil, show: $manage_vm.show_add_friend_group_alert)
     }
 }
 
