@@ -224,7 +224,7 @@ class APIClient {
     //친구 요청 거절
     static func decline_friend_request_api(friend_idx: Int, action: String) -> AnyPublisher<JSON, AFError>{
         
-        let publisher = AF.request(APIRouter.accept_friend_request(friend_idx: friend_idx, action: "거절"), interceptor: RequestInterceptorClass())
+        let publisher = AF.request(APIRouter.decline_friend_request(friend_idx: friend_idx, action: "거절"), interceptor: RequestInterceptorClass())
             .publishDecodable(type: JSON.self)
         return publisher.value()
     }
