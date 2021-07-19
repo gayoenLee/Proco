@@ -145,7 +145,7 @@ struct FriendStateDialogContents : View{
                         Spacer()
                     }
                 }else{
-                    if main_vm.friend_info_struct.profile_photo == "" || main_vm.friend_info_struct.profile_photo == nil{
+                    if main_vm.friend_info_struct.profile_photo_path == "" || main_vm.friend_info_struct.profile_photo_path == nil{
                         
                         
                         Image("main_profile_img")
@@ -155,7 +155,7 @@ struct FriendStateDialogContents : View{
                         
                     }else{
                         
-                        KFImage(URL(string:  main_vm.friend_info_struct.profile_photo!))
+                        KFImage(URL(string:  main_vm.friend_info_struct.profile_photo_path!))
                             .placeholder{Image("main_profile_img")
                                 .resizable()
                                 .frame(width: 48, height: 48)
@@ -271,7 +271,7 @@ struct FriendStateDialogContents : View{
                             calendar_vm.calendar_owner.watch_user_idx = Int(calendar_vm.my_idx!)!
                             print("캘린더 보는 유저 idx: \(calendar_vm.calendar_owner.watch_user_idx), \(Int(calendar_vm.my_idx!)!)")
                             
-                            calendar_vm.calendar_owner.profile_photo_path = main_vm.friend_info_struct.profile_photo ?? ""
+                            calendar_vm.calendar_owner.profile_photo_path = main_vm.friend_info_struct.profile_photo_path ?? ""
                             
                             calendar_vm.calendar_owner.user_idx = main_vm.friend_info_struct.idx!
                             print("캘린더 주인 idx: \(main_vm.friend_info_struct.idx!)")
@@ -360,7 +360,7 @@ struct FriendStateDialogContents : View{
                             print("일대일 채팅하기 클릭 내 idx: \(Int(main_vm.my_idx!)!), 친구: \(main_vm.friend_info_struct.idx!)")
                             ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_info_struct.idx!, nickname: main_vm.friend_info_struct.nickname!)
                             
-                            SockMgr.socket_manager.temp_chat_friend_model = UserChatInListModel(idx: main_vm.friend_info_struct.idx!, nickname: main_vm.friend_info_struct.nickname!, profile_photo_path: main_vm.friend_info_struct.profile_photo ?? "")
+                            SockMgr.socket_manager.temp_chat_friend_model = UserChatInListModel(idx: main_vm.friend_info_struct.idx!, nickname: main_vm.friend_info_struct.nickname!, profile_photo_path: main_vm.friend_info_struct.profile_photo_path ?? "")
                             
                             self.go_to_chat.toggle()
                             

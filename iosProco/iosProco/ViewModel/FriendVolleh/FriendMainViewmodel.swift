@@ -564,7 +564,7 @@ class FriendVollehMainViewmodel: ObservableObject{
         self.friend_info_struct.idx = self.friend_list_struct[detail_index!].idx
         self.friend_info_struct.nickname = self.friend_list_struct[detail_index!].nickname
         
-        self.friend_info_struct.profile_photo = self.friend_list_struct[detail_index!].profile_photo
+        self.friend_info_struct.profile_photo_path = self.friend_list_struct[detail_index!].profile_photo_path
         //on.off상태
         self.friend_info_struct.state = self.friend_list_struct[detail_index!].state
             }
@@ -764,7 +764,7 @@ class FriendVollehMainViewmodel: ObservableObject{
 
                     if friend.nickname != nil{
 
-                        self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx!, nickname: friend.nickname!, profile_photo: friend.profile_photo, state: friend.state))
+                        self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx!, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path, state: friend.state))
                     }
                 }
 //               // self.got_friend_list_all.toggle()

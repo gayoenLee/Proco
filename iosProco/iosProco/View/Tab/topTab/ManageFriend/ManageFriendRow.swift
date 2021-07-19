@@ -77,7 +77,7 @@ extension ManageFriendRow{
         
         HStack{
         //프로필 사진은 의무가 아니므로 프로필 사진이 없는 경우 추가
-        if friend_model.profile_photo == nil || friend_model.profile_photo == ""{
+        if friend_model.profile_photo_path == nil || friend_model.profile_photo_path == ""{
             
             ZStack(alignment: .bottomTrailing){
                 Image("main_profile_img")
@@ -97,7 +97,7 @@ extension ManageFriendRow{
             
             ZStack(alignment: .bottomTrailing){
                 
-                KFImage(URL(string: friend_model.profile_photo!))
+                KFImage(URL(string: friend_model.profile_photo_path!))
                     .loadDiskFileSynchronously()
                     .cacheMemoryOnly()
                     .fade(duration: 0.25)

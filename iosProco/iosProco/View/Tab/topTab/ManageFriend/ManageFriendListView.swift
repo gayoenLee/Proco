@@ -159,7 +159,7 @@ struct ManageFriendListView: View {
                                                 ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx)
                                                     .padding()
                                                     .onTapGesture {
-                                                        self.friend_vm.friend_info_struct.profile_photo = friend.profile_photo ?? ""
+                                                        self.friend_vm.friend_info_struct.profile_photo_path = friend.profile_photo_path ?? ""
                                                         self.friend_vm.friend_info_struct.nickname = friend.nickname!
                                                         
                                                         self.friend_vm.friend_info_struct.idx
@@ -169,7 +169,7 @@ struct ManageFriendListView: View {
                                                         
                                                         self.friend_vm.friend_info_struct.state = friend.state
                                                         
-                                                        self.friend_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo ?? "", state: friend.state, kinds: friend.kinds)
+                                                        self.friend_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds)
                                                         
                                                         self.show_friend_profile = true
                                                     }
@@ -191,7 +191,7 @@ struct ManageFriendListView: View {
                                                 ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx)
                                                     .padding()
                                                     .onTapGesture {
-                                                        self.friend_vm.friend_info_struct.profile_photo = friend.profile_photo ?? ""
+                                                        self.friend_vm.friend_info_struct.profile_photo_path = friend.profile_photo_path ?? ""
                                                         self.friend_vm.friend_info_struct.nickname = friend.nickname!
                                                         
                                                         self.friend_vm.friend_info_struct.idx
@@ -201,7 +201,7 @@ struct ManageFriendListView: View {
                                                         
                                                         self.friend_vm.friend_info_struct.state = friend.state
                                                         
-                                                        self.friend_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo ?? "", state: friend.state, kinds: friend.kinds)
+                                                        self.friend_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds)
                                                         
                                                         self.show_friend_profile = true
                                                     }

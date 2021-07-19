@@ -160,14 +160,14 @@ struct PlusFriendRow : View{
                 HStack {
                     HStack(alignment: .center){
                         
-                        if friend_model.profile_photo == "" || friend_model.profile_photo == nil{
+                        if friend_model.profile_photo_path == "" || friend_model.profile_photo_path == nil{
                             
                             Image("main_profile_img")
                                 .resizable()
                                 .frame(width: 38.23,height:38.23 )
                         }else{
                             
-                            KFImage(URL(string: friend_model.profile_photo!))
+                            KFImage(URL(string: friend_model.profile_photo_path!))
                                 .loadDiskFileSynchronously()
                                 .cacheMemoryOnly()
                                 .fade(duration: 0.25)
@@ -229,14 +229,14 @@ struct PlusFriendRow : View{
                 
                 HStack(alignment: .center){
                     
-                    if friend_model.profile_photo == "" || friend_model.profile_photo == nil{
+                    if friend_model.profile_photo_path == "" || friend_model.profile_photo_path == nil{
                         
                         Image("main_profile_img")
                             .resizable()
                             .frame(width: 38.23,height:38.23 )
                     }else{
                         
-                        KFImage(URL(string: friend_model.profile_photo!))
+                        KFImage(URL(string: friend_model.profile_photo_path!))
                             .loadDiskFileSynchronously()
                             .cacheMemoryOnly()
                             .fade(duration: 0.25)

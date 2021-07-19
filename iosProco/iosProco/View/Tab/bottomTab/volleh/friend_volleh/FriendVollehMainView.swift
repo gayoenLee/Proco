@@ -366,7 +366,7 @@ private extension FriendVollehMainView{
                 }
                 .onTapGesture {
                     
-                    self.main_vm.friend_info_struct = GetFriendListStruct(idx: Int(self.main_vm.my_idx!),nickname: main_vm.my_nickname, profile_photo: self.my_photo_path, state: self.state_on, kinds:  "")
+                    self.main_vm.friend_info_struct = GetFriendListStruct(idx: Int(self.main_vm.my_idx!),nickname: main_vm.my_nickname, profile_photo_path: self.my_photo_path, state: self.state_on, kinds:  "")
                     
                     // 내 프로필 이미지 클릭시 다이얼로그 나오고 = on, off 선택 가능
                     self.friend_info_dialog = true
@@ -536,7 +536,7 @@ private extension FriendVollehMainView{
                     
                     Button(action: {
                         print("친구 한 명 클릭")
-                        self.main_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx,nickname: friend.nickname, profile_photo: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds )
+                        self.main_vm.friend_info_struct = GetFriendListStruct(idx: friend.idx,nickname: friend.nickname, profile_photo_path: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds )
                         self.friend_info_dialog.toggle()
                     }){
                         VStack{

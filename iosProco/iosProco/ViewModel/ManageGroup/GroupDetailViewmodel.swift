@@ -183,9 +183,9 @@ class GroupDetailViewmodel: ObservableObject{
                 
                 for friend in response{
                     if friend.nickname != nil{
-                        self.friend_list_struct.append(GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo ?? "", state: friend.state, kinds: friend.kinds))
+                        self.friend_list_struct.append(GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds))
                         
-                        self.group_details.append(GroupDetailStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo ?? ""))
+                        self.group_details.append(GroupDetailStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path ?? ""))
                     }
                     print("통신 후 set에 데이터 추가 확인 : \(self.selected_friend_set)")
                 }
@@ -243,6 +243,11 @@ class GroupDetailViewmodel: ObservableObject{
             }, receiveValue:{ (response)in
                 print("그룹 삭제 통신 확인 : \(response)")
                 if response["result"].string == "ok"{
+                    //삭제 성공시 뷰모델에도 삭제된 그룹 데이터 반영
+                    let model_idx = self.group_details.firstIndex(where: { $0.idx  == group_idx}) ?? -1
+                    if model_idx != -1 {
+                        self.group_details.remove(at: model_idx)}
+                    
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["delete_group" : "ok"])
                 }else{
                     print("그룹 삭제 통신 실패")

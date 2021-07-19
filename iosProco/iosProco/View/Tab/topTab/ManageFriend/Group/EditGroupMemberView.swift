@@ -159,14 +159,14 @@ struct EditFriendRow : View{
                 HStack {
                     HStack{
                         
-                        if friend_model.profile_photo == "" || friend_model.profile_photo == nil{
+                        if friend_model.profile_photo_path == "" || friend_model.profile_photo_path == nil{
                             
                             Image("main_profile_img")
                                 .resizable()
                                 .frame(width: 38.23,height:38.23 )
                         }else{
                             
-                            KFImage(URL(string: friend_model.profile_photo!))
+                            KFImage(URL(string: friend_model.profile_photo_path!))
                                 .loadDiskFileSynchronously()
                                 .cacheMemoryOnly()
                                 .fade(duration: 0.25)
@@ -213,7 +213,7 @@ struct EditFriendRow : View{
                                     
                                     self.viewmodel.temp_selected_friend_set.insert(self.friend_model.idx ?? -1)
                                     
-                                    self.viewmodel.group_details.append(GroupDetailStruct( idx: friend_model.idx!, nickname: friend_model.nickname!, profile_photo_path: friend_model.profile_photo ?? ""))
+                                    self.viewmodel.group_details.append(GroupDetailStruct( idx: friend_model.idx!, nickname: friend_model.nickname!, profile_photo_path: friend_model.profile_photo_path ?? ""))
                                 }
                             }){
                                 if self.is_selected{
@@ -244,14 +244,14 @@ struct EditFriendRow : View{
                 
             }else if (isSearching == false && end_search == false){
                 HStack(alignment: .center){
-                    if friend_model.profile_photo == "" || friend_model.profile_photo == nil{
+                    if friend_model.profile_photo_path == "" || friend_model.profile_photo_path == nil{
                         
                         Image("main_profile_img")
                             .resizable()
                             .frame(width: 38.23,height:38.23 )
                     }else{
                         
-                        KFImage(URL(string: friend_model.profile_photo!))
+                        KFImage(URL(string: friend_model.profile_photo_path!))
                             .loadDiskFileSynchronously()
                             .cacheMemoryOnly()
                             .fade(duration: 0.25)
@@ -293,7 +293,7 @@ struct EditFriendRow : View{
                             else if self.is_selected == false{
                                 self.viewmodel.temp_selected_friend_set.insert(self.friend_model.idx ?? -1 )
                                 
-                                self.viewmodel.group_details.append(GroupDetailStruct( idx: friend_model.idx!, nickname: friend_model.nickname!, profile_photo_path: friend_model.profile_photo ?? ""))
+                                self.viewmodel.group_details.append(GroupDetailStruct( idx: friend_model.idx!, nickname: friend_model.nickname!, profile_photo_path: friend_model.profile_photo_path ?? ""))
                             }
                         }){
                             if self.is_selected{
