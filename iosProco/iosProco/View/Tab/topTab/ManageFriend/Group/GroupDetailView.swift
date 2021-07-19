@@ -26,7 +26,6 @@ struct GroupDetailView: View {
          해당 그룹에 속한 친구 리스트 - 처음에 데이터 통신시 noti로 받아서 데이터 넣어줌.
      -> 그룹 멤버 편집시 넘겨주는 모델이므로 편집 데이터가 바로 반영돼야하기 때문
     */
-    @State var  selected_friend_set = Set<Int>()
     @State var group_detail_friends : [GroupDetailStruct]  = []
     
     //----화면 이동 사용 변수들----
@@ -179,10 +178,10 @@ struct GroupDetailView: View {
                 if data as! String == "ok"{
                     
                     //선택한 친구들 set
-                    self.selected_friend_set = self.detail_group_vm.selected_friend_set
+            
                     
                     self.group_detail_friends = self.detail_group_vm.group_details
-                    print("그룹관리 - 친구 리스트 데이터 저장 : \(self.selected_friend_set)")
+                    
                 }
             }else{
                 print("그룹관리 - 친구 리스트 데이터 노티 아님")
