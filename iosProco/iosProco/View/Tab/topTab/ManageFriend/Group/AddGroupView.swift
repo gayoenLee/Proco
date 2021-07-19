@@ -58,7 +58,7 @@ struct AddGroupView: View {
                 
                 RoundedRectangle(cornerRadius: 5)
                     .frame(width: 55, height: 37)
-                    .foregroundColor(.proco_black)
+                    .foregroundColor(self.viewmodel.input_group_name == "" ? .gray: .proco_black)
                     .overlay(
                         Button(action: {
                             
@@ -139,9 +139,9 @@ struct AddGroupView: View {
                 }
                 .padding()
                 
-                ForEach(viewmodel.show_selected_member().indices, id: \.self){index in
+                ForEach(viewmodel.show_selected_member()){friend in
                     
-                    GroupFriendListView(friend_model:viewmodel.show_selected_member()[index] as! GetFriendListStruct)
+                    GroupFriendListView(friend_model:friend)
                 }
                 Spacer()
                 
@@ -159,6 +159,7 @@ struct AddGroupView: View {
         }
         .onDisappear{
             main_viewmodel.manage_groups.removeAll()
+            viewmodel.selected_friend_set.removeAll()
             main_viewmodel.get_manage_data_and_fetch()
             print("********************************그룹 추가뷰 닫음*****************************")
         }

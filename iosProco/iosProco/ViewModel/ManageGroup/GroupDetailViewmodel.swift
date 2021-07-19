@@ -98,7 +98,7 @@ class GroupDetailViewmodel: ObservableObject{
         filtered_array = self.group_details.filter{(selected_friend_set.contains($0.idx!)
         )}
         print("필터된 편집하는 친구 목록 확인: \(filtered_array)")
-         return filtered_array
+        return filtered_array
     }
     
     //그룹관리 - 그룹 이름 편집통신
@@ -115,7 +115,7 @@ class GroupDetailViewmodel: ObservableObject{
             }, receiveValue:{ (response)in
                 print("그룹 이름 편집 통신 확인 : \(response)")
                 if response["result"].string == "ok"{
-                   
+                    
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["edited_group_name" : "ok"])
                 }else{
                     //그룹 이름 편집 안됐다는 예외처리하기*************************alert창
@@ -183,7 +183,7 @@ class GroupDetailViewmodel: ObservableObject{
                 
                 for friend in response{
                     if friend.nickname != nil{
-                        self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo, state: friend.state))
+                        self.friend_list_struct.append(GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo: friend.profile_photo ?? "", state: friend.state, kinds: friend.kinds))
                         
                         self.group_details.append(GroupDetailStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo ?? ""))
                     }
@@ -192,7 +192,7 @@ class GroupDetailViewmodel: ObservableObject{
                 
                 //친구 수를 노티를 이용하는 이유는 친구 수락 또는 거절시 친구 수를 state로 동적으로 변화시키기 위함.
                 NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["got_all_friend_detail" : "ok"])
-
+                
             })
     }
     

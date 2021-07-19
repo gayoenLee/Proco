@@ -56,7 +56,7 @@ struct EditManageGroupNameView: View {
                     
                     RoundedRectangle(cornerRadius: 5)
                         .frame(width: 55, height: 37)
-                        .foregroundColor(.proco_black)
+                        .foregroundColor(self.group_name == self.main_vm.edit_group_name || self.group_name == "" ? .gray : .proco_black)
                         .overlay(
                             Button(action: {
                                 print("그룹 이름 편집 통신")
@@ -68,7 +68,7 @@ struct EditManageGroupNameView: View {
                                     .foregroundColor(Color.proco_white)
                             })
                             //원래 그룹 이름과 같거나 입력한 이름이 없으면 확인 버튼 비활성화
-                            .disabled(self.group_name == self.main_vm.edit_group_name && self.group_name != ""))
+                            .disabled(self.group_name == self.main_vm.edit_group_name || self.group_name == ""))
                 }
             }
             .padding()

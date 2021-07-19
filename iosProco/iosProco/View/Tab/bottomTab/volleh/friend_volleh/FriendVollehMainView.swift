@@ -257,6 +257,7 @@ struct FriendVollehMainView: View {
                     self.state_on = UserDefaults.standard.integer(forKey: "\(user_idx)_state")
                     
                     print("저장됐던 유저 상태 확인:\(user_idx) \(self.state_on)")
+                    
                 }
                 .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
                     print("친구랑 볼래에서 오늘 심심기간 초기 설정 노티 받음")

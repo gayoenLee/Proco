@@ -99,7 +99,7 @@ struct FriendStateDialogContents : View{
             
             //일반 채팅방 화면으로 이동.
             NavigationLink("",
-                           destination: NormalChatRoom(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket: self.socket),
+                           destination: NormalChatRoom(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket: self.socket, from_tab: false),
                            isActive: self.$go_to_chat)
             
             NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_to_feed)
@@ -275,7 +275,7 @@ struct FriendStateDialogContents : View{
                             calendar_vm.calendar_owner.user_idx = main_vm.friend_info_struct.idx!
                             print("캘린더 주인 idx: \(main_vm.friend_info_struct.idx!)")
                             print("캘린더 주인 데이터 넣은 것 확인: \(calendar_vm.calendar_owner)")
-                            
+                            calendar_vm.calendar_owner.user_nickname = main_vm.friend_info_struct.nickname!
                             SimSimFeedPage.calendar_owner_idx = main_vm.friend_info_struct.idx!
                             
                             //친구가 아닌 경우는 모임에서 다이얼로그를 클릭한 경우

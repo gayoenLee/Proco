@@ -44,7 +44,6 @@ struct EditGroupMemberView: View {
         VStack {
             
             HStack{
-                
                 Button(action: {
                     self.presentationMode.wrappedValue.dismiss()
                     
@@ -195,17 +194,26 @@ struct EditFriendRow : View{
                         HStack{
                             //선택 박스
                             Button(action: {
-                                print("버튼 클릭")
+                                print("버튼 클릭: \(self.friend_model.idx)")
                                 if self.is_selected{
                                     print("제거된 값 확인 : \(self.viewmodel.temp_selected_friend_set)")
                                     print("제거된 이름 확인 : \(String(describing: self.friend_model.nickname))")
                                     self.viewmodel.temp_selected_friend_set.remove(self.friend_model.idx ?? -1)
+                                    
+                                    let model_idx = self.viewmodel.group_details.firstIndex(where: {
+                                        $0.idx! == self.friend_model.idx!
+                                    }) ?? -1
+                                    if model_idx != -1{
+                                        self.viewmodel.group_details.remove(at: model_idx)
+                                    }
                                 }
                                 else if self.is_selected == false{
                                     print("추가된 값 확인 : \(self.viewmodel.temp_selected_friend_set)")
                                     print("추가된 이름 확인 : \(String(describing: self.friend_model.nickname))")
                                     
                                     self.viewmodel.temp_selected_friend_set.insert(self.friend_model.idx ?? -1)
+                                    
+                                    self.viewmodel.group_details.append(GroupDetailStruct( idx: friend_model.idx!, nickname: friend_model.nickname!, profile_photo_path: friend_model.profile_photo ?? ""))
                                 }
                             }){
                                 if self.is_selected{
@@ -271,12 +279,21 @@ struct EditFriendRow : View{
                     HStack{
                         //선택 박스
                         Button(action: {
-                            print("버튼 클릭")
+                            print("버튼 클릭 친구 정보: \(self.friend_model.idx!)")
                             if self.is_selected{
-                                self.viewmodel.temp_selected_friend_set.remove(self.friend_model.idx ?? 0 )
+                                self.viewmodel.temp_selected_friend_set.remove(self.friend_model.idx ?? -1 )
+                                
+                                let model_idx = self.viewmodel.group_details.firstIndex(where: {
+                                    $0.idx! == self.friend_model.idx!
+                                }) ?? -1
+                                if model_idx != -1{
+                                    self.viewmodel.group_details.remove(at: model_idx)
+                                }
                             }
                             else if self.is_selected == false{
-                                self.viewmodel.temp_selected_friend_set.insert(self.friend_model.idx ?? 0 )
+                                self.viewmodel.temp_selected_friend_set.insert(self.friend_model.idx ?? -1 )
+                                
+                                self.viewmodel.group_details.append(GroupDetailStruct( idx: friend_model.idx!, nickname: friend_model.nickname!, profile_photo_path: friend_model.profile_photo ?? ""))
                             }
                         }){
                             if self.is_selected{
