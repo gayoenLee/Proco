@@ -160,6 +160,7 @@ struct AddGroupView: View {
         .onDisappear{
             main_viewmodel.manage_groups.removeAll()
             viewmodel.selected_friend_set.removeAll()
+            viewmodel.input_group_name = ""
             main_viewmodel.get_manage_data_and_fetch()
             print("********************************그룹 추가뷰 닫음*****************************")
         }
@@ -177,7 +178,7 @@ struct GroupFriendListView: View{
         VStack{
             HStack(alignment: .center){
                 
-                if friend_model.profile_photo == "" || friend_model.profile_photo == nil{
+                if friend_model.profile_photo_path == "" || friend_model.profile_photo_path == nil{
                     
                     Image("main_profile_img")
                         .resizable()
@@ -185,7 +186,7 @@ struct GroupFriendListView: View{
                     
                 }else{
                     
-                    KFImage(URL(string: friend_model.profile_photo!))
+                    KFImage(URL(string: friend_model.profile_photo_path!))
                         .loadDiskFileSynchronously()
                         .cacheMemoryOnly()
                         .fade(duration: 0.25)
