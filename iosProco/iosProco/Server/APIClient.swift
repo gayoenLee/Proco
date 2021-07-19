@@ -213,6 +213,15 @@ class APIClient {
         return publisher.value()
     }
     
+    //친구관리 - 내가 친구 신청한 목록
+    static func get_my_request_friend_list(friend_type: String) -> AnyPublisher<JSON, AFError>{
+        
+        let publisher = AF.request(APIRouter.get_my_request_friend_list(friend_type: "친구요청중") , interceptor: RequestInterceptorClass())
+            .publishDecodable(type:JSON.self)
+        
+        return publisher.value()
+    }
+    
     //친구 요청 수락
     static func accpet_friend_request_api(friend_idx: Int, action: String) -> AnyPublisher<JSON, AFError>{
         
