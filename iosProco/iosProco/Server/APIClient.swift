@@ -673,8 +673,8 @@ class APIClient {
         return publisher.value()
     }
     //설정 - 회원탈퇴
-    static func delete_exit_user(user_idx: Int) -> AnyPublisher<JSON,AFError>{
-        let publisher = AF.request(APIRouter.delete_exit_user(user_idx: user_idx), interceptor: RequestInterceptorClass())
+    static func delete_exit_user() -> AnyPublisher<JSON,AFError>{
+        let publisher = AF.request(APIRouter.delete_exit_user, interceptor: RequestInterceptorClass())
             .publishDecodable(type: JSON.self)
         
         print("api client에서 설정 - 회원탈퇴 통신 확인: \(publisher.value())")
@@ -1007,6 +1007,14 @@ class APIClient {
                     completion(response.result)
                 }
     }
+    
+    //로그아웃
+        static func logout() -> AnyPublisher<JSON, AFError>{
+            let publisher = AF.request(APIRouter.logout,interceptor: RequestInterceptorClass())
+                .publishDecodable(type : JSON.self)
+            print("[로그아웃 확인]")
+            return publisher.value()
+        }
 
     
     
