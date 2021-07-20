@@ -8,19 +8,43 @@
 import SwiftUI
 
 struct MyLikeCardsListView: View {
-    
+    @Environment(\.presentationMode) var presentation
+
     @ObservedObject var main_vm : SettingViewModel
     @StateObject var friend_vm = FriendVollehMainViewmodel()
     @StateObject var meeting_vm = GroupVollehMainViewmodel()
     
     //친구 카드 상세 페이지 이동값
-    @State private var go_friend_card_detail : Bool = false
+    @State private var show_friend_info : Bool = false
     //모임 카드 상세 페이지 이동값
     @State private var go_meeting_card_detail : Bool = false
-    
+    //온오프 버튼 구분위함
+    @State private var state_on : Int? = 0
     var body: some View {
        
         VStack{
+            
+            HStack{
+                Button(action: {
+                    self.presentation.wrappedValue.dismiss()
+                    
+                }, label: {
+                    
+                    Image("white_left")
+                        .resizable()
+                        .frame(width: 8.51, height: 17)
+                })
+                
+                Spacer()
+                Text("내가 좋아요한 카드")
+                    .font(.custom(Font.t_extra_bold, size: 20))
+                    .foregroundColor(Color.proco_black)
+                
+                Spacer()
+
+            }
+            .padding()
+            
             ScrollView{
             HStack{
                 Text("친구카드")
@@ -40,11 +64,8 @@ struct MyLikeCardsListView: View {
                             MyLikeFriendCardsRow(main_vm: self.main_vm, friend_card_model: card, current_card_index: self.main_vm.get_index(item: card)))
                         .onTapGesture {
                             print("친구 카드 한 개 클릭: \(card.card_idx!)")
-                           // self.friend_vm.selected_card_idx = card.card_idx!
-                            SockMgr.socket_manager.selected_card_idx = card.card_idx!
-                            //상세 페이지로 들어오는 경우 - 메인, 드로어(카드 정보 보기), 친구 카드 초대하기 - 내 카드 1개 클릭..이것들 구분 위함.
-                            SockMgr.socket_manager.is_from_chatroom = true
-                            self.go_friend_card_detail = true
+//                            self.friend_vm.friend_info_struct = GetFriendListStruct(idx: card.creator?.idx, nickname: card.creator?.nickname, profile_photo_path: card.creator?.profile_photo_path ?? "", state: 0, kinds: String(card.is_favor_friend!))
+//                            self.show_friend_info = true
                         }
 
 
@@ -72,12 +93,8 @@ struct MyLikeCardsListView: View {
                             self.meeting_vm.selected_card_idx = card.card_idx!
                             self.go_meeting_card_detail = true
                         }
-
-
                 }
             }
-            
-            NavigationLink("",destination: FriendVollehCardDetail(main_vm: FriendVollehMainViewmodel(), group_main_vm: self.meeting_vm, calendar_vm: CalendarViewModel()).navigationBarHidden(true).navigationBarTitle("", displayMode: .inline), isActive: self.$go_friend_card_detail)
             
             NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.meeting_vm, calendar_vm: CalendarViewModel()).navigationBarHidden(true), isActive: self.$go_meeting_card_detail)
             
@@ -85,7 +102,9 @@ struct MyLikeCardsListView: View {
             print("내가 좋아요한 카드 리스트뷰 나옴.")
             self.main_vm.get_liked_cards()
         }
-        .navigationBarHidden(false)
+        .navigationBarHidden(true)
+        .navigationBarTitle("", displayMode: .inline)
+        //.navigationBarTitle("내가 좋아요한 카드")
         
     }
 }
