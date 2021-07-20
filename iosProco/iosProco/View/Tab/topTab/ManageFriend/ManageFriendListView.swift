@@ -248,7 +248,9 @@ struct ManageFriendListView: View {
                             let model_idx =  self.friend_list_model.firstIndex(where: {
                                 $0.idx == Int(friend_idx)
                             })
+                            withAnimation(.spring()) {
                             self.friend_list_model.remove(at: model_idx!)
+                            }
                         }
                     }else{
                         print("친구 삭제 완료 노티 아님")
