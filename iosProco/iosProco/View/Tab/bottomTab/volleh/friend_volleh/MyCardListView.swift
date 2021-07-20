@@ -22,6 +22,7 @@ struct MyCardListView: View {
     let scale = UIScreen.main.scale
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
+    let my_profile_img = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
     var body: some View{
         
         //카드 1개
@@ -329,7 +330,8 @@ private extension MyCardListView{
     var card_owner_img : some View{
         VStack{
             if SockMgr.socket_manager.is_from_chatroom{
-                if SockMgr.socket_manager.my_profile_photo == "" ||  my_volleh_card_struct.creator?.profile_photo_path == nil{
+                
+                if SockMgr.socket_manager.my_profile_photo == "" {
                     
                     Image("main_profile_img")
                         .resizable()
@@ -356,7 +358,7 @@ private extension MyCardListView{
                 
             }else{
                 //프로필 이미지는 없을 수 있기 때문에 나눔.
-                if my_volleh_card_struct.creator?.profile_photo_path == nil || my_volleh_card_struct.creator?.profile_photo_path == ""{
+                if  my_profile_img == ""{
                     
                     Image("main_profile_img")
                         .resizable()
@@ -367,7 +369,7 @@ private extension MyCardListView{
                         .padding([.trailing], UIScreen.main.bounds.width/30)
                     
                 }else{
-                    KFImage(URL(string: (my_volleh_card_struct.creator?.profile_photo_path!)!)!)
+                    KFImage(URL(string: my_profile_img))
                         .loadDiskFileSynchronously()
                         .cacheMemoryOnly()
                         .fade(duration: 0.25)

@@ -14,7 +14,7 @@ struct MyPage: View {
     @StateObject var main_vm : SettingViewModel
     
     @State private var user_nickname = ""
-
+    
     //프로필 이미지값
     @State private var profile_photo_path: String = ""
     
@@ -28,34 +28,34 @@ struct MyPage: View {
     @State private var go_like_cards: Bool = false
     //이미지 선택 sheet 보여줄지 구분하는 변수
     @State private var show_image_picker = false
-        
+    
     @State var pickerResult: UIImage? = UIImage()
     
-       var config: PHPickerConfiguration  {
-          var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
+    var config: PHPickerConfiguration  {
+        var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
         //videos, livePhotos...등도 넣을 수 있음.
-           config.filter = .images
+        config.filter = .images
         //0은 제한 없음을 의미, 갯수 제한 두는 것.
-           config.selectionLimit = 1 //0 => any, set 1-2-3 for har limit
-           return config
-       }
+        config.selectionLimit = 1 //0 => any, set 1-2-3 for har limit
+        return config
+    }
     //닉네임 편집 뷰로 이동값
     @State private var go_to_edit_name : Bool = false
     
     var body: some View {
-        NavigationView{
+        
         VStack {
-            NavigationLink("",destination: MyInterestFriendsListView(main_vm: self.main_vm), isActive: self.$go_interest_friends)
+            NavigationLink("",destination: MyInterestFriendsListView(main_vm: self.main_vm).navigationBarTitle("내 관심친구"), isActive: self.$go_interest_friends)
             
-            NavigationLink("",destination: MyLikeCardsListView(main_vm: self.main_vm).navigationBarTitle("내가 좋아요한 카드"), isActive: self.$go_like_cards)
+            NavigationLink("",destination: MyLikeCardsListView(main_vm: self.main_vm), isActive: self.$go_like_cards)
             
             //내 프로필
             profile_photo_view
             Group{
                 HStack{
-                        Text("\(self.user_nickname)")
-                            .padding(.trailing, UIScreen.main.bounds.width/20)
-                            
+                    Text("\(self.user_nickname)")
+                        .padding(.trailing, UIScreen.main.bounds.width/20)
+                    
                     Spacer()
                     
                     Image("right_light")
@@ -93,7 +93,6 @@ struct MyPage: View {
         }
         .onDisappear{
         }
-        }
     }
 }
 
@@ -107,11 +106,11 @@ private extension MyPage {
             VStack{
                 
                 if self.main_vm.user_info_model.profile_photo_path == "" || self.main_vm.user_info_model.profile_photo_path == nil{
-
+                    
                     Image("main_profile_img")
                         .resizable()
                         .frame(width: 154.26, height: 154.26)
-
+                    
                 }else{
                     
                     KFImage(URL(string: self.main_vm.user_info_model.profile_photo_path!))
@@ -128,7 +127,7 @@ private extension MyPage {
                         .onFailure{error in
                             print("실패 이유: \(error)")
                         }
-               }
+                }
                 
                 Button(action: {
                     //이 버튼으로 이미지 선택 sheet값 변경함.

@@ -315,7 +315,7 @@ class FriendVollehMainViewmodel: ObservableObject{
      카드 편집 및 삭제
      */
     ///내 닉네임 가져와서 메인 페이지에서 내 카드만 보여줄 때 사용, 카드 만들기 후 user_chat_in_model에 저장할 때 사용.
-    @Published var my_nickname =  UserDefaults.standard.string(forKey: "\(UserDefaults.standard.string(forKey: "user_id")!)_nickname"){
+    @Published var my_nickname =  UserDefaults.standard.string(forKey: "nickname"){
         didSet {
             objectWillChange.send()
         }
@@ -428,7 +428,7 @@ class FriendVollehMainViewmodel: ObservableObject{
     //----------------------------------------------------
     ///내 아이디 갖고와서 카드 리스트에 내 카드만 보여주기 위해 비교할 때 이용.
     func get_my_nickname(){
-        self.my_nickname = UserDefaults.standard.string(forKey: "\(self.my_idx!)_nickname")!
+        self.my_nickname = UserDefaults.standard.string(forKey: "nickname")!
         
     }
     

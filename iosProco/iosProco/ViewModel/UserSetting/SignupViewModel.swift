@@ -297,8 +297,8 @@ class SignupViewModel : ObservableObject{
                     UserDefaults.standard.set(refresh_token, forKey: "refresh_token")
                     UserDefaults.standard.set(access_token, forKey: "access_token")
                     UserDefaults.standard.set(idx, forKey: "user_id")
-                    UserDefaults.standard.set(nickname, forKey: "\(idx)_nickname")
-                    
+                    UserDefaults.standard.set(nickname, forKey: "nickname")
+                    UserDefaults.standard.set(profile_photo_path, forKey: "profile_photo_path")
                     self.kakao_join_end.toggle()
                 }else{
                     print("카카오 회원가입 오류")

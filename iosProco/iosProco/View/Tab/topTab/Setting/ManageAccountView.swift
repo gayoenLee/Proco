@@ -25,6 +25,9 @@ struct ManageAccountView: View {
     //회원탈퇴 글자 입력 제대로 하지 않았을 경우 나타나는 알림창
     @State private var exit_txt_wrong : Bool = false
     
+    //회원탈퇴시 오류 발생했을 때 띄울 토스트
+    @State private var show_error_toast :Bool = false
+    
     var body: some View {
         VStack{
             NavigationLink("",destination: MyPage(main_vm: self.main_vm).navigationBarTitle("마이페이지"), isActive: self.$go_my_page)
@@ -43,11 +46,29 @@ struct ManageAccountView: View {
                 exit_btn
             }
         }
+        //회원탈퇴 오류 발생시 토스트 띄움
+        .overlay(overlayView: Toast.init(dataModel: Toast.ToastDataModel.init(title: "오류", image: "checkmark"), show: self.$show_error_toast), show: self.$show_error_toast)
+        
         .navigationBarTitle("계정관리")
         .navigationBarHidden(false)
         .alert(isPresented: self.$exit_txt_wrong){
             Alert(title: Text("알림"), message: Text("입력 단어가 일치하지 않아 탈퇴가 처리되지 않았습니다."), dismissButton: Alert.Button.default(Text("확인")))
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
+                    
+                    if let user_info = value.userInfo, let data = user_info["logout_event"]{
+                        print("[로그아웃] 노티피케이션센터 - 로그아웃 결과 \(data)")
+                        
+                        if data as! String == "ok"{
+                            print("로그아웃 성공")
+                            self.logout_ok.toggle()
+                        }
+                        else{
+                            self.show_error_toast = true
+                            print("로그아웃 실패")
+                        }
+                    }
+                })
     }
 }
 
@@ -116,17 +137,7 @@ private extension ManageAccountView{
             .alert(isPresented: self.$ask_logout){
                 Alert(title: Text("로그아웃"), message: Text("정말 로그아웃 하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
                     
-                    /*
-                     사용자를 로그인 화면으로 돌려 보내기
-                     user defaults에 저장된 아이디, 닉네임 정보 삭제
-                     */
-                    self.logout_ok.toggle()
-                    UserDefaults.standard.removeObject(forKey: "\(self.main_vm.my_idx!)_access_token")
-                    UserDefaults.standard.removeObject(forKey: "\(self.main_vm.my_idx!)_refresh_token")
-                    UserDefaults.standard.removeObject(forKey: "\(self.main_vm.my_idx!)_user_id")
-                    UserDefaults.standard.removeObject(forKey: "\(self.main_vm.my_idx!)_nickname")
-                    UserDefaults.standard.removeObject(forKey: "\(self.main_vm.my_idx!)_profile_photo_path")
-                    SockMgr.socket_manager.close_connection()
+                    self.main_vm.logout()
                 }), secondaryButton: Alert.Button.cancel(Text("취소"), action: {
                     self.ask_logout = false
                 }))
@@ -155,14 +166,31 @@ private extension ManageAccountView{
                 if result == "회원탈퇴"{
                     print("회원탈퇴 글자 같음.")
                     //회원탈퇴 글자를 정확히 입력했으므로 회원 탈퇴 통신, 로그인 화면으로 보냄.
-                    self.main_vm.delete_exit_user(user_idx: Int(main_vm.my_idx!)!)
-                    self.logout_ok.toggle()
+                    self.main_vm.delete_exit_user()
                     
                 }else{
                     print("회원 탈퇴 처리 안함.글자 같지 않음.")
                     self.exit_txt_wrong = true
                 }
                })
+        .onReceive(NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
+            
+            if let user_info = value.userInfo,  let check_result = user_info["delete_exit_user"]{
+               
+                
+                print("회원 탈퇴 처리 데이터 확인: \(String(describing: check_result))")
+                
+                //회원 탈퇴한 경우
+                 if check_result as! String == "ok"{
+                 
+                    self.logout_ok = true
+                }else if check_result as! String == "error"{
+                    
+        
+                }
+            }
+            
+        })
     }
 }
 

@@ -32,7 +32,7 @@ class ChatDataManager : ObservableObject{
         }
     }
     
-    @Published var my_nickname = UserDefaults.standard.string(forKey: "\(String(describing: UserDefaults.standard.string(forKey: "user_id")))_nickname"){
+    @Published var my_nickname = UserDefaults.standard.string(forKey: "nickname"){
         didSet{
             objectWillChange.send()
         }
@@ -171,6 +171,19 @@ class ChatDataManager : ObservableObject{
             print("디비 연결 안됨")
         }
         return nil
+    }
+    
+    func remove_db(){
+        print("디비 지우기")
+        let file_manager = FileManager.default
+        let db_path = self.db_path
+        
+        do{
+            try file_manager.removeItem(atPath: self.db_path)
+        }
+        catch let error as NSError{
+            print("디비 파일 삭제 안됨\(error)")
+        }
     }
     
     //디비 닫기

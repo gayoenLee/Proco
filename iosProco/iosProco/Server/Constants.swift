@@ -595,6 +595,10 @@ struct Keys{
     struct  GetMyRequestFriendList {
         static let friend_type = "friend_type"
     }
+    
+    //로그아웃
+    struct LogOut{
+    }
 }
 
 enum HTTPHeaderField: String{

@@ -215,7 +215,7 @@ extension ChatroomDrawer{
         .alert(isPresented: self.$alert_go_out){
             Alert(title: Text("채팅방 나가기"), message: Text("채팅방을 나가시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
                 let user_idx = UserDefaults.standard.string(forKey: "user_id")
-                let nickname = UserDefaults.standard.string(forKey: "\(user_idx)_nickname")
+                let nickname = UserDefaults.standard.string(forKey: "nickname")
                 print("가져온 닉네임 확인: \(String(describing: nickname))")
                 print("드로어에서 나가는 방 종류 확인: \(SockMgr.socket_manager.current_chatroom_info_struct.kinds)")
                 //확인 눌렀을 때 통신 시작
