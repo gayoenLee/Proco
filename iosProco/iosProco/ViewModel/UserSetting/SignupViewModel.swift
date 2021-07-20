@@ -297,7 +297,7 @@ class SignupViewModel : ObservableObject{
                     UserDefaults.standard.set(refresh_token, forKey: "refresh_token")
                     UserDefaults.standard.set(access_token, forKey: "access_token")
                     UserDefaults.standard.set(idx, forKey: "user_id")
-                    UserDefaults.standard.set(nickname, forKey: "nickname")
+                    UserDefaults.standard.set(nickname, forKey: "\(idx)_nickname")
                     
                     self.kakao_join_end.toggle()
                 }else{

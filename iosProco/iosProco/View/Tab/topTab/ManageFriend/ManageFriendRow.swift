@@ -51,6 +51,7 @@ struct ManageFriendRow: View{
             .padding(.trailing, UIScreen.main.bounds.width/40)
         }
         .padding()
+        .transition(.slide)
         .actionSheet(isPresented: self.$show_delete_alert, content: {
             ActionSheet(title: Text("\(friend_model.nickname!)"), message: Text(""), buttons: [ActionSheet.Button.default(Text("그룹에 추가"), action: {
                 

@@ -26,7 +26,7 @@ struct EditNicknameView: View {
                     .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                 }
                 Spacer()
-                Text("닉네임")
+                Text("닉네임 변경")
                     .font(.custom(Font.n_extra_bold, size: 16))
                     .foregroundColor(Color.proco_black)
         Spacer()
@@ -49,6 +49,9 @@ struct EditNicknameView: View {
             .padding()
             
             Divider()
+                .frame(width: UIScreen.main.bounds.width*0.9, height: 2, alignment: .center)
+                .foregroundColor(Color.proco_black)
+                
             Spacer()
             
             Button(action: {
@@ -74,12 +77,13 @@ struct EditNicknameView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.move_view), perform: {value in
             
-            if let user_info = value.userInfo, let data = user_info["nickname change"]{
+            if let user_info = value.userInfo, let data = user_info["nickname_change"]{
                 print("닉네임 변경 노티 \(data)")
                 
                 if data as! String == "ok"{
                     //창 닫기
                     self.open_view = false
+                    
                 }else {
                     print("닉네임 변경 노티 fail옴")
                     self.show_fail_alert = true

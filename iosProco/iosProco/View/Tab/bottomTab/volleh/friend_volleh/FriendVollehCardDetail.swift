@@ -30,7 +30,7 @@ struct FriendVollehCardDetail: View {
     @State private var volleh_category_struct = VollehTagCategoryStruct()
     @State private var go_back_chatroom: Bool = false
     
-    @ObservedObject var calendar_vm: CalendarViewModel
+    @StateObject var calendar_vm: CalendarViewModel
     
     //신고하기 버튼 클릭시 나타나는 모달창 띄우는데 사용하는 구분값
     @State private var show_report_view = false

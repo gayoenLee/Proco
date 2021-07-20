@@ -152,7 +152,7 @@ struct FriendVollehMainView: View {
                                                             //카드 idx로 채팅방 idx 가져오기
                                                             let chatroom_idx =     ChatDataManager.shared.get_chatroom_from_card(card_idx: Int(self.main_vm.selected_card_idx))
                                                             
-                                                            SockMgr.socket_manager.exit_room(chatroom_idx: chatroom_idx, idx: Int(main_vm.my_idx!)!, nickname: main_vm.my_nickname, profile_photo_path: "", kinds: nil)
+                                                            SockMgr.socket_manager.exit_room(chatroom_idx: chatroom_idx, idx: Int(main_vm.my_idx!)!, nickname: main_vm.my_nickname!, profile_photo_path: "", kinds: nil)
                                                             
                                                         }), secondaryButton: Alert.Button.default(Text("취소"), action: {
                                                             self.show_delete_alert.toggle()
@@ -375,7 +375,7 @@ private extension FriendVollehMainView{
                 Spacer()
                 Group{
                     HStack{
-                        Text(main_vm.my_nickname)
+                        Text(main_vm.my_nickname!)
                             .font(.custom(Font.n_bold, size: 13))
                             .foregroundColor(.proco_black)
                         

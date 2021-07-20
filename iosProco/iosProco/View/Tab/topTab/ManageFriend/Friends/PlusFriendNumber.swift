@@ -50,21 +50,19 @@ struct PlusFriendNumber: View {
                 
                 RoundedRectangle(cornerRadius: 5)
                     .frame(width: 55, height: 37)
-                    .foregroundColor(.proco_black)
+                    .foregroundColor(self.viewmodel.add_friend_number_value != "" ? .proco_black: .gray)
                     .overlay(
                         Button(action: {
                             print("전화번호 텍스트필드에서 엔터 누름")
                             //해당 번호가 내 번호인지, 이미 친구인 사람인지, 없는 번호인지 체크
                             viewmodel.add_friend_number_check()
-                            //
-                            //                            self.viewmodel.request_result_alert_func(viewmodel.request_result_alert)
-                            
                             
                         }){
                             Text("확인")
                                 .font(.custom(Font.t_extra_bold, size: 15))
                                 .foregroundColor(Color.proco_white)
-                        })
+                        }.disabled(self.viewmodel.add_friend_number_value == "")
+                    )
             }
             .padding()
             
@@ -200,6 +198,10 @@ struct PlusFriendNumber: View {
                 }
             }
             Spacer()
+        }
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         .alert(isPresented: $viewmodel.show_request_result_alert){
             switch viewmodel.request_result_alert{

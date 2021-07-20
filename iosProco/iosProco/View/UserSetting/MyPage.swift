@@ -11,7 +11,7 @@ import PhotosUI
 
 struct MyPage: View {
     
-    @ObservedObject var main_vm : SettingViewModel
+    @StateObject var main_vm : SettingViewModel
     
     @State private var user_nickname = ""
 
@@ -20,7 +20,7 @@ struct MyPage: View {
     
     //이미지 원처럼 보이게 하기 위해 scale값을 곱함.
     let scale = UIScreen.main.scale
-    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 150, height: 150)) |> RoundCornerImageProcessor(cornerRadius: 40)
+    let img_processor = DownsamplingImageProcessor(size: CGSize(width: 150, height: 150)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
     //관심 친구 리스트 보러가기 이동값
     @State private var go_interest_friends : Bool = false
@@ -47,7 +47,7 @@ struct MyPage: View {
         VStack {
             NavigationLink("",destination: MyInterestFriendsListView(main_vm: self.main_vm), isActive: self.$go_interest_friends)
             
-            NavigationLink("",destination: MyLikeCardsListView(main_vm: self.main_vm), isActive: self.$go_like_cards)
+            NavigationLink("",destination: MyLikeCardsListView(main_vm: self.main_vm).navigationBarTitle("내가 좋아요한 카드"), isActive: self.$go_like_cards)
             
             //내 프로필
             profile_photo_view
@@ -75,7 +75,6 @@ struct MyPage: View {
             }
             Spacer()
         }
-        .navigationBarTitle(Text("마이페이지"))
         .navigationBarHidden(false)
         //갤러리 나타나는 것.
         .sheet(isPresented: $show_image_picker) {
@@ -89,7 +88,7 @@ struct MyPage: View {
         .onAppear{
             self.main_vm.get_detail_user_info(user_idx: Int(self.main_vm.my_idx!)!)
             
-            self.user_nickname = main_vm.nickname!
+            self.user_nickname = main_vm.user_info_model.nickname
             print("마이페이지에서 프로필 이미지 확인: \(String(describing: self.main_vm.user_info_model.profile_photo_path))")
         }
         .onDisappear{
@@ -107,22 +106,12 @@ private extension MyPage {
             Spacer()
             VStack{
                 
-                if self.main_vm.user_info_model.profile_photo_path == "" && pickerResult  == nil{
-                    
+                if self.main_vm.user_info_model.profile_photo_path == "" || self.main_vm.user_info_model.profile_photo_path == nil{
+
                     Image("main_profile_img")
                         .resizable()
                         .frame(width: 154.26, height: 154.26)
-                    
-                }else if pickerResult != nil{
-                    
-                 
-                        Image.init(uiImage: pickerResult!)
-                            .resizable()
-                            //이미지 채우기
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: UIScreen.main.bounds.width/2, height: UIScreen.main.bounds.width/2)
-                            .clipShape(Circle())
-                    
+
                 }else{
                     
                     KFImage(URL(string: self.main_vm.user_info_model.profile_photo_path!))
@@ -139,7 +128,7 @@ private extension MyPage {
                         .onFailure{error in
                             print("실패 이유: \(error)")
                         }
-                }
+               }
                 
                 Button(action: {
                     //이 버튼으로 이미지 선택 sheet값 변경함.

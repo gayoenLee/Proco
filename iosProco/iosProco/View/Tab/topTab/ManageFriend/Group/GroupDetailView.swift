@@ -64,6 +64,9 @@ struct GroupDetailView: View {
             }
             .padding([.leading])
 
+            NavigationLink("",destination:
+                EditGroupMemberView(manage_vm: self.manage_vm, detail_vm: self.detail_group_vm, friend_model: friend_model, current_group_idx: manage_vm.detail_group_idx), isActive: self.$go_to_edit_member)
+            
                 HStack{
                     Text(detail_group_vm.edit_group_name+" 입니다")
                         .font(.custom(Font.n_extra_bold, size: 22))
@@ -157,9 +160,6 @@ struct GroupDetailView: View {
             .padding(.leading)
             Spacer()
         }
-        .sheet(isPresented: self.$go_to_edit_member, content: {
-            EditGroupMemberView(manage_vm: self.manage_vm, detail_vm: self.detail_group_vm, friend_model: friend_model, current_group_idx: manage_vm.detail_group_idx)
-        })
         .popover(isPresented: self.$go_to_edit_name, content: {
             
             EditManageGroupNameView(main_vm: self.detail_group_vm, manage_vm: self.manage_vm, current_group_idx: self.manage_vm.detail_group_idx, friend_model: self.friend_model, edit_group_name_ok: self.$go_to_edit_name)
@@ -212,10 +212,10 @@ struct GroupDetailView: View {
         }
         .onDisappear{
             print("*******그룹 상세 페이지 사라짐****************************************************")
-            //self.manage_vm.detail_group_idx = -1
-            self.detail_group_vm.selected_friend_set.removeAll()
-            self.detail_group_vm.temp_selected_friend_set.removeAll()
-            self.detail_group_vm.group_details.removeAll()
+            //친구 추가하기 뷰를 네비게이션 링크로 변경하면서 아래 코드를 실행하면 데이터가 없어져서 주석처리.
+//            self.detail_group_vm.selected_friend_set.removeAll()
+//            self.detail_group_vm.temp_selected_friend_set.removeAll()
+//            self.detail_group_vm.group_details.removeAll()
         }
         .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
             

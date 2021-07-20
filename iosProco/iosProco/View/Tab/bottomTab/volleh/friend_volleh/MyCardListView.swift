@@ -318,7 +318,7 @@ private extension MyCardListView{
                 
             }else{
                 //친구 이름
-                Text(my_volleh_card_struct.creator!.nickname)
+                Text(self.main_viewmodel.my_nickname!)
                     .font(.custom(Font.n_bold, size: 15))
                     .foregroundColor(.proco_black)
             }

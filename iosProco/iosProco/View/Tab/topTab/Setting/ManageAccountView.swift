@@ -20,16 +20,16 @@ struct ManageAccountView: View {
     @State private var exit_click : Bool = false
     //마이페이지 이동 구분값
     @State private var go_my_page  = false
-    @ObservedObject var main_vm: SettingViewModel
+    @StateObject var main_vm: SettingViewModel
     
     //회원탈퇴 글자 입력 제대로 하지 않았을 경우 나타나는 알림창
     @State private var exit_txt_wrong : Bool = false
     
     var body: some View {
         VStack{
-            NavigationLink("",destination: MyPage(main_vm: self.main_vm), isActive: self.$go_my_page)
+            NavigationLink("",destination: MyPage(main_vm: self.main_vm).navigationBarTitle("마이페이지"), isActive: self.$go_my_page)
             
-            NavigationLink("",destination: SettingChangePwdView(main_vm: self.main_vm), isActive: self.$go_change_pwd)
+            NavigationLink("",destination: SettingChangePwdView(main_vm: self.main_vm).navigationBarTitle("비밀번호 변경"), isActive: self.$go_change_pwd)
             
             //로그아웃하는 사용자를 로그인 화면으로 이동시킴.
             NavigationLink("",destination: LoginMenuView().navigationBarBackButtonHidden(true)

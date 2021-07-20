@@ -30,24 +30,18 @@ class CheckValidatorViewModel: ObservableObject{
     
     //설정 - 비밀번호 재설정 - 새로운 비밀번호 첫번째
     @Published var new_pwd  = ""{
-        willSet{
-            objectWillChange.send()
-            self.second_pwd_ok =  self.validator_password(new_pwd)
-        }
         didSet{
             objectWillChange.send()
+            self.first_pwd_ok =  self.validator_password(new_pwd)
         }
     }
     
     //설정 - 비밀번호 재설정 - 새로운 비밀번호 확인용
     @Published var new_pwd_again = ""{
-                willSet{
+        didSet{
                     objectWillChange.send()
                     self.second_pwd_ok =  self.validator_password(new_pwd_again)
                 }
-        didSet{
-            objectWillChange.send()
-        }
     }
     //첫번째 비밀번호가 정규식에 맞는지
     @Published var first_pwd_ok: Bool = false
@@ -90,6 +84,7 @@ class CheckValidatorViewModel: ObservableObject{
         case valid
         case empty
         case no_match
+        case wrong_regex
     }
     
     //2번 비밀번호 정규식 체크
@@ -98,10 +93,26 @@ class CheckValidatorViewModel: ObservableObject{
             return false
         }
         //비밀번호(숫자, 문자, 특수문자 모두 포함 8-18자)
-        let passsword_format = ("(?=.*[A-Za-z])(?=.*[0-9]).{8,20}")
-        let password_predicate = NSPredicate(format: "SELF MATCHES %@", passsword_format)
+        let passsword_format = ("(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$#!%*?&])[A-Za-z\\d$@$!%*?&].{8,20}$")
+        
+        let password_predicate = NSPredicate(format: "SELF MATCHES %@ ", passsword_format)
         return password_predicate.evaluate(with: mypassword)
     }
+    
+    //첫번째, 두번째 모두 정규식이 맞을 경우 publish true
+    private var regex_is_ok_publisher : AnyPublisher<Bool,Never>{
+            Publishers.CombineLatest($first_pwd_ok, $second_pwd_ok)
+                .debounce(for: 0.2, scheduler: RunLoop.main)
+                .map { first_pwd_ok, second_pwd_ok in
+                   // print("정규식 확인: \(first_pwd_ok), 두번째: \(second_pwd_ok)")
+                    if first_pwd_ok == true && second_pwd_ok == true
+                    {return true}
+                    else {
+                        return false
+                    }
+                }
+                .eraseToAnyPublisher()
+        }
     
     //3번. 비밀번호를 입력하지 않았을 경우를 알기 위한 publisher
     private var password_is_empty_publisher: AnyPublisher<Bool, Never> {
@@ -129,8 +140,8 @@ class CheckValidatorViewModel: ObservableObject{
     
     //위에서 1번, 3번 메소드를 아래에서 통합해서 publish함.
     private var password_is_valid_publisher: AnyPublisher<password_check, Never> {
-        Publishers.CombineLatest(password_is_empty_publisher, password_is_equal_publisher )
-            .map{ password_is_empty, password_is_equal in
+        Publishers.CombineLatest3(password_is_empty_publisher, password_is_equal_publisher, regex_is_ok_publisher)
+            .map{ password_is_empty, password_is_equal, regex_is_ok in
                 print("패스워드 같은지 받은 것: \(password_is_equal)")
                 if password_is_empty{
                     print("비번이 empty로 나옴.")
@@ -139,6 +150,8 @@ class CheckValidatorViewModel: ObservableObject{
                 else if(!password_is_equal){
                     print("비밀번호 틀리다고 나옴.")
                     return .no_match
+                }else if !regex_is_ok{
+                    return .wrong_regex
                 }
                 else{
                     print("엘스문임")
@@ -176,6 +189,8 @@ class CheckValidatorViewModel: ObservableObject{
                      return "비밀번호를 입력해주세요"
                    case .no_match:
                      return "비밀번호가 일치하지 않습니다."
+                   case .wrong_regex:
+                    return "숫자, 문자, 특수문자를 포함한 8~20자 형식에 맞춰주세요"
                    default:
                      return ""
                    }

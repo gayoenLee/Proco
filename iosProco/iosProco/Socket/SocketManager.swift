@@ -17,7 +17,7 @@ import Firebase
 import UIKit
 
 let access_token = UserDefaults.standard.string(forKey: "access_token")
-let nickname = UserDefaults.standard.string(forKey: "nickname")
+let nickname = UserDefaults.standard.string(forKey: "\(UserDefaults.standard.string(forKey: "user_id")!)_nickname")
 //config 옵션 주석 추가할 것.
 let manager = SocketManager(socketURL: URL(string: "https://3.37.11.107//")!, config: [.log(true), .compress, .forceWebsockets(true), .connectParams(["token" : access_token!, "nickname": nickname!]), .reconnectWaitMax(2), .reconnectWait(1), .forceNew(false)])
 let socket = manager.defaultSocket
@@ -1963,7 +1963,7 @@ class SockMgr : ObservableObject {
                     let got_server_idx = ChatDataManager.shared.user_server_idx
                     
                     //서버에 user read이벤트 보냄.
-                    self.update_other_message_read(server_idx: got_server_idx, user_idx: my_idx!, chatroom_idx: chatroom_idx, nickname: UserDefaults.standard.string(forKey: "nickname")!, profile_photo_path: "", read_start_idx: read_start_idx, read_last_idx: chatting_idx, updated_at: current_time, deleted_at: "")
+                    self.update_other_message_read(server_idx: got_server_idx, user_idx: my_idx!, chatroom_idx: chatroom_idx, nickname: UserDefaults.standard.string(forKey: "\(String(describing: my_idx))_nickname")!, profile_photo_path: "", read_start_idx: read_start_idx, read_last_idx: chatting_idx, updated_at: current_time, deleted_at: "")
                     /*
                      안읽은 사람 표시
                      새로운 메세지 보냈을 때 해당 메세지의 안읽은 갯수 구하기 위함.
@@ -2374,7 +2374,7 @@ class SockMgr : ObservableObject {
                     let got_server_idx = ChatDataManager.shared.user_server_idx
                     
                     //서버에 user read이벤트 보냄.
-                    self.update_other_message_read(server_idx: got_server_idx, user_idx: my_idx!, chatroom_idx: chatroom_idx, nickname: UserDefaults.standard.string(forKey: "nickname")!, profile_photo_path: "", read_start_idx: read_start_idx, read_last_idx: chatting_idx, updated_at: current_time, deleted_at: "")
+                    self.update_other_message_read(server_idx: got_server_idx, user_idx: my_idx!, chatroom_idx: chatroom_idx, nickname: UserDefaults.standard.string(forKey: "\(my_idx)_nickname")!, profile_photo_path: "", read_start_idx: read_start_idx, read_last_idx: chatting_idx, updated_at: current_time, deleted_at: "")
                     /*
                      안읽은 사람 표시
                      새로운 메세지 보냈을 때 해당 메세지의 안읽은 갯수 구하기 위함.

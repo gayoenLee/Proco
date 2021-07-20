@@ -893,7 +893,7 @@ class ManageFriendViewModel: ObservableObject{
                 if result == "message sended"{
                     print("메세지 보내짐")
                     //userdefaults에서 저장된 데이터 꺼내오기 -> 다시 저장하기
-                    let my_idx = UserDefaults.standard.string(forKey: "user_id")
+                    let my_idx = UserDefaults.standard.string(forKey: "user_id")!
                     let sent_addresses = UserDefaults.standard.array(forKey: "\(String(describing: my_idx))_invited_addresses") as? [String] ?? [String]()
                     var updated_data : [String] = []
                                 

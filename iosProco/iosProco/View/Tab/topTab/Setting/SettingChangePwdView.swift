@@ -9,16 +9,13 @@ import SwiftUI
 
 
 struct SettingChangePwdView: View {
-    
-    @ObservedObject var main_vm : SettingViewModel
-    @ObservedObject private var vm =  CheckValidatorViewModel()
-    @State private var changed_pwd: Bool = false
-
+    @Environment(\.presentationMode) var presentation
+    @StateObject var main_vm : SettingViewModel
+    @StateObject private var vm =  CheckValidatorViewModel()
     
     var body: some View {
         VStack{
-            //비밀번호 변경 완료시 계정관리 페이지로 이동시킴.
-            NavigationLink("",destination: ManageAccountView(main_vm: self.main_vm), isActive: self.$changed_pwd)
+
         Form{
 
             Section(header: Text("현재 비밀번호").foregroundColor(Color.proco_black),footer: Text(vm.current_pwd_msg).foregroundColor(.red)) {
@@ -60,8 +57,7 @@ struct SettingChangePwdView: View {
               case .ok:
                   return Alert(title: Text("비밀번호 변경"), message: Text("비밀번호 변경이 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
                       //계정관리 페이지로 이동시키기.
-                      self.changed_pwd.toggle()
-                      
+                    self.presentation.wrappedValue.dismiss()
                   }))
               case .wrong:
                   return Alert(title: Text("비밀번호 변경"), message: Text("비밀번호를 다시 확인해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
@@ -74,6 +70,9 @@ struct SettingChangePwdView: View {
             }
         }
         .onAppear{
+            self.vm.new_pwd = ""
+            self.vm.new_pwd_again = ""
+            self.vm.current_pwd = ""
             UITableView.appearance().backgroundColor = .clear
         }
         .background(Color.clear)

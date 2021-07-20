@@ -315,7 +315,7 @@ class FriendVollehMainViewmodel: ObservableObject{
      카드 편집 및 삭제
      */
     ///내 닉네임 가져와서 메인 페이지에서 내 카드만 보여줄 때 사용, 카드 만들기 후 user_chat_in_model에 저장할 때 사용.
-    @Published var my_nickname = ""{
+    @Published var my_nickname =  UserDefaults.standard.string(forKey: "\(UserDefaults.standard.string(forKey: "user_id")!)_nickname"){
         didSet {
             objectWillChange.send()
         }
@@ -428,7 +428,9 @@ class FriendVollehMainViewmodel: ObservableObject{
     //----------------------------------------------------
     ///내 아이디 갖고와서 카드 리스트에 내 카드만 보여주기 위해 비교할 때 이용.
     func get_my_nickname(){
-        self.my_nickname = UserDefaults.standard.string(forKey: "nickname")!    }
+        self.my_nickname = UserDefaults.standard.string(forKey: "\(self.my_idx!)_nickname")!
+        
+    }
     
     ///카드 만들기, 편집에서 파라미터로 share_list보낼 때 데이터 형식 맞추기 위해 실행하는 메소드
     func make_dictionary(){
@@ -594,7 +596,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                         tags.append(FriendVollehTags(idx: tag.idx, tag_name: tag.tag_name))
                     }
                     //////
-                    self.my_friend_volleh_card_struct.append(FriendVollehCardStruct(card_idx: response.card_idx, kinds: "친구", expiration_at: self.card_expire_time, lock_state: 0, like_count: 0, like_state: 0, tags:  tags, creator: Creator(idx: Int(self.my_idx!), nickname: self.my_nickname, profile_photo_path: ""), share_list: [], offset: 0.0))
+                    self.my_friend_volleh_card_struct.append(FriendVollehCardStruct(card_idx: response.card_idx, kinds: "친구", expiration_at: self.card_expire_time, lock_state: 0, like_count: 0, like_state: 0, tags:  tags, creator: Creator(idx: Int(self.my_idx!), nickname: self.my_nickname!, profile_photo_path: ""), share_list: [], offset: 0.0))
                     print("내 카드 추가했는지 확인: \(self.card_expire_time), \(self.my_friend_volleh_card_struct.first(where: {$0.card_idx == response.card_idx}))")
                     
                     /*
@@ -611,14 +613,14 @@ class FriendVollehMainViewmodel: ObservableObject{
                     print("내 idx가져왔는지 확인: \(String(describing: idx))")
                     
                     //1.데이터 모델에 저장.
-                    SockMgr.socket_manager.$user_chat_in_model.append(UserChatInListModel(idx: idx!, nickname: self.my_nickname, profile_photo_path: ""))
+                    SockMgr.socket_manager.$user_chat_in_model.append(UserChatInListModel(idx: idx!, nickname: self.my_nickname!, profile_photo_path: ""))
                     
                     //2.sqlite에 데이터 저장 - room, user, card, tag
                     ChatDataManager.shared.insert_chat_info_friend(idx: chatroom_idx, card_idx: card_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, room_name: "", kinds: "친구")
                     
                     let current_time = ChatDataManager.shared.make_created_at()
                     //TODO profile 사진 변경해야함
-                    ChatDataManager.shared.insert_user(chatroom_idx: response.chatroom_idx, user_idx: idx!, nickname: self.my_nickname, profile_photo_path: "", read_last_idx: 0, read_start_idx: 0, temp_key: "", server_idx: response.server_idx, updated_at: current_time, deleted_at: "")
+                    ChatDataManager.shared.insert_user(chatroom_idx: response.chatroom_idx, user_idx: idx!, nickname: self.my_nickname!, profile_photo_path: "", read_last_idx: 0, read_start_idx: 0, temp_key: "", server_idx: response.server_idx, updated_at: current_time, deleted_at: "")
                     
                     //태그
                     for tag in response.tags{
@@ -630,7 +632,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                     ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: "친구", card_photo_path: "", lock_state: 0, title: "", introduce: "", address: "",  map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
                     
                     //3.소켓으로 데이터 보내기
-                    socket_manager.make_chat_room_friend(chatroom_idx: chatroom_idx, idx: idx!, nickname: self.my_nickname)
+                    socket_manager.make_chat_room_friend(chatroom_idx: chatroom_idx, idx: idx!, nickname: self.my_nickname!)
                     
                     //TODO 동적링크 코드 위치 수정해야함.
                     //4.메세지 보내기(동적 링크)
@@ -716,24 +718,10 @@ class FriendVollehMainViewmodel: ObservableObject{
                 }).map({$0})
                 print("친구카드 뽑아낸 것 확인: \(String(describing: friend_card_list))")
                       self.friend_volleh_card_struct = friend_card_list!
-                
-//                    for card in response{
-//                        if my_count < response.count {
-//                            my_count = my_count + 1
-//
-//                            //내 카드일 경우
-//                            if card.creator!.nickname == self.my_nickname{
-//
-//                                self.my_friend_volleh_card_struct.append(FriendVollehCardStruct(card_idx: card.card_idx, kinds: card.kinds, expiration_at: card.expiration_at,lock_state: card.lock_state,like_count: card.like_count, like_state: card.like_state, tags: card.tags, creator: card.creator, offset: 0.0))
-//
-//                            }else{
-//
-//                                self.friend_volleh_card_struct.append(FriendVollehCardStruct(card_idx: card.card_idx, kinds: card.kinds, expiration_at: card.expiration_at,lock_state: card.lock_state,like_count: card.like_count, like_state: card.like_state, tags: card.tags, creator: card.creator, offset: 0.0))
-//                            }
-//                        }
-//                    }
+
                 }
                 print("내 카드 저장한 것 확인: \(self.my_friend_volleh_card_struct)")
+    
                 //오늘 심심기간인 친구들 가져오는 통신
                 let today_date = Date()
                 let bored_date = String.date_string(date: today_date)
@@ -1358,7 +1346,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                     //기존에 심심기간 설정이 됐던 경우라면 삭제
                     if action == 1{
 //                        self.today_boring_friends_model.append(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""))
-                        self.today_boring_friends_model.insert(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""), at: 0)
+                        self.today_boring_friends_model.insert(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname!, state: 1, kinds: ""), at: 0)
 
                     }
                     //기존에 심심기간 설정이 안됐었던 경우라면 추가

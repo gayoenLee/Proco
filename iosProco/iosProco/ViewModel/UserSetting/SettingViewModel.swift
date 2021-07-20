@@ -28,7 +28,7 @@ class SettingViewModel: ObservableObject{
     private var cancellableSet: Set<AnyCancellable> = []
     
     @Published var my_idx = UserDefaults.standard.string(forKey: "user_id")
-    @Published var nickname = UserDefaults.standard.string(forKey: "nickname")
+    @Published var nickname = UserDefaults.standard.string(forKey: "\(UserDefaults.standard.string(forKey: "user_id")!)_nickname")
     
     //친구 카드 모델
     @Published var friend_card_model : [FriendVollehCardStruct] = []{
@@ -456,10 +456,10 @@ class SettingViewModel: ObservableObject{
                 //저장됐던 닉네임 수정한 것으로 다시 저장.
                 UserDefaults.standard.set(nickname, forKey: "\(self.my_idx!)_nickname")
                 //뷰 업데이트 위해 보내기
-                NotificationCenter.default.post(name: Notification.move_view, object: nil, userInfo: ["nickanme_change" : "ok"])
+                NotificationCenter.default.post(name: Notification.move_view, object: nil, userInfo: ["nickname_change" : "ok"])
                 }else{
                     //뷰 업데이트 위해 보내기
-                    NotificationCenter.default.post(name: Notification.move_view, object: nil, userInfo: ["nickanme_change" : "fail"])
+                    NotificationCenter.default.post(name: Notification.move_view, object: nil, userInfo: ["nickname_change" : "fail"])
                 }
             })
     }
@@ -669,13 +669,13 @@ class SettingViewModel: ObservableObject{
                                 \(group_card_array)
                                 """
                         print("모임 카드 string변환")
-                        
+
                         let json_data = json_string.data(using: .utf8)
-                        
+
                         let card = try? JSONDecoder().decode([GroupCardStruct].self, from: json_data!)
-                        
+
                         print("모임 카드 리스트 디코딩한 값: \(String(describing: card))")
-                        
+
                         self.group_card_model = card!
                     }
                 }
