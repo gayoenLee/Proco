@@ -32,8 +32,8 @@ class ChatDataManager : ObservableObject{
         }
     }
     
-    @Published var my_nickname = UserDefaults.standard.string(forKey: "nickname"){
-        willSet{
+    @Published var my_nickname = UserDefaults.standard.string(forKey: "\(String(describing: UserDefaults.standard.string(forKey: "user_id")))_nickname"){
+        didSet{
             objectWillChange.send()
         }
     }
@@ -42,50 +42,50 @@ class ChatDataManager : ObservableObject{
      */
     //내가 읽은 메세지 idx
     @Published var read_last_message = -1{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     @Published var read_start_message = -1{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     //해당 채팅방의 마지막 메세지 idx
     @Published var last_message_idx = -1{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     //현재 채팅방 메세지의 idx
     @Published var message_idx = -1{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     
     //채팅방에서 모든 메세지의 안읽은 갯수 보여주기 위해 메세지들의 idx리스트 만듬, 채팅방 목록에서 안읽은 메세지 개수 보여주기 위해 채팅방 모든 메세지 idx리스트 저장할 때도 사용.
     @Published var message_idx_list : [Int] = []{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     
     @Published var user_read_list : [Int] = []{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     //현재 채팅방 안에 사람들의 idx리스트 만들어서 소켓에서 처음에 데이터 받을 때 비교용으로 사용.
     @Published var current_chat_user_list : [Int] = []{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     
     //채팅 유저들 저장시 server idx저장
     @Published var exist_chatroom_list : [Int] = []{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }

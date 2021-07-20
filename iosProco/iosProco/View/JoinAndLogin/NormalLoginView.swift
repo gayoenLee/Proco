@@ -10,7 +10,7 @@ import SwiftUI
 import Alamofire
 
 struct NormalLoginView:View{
-    @Environment(\.presentationMode) var presentation
+    @Environment(\.presentationMode) private var presentation
     
     @State private var login_id : String = ""
     @State private var login_pwd : String = ""
@@ -138,7 +138,7 @@ struct NormalLoginView:View{
                             UserDefaults.standard.set(access_token, forKey: "access_token")
                             UserDefaults.standard.set(refresh_token, forKey: "refresh_token")
                             UserDefaults.standard.set(idx, forKey: "user_id")
-                            UserDefaults.standard.set(nickname, forKey: "nickname")
+                            UserDefaults.standard.set(nickname, forKey: "\(idx)_nickname")
                             print("일반 로그인시 저장하는 닉네임 : \(String(describing: nickname))")
                             
                             SockMgr.socket_manager.establish_connection()
