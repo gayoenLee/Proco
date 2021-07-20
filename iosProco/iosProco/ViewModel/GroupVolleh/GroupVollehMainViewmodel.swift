@@ -184,7 +184,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     @Published var location_set : Set<String> = ["전체","서울", "인천", "경기", "충청", "강원", "전라", "경상", "제주"]
     //---------------------------------------------------------------------------------
     ///내 닉네임 가져와서 메인 페이지에서 내 카드만 보여줄 때 사용.
-    @Published var my_nickname = ""{
+    @Published var my_nickname = UserDefaults.standard.string(forKey: "nickname"){
         didSet {
             objectWillChange.send()
         }
@@ -562,7 +562,7 @@ class GroupVollehMainViewmodel: ObservableObject{
      */
     ///내 아이디 갖고와서 카드 리스트에 내 카드만 보여주기 위해 비교할 때 이용.
     func get_my_nickname(){
-        self.my_nickname = UserDefaults.standard.string(forKey: "\(self.my_idx!)_nickname")!
+        self.my_nickname = UserDefaults.standard.string(forKey: "nickname")!
     }
     
     /*
@@ -693,7 +693,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     let idx = Int(self.my_idx!)
                     
                     //1.데이터 모델에 저장.
-                    SockMgr.socket_manager.$user_chat_in_model.append(UserChatInListModel(idx: idx!, nickname: self.my_nickname, profile_photo_path: ""))
+                    SockMgr.socket_manager.$user_chat_in_model.append(UserChatInListModel(idx: idx!, nickname: self.my_nickname!, profile_photo_path: ""))
                     
                     print("카드 이름: \(self.card_name)")
                     //2.sqlite에 데이터 저장 - chatroom, user, card, tag
@@ -701,7 +701,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     
                     let current_time = ChatDataManager.shared.make_created_at()
                     //TODO profile 사진 변경해야함
-                    ChatDataManager.shared.insert_user(chatroom_idx: response.chatroom_idx, user_idx: idx!, nickname: self.my_nickname, profile_photo_path: "", read_last_idx: 0, read_start_idx: 0, temp_key: "", server_idx: response.server_idx, updated_at: current_time, deleted_at: "")
+                    ChatDataManager.shared.insert_user(chatroom_idx: response.chatroom_idx, user_idx: idx!, nickname: self.my_nickname!, profile_photo_path: "", read_last_idx: 0, read_start_idx: 0, temp_key: "", server_idx: response.server_idx, updated_at: current_time, deleted_at: "")
                     
                     //태그
                     for tag in response.tags{
@@ -713,7 +713,7 @@ class GroupVollehMainViewmodel: ObservableObject{
                     ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: type as! String, card_photo_path: response.card_photo_path ?? "", lock_state: 0, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
                     
                     //3.소켓으로 데이터 보내기
-                    SockMgr.socket_manager.make_chat_room_friend(chatroom_idx: response.chatroom_idx, idx: idx!, nickname: self.my_nickname)
+                    SockMgr.socket_manager.make_chat_room_friend(chatroom_idx: response.chatroom_idx, idx: idx!, nickname: self.my_nickname!)
                     
                     //추가 후 데이터 집어넣고는 publish변수에 있던 값들 없애주기
                     self.input_location = ""

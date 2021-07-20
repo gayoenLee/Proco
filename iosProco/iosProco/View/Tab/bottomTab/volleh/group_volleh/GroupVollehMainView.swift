@@ -43,10 +43,10 @@ struct GroupVollehMainView: View {
     //친구들 모임 카드 그룹 리스트 오픈 여부
     @State private var open_all_meeting_cards = true
     //내 프로필 사진
-    @State private var my_photo_path : String = ""
+    @State private var my_photo_path : String = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
     
     let scale = UIScreen.main.scale
-    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 40, height: 40)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
     //내 프로필 클릭시 나타나는 다이얼로그
     @State private var my_info_dialog : Bool = false
@@ -168,7 +168,7 @@ struct GroupVollehMainView: View {
                                                         //카드 idx로 채팅방 idx 가져오기
                                                         let chatroom_idx =     ChatDataManager.shared.get_chatroom_from_card(card_idx: Int(self.main_vm.selected_card_idx))
                                                         
-                                                        SockMgr.socket_manager.exit_room(chatroom_idx: chatroom_idx, idx: Int(main_vm.my_idx!)!, nickname: main_vm.my_nickname, profile_photo_path: "", kinds: nil)
+                                                        SockMgr.socket_manager.exit_room(chatroom_idx: chatroom_idx, idx: Int(main_vm.my_idx!)!, nickname: main_vm.my_nickname!, profile_photo_path: "", kinds: nil)
                                                         
                                                         print("확인클릭하고 데이터 삭제")
                                                         //확인 눌렀을 때 통신 시작
@@ -298,7 +298,7 @@ struct GroupVollehMainView: View {
             self.main_vm.applied_filter = false
 
             print("*************모여 볼래 메인 뷰 나타남****************")
-            self.my_photo_path = UserDefaults.standard.string(forKey: "\(main_vm.my_idx!)_profile_photo_path") ?? ""
+            my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
             
             //user defaults에서 내 닉네임 꺼내오는 메소드 실행. 그래야 내 카드만 골라서 보여줄 수 있음.
             main_vm.get_my_nickname()
@@ -326,7 +326,7 @@ extension GroupVollehMainView{
                 
                 ZStack(alignment: .bottomTrailing){
                     
-                    if self.my_photo_path == "" || self.my_photo_path == nil{
+                    if self.my_photo_path == "" {
                     //내 프로필
                     Image("main_profile_img")
                         .resizable()
@@ -339,10 +339,6 @@ extension GroupVollehMainView{
                     }else{
                         
                         KFImage(URL(string: self.my_photo_path))
-                            .placeholder{Image("main_profile_img")
-                                .resizable()
-                                .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                            }
                             .loadDiskFileSynchronously()
                             .cacheMemoryOnly()
                             .fade(duration: 0.25)
@@ -371,7 +367,7 @@ extension GroupVollehMainView{
                 Group{
                     HStack{
                         
-                        Text(main_vm.my_nickname)
+                        Text(main_vm.my_nickname!)
                             .font(.custom(Font.n_bold, size: 13))
                             .foregroundColor(.proco_black)
                         

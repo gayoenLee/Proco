@@ -51,10 +51,10 @@ struct FriendVollehMainView: View {
     @State private var open_friend_cards: Bool = true
     
     //내 프로필 사진
-    @State private var my_photo_path : String = ""
-    
+    @State private var my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
+
     let scale = UIScreen.main.scale
-    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 40, height: 40)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
     var body: some View {
         VStack{
@@ -63,7 +63,6 @@ struct FriendVollehMainView: View {
                 VStack{
                     //프로필 사진, 심심기간 설정 버튼, 카드 만들기 버튼
                     user_info_view
-                    
                     
                     //필터 버튼
                     filter_btn
@@ -244,7 +243,7 @@ struct FriendVollehMainView: View {
                 .onAppear{
                     print("*************친구랑 볼래 메인 뷰 나타남****************")
                     self.main_vm.applied_filter = false
-                    self.my_photo_path = UserDefaults.standard.string(forKey: "\(main_vm.my_idx!)_profile_photo_path") ?? ""
+                
                     //user defaults에서 내 닉네임 꺼내오는 메소드 실행. 그래야 내 카드만 골라서 보여줄 수 있음.
                     main_vm.get_my_nickname()
                     
@@ -255,7 +254,7 @@ struct FriendVollehMainView: View {
                     //on, off 상태 표시하기 위해 user defaults에서 가져와서 세팅
                     let user_idx = ChatDataManager.shared.my_idx!
                     self.state_on = UserDefaults.standard.integer(forKey: "\(user_idx)_state")
-                    
+                    self.my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
                     print("저장됐던 유저 상태 확인:\(user_idx) \(self.state_on)")
                     
                 }
@@ -316,7 +315,7 @@ private extension FriendVollehMainView{
             HStack{
                 ZStack(alignment: .bottomTrailing){
                     
-                    if self.my_photo_path == "" || self.my_photo_path == nil{
+                    if self.my_photo_path == ""{
                         //내 프로필
                         Image("main_profile_img")
                             .resizable()
@@ -330,10 +329,6 @@ private extension FriendVollehMainView{
                     }else{
                         
                         KFImage(URL(string: self.my_photo_path))
-                            .placeholder{Image("main_profile_img")
-                                .resizable()
-                                .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                            }
                             .loadDiskFileSynchronously()
                             .cacheMemoryOnly()
                             .fade(duration: 0.25)

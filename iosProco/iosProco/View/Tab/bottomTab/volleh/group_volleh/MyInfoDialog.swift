@@ -123,7 +123,7 @@ struct MyInfoDialogContents : View{
             
             HStack{
                 Spacer()
-                Text(self.main_vm.my_nickname)
+                Text(self.main_vm.my_nickname!)
                     .font(.custom(Font.n_bold, size: 15))
                     .foregroundColor(.proco_black)
                 

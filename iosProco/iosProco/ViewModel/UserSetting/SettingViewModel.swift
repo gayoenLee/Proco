@@ -28,7 +28,7 @@ class SettingViewModel: ObservableObject{
     private var cancellableSet: Set<AnyCancellable> = []
     
     @Published var my_idx = UserDefaults.standard.string(forKey: "user_id")
-    @Published var nickname = UserDefaults.standard.string(forKey: "\(UserDefaults.standard.string(forKey: "user_id")!)_nickname")
+    @Published var nickname = UserDefaults.standard.string(forKey: "nickname")
     
     //친구 카드 모델
     @Published var friend_card_model : [FriendVollehCardStruct] = []{
@@ -348,10 +348,10 @@ class SettingViewModel: ObservableObject{
                 
             })
     }
-    
+
     //회원 탈퇴 통신
-    func delete_exit_user(user_idx: Int){
-        cancellation = APIClient.delete_exit_user(user_idx: user_idx)
+    func delete_exit_user(){
+        cancellation = APIClient.delete_exit_user()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: {result in
                 switch result{
@@ -365,15 +365,21 @@ class SettingViewModel: ObservableObject{
                 print("회원 탈퇴 response: \(response)")
                 let result = response["result"].string
                if result == "ok"{
-                    print("이메일 인증 완료 확인")
-                self.email_result_alert = .verified
-                self.email_sent = "ok"
-
+                    print("회원 탈퇴 완료 확인")
+                ChatDataManager.shared.remove_db()
+                
+                UserDefaults.standard.removeObject(forKey: "access_token")
+                UserDefaults.standard.removeObject(forKey: "refresh_token")
+                UserDefaults.standard.removeObject(forKey: "user_id")
+                UserDefaults.standard.removeObject(forKey: "nickname")
+                UserDefaults.standard.removeObject(forKey: "profile_photo_path")
+                SockMgr.socket_manager.close_connection()
+                
+                NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["delete_exit_user" : "ok"])
 
                 }else{
-                    print("이메일 인증 체크 오류")
-                    self.email_sent = "no auth"
-
+                    print("회원 탈퇴 통신 오류")
+                    NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["delete_exit_user" : "error"])
                 }
             })
     }
@@ -454,7 +460,7 @@ class SettingViewModel: ObservableObject{
                 result = response["result"].string
                 if result == "ok"{
                 //저장됐던 닉네임 수정한 것으로 다시 저장.
-                UserDefaults.standard.set(nickname, forKey: "\(self.my_idx!)_nickname")
+                UserDefaults.standard.set(nickname, forKey: "nickname")
                 //뷰 업데이트 위해 보내기
                 NotificationCenter.default.post(name: Notification.move_view, object: nil, userInfo: ["nickname_change" : "ok"])
                 }else{
@@ -604,11 +610,11 @@ class SettingViewModel: ObservableObject{
             }, receiveValue: {response in
                 let friend_idx = String(f_idx)
                 
-                print("관심친구 설정 통신 response: \(response)")
+                print("관심친구 이벤트 종류 : \(action) 설정 통신 response: \(response)")
                 let result = response["result"].string
                 
                 if result == "ok"{
-                    print("관심친구 설정 완료")
+                    print("관심친구 이벤트 종류 : \(action) 완료")
                     
                     NotificationCenter.default.post(name: Notification.set_interest_friend, object: nil, userInfo: ["set_interest_friend" : "set_ok_\(action)", "friend_idx": friend_idx])
                     
@@ -799,7 +805,8 @@ class SettingViewModel: ObservableObject{
                 if (result_string == "ok"){
                     
                     self.user_info_model.profile_photo_path = result["profile_photo_path"].stringValue
-                    UserDefaults.standard.setValue(self.user_info_model.profile_photo_path, forKey: "\(self.my_idx!)_profile_photo_path")
+                
+                    UserDefaults.standard.set(self.user_info_model.profile_photo_path, forKey: "profile_photo_path")
                     
                 }else{
                     print("이미지 변경 안됨")
@@ -819,5 +826,43 @@ class SettingViewModel: ObservableObject{
             return item.card_idx == item1.card_idx
         } ?? -1
     }
+    
+    /*
+         1.소켓연결을 끊고, ChatDatamanager 초기화
+         2.user defaults에 저장된 아이디, 닉네임 정보 삭제
+         */
+        
+        func logout(){
+            cancellation = APIClient.logout()
+                .sink(receiveCompletion: {result in
+                    switch result{
+                    case .failure(let error):
+                        print("로그아웃 에러 발생 : \(error)")
+                    case .finished:
+                        break
+                    }
+                }, receiveValue: {response in
+                    print(response)
+                    
+                    let result : String?
+                    if response["result"] == "ok"{
+                        print("[로그아웃] 내 idx : \(self.my_idx)")
+                        UserDefaults.standard.removeObject(forKey: "access_token")
+                        UserDefaults.standard.removeObject(forKey: "refresh_token")
+                        UserDefaults.standard.removeObject(forKey: "user_id")
+                        UserDefaults.standard.removeObject(forKey: "nickname")
+                        UserDefaults.standard.removeObject(forKey: "profile_photo_path")
+                        SockMgr.socket_manager.close_connection()
+                       
+                        //뷰 업데이트 위해 보내기
+                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["logout_event":"ok"])
+                    }
+                    else{
+                        print("[로그아웃]로그아웃 실패")
+                        
+                        NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["logout_event":"error"])
+                    }
+                })
+        }
     
 }
