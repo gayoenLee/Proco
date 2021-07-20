@@ -171,7 +171,10 @@ struct FriendVollehCardDetail: View {
                     .padding()
                 }
             }
-        }.padding()
+        }
+        .padding()
+        .navigationBarHidden(true)
+        .navigationBarTitle("", displayMode: .inline)
         .sheet(isPresented: self.$show_report_view) {
             ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
         }
