@@ -18,9 +18,6 @@ struct EditGroupMemberView: View {
     @ObservedObject var detail_vm : GroupDetailViewmodel
     @State var friend_model : GetFriendListStruct
     
-    //그룹에 속한 친구 저장하는 곳
-    
-    
     //이전 뷰로부터 group_idx값 전달 받음
     var current_group_idx: Int
     
@@ -40,7 +37,7 @@ struct EditGroupMemberView: View {
     @State var end_add_group_member = false
     
     var body: some View {
-        NavigationView{
+        
         VStack {
             
             HStack{
@@ -65,30 +62,30 @@ struct EditGroupMemberView: View {
             
             Group{
                 
-            EditGroupSearchFriendBar(detail_viewmodel: self.detail_vm, searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
+                EditGroupSearchFriendBar(detail_viewmodel: self.detail_vm, searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
                 
                 ScrollView{
-                if end_search{
-                    Text("검색 결과")
-                        .font(.custom(Font.n_regular, size: 11))
-                        .foregroundColor(.gray)
-                
+                    if end_search{
+                        Text("검색 결과")
+                            .font(.custom(Font.n_regular, size: 11))
+                            .foregroundColor(.gray)
+                        
                         ForEach((detail_vm.friend_list_struct).filter({"\($0)".contains(searchText)}), id: \.self){
                             friend in
                             
                             EditFriendRow(viewmodel: self.detail_vm, friend_model: friend, searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
                         }
-                    
-                }else if (isSearching == false && end_search == false){
-               
+                        
+                    }else if (isSearching == false && end_search == false){
+                        
                         ForEach(0..<detail_vm.friend_list_struct.count, id: \.self){index in
                             VStack(alignment: .leading){
                                 EditFriendRow(viewmodel: self.detail_vm, friend_model: self.detail_vm.friend_list_struct[index], searchText: $searchText, isSearching: $isSearching, end_search: $end_search)
                             }
                         }
+                    }
                 }
             }
-        }
             Button(action: {
                 //뷰모델의 값에 선택한 친구들 배열 값 넣기
                 self.detail_vm.updated_friend_list = Array(detail_vm.temp_selected_friend_set)
@@ -96,9 +93,9 @@ struct EditGroupMemberView: View {
                 //***************************편집 통신 편집하려는 그룹의 idx값은 상세 페이지 뷰모델에 저장했던 값 사용.
                 detail_vm.edit_group_member(group_idx: self.current_group_idx, friends_idx: detail_vm.updated_friend_list)
                 
-                    print("그룹 멤버 편집 화면 전환 토글 값 true")
-                    self.presentationMode.wrappedValue.dismiss()
-              //통신 성공해서 ok가 아닐 경우 예외처리 해야함.**********************************
+                print("그룹 멤버 편집 화면 전환 토글 값 true")
+                self.presentationMode.wrappedValue.dismiss()
+                //통신 성공해서 ok가 아닐 경우 예외처리 해야함.**********************************
             }) {
                 Text("확인")
                     .font(.custom(Font.t_regular, size: 21))
@@ -122,10 +119,10 @@ struct EditGroupMemberView: View {
             detail_vm.get_friend_list_and_fetch()
         }
         .onDisappear{
-           // detail_vm.get_friend_list_and_fetch()
+            // detail_vm.get_friend_list_and_fetch()
             
         }
-        }
+        
     }
 }
 
@@ -239,6 +236,7 @@ struct EditFriendRow : View{
                         }
                     }
                 }
+                .padding([.leading, .trailing])
                 Divider()
                     .background(Color(.systemGray4))
                 
@@ -265,7 +263,7 @@ struct EditFriendRow : View{
                             .onFailure{error in
                                 print("실패 이유: \(error)")
                             }
-
+                        
                     }
                     
                     HStack(spacing: UIScreen.main.bounds.width/10){
@@ -317,6 +315,8 @@ struct EditFriendRow : View{
                         .background(Color.white)
                     }
                 }
+                .padding([.leading, .trailing])
+                
             }
         }
     }
