@@ -24,7 +24,7 @@ struct NormalLoginView:View{
     @State private var got_fcm_token : Bool = false
     @ObservedObject var view_router : ViewRouter
     var body: some View {
-        
+        NavigationView{
         VStack{
             top_nav_bar
                 
@@ -68,7 +68,7 @@ struct NormalLoginView:View{
                         Spacer()
                         login_btn
                         
-                        NavigationLink("",destination: TabbarView(view_router: self.view_router), isActive: $login_ok)
+                        NavigationLink("",destination: TabbarView(view_router: self.view_router).navigationBarHidden(true), isActive: $login_ok)
                         
                         find_id_pwd_btn
                         Spacer()
@@ -78,12 +78,11 @@ struct NormalLoginView:View{
             
             Spacer()
         }
-        .navigationBarTitle("", displayMode: .inline)
-        .navigationBarHidden(true)
         .background(Image("login_bg").resizable().scaledToFill())
         .alert(isPresented: $show_alert){
             Alert(title: Text("로그인"), message: Text("로그인을 다시 시도해주세요"), dismissButton: .default(Text("확인")))
         }
+        
         .onAppear{
             print("일반 로그인 화면 on appear: \(UserDefaults.standard.string(forKey: "fcm_token"))")
         }
@@ -100,6 +99,9 @@ struct NormalLoginView:View{
                 print("일반 로그인시 fcm 토큰 못 받음")
             }
         })
+        }
+        .navigationBarTitle("", displayMode: .inline)
+        .navigationBarHidden(true)
         //navigation view 끝
     }
     
@@ -138,7 +140,7 @@ struct NormalLoginView:View{
                             UserDefaults.standard.set(access_token, forKey: "access_token")
                             UserDefaults.standard.set(refresh_token, forKey: "refresh_token")
                             UserDefaults.standard.set(idx, forKey: "user_id")
-                            UserDefaults.standard.set(nickname, forKey: "\(idx)_nickname")
+                            UserDefaults.standard.set(nickname, forKey: "nickname")
                             print("일반 로그인시 저장하는 닉네임 : \(String(describing: nickname))")
                             
                             SockMgr.socket_manager.establish_connection()
