@@ -22,6 +22,8 @@ struct FriendVollehCardStruct :Codable, Identifiable{
     var share_list : [ShareList]? = []
     //수정.삭제 스와이프 구현하기 위해 추가로 넣음.
     var offset : CGFloat? = 0.0
+    //관심친구 여부
+    var is_favor_friend : Int? = 0
     //identifiable프로토콜 따르기 위해 추가함.
     var id : Int{
         card_idx!
