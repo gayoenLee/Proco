@@ -9,10 +9,11 @@ import SwiftUI
 import Kingfisher
 
 struct MyInterestFriendsListView: View {
-    
+    @StateObject var friend_vm = FriendVollehMainViewmodel()
     @ObservedObject var main_vm : SettingViewModel
     
     var body: some View {
+        NavigationView{
         VStack{
             
             ForEach(self.main_vm.friend_model){friend in
@@ -20,10 +21,11 @@ struct MyInterestFriendsListView: View {
             }
             Spacer()
         }
+        .navigationBarHidden(true)
         .onAppear{
             self.main_vm.get_interest_friends(friend_type: "관심친구")
         }
-        .navigationBarTitle(Text("내 관심친구"))
+        }
     }
 }
 
@@ -99,12 +101,15 @@ extension MyInterestFriendsRow{
                     print("친구 관심친구 설정 노티 받았음: \(value)")
                              
                     if data as! String == "set_ok_관심친구"{
+                        print("관심친구 설정한 경우 노티")
+
                         let friend_idx = user_info["friend_idx"] as! String
                         
                         if friend_struct.idx! == Int(friend_idx){
                             self.friend_struct.kinds = "관심친구"
                                               }
                     }else if data as! String == "set_ok_관심친구해제"{
+                        print("관심친구 해제한 경우 노티")
                         let friend_idx = user_info["friend_idx"] as! String
                         if friend_struct.idx! == Int(friend_idx){
                             self.friend_struct.kinds = "관심친구해제"
