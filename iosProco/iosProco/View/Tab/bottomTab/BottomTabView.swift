@@ -33,8 +33,8 @@ struct BottomTabView: View {
                                 //내 피드 화면으로 이동시 presentation: , 내 닉네임, 프로필 사진을 저장해놔야 함.
                                 vm.calendar_owner.user_idx = SimSimFeedPage.calendar_owner_idx!
                                 vm.calendar_owner.profile_photo_path = UserDefaults.standard.string(forKey: "\(vm.calendar_owner.user_idx)_photo") ?? ""
-                                
-                                vm.calendar_owner.user_nickname = UserDefaults.standard.string(forKey: "nickname") ?? ""
+                                let user_idx = UserDefaults.standard.string(forKey: "user_id")
+                                vm.calendar_owner.user_nickname = UserDefaults.standard.string(forKey: "\(user_idx)_nickname")!
                                 vm.calendar_owner.watch_user_idx = Int(vm.my_idx!)!
                                 print("심심피드 탭 클릭: \(vm.calendar_owner)")
                                 //다른 화면으로 이동시 하단 탭바 숨기는 것.
