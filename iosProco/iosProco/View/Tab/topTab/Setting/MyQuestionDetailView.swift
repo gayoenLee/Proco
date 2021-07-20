@@ -22,10 +22,7 @@ struct MyQuestionDetailView: View {
     @Environment(\.editMode) var editMode
     @ObservedObject var main_vm: SettingViewModel
     @State var ask_content: String = ""
-    
-    //삭제 후 문의내역 리스트페이지로 이동.
-    @State private var go_to_setting: Bool = false
-    
+    @State private var edit_content: String = ""
     //수정, 삭제 메뉴 있는 버튼
     @State private var show_menus : Bool = false
     //삭제 한 번 더 묻는 알림창
@@ -35,8 +32,6 @@ struct MyQuestionDetailView: View {
     
     var body: some View {
         VStack{
-            //삭제 후 문의하기 메인 페이지로 이동.
-            NavigationLink("",destination: ServiceCenterView(main_vm: self.main_vm), isActive: self.$go_to_setting)
             
             HStack{
                 Spacer()
@@ -98,11 +93,13 @@ struct MyQuestionDetailView: View {
                                 Button(action: {
                                     print("편집 완료 버튼 클릭")
                                     let question_idx = question_model.idx
-                                    let content = ask_content
+                                    let content = edit_content
+                                    ask_content = edit_content
+                                    
                                     //편집 통신
                                     self.main_vm.edit_question(question_idx: question_idx, content: content)
-                                    //편집 완료 알림
-                                    main_vm.request_result_alert_func(main_vm.request_result_alert)
+                                    
+                                    self.editMode?.wrappedValue = .inactive
                                     
                                 }){
                                     Text("완료")
@@ -110,26 +107,6 @@ struct MyQuestionDetailView: View {
                                         .foregroundColor(Color.proco_white)
                                         .background(Color.proco_blue)
                                         .cornerRadius(5)
-                                }
-                                .alert(isPresented: $main_vm.show_result_alert){
-                                    switch main_vm.request_result_alert{
-                                    case .make, .edit:
-                                        return Alert(title: Text("문의하기"), message: Text("등록되었습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
-                                            
-                                            self.editMode?.wrappedValue = .active == self.editMode?.wrappedValue ? .inactive : .active
-                                            
-                                        }))
-                                    case .delete:
-                                        return Alert(title: Text("문의하기"), message: Text("삭제되었습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
-                                            
-                                            self.go_to_setting.toggle()
-                                            
-                                        }))
-                                    case .fail:
-                                        return Alert(title: Text("문의하기"), message: Text("다시 시도해주세요"), dismissButton: Alert.Button.default(Text("확인"), action: {
-                                            
-                                        }))
-                                    }
                                 }
                             }
                             //답변대기시에만 수정, 삭제가 가능하다.
@@ -150,6 +127,7 @@ struct MyQuestionDetailView: View {
             ActionSheet(title: Text("내 문의내역"), message: nil, buttons: [.default(Text("수정하기"), action: {
                 
                 print("편집버튼 클릭")
+                self.edit_content = self.ask_content
                 self.editMode?.wrappedValue = .active
                 
             }), .default(Text("삭제하기"), action: {
@@ -166,8 +144,6 @@ struct MyQuestionDetailView: View {
                 
                 //삭제 통신
                 self.main_vm.delete_question(question_idx: question_model.idx)
-                //삭제 완료 알림
-                main_vm.request_result_alert_func(main_vm.request_result_alert)
                 
             }), secondaryButton: Alert.Button.cancel(Text("취소")))
         })
@@ -208,7 +184,7 @@ private extension MyQuestionDetailView{
                 }
                 if  (.active == self.editMode?.wrappedValue){
                     
-                    TextEditor(text: $ask_content)
+                    TextEditor(text: $edit_content)
                         .font(.custom(Font.n_bold, size: 14))
                         .foregroundColor(Color.proco_black)
                         .colorMultiply(Color.light_gray)
