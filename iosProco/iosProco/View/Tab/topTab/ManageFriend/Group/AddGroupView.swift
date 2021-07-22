@@ -22,9 +22,14 @@ struct AddGroupView: View {
     //그룹 추가 완료시 그룹 메인으로 이동
     @State private var add_group_ok : Bool = false
     //친구 추가 화면으로 이동
-    @State var go_to_add_friend : Bool = false
+    @State private var go_to_add_friend : Bool = false
     //친구 추가 후 데이터 전달 구분 위한 변수
     @State private var send_data : Bool = false
+    
+    //그룹 추가 후 토스트 띄우기 위한 구분값
+    @State private var show_add_result : Bool = false
+    //그룹 추가 후 결과별로 토스트 띄우기 위해 결과 저장할 변수
+    @State private var add_result_txt : String = ""
     
     var body: some View {
         
@@ -64,6 +69,7 @@ struct AddGroupView: View {
                             
                             print("그룹 추가 클릭,추가되는 친구들 리스트 확인 : \(self.viewmodel.added_friend_list)")
                             viewmodel.add_group()
+                            /////////////
                             self.presentation.wrappedValue.dismiss()
                             
                         }){
@@ -151,6 +157,28 @@ struct AddGroupView: View {
             PlusGroupMemberView(viewmodel: self.viewmodel, friend_model: self.friend_model)
                 .navigationBarHidden(true)
                 .navigationBarTitle("", displayMode: .inline)
+        })
+        .overlay(overlayView: self.add_result_txt == "group_name duplicated" ? Toast.init(dataModel: Toast.ToastDataModel.init(title: "이미 존재하는 그룹 이름입니다.", image: "exclamationmark.triangle.fill"), show: $show_add_result)  : Toast.init(dataModel: Toast.ToastDataModel.init(title: "다시 시도해주세요", image: "exclamationmark.triangle.fill"), show: $show_add_result) , show: $show_add_result)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
+            
+            if let user_info = value.userInfo, let data = user_info["add_group"]{
+                print("그룹 추가 이벤트 \(value)")
+                
+                if data as! String == "ok"{
+                    add_result_txt = "ok"
+                    self.show_add_result = true
+                   
+                }else if data as! String == "group_name duplicated"{
+                    add_result_txt = "group_name duplicated"
+                    self.show_add_result = true
+                    
+                }else if data as! String == "error"{
+                    add_result_txt = "error"
+                    self.show_add_result = true
+                }
+            }else{
+                print("캘린더 주인 프로필 클릭 이벤트 노티 아님")
+            }
         })
         //친구 리스트 끝
         .onAppear{
