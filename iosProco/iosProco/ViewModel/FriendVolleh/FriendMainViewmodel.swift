@@ -893,6 +893,8 @@ class FriendVollehMainViewmodel: ObservableObject{
             }
             , receiveValue: {response in
                 print("카드 상세 데이터 가져온 것 확인 : \(response)")
+            
+                self.my_card_detail_struct = FriendVollehCardStruct()
                 
                 //해당하는 카드 없거나 만료됨
                 if response.result == "no result"{
@@ -901,11 +903,11 @@ class FriendVollehMainViewmodel: ObservableObject{
                 }else{
                 print("만료날짜 원래 데이터 확인 : \(response.expiration_at)")
                 
-                let first_filtered_day = self.string_to_date(expiration: response.expiration_at)
+                    let first_filtered_day = self.string_to_date(expiration: response.expiration_at!)
                 print("날짜 변환했는지 확인 : \(first_filtered_day)")
                 self.card_date = first_filtered_day
                 
-                let time_filtered = self.string_to_time(expiration: String(response.expiration_at.split(separator: " ")[1]))
+                    let time_filtered = self.string_to_time(expiration: String(response.expiration_at!.split(separator: " ")[1]))
                 self.card_time = time_filtered
                 print("시간 변환 확인 : \(self.card_time)")
                 
