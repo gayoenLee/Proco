@@ -55,6 +55,7 @@ struct Keys{
         static let auth_num =  "auth_num"
         static let sign_device =  "sign_device"
         static let update_version =  "update_version"
+        static let fcm_token = "fcm_token"
     }
     
     //일반 로그인시 체크하기 위해 정보 보내기

@@ -25,7 +25,7 @@ enum APIRouter: URLRequestConvertible {
     
     //회원가입 마지막 정보 보낼 때
     case send_profile_image(profile_image: Data)
-    case send_signup_info(phone: String, email: String, password: String, gender: Int, birthday: String, nickname: String, marketing_yn: Int, auth_num: String, sign_device: String, update_version: String)
+    case send_signup_info(phone: String, email: String, password: String, gender: Int, birthday: String, nickname: String, marketing_yn: Int, auth_num: String, sign_device: String, update_version: String, fcm_token: String)
     //일반 로그인
     case send_check_login(id: String, password: String, fcm_token: String, device: String)
     
@@ -911,8 +911,8 @@ enum APIRouter: URLRequestConvertible {
         case .send_profile_image(let profile_image):
             return  [ Keys.SendProfileImageKey.profile_image: profile_image]
             
-        case .send_signup_info(let phone, let email, let password, let gender, let birthday, let nickname, let marketing_yn, let auth_num, let sign_device, let update_version):
-            return [Keys.SendSignupInfoKey.phone: phone, Keys.SendSignupInfoKey.email: email, Keys.SendSignupInfoKey.password: password, Keys.SendSignupInfoKey.gender: gender, Keys.SendSignupInfoKey.birthday: birthday, Keys.SendSignupInfoKey.nickname: nickname, Keys.SendSignupInfoKey.marketing_yn: marketing_yn, Keys.SendSignupInfoKey.auth_num: auth_num, Keys.SendSignupInfoKey.sign_device: sign_device, Keys.SendSignupInfoKey.update_version: update_version]
+        case .send_signup_info(let phone, let email, let password, let gender, let birthday, let nickname, let marketing_yn, let auth_num, let sign_device, let update_version, let fcm_token): 
+            return [Keys.SendSignupInfoKey.phone: phone, Keys.SendSignupInfoKey.email: email, Keys.SendSignupInfoKey.password: password, Keys.SendSignupInfoKey.gender: gender, Keys.SendSignupInfoKey.birthday: birthday, Keys.SendSignupInfoKey.nickname: nickname, Keys.SendSignupInfoKey.marketing_yn: marketing_yn, Keys.SendSignupInfoKey.auth_num: auth_num, Keys.SendSignupInfoKey.sign_device: sign_device, Keys.SendSignupInfoKey.update_version: update_version, Keys.SendSignupInfoKey.fcm_token : fcm_token]
             
         //일반 로그인
         case .send_check_login(let id, let password, let fcm_token, let device):
