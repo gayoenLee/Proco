@@ -50,9 +50,14 @@ struct FriendVollehMainView: View {
     @State private var open_my_cards : Bool = true
     @State private var open_friend_cards: Bool = true
     
+    //카드 잠금 이벤트시 토스트 띄우기 위한 구분값
+    @State private var show_lock_alert : Bool = false
+    //카드 잠금인지 잠금해제인지 이벤트 종류 알기 위해 저장할값 - 토스트에 띄움
+    @State private var lock_event_kind : String = ""
+    
     //내 프로필 사진
     @State private var my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
-
+    
     let scale = UIScreen.main.scale
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
@@ -84,18 +89,17 @@ struct FriendVollehMainView: View {
                             ZStack{
                                 // 1. hstack 버튼들 배경
                                 Group{
-                                    HStack{
+                                    HStack(spacing: 0){
                                         Spacer()
                                         //오른쪽으로 스와이프시 빨간색 배경, 주황색 배경
-                                        HStack{
-                                            Color.proco_red
-                                                .frame(width: UIScreen.main.bounds.width*0.3)
-                                                .opacity(main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0 < 0 ? 1 : 0)
-                                            
-                                            Color.main_orange
-                                                .frame(width: UIScreen.main.bounds.width*0.3)
-                                                .opacity(main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0 < 0 ? 1 : 0)
-                                        }
+                                        RoundedRectangle(cornerRadius: 5.0)
+                                                .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
+                                                .foregroundColor(  Color.proco_red .opacity(main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0 < 0 ? 1 : 0))
+
+                                        RoundedRectangle(cornerRadius: 5.0)
+                                                .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
+                                                .foregroundColor(    Color.main_orange .opacity(main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0 < 0 ? 1 : 0))
+                                        
                                     }
                                 }
                                 
@@ -103,8 +107,7 @@ struct FriendVollehMainView: View {
                                 Group{
                                     HStack{
                                         Spacer()
-                                        HStack{
-                                            HStack{
+                                           
                                                 //수정 버튼
                                                 HStack{
                                                     Button(action: {
@@ -115,13 +118,18 @@ struct FriendVollehMainView: View {
                                                         self.go_to_edit  = true
                                                         print("수정하는 페이지 이동 구분값: \(self.go_to_edit)")
                                                         
-                                                    }, label: {
+                                                    }){
                                                         VStack{
                                                             Image("swipe_edit_icon")
+                                                                .resizable()
+                                                                .frame(width:18.89, height: 19.03)
                                                             Image("swipe_edit_txt")
+                                                                .resizable()
+                                                                .frame(width:20, height: 13)
                                                         }
-                                                    })
-                                                    .frame(width: UIScreen.main.bounds.width*0.2)
+                                                    }
+                                                    .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width*0.3)
+                                                    
                                                     
                                                     //삭제버튼
                                                     Button(action: {
@@ -135,11 +143,15 @@ struct FriendVollehMainView: View {
                                                         
                                                         VStack{
                                                             Image("swipe_del_icon")
+                                                                .resizable()
+                                                                .frame(width:16, height: 22)
                                                             Image("swipe_del_txt")
+                                                                .resizable()
+                                                                .frame(width:20, height: 13)
                                                         }
                                                     })
-                                                    .frame(width: UIScreen.main.bounds.width*0.2)
-                                                    .padding()
+                                                    .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.3)
+                                                    //.padding()
                                                     .alert(isPresented: $show_delete_alert){
                                                         Alert(title: Text("카드 삭제하기"), message: Text("내 카드를 지우시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
                                                             
@@ -158,8 +170,7 @@ struct FriendVollehMainView: View {
                                                         }))
                                                     }
                                                 }
-                                            }
-                                        }
+                                            
                                     }
                                 }
                                 Group{
@@ -169,7 +180,7 @@ struct FriendVollehMainView: View {
                                         .shadow(color: .gray, radius: 2, x: 0, y: 2)
                                         .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.4)
                                         .overlay(
-                                            MyCardListView(main_viewmodel: main_vm, my_volleh_card_struct: main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)], current_card_index: self.main_vm.get_index(item: item))
+                                            MyCardListView(main_viewmodel: main_vm, my_volleh_card_struct: main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)], current_card_index: self.main_vm.get_index(item: item), show_lock_alert : self.$show_lock_alert, lock_event_kind: self.$lock_event_kind)
                                         )
                                         //스와이프해서 수정, 삭제 위해 offset을 데이터 모델에 임의로 넣어줬음. 이 값을 이용한 것.
                                         .offset(x:main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0)
@@ -184,7 +195,7 @@ struct FriendVollehMainView: View {
                                         }
                                         //스와이프할 때 Offset값을 얻어옴.
                                         .gesture(DragGesture().onChanged({ (value) in
-                                            withAnimation(.default){
+                                            withAnimation(.easeInOut){
                                                 main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset = value.translation.width
                                                 print("해당 카드 current_idx확인 : \(self.main_vm.get_index(item: item))")
                                                 
@@ -194,13 +205,13 @@ struct FriendVollehMainView: View {
                                         .onEnded({ (value) in
                                             withAnimation(.default){
                                                 
-                                                if value.translation.width < UIScreen.main.bounds.width * -0.15{
-                                                    print("on ended에 들어옴 : offset 확인2")
+                                                if value.translation.width < UIScreen.main.bounds.width * -0.01{
+                                                    print("on ended에 들어옴 : offset 확인2 : \(value.translation.width)")
                                                     
-                                                    main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset = UIScreen.main.bounds.width * -0.6
+                                                    main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset = UIScreen.main.bounds.width * -0.4
                                                 }
                                                 else{
-                                                    print("on ended에 들어옴 : offset 확인3")
+                                                    print("on ended에 들어옴 : offset 확인3: \( value.translation.width)")
                                                     main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset = 0
                                                 }
                                             }
@@ -222,12 +233,12 @@ struct FriendVollehMainView: View {
                     })
                     .padding(.trailing)
                     
-                    //친구 카드 상세 페이지 - 액티비티로 변경함.
-                    NavigationLink("", destination: FriendVollehCardDetail(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket:   SockMgr.socket_manager,calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline)
-                                    .navigationBarHidden(true), isActive: self.$show_friend_card_detail)
-                    
-                    //친구 카드 리스트
-                    friend_card_list
+//                    //친구 카드 상세 페이지 - 액티비티로 변경함.
+//                    NavigationLink("", destination: FriendVollehCardDetail(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket:   SockMgr.socket_manager,calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline)
+//                                    .navigationBarHidden(true), isActive: self.$show_friend_card_detail)
+//
+//                    //친구 카드 리스트
+//                    friend_card_list
                     
                 }
                 .onReceive(NotificationCenter.default.publisher(for: Notification.clicked_like), perform: {value in
@@ -243,7 +254,7 @@ struct FriendVollehMainView: View {
                 .onAppear{
                     print("*************친구랑 볼래 메인 뷰 나타남****************")
                     self.main_vm.applied_filter = false
-                
+                    
                     //user defaults에서 내 닉네임 꺼내오는 메소드 실행. 그래야 내 카드만 골라서 보여줄 수 있음.
                     main_vm.get_my_nickname()
                     
@@ -302,6 +313,7 @@ struct FriendVollehMainView: View {
         }
         .background(Color.proco_dark_white)
         .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: self.calendar_vm,show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true))
+        .overlay(overlayView: Toast.init(dataModel: Toast.ToastDataModel.init(title: "카드가 \(self.lock_event_kind)되었습니다.", image: "checkmark"), show: self.$show_lock_alert), show: self.$show_lock_alert)
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
     }
