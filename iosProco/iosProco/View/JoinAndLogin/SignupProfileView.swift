@@ -133,13 +133,12 @@ struct SignupProfileView: View {
             }
             
             //회원가입에 성공했을 경우 메인화면으로 보내기, 네비게이션 뷰에서 버튼 없이 화면 이동 가능한 방법.
-            NavigationLink("", destination: EnrolledFriendListView(vm: SignupInviteListViewModel(), phone_number: self.info_viewmodel.phone_number), isActive: self.$login_success)
+            NavigationLink("", destination: EnrolledFriendListView(), isActive: self.$login_success)
 
             NavigationLink("", destination: LoginMenuView(), isActive: self.$login_fail)
             
             //프로필 이미지 선택시 갤러리
             NavigationLink("", destination:  ImagePicker(image: self.$selected_image, image_url: self.$image_url, ui_image: self.$ui_image), isActive: self.$show_image_picker)
-            
         }
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
@@ -149,8 +148,6 @@ struct SignupProfileView: View {
         .alert(isPresented: $login_fail){
             Alert(title: Text(""), message: Text("회원가입 중 오류가 발생했습니다. 다시 시도해주세요"), dismissButton: .default(Text("확인")))
         }
-        
-        
     }
     
     //이미지 파일로 저장하기
@@ -161,12 +158,14 @@ struct SignupProfileView: View {
                 print("이미지 결과 확인 : \(result)")
                 let result_string = result["result"].string
                 if (result_string == "ok"){
-                    self.login_success = true
+                    //self.login_success = true
                     let profile_photo_path = result["profile_photo_path"].string
                     UserDefaults.standard.set(profile_photo_path, forKey: "profile_photo_path")
                     
+                    ViewRouter.get_view_router().init_root_view = "enrolled_friend"
+                    
                 }else{
-                    self.login_success = true
+                    self.login_fail = true
                 }
             }
         })

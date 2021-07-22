@@ -11,12 +11,12 @@ import Kingfisher
 
 struct EnrolledFriendListView: View {
     
-    @ObservedObject var vm : SignupInviteListViewModel
+    @ObservedObject var vm = SignupInviteListViewModel()
     @State private var go_invite_friends_view: Bool = false
     //친구 요청 결과를 toast띄울 때 사용하는 구분값 및 결과값 저장 변수
     @State private var show_request_alert : Bool = false
     @State private var request_result : String = ""
-    var phone_number : String
+    @State private var phone_number : String = UserDefaults.standard.string(forKey: "phone_number")!
     //추천 친구 리스트 많을 경우 시간 소요-> 프로그래스바 띄우기
     @State private var show_friend_list : Bool = false
     
@@ -78,7 +78,7 @@ struct EnrolledFriendListView: View {
             }
            
         }
-        .overlay(overlayView: self.request_result == "wait" ? Toast.init(dataModel: Toast.ToastDataModel.init(title: "친구 요청 후 응답을 기다리는 중입니다.", image: "checkmark"), show: $show_request_alert) : self.request_result == "already_got" ? Toast.init(dataModel: Toast.ToastDataModel.init(title: "친구 요청을 받은 사용자입니다.", image: "checkmark"), show: $show_request_alert) : self.request_result == "already_friend" ? Toast.init(dataModel: Toast.ToastDataModel.init(title: "이미 친구인 사용자입니다.", image: "checkmark"), show: $show_request_alert) :  Toast.init(dataModel: Toast.ToastDataModel.init(title: "나에게는 친구 요청을 할 수 없습니다.", image: "checkmark"), show: $show_request_alert), show: self.$show_request_alert)
+        .overlay(overlayView: self.request_result == "wait" ? Toast.init(dataModel: Toast.ToastDataModel.init(title: "친구 요청 후 응답을 기다리는 중입니다.", image: "checkmark"), show: $show_request_alert) : self.request_result == "already_got" ? Toast.init(dataModel: Toast.ToastDataModel.init(title: "친구 요청을 받은 사용자입니다.", image: "exclamationmark.triangle.fill"), show: $show_request_alert) : self.request_result == "already_friend" ? Toast.init(dataModel: Toast.ToastDataModel.init(title: "이미 친구인 사용자입니다.", image: "exclamationmark.triangle.fill"), show: $show_request_alert) :  Toast.init(dataModel: Toast.ToastDataModel.init(title: "나에게는 친구 요청을 할 수 없습니다.", image: "exclamationmark.triangle.fill"), show: $show_request_alert), show: self.$show_request_alert)
         }
     }
 }

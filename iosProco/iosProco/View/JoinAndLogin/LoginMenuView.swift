@@ -31,9 +31,16 @@ struct LoginMenuView:View{
     
     var body: some View{
         
-        if self.view_router.init_root_view{
+        //친구랑 볼래 메인 화면
+        if self.view_router.init_root_view == "tab_main"{
             TabbarView()
-        }else{
+        }
+        //회원가입 완료 후 보여줄 화면 - 친구 초대 화면
+        else if self.view_router.init_root_view == "enrolled_friend"{
+            EnrolledFriendListView()
+        }
+        //앱 초대 화면
+        else{
         NavigationView{
             VStack{
                 //서브 타이틀 위의 공백 추가

@@ -17,6 +17,10 @@ struct MyCardListView: View {
     var current_card_index : Int
     
     @State private var expiration_at = ""
+    //카드 잠금 이벤트시 토스트 띄우기 위한 구분값
+    @Binding var show_lock_alert : Bool
+    //카드 잠금인지 잠금해제인지 이벤트 종류 알기 위해 저장할값 - 토스트에 띄움
+    @Binding var lock_event_kind : String
     
     //이미지 원처럼 보이게 하기 위해 scale값을 곱함.
     let scale = UIScreen.main.scale
@@ -93,6 +97,8 @@ struct MyCardListView: View {
                                 if card_idx == self.my_volleh_card_struct.card_idx{
                                     
                                     self.my_volleh_card_struct.lock_state = 1
+                                    self.lock_event_kind = "잠금"
+                                    self.show_lock_alert = true
                                 }
                             }else if check_result as! String == "잠금해제"{
                                 
@@ -101,6 +107,8 @@ struct MyCardListView: View {
                                 print("잠금 취소한 idx: \(card_idx)")
                                 if card_idx == self.my_volleh_card_struct.card_idx{
                                     self.my_volleh_card_struct.lock_state = 0
+                                    self.lock_event_kind = "잠금 해제"
+                                    self.show_lock_alert = true
                                 }
                             }
                         }

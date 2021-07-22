@@ -13,7 +13,7 @@ struct FindIdPasswordView: View{
     @Environment(\.presentationMode) var presentation
     
     //핸드폰 번호 맞는지 체크, 값 저장하기 위함.
-    @ObservedObject var phone_viewmodel = SignupViewModel()
+    @StateObject var phone_viewmodel = SignupViewModel()
     
     //인증번호 틀렸을 경우 경고 문구 나타내기 위한 구분값
     @State var show_warn = true
@@ -36,8 +36,10 @@ struct FindIdPasswordView: View{
     @State private var selection = 0
     let location_numbers = ["+82", "+81"]
     
+    @Binding var root_is_active : Bool
+    
     var body: some View{
-        
+        NavigationView{
         VStack{
             HStack{
                 Button(action: {
@@ -116,8 +118,10 @@ struct FindIdPasswordView: View{
                 Spacer()
                 HStack{
                     //다음 버튼 클릭시 인증번호 서버로 보내서 맞는지 확인하고 맞아야 이동 가능, self붙여야 데이터를 그대로 담아서 보낼 수 있음.
-                    NavigationLink("",destination: ChangePasswordView(info_viewmodel: self.phone_viewmodel)   .navigationBarTitle("", displayMode: .inline)
+                    NavigationLink("",destination: ChangePasswordView(info_viewmodel: self.phone_viewmodel, root_is_active: self.$root_is_active)   .navigationBarTitle("", displayMode: .inline)
                                     .navigationBarHidden(true), isActive: $is_auth_number_result)
+                        //완료 버튼 누른 후 로그인 페이지로 이동시키기 위함
+                        .isDetailLink(false)
                     Button(action:{
                         check_phone_auth()
                         print("이메일 패스워드 이동하는 네비게이션 링크 클릭")
@@ -155,6 +159,7 @@ struct FindIdPasswordView: View{
 
         .alert(isPresented: $auth_send_result){
             Alert(title: Text(result_message), dismissButton: .default(Text("확인")))
+        }
         }
     }
     //view 끝

@@ -93,26 +93,6 @@ struct SignupPasswordView: View {
             //이메일과 패스워드가 형식에 맞지 않을 경우 다음 버튼 활성화 안시킴.
             .disabled(all_is_ok == false)
         }
-//            .onTapGesture {
-//
-//                print("********************전체 화면 온탭 제스처")
-//               let is_same = self.check_pwd_same(first_pwd: self.first_pwd, second_pwd: self.second_pwd)
-//                if !is_same{
-//                    self.all_is_ok = false
-//                    print("첫번째 비번: \(self.first_pwd), 두번째 비번: \(self.second_pwd)")
-//                    self.show_pwd_diff = true
-//                    self.second_alert_msg_txt = "비밀번호가 일치하지 않습니다."
-//
-//                }else{
-//                    self.second_alert_msg_txt = ""
-//                    self.show_pwd_diff = false
-//                    self.show_pwd_form_wrong = false
-//
-//                    if self.show_pwd_diff == false && self.show_pwd_form_wrong == false{
-//                        self.all_is_ok = true
-//                    }
-//                }
-//            }
         }
         .onAppear{
             print("비밀번호 입력 페이지 나타남")

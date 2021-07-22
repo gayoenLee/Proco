@@ -114,6 +114,7 @@ class SignupInviteListViewModel: ObservableObject{
                 print("체크: \(String(describing: list))")
                 if list?.count ?? 0 > 0{
                     print("가입된 친구가 있는 경우")
+                    self.enrolled_friends_model.removeAll()
                     let friends = response.arrayValue
                     
                     for friend in friends{

@@ -82,13 +82,20 @@ class AddGroupViewmodel: ObservableObject{
                     self.input_group_name = ""
                     self.selected_friend_set.removeAll()
                     
+                    NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["add_group": "ok"])
+                    
                     //그룹 추가에 실패했을 경우 예외처리
+                }else if result.result == "group_name duplicated"{
+                    NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["add_group": "group_name duplicated"])
+                    
                 }else{
                     self.add_group_ok = false
+                    NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["add_group": "error"])
                 }
             case .failure(let error):
                 print("그룹 추가 에러 : \(error)")
                 self.add_group_ok = false
+                NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["add_group": "error"])
 
             }
         })

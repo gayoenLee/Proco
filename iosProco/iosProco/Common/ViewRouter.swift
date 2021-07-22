@@ -19,7 +19,7 @@ class ViewRouter:  ObservableObject {
         return view_router!
     }
     public let objectWillChange = ObservableObjectPublisher()
-    @Published var init_root_view : Bool = false {
+    @Published var init_root_view : String = "origin" {
         didSet{
             objectWillChange.send()
         }
