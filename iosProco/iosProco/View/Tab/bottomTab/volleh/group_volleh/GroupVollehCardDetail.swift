@@ -73,31 +73,32 @@ struct GroupVollehCardDetail: View {
                 if self.show_no_result{
                     
                     HStack{
-                        Button(action: {
-                            self.presentation.wrappedValue.dismiss()
-                            
-                        }, label: {
-                            
-                            Image("white_left")
-                                .resizable()
-                                .frame(width: 8.51, height: 17)
-                        })
+                        Image("left")
+                            .resizable()
+                            .frame(width: 10, height: 17)
+                            .padding(.leading, UIScreen.main.bounds.width/20)
+                            .onTapGesture {
+                                withAnimation{
+                                    self.presentation.wrappedValue.dismiss()
+                                    //self.show_current_view.toggle()
+                                }
+                            }
                         
                         Spacer()
-                        
                     }
                     .padding()
+                    Spacer()
                     
                     HStack{
                         
                         Text("찾을 수 없는 카드입니다.")
-                            .font(.custom(Font.t_extra_bold, size: 20))
+                            .font(.custom(Font.n_extra_bold, size: 20))
                             .foregroundColor(.proco_black)
                         
                         Spacer()
                     }
                     .padding()
-                    
+                    Spacer()
                 }else{
                     ScrollView(.vertical, showsIndicators: false){
                         VStack{
