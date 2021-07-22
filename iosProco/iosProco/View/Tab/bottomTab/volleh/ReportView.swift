@@ -33,31 +33,31 @@ struct ReportView: View {
     VStack{
         
         //상단 제목 라인
-//        HStack{
-//
-//            Button(action: {
-//
-//                self.presentation.wrappedValue.dismiss()
-//
-//            }, label: {
-//
-//                Image("left")
-//                    .resizable()
-//                    .frame(width: 8.51, height: 17)
-//            })
-//            .padding(.leading, UIScreen.main.bounds.width/20)
-//
-//            Spacer()
-//
-//            Text("신고하기")
-//                .font(.custom(Font.t_extra_bold, size: 20))
-//                .foregroundColor(.proco_black)
-//                .padding(.trailing, UIScreen.main.bounds.width/20)
-//
-//            Spacer()
-//
-//        }
-//        .padding()
+        HStack{
+
+            Button(action: {
+
+                self.presentation.wrappedValue.dismiss()
+
+            }, label: {
+
+                Image("left")
+                    .resizable()
+                    .frame(width: 8.51, height: 17)
+            })
+            .padding(.leading, UIScreen.main.bounds.width/20)
+
+            Spacer()
+
+            Text("신고하기")
+                .font(.custom(Font.t_extra_bold, size: 20))
+                .foregroundColor(.proco_black)
+                .padding(.trailing, UIScreen.main.bounds.width/20)
+
+            Spacer()
+
+        }
+        .padding()
         
         ZStack{
             ReportRadioButtons(selected: self.$selected, report_content: self.$report_content)
