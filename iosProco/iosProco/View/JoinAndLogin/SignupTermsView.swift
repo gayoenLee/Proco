@@ -33,11 +33,14 @@ struct SignupTermsView: View {
     //애플, 카카오 로그인시 약관 동의 화면 -> 메인 화면으로 이동.
     @State private var kakao_login_end = false
     @State private var apple_login_end = false
+    //일반 회원가입시 다음 뷰 이동값
+    @State private var go_next_step_not_social = false
     
     //약관별로 웹뷰 띄울 때 사용할 구분값
     @State private var go_necessary_term_view: Bool = false
     @State private var go_collect_info_term_view: Bool = false
     @State private var go_location_term_view: Bool = false
+    @State private var go_marketing_term_view: Bool = false
     
     var body: some View {
         
@@ -52,7 +55,6 @@ struct SignupTermsView: View {
                 .shadow( radius: 2)
                 .overlay(
                     VStack{
-                        
                         all_agree_btn
                         Divider()
                             .foregroundColor(Color.proco_black)
@@ -62,7 +64,7 @@ struct SignupTermsView: View {
                             HStack{
                                 //하위 약관들 뷰
                                 HStack{
-                                    Agree(signup_terms_container: self.signup_terms_container, terms_list: terms_list, selected: self.$selected, select_all: $select_all,  go_to_next: $go_to_next, go_necessary_term_view: self.$go_necessary_term_view, go_collect_info_term_view: self.$go_collect_info_term_view, go_location_term_view: self.$go_location_term_view)
+                                    Agree(signup_terms_container: self.signup_terms_container, terms_list: terms_list, selected: self.$selected, select_all: $select_all,  go_to_next: $go_to_next, go_necessary_term_view: self.$go_necessary_term_view, go_collect_info_term_view: self.$go_collect_info_term_view, go_location_term_view: self.$go_location_term_view, go_marketing_term_view: self.$go_marketing_term_view)
                                 }
                             }
                         }
@@ -75,6 +77,9 @@ struct SignupTermsView: View {
             
             //애플로그인 완료시 약관동의 페이지로 이동.
             NavigationLink("",destination: PhoneAuthView(phone_viewmodel: self.signup_user_setting, apple_login: self.$apple_login_end), isActive: self.$apple_login_end)
+            
+            //일반 회원가입시 핸드폰 번호 인증 페이지로 이동
+            NavigationLink("",destination: PhoneAuthView(phone_viewmodel: self.signup_user_setting, apple_login: self.$apple_login_end), isActive: self.$go_next_step_not_social)
             
             //TODO 모두 다 버튼으로 고쳐야 함.
             if kakao_login == true || apple_login == true {
@@ -123,10 +128,17 @@ struct SignupTermsView: View {
                         .cornerRadius(25)
                         .padding([.leading, .trailing, .bottom], UIScreen.main.bounds.width/25)
                 }
-            }
-            //phone_viewmodel전달시 self붙여야 값 넣어서 그대로 전달 가능함.
-            NavigationLink( destination: PhoneAuthView(phone_viewmodel: self.signup_user_setting, apple_login: self.$apple_login_end)){
+            }else{
+          
+            Button(action: {
                 
+                if self.selected.contains("마케팅 수신 동의 (선택)"){
+                    self.signup_user_setting.marketing_term_ok = 1
+                    print("마케팅 동의 여부 값 : \(self.signup_user_setting.marketing_term_ok)" )
+                }
+                self.go_next_step_not_social = true
+                
+            }){
                 Text("동의하고 가입하기")
                     .font(.custom(Font.t_extra_bold, size: 15))
                     .frame(minWidth: 0, maxWidth: .infinity)
@@ -136,32 +148,30 @@ struct SignupTermsView: View {
                     .background(!self.selected.isSuperset(of: necessary) ? Color.light_gray : Color.proco_black)
                     .cornerRadius(25)
                     .padding([.leading, .trailing, .bottom], UIScreen.main.bounds.width/25)
-                
             }
             //필수 약관을 모두 선택하지 않으면 넘어갈 수 없도록 처리
             .disabled(!self.selected.isSuperset(of: necessary))
-            //약관 내용 웹뷰
-            .sheet(isPresented: self.$go_necessary_term_view){
-                TermContentsView(url: "https://withproco.com/tos.html?view=tos")
             }
-            .sheet(isPresented: self.$go_location_term_view){
-                TermContentsView(url: "https://withproco.com/tos.html?view=location")
-            }
-            .sheet(isPresented: self.$go_collect_info_term_view){
-                TermContentsView(url: "https://withproco.com/tos.html?view=personal")
-            }
-            
-            //화면 사라질 때 마케팅 동의 여부값 저장하기
-            .onDisappear(perform: {
-                if self.selected.contains("마케팅 수신 동의 (선택)"){
-                    self.signup_user_setting.marketing_term_ok = 1
-                    print("마케팅 동의 여부 값 : \(self.signup_user_setting.marketing_term_ok)" )
-                }
-                
-            })
             
             //약관 5개 전체 vstack묶음 끝
         }
+        //약관 내용 웹뷰
+        .sheet(isPresented: self.$go_necessary_term_view){
+            TermContentsView(url: "https://withproco.com/tos.html?view=tos")
+        }
+        .sheet(isPresented: self.$go_location_term_view){
+            TermContentsView(url: "https://withproco.com/tos.html?view=location")
+        }
+        .sheet(isPresented: self.$go_collect_info_term_view){
+            TermContentsView(url: "https://withproco.com/tos.html?view=personal")
+        }
+        .sheet(isPresented: self.$go_marketing_term_view, content: {
+            TermContentsView(url: "https://withproco.com/tos.html?view=marketing")
+        })
+        .onDisappear(perform: {
+           
+            
+        })
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
@@ -190,15 +200,16 @@ struct Agree : View{
     //필수 약관 선택했는지에 따라서 다음 뷰로 넘어갈 수 있는지 구분 변수
     @Binding var go_to_next: Bool
     
-    //  //약관별로 웹뷰 띄울 때 사용할 구분값
+    //약관별로 웹뷰 띄울 때 사용할 구분값
     @Binding var go_necessary_term_view: Bool
     @Binding var go_collect_info_term_view: Bool
     @Binding var go_location_term_view: Bool
+    @Binding var go_marketing_term_view: Bool
     
     var body: some View{
-        VStack{
+     
             HStack{
-                //전체 동의하기 버튼
+                
                 HStack{
                     Button(action:{
                         //이미 선택한 상태에서 다시 클릭했을 때
@@ -260,27 +271,27 @@ struct Agree : View{
                 Spacer()
                 
                 //약관 내용 보는 웹뷰 띄우는 버튼 - 마케팅은 없음.
-                if terms_list.title.contains("마케팅"){Spacer()}
-                else{
                     HStack{
                         Image("right")
                             .foregroundColor(Color.proco_black)
                             .frame(width: UIScreen.main.bounds.width*0.1, height: UIScreen.main.bounds.width*0.1)
                     }
                     .frame(width: UIScreen.main.bounds.width*0.3, height: UIScreen.main.bounds.width*0.1)
-                    .onTapGesture {
-                        print("약관 한 개 클릭 : \(terms_list.title)")
-                        if terms_list.title.contains("이용약관"){
-                            self.go_necessary_term_view = true
-                        }else if terms_list.title.contains("개인정보"){
-                            self.go_collect_info_term_view = true
-                        }else if terms_list.title.contains("위치"){
-                            self.go_location_term_view = true
-                        }
-                    }
+            }
+            .onTapGesture {
+                print("약관 한 개 클릭 : \(terms_list.title)")
+                if terms_list.title.contains("이용약관"){
+                    self.go_necessary_term_view = true
+                }else if terms_list.title.contains("개인정보"){
+                    self.go_collect_info_term_view = true
+                }else if terms_list.title.contains("위치"){
+                    self.go_location_term_view = true
+                }else if terms_list.title.contains("마케팅"){
+                    self.go_marketing_term_view = true
                 }
             }
-        }
+            .padding(.leading)
+        
     }
 }
 
