@@ -21,15 +21,16 @@ struct Toast: View {
             HStack {
                 Image(systemName: dataModel.image)
                 Text(dataModel.title)
-            }.font(.headline)
-            .foregroundColor(.primary)
+            }.font(.custom(Font.t_extra_bold, size: 15))
+            .foregroundColor(.proco_black)
                 .padding([.top,.bottom],20)
                 .padding([.leading,.trailing],40)
             .background(Color(UIColor.secondarySystemBackground))
             .clipShape(Capsule())
         }
         .frame(width: UIScreen.main.bounds.width / 1.25)
-        .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
+//        .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
+        .transition(.move(edge: .leading))
         .onTapGesture {
             withAnimation {
                 self.show = false
