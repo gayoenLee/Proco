@@ -13,10 +13,8 @@ import Combine
 struct TabbarView : View {
     //그룹 리스트 가져오기 위해 사용하는 뷰모델
     @ObservedObject private var request_group_list = ManageFriendViewModel()
-    
-//    @State private var go_to_manage : Bool = false
-    
-    @ObservedObject var view_router : ViewRouter
+        
+    @ObservedObject var view_router : ViewRouter = ViewRouter.get_view_router()
     
     //하단 탭바중에서 어떤 것을 선택했는지 알 수 있는 구분자.
     @State var tab_index = 0
