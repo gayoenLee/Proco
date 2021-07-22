@@ -26,6 +26,9 @@ struct NormalLoginView:View{
     //최상단 스택 변경 위함.
     @ObservedObject var view_router : ViewRouter = ViewRouter.get_view_router()
     
+    //최상단 뷰로 이동하기 위한 변수, 아이디 & 비번 찾기에서 쓰임
+    @State private var is_active: Bool = false
+    
     var body: some View {
         NavigationView{
         VStack{
@@ -147,7 +150,7 @@ struct NormalLoginView:View{
                             print("일반 로그인시 저장하는 닉네임 : \(String(describing: nickname))")
                             
                             SockMgr.socket_manager.establish_connection()
-                            self.view_router.init_root_view = true
+                            self.view_router.init_root_view = "tab_main"
                            // login_ok.toggle()
                         }
                         
@@ -222,14 +225,19 @@ extension NormalLoginView{
     
     var find_id_pwd_btn: some View{
         NavigationLink(
-            destination: FindIdPasswordView()){
+            destination: FindIdPasswordView(root_is_active: self.$is_active).navigationBarTitle("")
+                .navigationBarHidden(true), isActive: self.$is_active)
+        {
             Text("아이디/비밀번호 찾기")
                 .font(.custom(Font.n_regular, size: 11))
                 .foregroundColor(.gray)
                 .minimumScaleFactor(0.5)
                 .padding(.horizontal)
         }
+        .isDetailLink(false)
         .navigationBarTitle("")
+        .navigationBarHidden(true)
+    
     }
     
     var wrong_id_guid_txt: some View{
