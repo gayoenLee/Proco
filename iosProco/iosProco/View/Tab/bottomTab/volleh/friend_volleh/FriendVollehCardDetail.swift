@@ -62,6 +62,37 @@ struct FriendVollehCardDetail: View {
     var body: some View{
         
         VStack{
+            if self.no_result_alert{
+                HStack{
+                    Image("left")
+                        .resizable()
+                        .frame(width: 10, height: 17)
+                        .padding([.leading, .top], UIScreen.main.bounds.width/20)
+                        .onTapGesture {
+                            withAnimation{
+                                self.presentation.wrappedValue.dismiss()
+                                //self.show_current_view.toggle()
+                            }
+                        }
+                    
+                    Spacer()
+                }
+                .padding()
+                
+                Spacer()
+                
+                HStack{
+                    
+                    Text("찾을 수 없는 카드입니다.")
+                        .font(.custom(Font.n_extra_bold, size: 20))
+                        .foregroundColor(.proco_black)
+                    
+                    Spacer()
+                }
+                .padding()
+                Spacer()
+                
+            }else{
             Group{
                 top_nav_bar
                 
@@ -161,7 +192,7 @@ struct FriendVollehCardDetail: View {
                             invite_btn
                             
                             //내 카드인 경우 하단 버튼 안보임.
-                        }else if Int(self.main_vm.my_idx!) == self.main_vm.friend_volleh_card_detail.creator.idx{
+                        }else if Int(self.main_vm.my_idx!) == self.main_vm.friend_volleh_card_detail.creator?.idx{
                             
                         }
                         else{
@@ -171,6 +202,8 @@ struct FriendVollehCardDetail: View {
                     .padding()
                 }
             }
+                
+        }
         }
         .padding()
         .navigationBarHidden(true)
@@ -194,7 +227,7 @@ struct FriendVollehCardDetail: View {
         .onDisappear{
             print("-------------------친구랑 볼래 카드 상세 화면 사라짐--------------------")
             //이렇게 해야 메인에서 다른 카드 상세 페이지 갈 때 데이터 중복 안됨.
-            main_vm.my_card_detail_struct.creator!.idx = -1
+           // main_vm.my_card_detail_struct.creator!.idx = -1
             
             //채팅방에서 상세 페이지로 넘어온 경우 true값으로 이 페이지로 들어왔으므로 나갈 때 다시 초기화.
             //여기에서 하면 오류 남.
@@ -331,9 +364,9 @@ private extension FriendVollehCardDetail{
             
             let chatroom_idx = SockMgr.socket_manager.invite_chatroom_idx
             let meeting_date = self.main_vm.friend_volleh_card_detail.expiration_at
-            let converted_date = String.kor_date_string(date_string: meeting_date)
+            let converted_date = String.kor_date_string(date_string: meeting_date!)
             let meeting_time = self.main_vm.friend_volleh_card_detail.expiration_at
-            let converted_time = String.time_to_kor_language(date: meeting_time)
+            let converted_time = String.time_to_kor_language(date: meeting_time!)
             
             print("초대하려는 채팅방 idx: \(chatroom_idx), 카드idx: \(self.main_vm.friend_volleh_card_detail.card_idx!)")
             
@@ -384,14 +417,14 @@ private extension FriendVollehCardDetail{
                 //캘린더를 보려는 사람의 idx = 내 idx 저장.
                 calendar_vm.calendar_owner.watch_user_idx = Int(main_vm.my_idx!)!
                 
-                calendar_vm.calendar_owner.user_idx = main_vm.friend_volleh_card_detail.creator.idx
+                calendar_vm.calendar_owner.user_idx = (main_vm.friend_volleh_card_detail.creator?.idx)!
                 
-                calendar_vm.calendar_owner.profile_photo_path = main_vm.friend_volleh_card_detail.creator.profile_photo_path ?? ""
+                calendar_vm.calendar_owner.profile_photo_path = main_vm.friend_volleh_card_detail.creator?.profile_photo_path ?? ""
                 
-                calendar_vm.calendar_owner.user_nickname = main_vm.friend_volleh_card_detail.creator.nickname
+                calendar_vm.calendar_owner.user_nickname = main_vm.friend_volleh_card_detail.creator!.nickname
                 print("심심피드 보기 클릭시 친구 idx 확인: \(main_vm.friend_volleh_card_detail.creator)")
                 
-                SimSimFeedPage.calendar_owner_idx = main_vm.friend_volleh_card_detail.creator.idx
+                SimSimFeedPage.calendar_owner_idx = main_vm.friend_volleh_card_detail.creator?.idx
                 self.go_to_feed.toggle()
                 
             }){
@@ -412,12 +445,12 @@ private extension FriendVollehCardDetail{
             Button(action: {
                 
                 print("일대일 채팅하기 클릭 내 idx: \(Int(main_vm.my_idx!)!)")
-                print("일대일 채팅하기 클릭 친구 idx: \(String(describing: main_vm.friend_volleh_card_detail.creator.idx)), 닉네임: \(main_vm.friend_volleh_card_detail.creator.nickname)")
+                print("일대일 채팅하기 클릭 친구 idx: \(String(describing: main_vm.friend_volleh_card_detail.creator?.idx)), 닉네임: \(main_vm.friend_volleh_card_detail.creator!.nickname)")
                 //채팅하려는 친구의 idx값 저장해두기
-                socket.temp_chat_friend_model = UserChatInListModel(idx: main_vm.friend_volleh_card_detail.creator.idx, nickname: main_vm.friend_volleh_card_detail.creator.nickname, profile_photo_path: main_vm.friend_volleh_card_detail.creator.profile_photo_path ?? "")
+                socket.temp_chat_friend_model = UserChatInListModel(idx: (main_vm.friend_volleh_card_detail.creator?.idx)!, nickname: main_vm.friend_volleh_card_detail.creator!.nickname, profile_photo_path: main_vm.friend_volleh_card_detail.creator?.profile_photo_path ?? "")
                 
                 //일대일 채팅방이 기존에 존재했는지 확인하는 쿼리문
-                ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: main_vm.friend_volleh_card_detail.creator.idx!, nickname: main_vm.friend_volleh_card_detail.creator.nickname)
+                ChatDataManager.shared.check_chat_already(my_idx: Int(main_vm.my_idx!)!, friend_idx: (main_vm.friend_volleh_card_detail.creator?.idx!)!, nickname: main_vm.friend_volleh_card_detail.creator!.nickname)
                 
                 self.go_to_chat.toggle()
                 
@@ -454,11 +487,11 @@ private extension FriendVollehCardDetail{
         
         
         Button(action: {
-            print("참가자 보기 클릭 카드 만든 유저: \(main_vm.friend_volleh_card_detail.creator.idx!)")
+            print("참가자 보기 클릭 카드 만든 유저: \(main_vm.friend_volleh_card_detail.creator?.idx!)")
             print("내 idx: \(self.main_vm.my_idx!)")
             
             //친구 카드는 카드를 만든 사람만 참가자 보기가 가능함
-            if Int(self.main_vm.my_idx!) == main_vm.friend_volleh_card_detail.creator.idx{
+            if Int(self.main_vm.my_idx!) == main_vm.friend_volleh_card_detail.creator?.idx{
                 print("만든 사람이 참가자 보기 클릭")
                 self.see_attend_people = true
                 
@@ -470,7 +503,7 @@ private extension FriendVollehCardDetail{
                     .resizable()
                     .frame(width: 15, height: 16)
                 
-                Text(self.main_vm.friend_volleh_card_detail.cur_user == 0 ? "" : "\(self.main_vm.friend_volleh_card_detail.cur_user)명")
+                Text(self.main_vm.friend_volleh_card_detail.cur_user == 0 ? "" : "\(self.main_vm.friend_volleh_card_detail.cur_user!)명")
                     .font(.custom(Font.n_extra_bold, size: 15))
                     .foregroundColor(Color.proco_black)
             }
@@ -529,7 +562,7 @@ private extension FriendVollehCardDetail{
                 self.go_like_people_list.toggle()
             }){
                 HStack{
-                    Text(self.main_vm.friend_volleh_card_detail.like_count > 0 ? "좋아요\(self.main_vm.friend_volleh_card_detail.like_count)개" : "")
+                    Text(self.main_vm.friend_volleh_card_detail.like_count ?? 0 > 0 ? "좋아요\(self.main_vm.friend_volleh_card_detail.like_count!)개" : "")
                         .font(.custom(Font.n_extra_bold, size: 10))
                         .foregroundColor(Color.proco_black)
                 }
@@ -542,12 +575,12 @@ private extension FriendVollehCardDetail{
                 if check_result as! String == "ok"{
                     
                     self.main_vm.friend_volleh_card_detail.like_state = 1
-                    self.main_vm.friend_volleh_card_detail.like_count += 1
+                    self.main_vm.friend_volleh_card_detail.like_count! += 1
                     
                 }else if check_result as! String == "canceled_ok"{
                     
                     self.main_vm.friend_volleh_card_detail.like_state = 0
-                    self.main_vm.friend_volleh_card_detail.like_count -= 1
+                    self.main_vm.friend_volleh_card_detail.like_count! -= 1
                     
                 }
             }
@@ -575,7 +608,7 @@ private extension FriendVollehCardDetail{
             //TODO 채팅방 드로어에서 넘어온 경우, 메인에서 넘어온 경우 사용하는 데이터 모델이 다름.그래서 경우 나눔.
             //카드를 만든 사람에게만 보이는 수정 버튼. 클릭시 수정하는 화면으로 이동.
             //1.메인에서 넘어온 경우
-            if self.main_vm.friend_volleh_card_detail.creator.idx! == Int(self.main_vm.my_idx!){
+            if self.main_vm.friend_volleh_card_detail.creator?.idx! == Int(self.main_vm.my_idx!){
                 
                 Button(action: {
                     
@@ -593,7 +626,7 @@ private extension FriendVollehCardDetail{
                 }
             }
             
-            if self.main_vm.friend_volleh_card_detail.creator.idx! != Int(self.main_vm.my_idx!){
+            if self.main_vm.friend_volleh_card_detail.creator?.idx! != Int(self.main_vm.my_idx!){
                 send_report_btn
             }
         }
@@ -606,14 +639,14 @@ private extension FriendVollehCardDetail{
             // - 내 카드를 볼 경우
             if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
                 
-                if self.main_vm.friend_volleh_card_detail.creator.profile_photo_path == "" || self.main_vm.friend_volleh_card_detail.creator.profile_photo_path == nil{
+                if self.main_vm.friend_volleh_card_detail.creator?.profile_photo_path == "" || self.main_vm.friend_volleh_card_detail.creator?.profile_photo_path == nil{
                     
                     Image("main_profile_img")
                         .padding()
                     
                 }  else{
                     
-                    KFImage(URL(string: self.main_vm.friend_volleh_card_detail.creator.profile_photo_path!))
+                    KFImage(URL(string: (self.main_vm.friend_volleh_card_detail.creator?.profile_photo_path!)!))
                         .loadDiskFileSynchronously()
                         .cacheMemoryOnly()
                         .fade(duration: 0.25)
@@ -639,33 +672,33 @@ private extension FriendVollehCardDetail{
                 HStack{
                     Spacer()
                     
-                    if main_vm.friend_volleh_card_detail.creator.profile_photo_path == "" || main_vm.friend_volleh_card_detail.creator.profile_photo_path == nil {
+                    if main_vm.friend_volleh_card_detail.creator?.profile_photo_path == "" || main_vm.friend_volleh_card_detail.creator?.profile_photo_path == nil {
                         Image("main_profile_img")
                             .resizable()
                             .frame(width: 75, height: 75)
                     }else{
-                        Image((self.main_vm.friend_volleh_card_detail.creator.profile_photo_path!))
+                        Image((self.main_vm.friend_volleh_card_detail.creator?.profile_photo_path!)!)
                             .resizable()
                             .frame(width: 75, height: 75)
                     }
                     Spacer()
                 }
                 HStack{
-                    Text(self.main_vm.friend_volleh_card_detail.creator.nickname)
+                    Text(self.main_vm.friend_volleh_card_detail.creator!.nickname)
                         .font(.custom(Font.n_bold, size: 17))
                         .foregroundColor(.proco_black)
                     
                     //나를 제외한 사람들에게만 관심아이콘 보여주기
-                    if Int(self.main_vm.my_idx!) != self.main_vm.friend_volleh_card_detail.creator.idx{
+                    if Int(self.main_vm.my_idx!) != self.main_vm.friend_volleh_card_detail.creator?.idx{
                         
                         
                         Button(action: {
                             
                             if self.main_vm.friend_volleh_card_detail.is_favor_friend == 0{
-                                self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_volleh_card_detail.creator.idx, action: "관심친구")
+                                self.main_vm.set_interest_friend(f_idx: (self.main_vm.friend_volleh_card_detail.creator?.idx)!, action: "관심친구")
                                 print("관심친구 아이콘 클릭")
                             }else{
-                                self.main_vm.set_interest_friend(f_idx: self.main_vm.friend_volleh_card_detail.creator.idx, action: "관심친구해제")
+                                self.main_vm.set_interest_friend(f_idx: (self.main_vm.friend_volleh_card_detail.creator?.idx!)!, action: "관심친구해제")
                             }
                             print("관심친구 아이콘 클릭")
                             
