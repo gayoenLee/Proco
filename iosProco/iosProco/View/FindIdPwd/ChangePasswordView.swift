@@ -19,8 +19,10 @@ struct ChangePasswordView: View {
 
     @State private var password_change_result :Bool = false
     @State private var result_message : String = ""
-    @State private var go_main : Bool = false
-    //새로운 비밀번호 입력이 잘못됐을 경우
+    //@State private var go_main : Bool = false
+    
+    @Binding var root_is_active : Bool
+    
     var body: some View{
         VStack{
             HStack{
@@ -71,10 +73,10 @@ struct ChangePasswordView: View {
                 .padding(.bottom, UIScreen.main.bounds.width/5)
             }
             Spacer()
-            NavigationLink("",
-                destination: NormalLoginView(view_router: ViewRouter())
-                .navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true), isActive: $go_main)
+//            NavigationLink("",
+//                destination: NormalLoginView(view_router: ViewRouter())
+//                .navigationBarTitle("", displayMode: .inline)
+//                            .navigationBarHidden(true), isActive: $go_main)
             
             Button(action:{
                 change_pwd()
@@ -101,8 +103,8 @@ struct ChangePasswordView: View {
         .alert(isPresented: $password_change_result){
             if self.result_message == "비밀번호가 변경되었습니다."{
                 return  Alert(title: Text("비밀번호 변경"), message: Text(result_message), dismissButton: Alert.Button.default(Text("확인"), action: {
-                    self.go_main.toggle()
-                    
+                    //self.go_main.toggle()
+                    self.root_is_active.toggle()
                 }))
                 
             }
