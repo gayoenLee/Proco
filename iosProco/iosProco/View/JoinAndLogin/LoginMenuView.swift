@@ -27,8 +27,13 @@ struct LoginMenuView:View{
     @State var kakao_join_ok :Bool = false
     
     @State var kakao_login_ok : Bool = false
+    @ObservedObject var view_router : ViewRouter = ViewRouter.get_view_router()
     
     var body: some View{
+        
+        if self.view_router.init_root_view{
+            TabbarView()
+        }else{
         NavigationView{
             VStack{
                 //서브 타이틀 위의 공백 추가
@@ -61,7 +66,7 @@ struct LoginMenuView:View{
                 //이미지 아래 공백 추가
                 VStack(alignment: .center){
                     
-                    NavigationLink(destination: NormalLoginView( view_router: ViewRouter())){
+                    NavigationLink(destination: NormalLoginView()){
                         
                         Text("프로코로 로그인하기")
                             .font(.custom(Font.t_extra_bold, size: 15))
@@ -245,6 +250,7 @@ struct LoginMenuView:View{
             .onAppear{
                 print("로그인 화면 on appear : \(UserDefaults.standard.string(forKey: "fcm_token"))")
             }
+        }
         }
     }
     

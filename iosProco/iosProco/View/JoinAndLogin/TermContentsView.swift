@@ -24,7 +24,10 @@ struct TermContentsView: View {
                         .resizable()
                         .frame(width: 8.51, height: 17)
                 }
+                
+                Spacer()
             }
+            .padding([.top, .leading, .trailing])
         SignupTermsWebView(url: URL(string: url)!)
         }
     }

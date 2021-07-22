@@ -93,9 +93,8 @@ class CheckValidatorViewModel: ObservableObject{
             return false
         }
         //비밀번호(숫자, 문자, 특수문자 모두 포함 8-18자)
-        let passsword_format = ("(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$#!%*?&])[A-Za-z\\d$@$!%*?&].{8,20}$")
         
-        let password_predicate = NSPredicate(format: "SELF MATCHES %@ ", passsword_format)
+        let password_predicate = NSPredicate(format: "SELF MATCHES %@ ", Settings.regex.password)
         return password_predicate.evaluate(with: mypassword)
     }
     

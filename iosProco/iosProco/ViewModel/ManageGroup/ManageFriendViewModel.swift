@@ -492,21 +492,12 @@ class ManageFriendViewModel: ObservableObject{
             })
     }
     
-    //체크한 후 valid한지 확인하는 메소드
-    func is_valid_phone_number(phone_number: String) -> Bool{
-        
-        let regular_expression_phone = "^01([0|1|6|7|8|9]?)-?([0-9]{3,4})-?([0-9]{4})$"
-        let testPhone = NSPredicate(format:"SELF MATCHES %@", regular_expression_phone)
-        let phone_number_check_result = testPhone.evaluate(with: self)
-        return phone_number_check_result
-    }
     //핸드폰 번호 양식 체크
     func validator_phonenumber(_ string: String) -> Bool {
         if string.count > 100 {
             return false
         }
-        let phone_format = "^01([0|1|6|7|8|9]?)-?([0-9]{3,4})-?([0-9]{4})$"
-        let phone_predicate = NSPredicate(format:"SELF MATCHES %@", phone_format)
+        let phone_predicate = NSPredicate(format:"SELF MATCHES %@", Settings.regex.phone)
         return phone_predicate.evaluate(with: string)
     }
     

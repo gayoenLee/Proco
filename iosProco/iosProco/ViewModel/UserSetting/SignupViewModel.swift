@@ -11,7 +11,7 @@ import Alamofire
 import Contacts
 
 enum AlertMessage{
-    case success, fail, already
+    case success, fail, already_sended, already_exist_user
 }
 
 class SignupViewModel : ObservableObject{
@@ -37,55 +37,73 @@ class SignupViewModel : ObservableObject{
         }
     }
     
+    //아이디, 비밀번호 찾기에서 핸드폰 인증시 정규식 체크 했을 때 true인 경우
+    @Published var phone_is_valid : Bool = false{
+        didSet{
+            objectWillChange.send()
+        }
+    }
     
     //회원가입시 작성하는 정보들 마지막에 넘겨주기 위해 이곳에 저장해 놓기
     @Published var marketing_term_ok : Int = 0
     @Published var phone_number : String = ""{
-        willSet {
+        didSet {
+            phone_is_valid = validator_phonenumber(phone_number)
             objectWillChange.send()
         }
     }
-    @Published var confirmed_phone : String = ""
-    @Published var auth_num: String = ""
+    
+    //인증번호 6개 제한
+    let authnum_limit = 6
+    @Published var auth_num: String = ""{
+        didSet{
+            if auth_num.count > authnum_limit && oldValue.count <= authnum_limit {
+                auth_num = oldValue
+            }
+            objectWillChange.send()
+        }
+    }
+    
+    //첫번째 비밀번호가 정규식에 맞는지
+    @Published var first_pwd_ok: Bool = false
+    //두번째 비밀번호가 정규식에 맞는지
+    @Published var second_pwd_ok: Bool = false
     
     @Published var phone_auth_ok: Bool = false
-    @Published var email: String = ""{
-        willSet {
-            objectWillChange.send()
-        }
-    }
-    //비밀번호 경고 문구 나타내기 위해 비교용 변수들
-    @Published var password: String = ""{
-        willSet {
-            objectWillChange.send()
-        }
-    }
-    @Published var password_again : String = ""{
-        willSet {
-            objectWillChange.send()
-        }
-    }
-    @Published var confirmed_password : String = ""
     
+    @Published var password: String = ""
+    
+    @Published var change_pwd : String = ""{
+        didSet{
+            objectWillChange.send()
+            self.first_pwd_ok = self.validator_password(change_pwd)
+        }
+    }
+    @Published var change_pwd_again : String = ""{
+        didSet {
+            objectWillChange.send()
+            self.second_pwd_ok = self.validator_password(change_pwd_again)
+        }
+    }
+    
+    //    @Published var confirmed_password : String = ""
+    //
     //비밀번호 두번 입력시 두개가 같은지 확인하기 위함
     @Published var password_valid = false{
-        willSet {
+        didSet {
             objectWillChange.send()
         }
     }
     //비밀번호 불일치시 보여주는 메시지
     @Published var password_message = ""{
-        willSet {
+        didSet {
             objectWillChange.send()
         }
     }
     
-    @Published var gender: Int = 0
-    @Published var birth: Date = Date()
-    @Published var birth_string: String = ""
     
     @Published var nickname: String = ""{
-        willSet {
+        didSet {
             objectWillChange.send()
         }
     }
@@ -94,24 +112,12 @@ class SignupViewModel : ObservableObject{
     @Published var email_password_valid = false
     private var cancellable_set: Set<AnyCancellable> = []
     
-    
-    //핸드폰 번호 정규식 체크 메소드
-    func is_valid_phone_number(phone_number: String) -> Bool{
-        
-        let regular_expression_phone = "^01([0|1|6|7|8|9]?)-?([0-9]{3,4})-?([0-9]{4})$"
-        let testPhone = NSPredicate(format:"SELF MATCHES %@", regular_expression_phone)
-        let phone_number_check_result = testPhone.evaluate(with: self)
-        print("핸드폰 번호 정규식 체크 안: \(phone_number_check_result)")
-        return phone_number_check_result
-    }
-    
     //회원가입시 핸드폰 번호 체크
     func validator_phonenumber(_ string: String) -> Bool {
         if string.count > 100 {
             return false
         }
-        let phone_format = "^01([0|1|6|7|8|9]?)-?([0-9]{3,4})-?([0-9]{4})$"
-        let phone_predicate = NSPredicate(format:"SELF MATCHES %@", phone_format)
+        let phone_predicate = NSPredicate(format:"SELF MATCHES %@", Settings.regex.phone)
         return phone_predicate.evaluate(with: string)
     }
     
@@ -121,8 +127,7 @@ class SignupViewModel : ObservableObject{
             return false
         }
         //영어 대소문자 , 특수문자 모두 가능, @가 무조건 있어야 함, @뒤에는 대문자, 소문자, 숫자만 됨.2~64글자만 허용
-        let email_format = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let email_predicate = NSPredicate(format: "SELF MATCHES %@", email_format)
+        let email_predicate = NSPredicate(format: "SELF MATCHES %@", Settings.regex.email)
         return email_predicate.evaluate(with: myemail)
     }
     
@@ -131,33 +136,33 @@ class SignupViewModel : ObservableObject{
         if mypassword.count > 100 {
             return false
         }
-        //비밀번호(숫자, 문자, 특수문자 모두 포함 8-18자)
-        let passsword_format = ("(?=.*[A-Za-z])(?=.*[0-9]).{8,20}")
-        let password_predicate = NSPredicate(format: "SELF MATCHES %@", passsword_format)
+        //비밀번호(숫자, 문자, 특수문자 모두 포함 8-20자)
+        
+        let password_predicate = NSPredicate(format: "SELF MATCHES %@", Settings.regex.password)
         return password_predicate.evaluate(with: mypassword)
     }
     //이메일이 valid한가를 알기 위한 publisher
-    private var email_is_valid_publisher: AnyPublisher<Bool, Never>{
-        $email
-            .debounce(for: 0.8, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .map{input in
-                return input.count >= 2
-            }
-            .eraseToAnyPublisher()
-    }
+    //    private var email_is_valid_publisher: AnyPublisher<Bool, Never>{
+    //        $email
+    //            .debounce(for: 0.8, scheduler: RunLoop.main)
+    //            .removeDuplicates()
+    //            .map{input in
+    //                return input.count >= 2
+    //            }
+    //            .eraseToAnyPublisher()
+    //    }
     //비밀번호가 일치하는지 여부를 알기 위한 publisher
     private var password_is_equal_publisher: AnyPublisher<Bool, Never>{
-        Publishers.CombineLatest($password, $password_again)
+        Publishers.CombineLatest($change_pwd, $change_pwd_again)
             .debounce(for: 0.2, scheduler: RunLoop.main)
-            .map{password, password_again in
-                return password == password_again
+            .map{change_pwd, change_pwd_again in
+                return change_pwd == change_pwd_again
             }
             .eraseToAnyPublisher()
     }
     //비밀번호를 입력하지 않았을 경우를 알기 위한 publisher
     private var password_is_empty_publisher: AnyPublisher<Bool, Never> {
-        $password
+        $change_pwd
             .debounce(for: 0.8, scheduler: RunLoop.main)
             .removeDuplicates()
             .map { password in
@@ -170,18 +175,37 @@ class SignupViewModel : ObservableObject{
         case valid
         case empty
         case no_match
+        case wrong_regex
     }
+    
+    //첫번째, 두번째 모두 정규식이 맞을 경우 publish true
+    private var regex_is_ok_publisher : AnyPublisher<Bool,Never>{
+        Publishers.CombineLatest($first_pwd_ok, $second_pwd_ok)
+            .debounce(for: 0.2, scheduler: RunLoop.main)
+            .map { first_pwd_ok, second_pwd_ok in
+                // print("정규식 확인: \(first_pwd_ok), 두번째: \(second_pwd_ok)")
+                if first_pwd_ok == true && second_pwd_ok == true
+                {return true}
+                else {
+                    return false
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+    
     //비밀번호 입력칸이 빈칸이 아니고, 비밀번호 입력이 일치했을 경우 valid
     private var password_is_valid_publisher: AnyPublisher<password_check, Never>{
-        Publishers.CombineLatest(password_is_equal_publisher, password_is_empty_publisher )
-            .map{ password_is_equal, password_is_empty in
+        Publishers.CombineLatest3(password_is_equal_publisher, password_is_empty_publisher,regex_is_ok_publisher )
+            .map{ password_is_equal, password_is_empty, regex_is_ok in
                 if password_is_empty{
                     return .empty
                 }
-                if(!password_is_equal){
+                else if(!password_is_equal){
                     return .no_match
                 }
-                
+                else if !regex_is_ok{
+                    return .wrong_regex
+                }
                 else{
                     return .valid
                 }
@@ -189,14 +213,13 @@ class SignupViewModel : ObservableObject{
             .eraseToAnyPublisher()
     }
     //이메일, 비밀번호 모두 맞게 입력했을 때
-    private var form_is_valid_publisher:AnyPublisher<Bool, Never>{
-        Publishers.CombineLatest(email_is_valid_publisher, password_is_valid_publisher)
-            .map{ email_is_valid, password_is_valid in
-                //return email_is_valid && (password_is_valid == .valid)
-                return true && (password_is_valid == .valid)
-            }
-            .eraseToAnyPublisher()
-    }
+    //    private var form_is_valid_publisher:AnyPublisher<Bool, Never>{
+    //        Publishers.CombineLatest(email_is_valid_publisher, password_is_valid_publisher)
+    //            .map{ email_is_valid, password_is_valid in
+    //                return true && (password_is_valid == .valid)
+    //            }
+    //            .eraseToAnyPublisher()
+    //    }
     
     init(){
         password_is_valid_publisher
@@ -207,6 +230,8 @@ class SignupViewModel : ObservableObject{
                     return "비밀번호를 입력해주세요"
                 case .no_match:
                     return "비밀번호가 일치하지 않습니다"
+                case .wrong_regex :
+                    return "숫자, 문자, 특수문자를 포함한 8~20자 형식에 맞춰주세요"
                 default:
                     return ""
                 }
@@ -214,11 +239,11 @@ class SignupViewModel : ObservableObject{
             }
             .assign(to: \.password_message, on: self)
             .store(in: &cancellable_set)
-        
-        form_is_valid_publisher
-            .receive(on: RunLoop.main)
-            .assign(to: \.email_password_valid, on: self)
-            .store(in: &cancellable_set)
+        //
+        //        form_is_valid_publisher
+        //            .receive(on: RunLoop.main)
+        //            .assign(to: \.email_password_valid, on: self)
+        //            .store(in: &cancellable_set)
     }
     /*
      애플 로그인 response를 받고 저장 한 후 메인 화면으로 이동시키기 위해 사용하는 구분값.
@@ -306,225 +331,8 @@ class SignupViewModel : ObservableObject{
             })
     }
     
-    @Published var contacts_model : [FetchedContactModel] = []{
-        didSet{
-            objectWillChange.send()
-        }
-    }
-    
-    //연락처가져오기
-    func fetchContacts() {
-        // 1.
-        let store = CNContactStore()
-        store.requestAccess(for: .contacts) { (granted, error) in
-            if let error = error {
-                print("주소록 권한 요청에 실패", error)
-                return
-            }
-            if granted {
-                // 2.
-                let keys = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey]
-                let request = CNContactFetchRequest(keysToFetch: keys as [CNKeyDescriptor])
-                do {
-                    // 3.
-                    try store.enumerateContacts(with: request, usingBlock: { (contact, stopPointer) in
-                        print("핸드폰 번호: \(contact.phoneNumbers.first?.value.stringValue ?? "")")
-                        print("이름: \(contact.familyName)\(contact.givenName)")
-                        
-                        let my_friend_phone = contact.phoneNumbers.first?.value.stringValue.replacingOccurrences(of: "-", with: "")
-                        print("형식 통일한 전화번호: \(String(describing: my_friend_phone))")
-                        
-                        //주소록에 등록된 정보중 전화번호가 없는 경우도 있음.
-                        if my_friend_phone != nil{
-                            self.contacts_model.append(FetchedContactModel(firstName: contact.givenName, lastName: contact.familyName, telephone: my_friend_phone ?? "", profile_photo_path: ""))
-                        }
-                        
-                        for enrolled_friend in self.enrolled_friends_model{
-                            print("비교하는 친구 한 명: \(enrolled_friend.phone_number)")
-                            
-                            if my_friend_phone! == enrolled_friend.phone_number{
-                                print("같은 전화번호")
-                                self.contacts_model.removeLast()
-                            }
-                        }
-                    })
-                    
-                    //서버에서 가져온 친구 리스트, 내 주소록 기반 연락처 리스트 비교해서 서버에서 가져온 리스트에 포함이 안된 경우 -> contacts_model에 넣기.
-                    
-                } catch let error {
-                    print("전화번호 가져오는데 실패", error)
-                }
-            } else {
-                print("접근 거부됨.")
-            }
-        }
-    }
-    
-    @Published var enrolled_friends_model : [EnrolledFriendsModel] = []{
-        didSet{
-            objectWillChange.send()
-        }
-    }
-    //내 친구들 중 이미 앱에 가입한 친구리스트 가져오기
-    func get_enrolled_friends(contacts: Array<Any>){
-        cancellation = APIClient.get_enrolled_friends(contacts: contacts)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: {result in
-                switch result{
-                case .failure(let error):
-                    print("이미 앱에 가입한 친구리스트 가져오기 에러 발생 : \(error)")
-                case .finished:
-                    break
-                }
-            }, receiveValue: {response in
-                print("이미 앱에 가입한 친구리스트 가져오기 response: \(response)")
-                let result = response["result"].string
-                if result == "ok"{
-                    print("가입된 친구 없음")
-                }
-                
-                let list = response.array
-                print("체크: \(String(describing: list))")
-                if list?.count ?? 0 > 0{
-                    print("가입된 친구가 있는 경우")
-                    let friends = response.arrayValue
-                    
-                    for friend in friends{
-                        
-                        let idx = friend["idx"].intValue
-                        let nickname = friend["nickname"].stringValue
-                        let profile_img = friend["profile_photo_path"].stringValue
-                        let phone_number = friend["phone_number"].stringValue
-                        
-                        self.enrolled_friends_model.append(EnrolledFriendsModel(idx: idx, nickname: nickname, profile_photo_path: profile_img, phone_number: phone_number))
-                    }
-                    print("최종 저장한 등록된 친구들 모델: \(self.enrolled_friends_model)")
-                }
-                //내 주소록에 등록된 연락처 친구 리스트 가져오기
-                self.fetchContacts()
-            })
-    }
-    
-    //회원가입시 친구들에게 초대 문자 보내기
-    func send_invite_message(contacts: Array<Any>){
-        cancellation = APIClient.send_invite_message(contacts: contacts)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: {result in
-                switch result{
-                case .failure(let error):
-                    print("회원가입시 친구들에게 초대 문자 보내기 에러 발생 : \(error)")
-                case .finished:
-                    break
-                }
-            }, receiveValue:{response in
-                print("친구들에게 초대 문자 보내기 response: \(response)")
-                
-                let result = response["result"].string
-                if result == "message sended"{
-                    print("메세지 보내짐")
-                    
-                    //전화번호도 노티에 보내야 받아서 비교해서 뷰 변경 가능.
-                    let contact = contacts[0] as! String
-                    NotificationCenter.default.post(name: Notification.sent_invite_msg, object: nil, userInfo: ["sent_invite_msg": "ok", "contact": contact])
-                    
-                }else if result == "message send error"{
-                    print("메세지 보내는데 에러 발생")
-                    //전화번호도 노티에 보내야 받아서 비교해서 뷰 변경 가능.
-                    let contact = contacts[0] as! String
-                    
-                    NotificationCenter.default.post(name: Notification.sent_invite_msg, object: nil, userInfo: ["sent_invite_msg": "fail", "contact": contact])
-                    
-                }else{
-                    //전화번호도 노티에 보내야 받아서 비교해서 뷰 변경 가능.
-                    let contact = contacts[0] as! String
-                    
-                    NotificationCenter.default.post(name: Notification.sent_invite_msg, object: nil, userInfo: ["sent_invite_msg": "fail", "contact": contact])
-                    
-                }
-            })
-        }
-    
-    //친구 신청하기
-    func add_friend_request(f_idx: Int){
-        cancellation = APIClient.add_friend_request(f_idx: f_idx)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: {result in
-                switch result{
-                case .failure(let error):
-                    print("회원가입 친구 요청 통신 에러 발생 : \(error)")
-                case .finished:
-                    break
-                }
-            }, receiveValue: {response in
-               print("회원가입 친구 요청 통신 response: \(response)")
-                  let friend_idx = String(f_idx)
-                if response["result"] == "ok"{
-                   
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "ok", "friend": friend_idx])
-                    
-                } else if response["result"]  == "no signed friends"{
-                    print("회원가입 친구추가하기 없는 사용자")
-                    
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "no signed friends", "friend": friend_idx])
-                    
-                }else if response["result"]  == "친구요청대기"{
-                    print("회원가입 친구 요청 대기중")
-                    
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "친구요청대기", "friend": friend_idx])
-                    
-                }else if response["result"]  == "친구요청뱓음"{
-                    print("회원가입 친구 요청 대기중")
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "친구요청뱓음", "friend": friend_idx])
-                    
-                }else if response["result"]  == "친구상태"{
-                    print("회원가입 이미 친구입니다")
-                    
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "친구상태", "friend": friend_idx])
-                    
-                }else if response["result"]  == "자기자신"{
-                    print("회원가입 나자신")
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "자기자신", "friend": friend_idx])
-                    
-                    
-                }else{
-                    print("회원가입 친구 요청 실패")
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "fail"])
-                   }
-                
-            })
-    }
-    
-    //친구 신청 취소
-    func cancel_request_friend(f_idx: Int){
-        cancellation = APIClient.cancel_request_friend(f_idx: f_idx)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: {result in
-                switch result{
-                case .failure(let error):
-                    print("회원가입 친구 요청 통신 에러 발생 : \(error)")
-                case .finished:
-                    break
-                }
-            }, receiveValue: {response in
-                print("친구 신청 취소 응답: \(response)")
-                
-                let result : String?
-                result = response["result"].string
-                let friend_idx = String(f_idx)
-                
-                if result == "ok"{
-                    print("친구 신청 취소 완료")
-                   
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "canceled_ok", "friend": friend_idx])
-                    
-                }else{
-                    print("친구 신청 취소 실패")
-                    NotificationCenter.default.post(name: Notification.request_friend, object: nil, userInfo: ["request_friend": "canceled_fail", "friend": friend_idx])
-                    
-                }
-            })
-    }
 
+    
     
     
 }

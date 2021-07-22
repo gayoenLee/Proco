@@ -10,8 +10,20 @@ import Combine
 import SwiftUI
 
 class ViewRouter:  ObservableObject {
+    static var view_router : ViewRouter?
+    static func get_view_router() -> ViewRouter{
+        if view_router == nil {
+            view_router = ViewRouter()
+        }
+        
+        return view_router!
+    }
     public let objectWillChange = ObservableObjectPublisher()
-
+    @Published var init_root_view : Bool = false {
+        didSet{
+            objectWillChange.send()
+        }
+    }
     @Published var current_page: Page = .friend_volleh{
         didSet{
             print("첫 화면 변경")

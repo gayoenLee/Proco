@@ -43,9 +43,6 @@ struct SignupPersonalView: View {
             }
             .padding(UIScreen.main.bounds.width/10)
           
-                DatePicker("생년월일", selection:self.$info_viewmodel.birth, in: ...Date(), displayedComponents: .date )
-                    .padding(UIScreen.main.bounds.width/20)
-                    .font(.custom(Font.n_extra_bold, size: 15))
          
             Spacer()
             NavigationLink(
@@ -66,9 +63,9 @@ struct SignupPersonalView: View {
             .onDisappear(perform: {
                 print("퍼스널뷰에서 핸드폰 번호 확인 : \(self.info_viewmodel.phone_number)")
                 //다음 페이지로 갈 때 생년월일을 string으로 변환하는 메소드 실행
-                let formatter = DateFormatter()
-                string_date = formatter.string(from: self.info_viewmodel.birth)
-                self.info_viewmodel.birth_string = string_date
+//                let formatter = DateFormatter()
+//                string_date = formatter.string(from: self.info_viewmodel.birth)
+//                self.info_viewmodel.birth_string = string_date
             })
             Spacer()
             //vstack끝
@@ -106,7 +103,6 @@ struct GenderSelectButtons: View{
                 
                 selected.remove("women")
                 selected.insert("men")
-                personal_info_viewmodel.gender = 1
                 
                 print(selected, selected_gender)
             }){
@@ -124,7 +120,7 @@ struct GenderSelectButtons: View{
                 selected_gender.toggle()
                 selected.remove("men")
                 selected.insert("women")
-                personal_info_viewmodel.gender = 0
+
                 print(selected, selected_gender)
             }){
                 VStack{

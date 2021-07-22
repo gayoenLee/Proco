@@ -22,7 +22,10 @@ struct NormalLoginView:View{
     @State private var show_alert = false;
     @State private var fcm_token : String = ""
     @State private var got_fcm_token : Bool = false
-    @ObservedObject var view_router : ViewRouter
+    
+    //최상단 스택 변경 위함.
+    @ObservedObject var view_router : ViewRouter = ViewRouter.get_view_router()
+    
     var body: some View {
         NavigationView{
         VStack{
@@ -67,8 +70,8 @@ struct NormalLoginView:View{
                         }
                         Spacer()
                         login_btn
-                        
-                        NavigationLink("",destination: TabbarView(view_router: self.view_router).navigationBarHidden(true), isActive: $login_ok)
+                   //뷰라우터 싱글톤 만들면서 주석처리
+//                        NavigationLink("",destination: TabbarView(view_router: self.view_router).navigationBarHidden(true), isActive: $login_ok)
                         
                         find_id_pwd_btn
                         Spacer()
@@ -144,7 +147,8 @@ struct NormalLoginView:View{
                             print("일반 로그인시 저장하는 닉네임 : \(String(describing: nickname))")
                             
                             SockMgr.socket_manager.establish_connection()
-                            login_ok.toggle()
+                            self.view_router.init_root_view = true
+                           // login_ok.toggle()
                         }
                         
                     //로그인 메뉴 화면으로 다시 보내기
@@ -176,13 +180,14 @@ extension NormalLoginView{
     }
     
     var id_input_txt_field: some View{
-        TextField("아이디(전화번호 혹은 이메일)", text: $login_id)
+        TextField("아이디(핸드폰 번호)", text: $login_id)
             .font(.custom(Font.n_regular, size: 14))
             .foregroundColor(Color.gray)
             .padding()
             .background(Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0))
             .cornerRadius(25.0)
             .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
+            .keyboardType(.phonePad)
     }
     
     var pwd_input_txt_field: some View{
@@ -228,29 +233,31 @@ extension NormalLoginView{
     }
     
     var wrong_id_guid_txt: some View{
-        HStack{
-            Text("잘못된 아이디입니다")
-                .font(.custom(Font.n_regular, size: 7))
-                .foregroundColor(.proco_red)
-                //프레임 크기에 맞춰서 글자 크기 줄이기
-                .minimumScaleFactor(0.5)
-                .padding([.leading], UIScreen.main.bounds.width/15)
-            Spacer()
+            HStack{
+                Text("잘못된 아이디입니다")
+                    .font(.custom(Font.n_regular, size: 10))
+                    .foregroundColor(.proco_red)
+                    //프레임 크기에 맞춰서 글자 크기 줄이기
+                    .frame(width: UIScreen.main.bounds.width*0.6, height: UIScreen.main.bounds.height/40, alignment: .leading)
+                    .minimumScaleFactor(0.5)
+                    .padding([.leading], UIScreen.main.bounds.width/10)
+                Spacer()
+            }
         }
-    }
-    
-    var wrong_pwd_guide_txt: some View{
-        HStack{
-            Text("잘못된 비밀번호입니다")
-                .font(.custom(Font.n_regular, size: 11))
-                .foregroundColor(.proco_red)
-                //프레임 크기에 맞춰서 글자 크기 줄이기
-                .minimumScaleFactor(0.5)
-                .padding([.leading], UIScreen.main.bounds.width/15)
-                .hidden()
-            Spacer()
+        
+        var wrong_pwd_guide_txt: some View{
+            HStack{
+                Text("잘못된 비밀번호입니다")
+                    .font(.custom(Font.n_regular, size: 10))
+                    .foregroundColor(.proco_red)
+                    //프레임 크기에 맞춰서 글자 크기 줄이기
+                    .frame(width: UIScreen.main.bounds.width*0.6, height: UIScreen.main.bounds.height/40, alignment: .leading)
+                    .minimumScaleFactor(0.5)
+                    .padding([.leading], UIScreen.main.bounds.width/10)
+
+                Spacer()
+            }
         }
-    }
     
     
 }

@@ -52,7 +52,6 @@ class APIClient {
                     //통신은 성공했지만 인증번호 불일치할 경우 alert 띄우기
                 }
                 completion(json!)
-                print("api client에서 첫번째 핸드폰 인증 결과\(response.result)")
             }
     }
     //유저가 핸드폰 인증문자 입력 후 다음 버튼 클릭시 인증문자가 맞는지 확인하는 통신
@@ -98,11 +97,11 @@ class APIClient {
     }
     
     //마지막으로 이미지를 제외한 모든 회원가입 정보 보내기
-    static func send_user_info_api(phone: String, email: String, password: String, gender: Int, birthday: String, nickname: String, marketing_yn: Int, auth_num: String, sign_device: String?, update_version: String?, completion: @escaping(Result<ResponseSignup, AFError>) -> ()){
+    static func send_user_info_api(phone: String, email: String, password: String, gender: Int, birthday: String, nickname: String, marketing_yn: Int, auth_num: String, sign_device: String?, update_version: String?,fcm_token: String, completion: @escaping(Result<ResponseSignup, AFError>) -> ()){
         let jsonDecoder = JSONDecoder()
         jsonDecoder.dateDecodingStrategy = .formatted(DateFormatter.dateformatter)
         
-        AF.request(APIRouter.send_signup_info(phone: phone, email: email, password: password, gender: gender, birthday: birthday, nickname: nickname, marketing_yn: marketing_yn, auth_num: auth_num, sign_device: sign_device ?? "디바이스", update_version: update_version ?? "업데이트 버전"))
+        AF.request(APIRouter.send_signup_info(phone: phone, email: email, password: password, gender: gender, birthday: birthday, nickname: nickname, marketing_yn: marketing_yn, auth_num: auth_num, sign_device: sign_device ?? "디바이스", update_version: update_version ?? "업데이트 버전", fcm_token: fcm_token))
             .validate(statusCode: 200..<300)
             .responseDecodable(decoder: jsonDecoder){(response: DataResponse<ResponseSignup, AFError>) in
                 
