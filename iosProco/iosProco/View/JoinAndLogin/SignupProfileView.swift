@@ -15,7 +15,7 @@ struct SignupProfileView: View {
     @Environment(\.presentationMode) var presentation
 
     //회원가입 정보들 저장할 곳
-    @ObservedObject var info_viewmodel :  SignupViewModel
+    @StateObject var info_viewmodel :  SignupViewModel
     //이미지 선택 sheet 보여줄지 구분하는 변수
     @State private var show_image_picker = false
     
@@ -30,8 +30,11 @@ struct SignupProfileView: View {
     @State private var image_url : String? = ""
     @State private var ui_image : UIImage? = nil
     
+    //닉네임 값 - 뷰모델값 쓰면 publish돼서 화면 전환 문제 일어나서 state값 씀.
+    @State private var nickname: String = ""
+    
     var body: some View {
-      
+     
         VStack(alignment: .center){
             HStack{
                     Button(action: {
@@ -67,8 +70,6 @@ struct SignupProfileView: View {
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: UIScreen.main.bounds.width/2, height: UIScreen.main.bounds.width/2)
                                 .clipShape(Circle())
-                                .shadow(radius: 10)
-                                .overlay(Circle().stroke(Color.gray, lineWidth: 1))
                         }
                     }
                     
@@ -88,14 +89,15 @@ struct SignupProfileView: View {
                 }
                 Spacer()
             }
-            TextField("닉네임 최대 15글자", text: self.$info_viewmodel.nickname)
+            TextField("닉네임 최대 15글자", text: self.$nickname)
                 .font(.custom(Font.n_regular, size: 15))
                 //IOS14부터 onchange사용 가능
-                .onChange(of: self.info_viewmodel.nickname) { value in
+                .onChange(of: self.nickname) { value in
                     print("닉네임 onchangee 들어옴")
-                   if value.count > 10 {
-                    print("닉네임 10글자 넘음")
-                    self.info_viewmodel.nickname = String(value.prefix(10))
+                   if value.count > 15 {
+                    print("닉네임 15글자 넘음")
+                    self.nickname = String(value.prefix(15))
+                    print("닉네임 확인: \(self.nickname)")
                   }
               }
                 .padding()
@@ -106,14 +108,19 @@ struct SignupProfileView: View {
             Spacer()
             //클릭시 회원가입 정보 모두 서버에 보내는 통신
             Button(action:{
+                //이메일값 뷰모델에 저장
+                //self.info_viewmodel.nickname = self.nickname
+                
                 //이미지 데이터를 UIImage로 변환해서 jpeg로 만듬.
                 if selected_image != nil{
                 let ui_image : UIImage = self.selected_image.asUIImage()
                 image_data = ui_image.jpegData(compressionQuality: 0.2) ?? Data()
                 }
-                print("핸드폰 : \(info_viewmodel.phone_number) email: \(info_viewmodel.email), password: \(info_viewmodel.password), gender: \(info_viewmodel.gender), birthday: \(info_viewmodel.birth_string), nickname: \(info_viewmodel.nickname), marketing_yn: \(info_viewmodel.marketing_term_ok), auth_num: \(info_viewmodel.auth_num)")
+                
+                let fcm_token = UserDefaults.standard.string(forKey: "fcm_token") ?? ""
+                print("핸드폰 : \(info_viewmodel.phone_number), password: \(info_viewmodel.password), nickname: \(info_viewmodel.nickname), marketing_yn: \(info_viewmodel.marketing_term_ok), auth_num: \(info_viewmodel.auth_num)")
                 //회원가입 정보 보내는 통신 진행.
-                send_user_info()
+                send_user_info(fcm_token: fcm_token)
             }){
                 Text("가입 완료")
                     .font(.custom(Font.t_extra_bold, size: 15))
@@ -125,24 +132,25 @@ struct SignupProfileView: View {
                     .padding([.leading, .trailing], UIScreen.main.bounds.width/25)
             }
             
-//테스트 위해 주석처리함*************************
             //회원가입에 성공했을 경우 메인화면으로 보내기, 네비게이션 뷰에서 버튼 없이 화면 이동 가능한 방법.
-            NavigationLink("", destination: TabbarView(view_router: ViewRouter()), isActive: self.$login_success)
+            NavigationLink("", destination: EnrolledFriendListView(vm: SignupInviteListViewModel(), phone_number: self.info_viewmodel.phone_number), isActive: self.$login_success)
 
             NavigationLink("", destination: LoginMenuView(), isActive: self.$login_fail)
+            
+            //프로필 이미지 선택시 갤러리
+            NavigationLink("", destination:  ImagePicker(image: self.$selected_image, image_url: self.$image_url, ui_image: self.$ui_image), isActive: self.$show_image_picker)
+            
         }
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
         .background( Image("signup_fifth")
                          .resizable()
                          .scaledToFill())
-        //갤러리 나타나는 것.
-        .sheet(isPresented: $show_image_picker, content:{
-            ImagePicker(image: self.$selected_image, image_url: self.$image_url, ui_image: self.$ui_image)
-        })
         .alert(isPresented: $login_fail){
             Alert(title: Text(""), message: Text("회원가입 중 오류가 발생했습니다. 다시 시도해주세요"), dismissButton: .default(Text("확인")))
         }
+        
+        
     }
     
     //이미지 파일로 저장하기
@@ -154,7 +162,9 @@ struct SignupProfileView: View {
                 let result_string = result["result"].string
                 if (result_string == "ok"){
                     self.login_success = true
-
+                    let profile_photo_path = result["profile_photo_path"].string
+                    UserDefaults.standard.set(profile_photo_path, forKey: "profile_photo_path")
+                    
                 }else{
                     self.login_success = true
                 }
@@ -163,9 +173,9 @@ struct SignupProfileView: View {
     }
     
     //회원가입 정보 전송
-    func send_user_info(){
+    func send_user_info(fcm_token: String){
         
-        APIClient.send_user_info_api(phone: info_viewmodel.phone_number, email: info_viewmodel.email, password: info_viewmodel.password, gender: info_viewmodel.gender, birthday: "1988-08-18", nickname: info_viewmodel.nickname, marketing_yn: info_viewmodel.marketing_term_ok, auth_num: info_viewmodel.auth_num, sign_device: "ios", update_version: "test_version", completion: {result in
+        APIClient.send_user_info_api(phone: info_viewmodel.phone_number, email: "", password: info_viewmodel.password, gender: 0, birthday: "", nickname: self.nickname, marketing_yn: info_viewmodel.marketing_term_ok, auth_num: info_viewmodel.auth_num, sign_device: "ios", update_version: "test_version", fcm_token: fcm_token,completion: {result in
             switch result{
             case .success(let result):
                 print("회원가입 성공, 다음 화면 이동 boolean : \(login_success)")
@@ -179,17 +189,17 @@ struct SignupProfileView: View {
                     let user_nickname = result.nickname
                     let user_access = result.access_token
                     let user_refresh = result.refresh_token
-                    let user_photo = result.profile_photo_path
+                    print("서버한테 받은 리절트값 : \(result)")
                     
                     print("회원가입 토큰 저장하는 값 확인 : \(user_refresh)")
                     UserDefaults.standard.set(user_refresh, forKey: "refresh_token")
                     UserDefaults.standard.set(user_access, forKey: "access_token")
                     UserDefaults.standard.set(user_id, forKey: "user_id")
-                    UserDefaults.standard.set(user_nickname, forKey: "nickname")
-                    UserDefaults.standard.set(user_photo, forKey: "\(user_id)_photo")
+                    UserDefaults.standard.set(self.nickname, forKey: "nickname")
+                
+                    UserDefaults.standard.set(info_viewmodel.phone_number, forKey: "phone_number")
                     
                     print("스토리지에 저장한 값 확인: \(String(describing: UserDefaults.standard.string(forKey: "access_token")))")
-                   // print("저장한 access토큰값 확인 : \(global_state.access_token)" )
                     
                     //서버 통신은 성공했으나 회원가입이 안된 경우 회원가입 다시 하라고 alert/서비스 첫 화면으로 돌려 보내기
                     send_profile_image()
