@@ -93,117 +93,118 @@ struct FriendVollehCardDetail: View {
                 Spacer()
                 
             }else{
-            Group{
-                top_nav_bar
-                
-                //약속날짜
-                HStack{
+                Group{
+                    top_nav_bar
+                    
+                    
+                    //약속날짜
+                    HStack{
+                        Spacer()
+                        card_meeting_day
+                    }
                     Spacer()
-                    card_meeting_day
                 }
-                Spacer()
-            }
-            Group{
-                //카드 주인의 프로필 사진, 이름
-                owner_profile
-                HStack{
-                    category_tag
-                    //현재 카드에 참가한 유저 수
-                    cur_user
-                }
-                //태그
-                HStack{
-                    Spacer()
-                    ForEach(self.main_vm.user_selected_tag_list.indices, id: \.self){tag in
-                        //index 0태그는 카테고리이므로 빼고 보여준다.
-                        if tag == 0{
-                            
-                        }else{
-                            HStack{
-                                Image("tag_sharp")
-                                    .resizable()
-                                    .frame(width: 18, height: 18)
+                Group{
+                    //카드 주인의 프로필 사진, 이름
+                    owner_profile
+                    HStack{
+                        category_tag
+                        //현재 카드에 참가한 유저 수
+                        cur_user
+                    }
+                    //태그
+                    HStack{
+                        Spacer()
+                        ForEach(self.main_vm.user_selected_tag_list.indices, id: \.self){tag in
+                            //index 0태그는 카테고리이므로 빼고 보여준다.
+                            if tag == 0{
                                 
-                                Text("\(self.main_vm.user_selected_tag_list[tag])")
-                                    .font(.custom(Font.n_bold, size: 15))
-                                    .foregroundColor(.proco_black)
+                            }else{
+                                HStack{
+                                    Image("tag_sharp")
+                                        .resizable()
+                                        .frame(width: 18, height: 18)
+                                    
+                                    Text("\(self.main_vm.user_selected_tag_list[tag])")
+                                        .font(.custom(Font.n_bold, size: 15))
+                                        .foregroundColor(.proco_black)
+                                }
                             }
                         }
+                        Spacer()
                     }
-                    Spacer()
-                }
-                
-                //좋아요
-                HStack{
-                    Spacer()
-                    like_icon
-                    Spacer()
-                }
-                Spacer()
-            }
-            
-            //동적링크를 통해 초대된 채팅방으로 이동
-            NavigationLink("",destination: ChatFriendRoomView(socket: socket).navigationBarHidden(true)
-                            .navigationBarTitle(""), isActive: self.$go_invited_room)
-            
-            //친구 카드 주인과 1대1 채팅방 화면으로 이동.
-            NavigationLink("",
-                           destination: NormalChatRoom(main_vm:  self.main_vm,group_main_vm: self.group_main_vm,socket: SockMgr.socket_manager, from_tab : false).navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true),
-                           isActive: self.$go_to_chat)
-            
-            //드로어에서 카드 상세 페이지 -> 카드 수정 화면 이동
-            NavigationLink("",
-                           destination: EditCardView(main_viewmodel: self.main_vm, tag_category_struct: volleh_category_struct ).navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true),
-                           isActive: self.$go_edit_from_chat)
-            
-            //메인에서 카드 상세 페이지 -> 카드 수정 화면 이동
-            NavigationLink("",
-                           destination: EditCardView(main_viewmodel: self.main_vm, tag_category_struct: volleh_category_struct ).navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true)
-                            .navigationBarBackButtonHidden(true),
-                           isActive: self.$go_edit_from_main)
-            //피드 페이지 이동
-            NavigationLink("",destination: SimSimFeedPage( main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_to_feed)
-            
-            //좋아요한 사람들 목록 페이지 이동
-            NavigationLink("",destination: LikePeopleListView(card_idx: self.main_vm.selected_card_idx, main_vm: self.main_vm), isActive: self.$go_like_people_list)
-            
-            //참가자 목록 페이지 이동
-            NavigationLink("",destination: FriendCardApplyPeopleListView(main_vm: self.main_vm, card_idx: self.$current_card_idx, show_view: self.$see_attend_people), isActive: self.$see_attend_people)
-            
-            Group{
-                //캘린더에서 넘어온 경우에는 채팅, 피드 버튼이 보이지 않음.
-                if calendar_vm.from_calendar{
-                }
-                //동적링크를 통해 들어온 경우 참여하기 버튼.
-                else if SockMgr.socket_manager.is_dynamic_link{
-                    accept_invitaion_btn
-                }
-                else{
+                    
+                    //좋아요
                     HStack{
-                        /*
-                         드로어에서 넘어온 경우, 카드에 초대하기 버튼 클릭
-                         - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
-                         - 주의 : 친구 채팅방 카드이므로 소켓 매니저 클래스의 which_type_room변수를 FRIEND로 만들기.
-                         */
-                        if  SockMgr.socket_manager.detail_to_invite{
-                            invite_btn
-                            
-                            //내 카드인 경우 하단 버튼 안보임.
-                        }else if Int(self.main_vm.my_idx!) == self.main_vm.friend_volleh_card_detail.creator?.idx{
-                            
-                        }
-                        else{
-                            bottom_menu_btns
-                        }
+                        Spacer()
+                        like_icon
+                        Spacer()
                     }
-                    .padding()
+                    Spacer()
                 }
-            }
                 
-        }
+                //동적링크를 통해 초대된 채팅방으로 이동
+                NavigationLink("",destination: ChatFriendRoomView(socket: socket).navigationBarHidden(true)
+                                .navigationBarTitle(""), isActive: self.$go_invited_room)
+                
+                //친구 카드 주인과 1대1 채팅방 화면으로 이동.
+                NavigationLink("",
+                               destination: NormalChatRoom(main_vm:  self.main_vm,group_main_vm: self.group_main_vm,socket: SockMgr.socket_manager, from_tab : false).navigationBarTitle("", displayMode: .inline)
+                                .navigationBarHidden(true),
+                               isActive: self.$go_to_chat)
+                
+                //드로어에서 카드 상세 페이지 -> 카드 수정 화면 이동
+                NavigationLink("",
+                               destination: EditCardView(main_viewmodel: self.main_vm, tag_category_struct: volleh_category_struct ).navigationBarTitle("", displayMode: .inline)
+                                .navigationBarHidden(true),
+                               isActive: self.$go_edit_from_chat)
+                
+                //메인에서 카드 상세 페이지 -> 카드 수정 화면 이동
+                NavigationLink("",
+                               destination: EditCardView(main_viewmodel: self.main_vm, tag_category_struct: volleh_category_struct ).navigationBarTitle("", displayMode: .inline)
+                                .navigationBarHidden(true)
+                                .navigationBarBackButtonHidden(true),
+                               isActive: self.$go_edit_from_main)
+                //피드 페이지 이동
+                NavigationLink("",destination: SimSimFeedPage( main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_to_feed)
+                
+                //좋아요한 사람들 목록 페이지 이동
+                NavigationLink("",destination: LikePeopleListView(card_idx: self.main_vm.selected_card_idx, main_vm: self.main_vm), isActive: self.$go_like_people_list)
+                
+                //참가자 목록 페이지 이동
+                NavigationLink("",destination: FriendCardApplyPeopleListView(main_vm: self.main_vm, card_idx: self.$current_card_idx, show_view: self.$see_attend_people), isActive: self.$see_attend_people)
+                
+                Group{
+                    //캘린더에서 넘어온 경우에는 채팅, 피드 버튼이 보이지 않음.
+                    if calendar_vm.from_calendar{
+                    }
+                    //동적링크를 통해 들어온 경우 참여하기 버튼.
+                    else if SockMgr.socket_manager.is_dynamic_link{
+                        accept_invitaion_btn
+                    }
+                    else{
+                        HStack{
+                            /*
+                             드로어에서 넘어온 경우, 카드에 초대하기 버튼 클릭
+                             - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
+                             - 주의 : 친구 채팅방 카드이므로 소켓 매니저 클래스의 which_type_room변수를 FRIEND로 만들기.
+                             */
+                            if  SockMgr.socket_manager.detail_to_invite{
+                                invite_btn
+                                
+                                //내 카드인 경우 하단 버튼 안보임.
+                            }else if Int(self.main_vm.my_idx!) == self.main_vm.friend_volleh_card_detail.creator?.idx{
+                                
+                            }
+                            else{
+                                bottom_menu_btns
+                            }
+                        }
+                        .padding()
+                    }
+                }
+                
+            }
         }
         .padding()
         .navigationBarHidden(true)
@@ -227,7 +228,7 @@ struct FriendVollehCardDetail: View {
         .onDisappear{
             print("-------------------친구랑 볼래 카드 상세 화면 사라짐--------------------")
             //이렇게 해야 메인에서 다른 카드 상세 페이지 갈 때 데이터 중복 안됨.
-           // main_vm.my_card_detail_struct.creator!.idx = -1
+            // main_vm.my_card_detail_struct.creator!.idx = -1
             
             //채팅방에서 상세 페이지로 넘어온 경우 true값으로 이 페이지로 들어왔으므로 나갈 때 다시 초기화.
             //여기에서 하면 오류 남.
@@ -409,6 +410,7 @@ private extension FriendVollehCardDetail{
         .alert(isPresented: self.$invite_ok){
             Alert(title: Text("초대하기"), message: Text(self.invite_result_txt), dismissButton: Alert.Button.default(Text("확인")))
         }
+        .padding(.bottom, UIScreen.main.bounds.width/25)
     }
     var bottom_menu_btns : some View{
         HStack{
@@ -630,7 +632,7 @@ private extension FriendVollehCardDetail{
                 send_report_btn
             }
         }
-        .padding(.top)
+        .padding(.top, UIScreen.main.bounds.width/20)
     }
     
     var owner_profile : some View{
