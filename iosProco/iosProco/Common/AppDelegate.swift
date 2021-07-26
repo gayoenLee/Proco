@@ -33,8 +33,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate,  UNUserNotificationCenter
 
         let userInfo = response.notification.request.content.userInfo as? [String: AnyObject]
         print("노티 받음 111 : \(userInfo)")
-
-        let noti_type = String(describing: userInfo!["noti_type"]!)
+        let is_foreground_msg = userInfo?["foreground_msg"] as? String
+        print("포그라운드 메세지인지 : \(is_foreground_msg)")
+        
+        if is_foreground_msg == "ok"{
+            
+            let room_kind = userInfo?["room_kind"] as! String
+            let chatroom_idx = userInfo!["chatroom_idx"] as! String
+            SockMgr.socket_manager.enter_chatroom_idx = Int(chatroom_idx)!
+            print("포그라운드 메세지일 경우 클릭했을 때: \(chatroom_idx), \(room_kind)")
+            DispatchQueue.main.async {
+            switch room_kind {
+            case "친구":
+                print("친구 채팅방")
+                ViewRouter.get_view_router().current_page = .chat_tab
+                ViewRouter.get_view_router().fcm_destination = "friend_chat_room"
+            case "일반":
+                print("일반 채팅방")
+                ViewRouter.get_view_router().current_page = .chat_tab
+                ViewRouter.get_view_router().fcm_destination = "normal_chat_room"
+            case "모임":
+                print("모임 채팅방")
+                ViewRouter.get_view_router().current_page = .chat_tab
+                ViewRouter.get_view_router().fcm_destination = "group_chat_room"
+            default:
+                print("그 외")
+            }
+            }
+        }else{
+            
+        let noti_type = String(describing: userInfo?["noti_type"])
         
         switch noti_type{
         case "chat":
@@ -177,13 +205,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate,  UNUserNotificationCenter
             print("확인: \(userInfo!["aps"])")
             }
 
-          completionHandler()
+        }
+        completionHandler()
         }
     
-    //FCM1.앱이 포그라운드에 있을 때 푸시를 받은 경우 호출되는 함수
+    //FCM1.앱이 포그라운드에 있을 때 푸시를 받은 경우 호출되는 함수 - 노티 클릭 이벤트와는 상관 없음.
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        print("앱 포그라운드에서 푸시 받음")
+        print("앱 포그라운드에서 푸시 받음: \(notification)")
+      
+            print("포그라운드 채팅 푸시일 때: \(notification.request.content)")
+            
+            let room_kind = notification.request.content.userInfo["room_kind"] as! String
+            let chatroom_idx_str = notification.request.content.userInfo["chatroom_idx"] as! String
+            print("포그라운드 노티 데이터 뺀 것 확인: \(room_kind), \(chatroom_idx_str)")
+            
+            let chatroom_idx = Int(chatroom_idx_str)
+            
+            DispatchQueue.main.async {
+                ChatDataManager.shared.read_chatroom(chatroom_idx: chatroom_idx!)
+                let room_kinds = room_kind
+                print("포그라운드 어떤 채팅방인지 확인: \(room_kinds)")
+                
+                if room_kinds == "친구"{
+                print("앱딜리게이트에서 친구 채팅룸으로 화면 변경.")
+                self.view_router.current_page = .chat_room
+                    
+                }else if room_kinds == "일반"{
+                    print("앱딜리게이트에서 일반 채팅룸으로 화면 변경.")
+
+                }else{
+                    print("앱딜리게이트에서 모임 채팅룸으로 화면 변경.")
+                    self.view_router.current_page = .group_chat_room
+                }
+            }
+      
         completionHandler([.badge, .sound, .alert])
+        
+        
     }
     
     /*
