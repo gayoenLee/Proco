@@ -319,7 +319,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     }
     //소개글
     ///사용자가 입력한 소개글
-    @Published var input_introduce : String = "모임을 소개해주세요"{
+    @Published var input_introduce : String = ""{
         didSet {
             objectWillChange.send()
         }
@@ -534,7 +534,7 @@ class GroupVollehMainViewmodel: ObservableObject{
     }
     ///모임 신청자 페이지에서 주최자인지 알기 위해
     func find_owner() -> Bool{
-        
+        print("내 idx: \(self.my_idx!)")
         var idx : Bool = false
         
         idx =  self.my_group_card_struct.contains(where: {
@@ -597,23 +597,23 @@ class GroupVollehMainViewmodel: ObservableObject{
             .sink(receiveCompletion: {result in
                 switch result{
                 case .failure(let error):
-                    print("친구 카드 신고하기 에러 발생 : \(error)")
+                    print("모임 카드 신고하기 에러 발생 : \(error)")
                 case .finished:
                     break
                 }
             }, receiveValue: {response in
-                print("친구 카드 신고하기 resopnse: \(response)")
+                print("모임 카드 신고하기 resopnse: \(response)")
                 
                 let result = response["result"].string
                 
                 if result == result{
                     if result == "ok"{
                         print("신고하기 완료")
-                        self.request_result_alert = .success
+                        NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["report_result" : "ok"])
                         
                     }else{
                         print("신고하기 실패")
-                        self.request_result_alert = .fail
+                        NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["report_result" : "fail"])
                     }
                 }
             })
@@ -929,6 +929,8 @@ class GroupVollehMainViewmodel: ObservableObject{
             }, receiveValue: {response in
                 print("참가자 : \(response)")
                 //신청자 및 참여자가 없을 경우 오는 결과값
+                self.apply_user_struct.removeAll()
+                
                 if response["result"] == "no result"{
                     print("참가자 없음 no result")
                 }else{
@@ -979,7 +981,9 @@ class GroupVollehMainViewmodel: ObservableObject{
                     
                     //채팅 서버에 모임 카드 참여 통신 진행.
                     SockMgr.socket_manager.send_join_card_ok(user_idx: self.apply_user_idx, chatroom_idx: chatroom_idx)
+                    let apply_user = String(self.apply_user_idx)
                     
+                    NotificationCenter.default.post(name: Notification.apply_meeting_result, object: nil, userInfo: ["owner_event" : "owner_accept", "user_idx" : apply_user])
                     
                     //참가 신청 완료 알림 나타내기
                     self.alert_type = .success
@@ -1005,6 +1009,10 @@ class GroupVollehMainViewmodel: ObservableObject{
             }, receiveValue: {response in
                 print("참가신청 거절 결과 : \(response)")
                 if response["result"] == "ok"{
+                    let apply_user = String(self.apply_user_idx)
+                    
+                    NotificationCenter.default.post(name: Notification.apply_meeting_result, object: nil, userInfo: ["owner_event" : "owner_decline", "user_idx" : apply_user])
+                    
                     //참가 신청 완료 알림 나타내기
                     self.alert_type = .success
                 }else{
