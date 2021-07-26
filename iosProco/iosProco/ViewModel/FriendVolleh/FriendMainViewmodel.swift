@@ -156,7 +156,7 @@ class FriendVollehMainViewmodel: ObservableObject{
     @Published var manage_groups = [ManageGroupStruct](){
         
         didSet{
-           // objectWillChange.send()
+            // objectWillChange.send()
         }
     }
     
@@ -499,11 +499,11 @@ class FriendVollehMainViewmodel: ObservableObject{
         if check_set.isEmpty{
             print("카테고리 포함 안돼있음 : \(check_set)")
             return false
-        //카테고리는 최소 한개만 선택 가능.
+            //카테고리는 최소 한개만 선택 가능.
         }else if check_set.count == 1{
             print("카테고리 포함돼 있음  : \(check_set)")
             return true
-         //카테고리를 1개 이상 선택한 경우
+            //카테고리를 1개 이상 선택한 경우
         }else{
             return false
         }
@@ -557,7 +557,7 @@ class FriendVollehMainViewmodel: ObservableObject{
             objectWillChange.send()
         }
     }
-
+    
     //on.off나타내는 친구 리스트 중 친구 한 명 클릭했을 때 채팅하기, 피드 가기 다이얼로그 띄우기 위함.
     func get_friend_info(){
         
@@ -569,7 +569,7 @@ class FriendVollehMainViewmodel: ObservableObject{
         self.friend_info_struct.profile_photo_path = self.friend_list_struct[detail_index!].profile_photo_path
         //on.off상태
         self.friend_info_struct.state = self.friend_list_struct[detail_index!].state
-            }
+    }
     /*
      ------------------------------------ 통신 코드 시작--------------------------
      */
@@ -640,7 +640,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                         print("동적링크인 경우")
                         self.selected_card_idx = card_idx
                         //동적링크 생성하기
-//                        socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: "", card_idx: card_idx, kinds: "friend")
+                        //                        socket_manager.make_dynamic_link(chatroom_idx: chatroom_idx, link_img: "", card_idx: card_idx, kinds: "friend")
                         
                         let converted_time = String.time_to_kor_language(date: self.card_expire_time)
                         let converted_date = String.kor_date_string(date_string: self.card_expire_time)
@@ -684,44 +684,44 @@ class FriendVollehMainViewmodel: ObservableObject{
                 print("친구랑 볼래 카드 리스트 가져오기 결과값 : \(response)")
                 self.my_friend_volleh_card_struct.removeAll()
                 self.friend_volleh_card_struct.removeAll()
-                              
+                
                 let result : String?
                 result = response["result"].string
                 if result == "no result"{
                     
                 }
-               else{
-                print("카드 있는 경우: \(self.my_idx!)")
+                else{
+                    print("카드 있는 경우: \(self.my_idx!)")
                     //let result = response.arrayValue
                     var my_count = 0
-                let friend_cards = response.arrayValue
-                
-                let json_string = """
+                    let friend_cards = response.arrayValue
+                    
+                    let json_string = """
                         \(friend_cards)
                         """
-                print("친구 카드 string변환")
-                
-                let json_data = json_string.data(using: .utf8)
-                
-                let card = try? JSONDecoder().decode([FriendVollehCardStruct].self, from: json_data!)
-                
-                print("내가 만든 친구랑 볼래 카드 리스트 디코딩한 값: \(String(describing: card))")
-                
-                let my_card_list = card?.filter({
-                    $0.creator!.idx == Int(self.my_idx!)
-                }).map({$0})
-                print("내 카드 뽑아낸 것 확인: \(String(describing: my_card_list))")
-                self.my_friend_volleh_card_struct = my_card_list!
-                
-                let friend_card_list = card?.filter({
-                    $0.creator!.idx != Int(self.my_idx!)
-                }).map({$0})
-                print("친구카드 뽑아낸 것 확인: \(String(describing: friend_card_list))")
-                      self.friend_volleh_card_struct = friend_card_list!
-
+                    print("친구 카드 string변환")
+                    
+                    let json_data = json_string.data(using: .utf8)
+                    
+                    let card = try? JSONDecoder().decode([FriendVollehCardStruct].self, from: json_data!)
+                    
+                    print("내가 만든 친구랑 볼래 카드 리스트 디코딩한 값: \(String(describing: card))")
+                    
+                    let my_card_list = card?.filter({
+                        $0.creator!.idx == Int(self.my_idx!)
+                    }).map({$0})
+                    print("내 카드 뽑아낸 것 확인: \(String(describing: my_card_list))")
+                    self.my_friend_volleh_card_struct = my_card_list!
+                    
+                    let friend_card_list = card?.filter({
+                        $0.creator!.idx != Int(self.my_idx!)
+                    }).map({$0})
+                    print("친구카드 뽑아낸 것 확인: \(String(describing: friend_card_list))")
+                    self.friend_volleh_card_struct = friend_card_list!
+                    
                 }
                 print("내 카드 저장한 것 확인: \(self.my_friend_volleh_card_struct)")
-    
+                
                 //오늘 심심기간인 친구들 가져오는 통신
                 let today_date = Date()
                 let bored_date = String.date_string(date: today_date)
@@ -749,13 +749,13 @@ class FriendVollehMainViewmodel: ObservableObject{
                 self.friend_list_struct.removeAll()
                 
                 for friend in response{
-
+                    
                     if friend.nickname != nil{
-
+                        
                         self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx!, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path, state: friend.state))
                     }
                 }
-//               // self.got_friend_list_all.toggle()
+                //               // self.got_friend_list_all.toggle()
                 self.get_all_groups()
             })
     }
@@ -779,7 +779,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                     print("그룹 리스트만 가져오는 데 받은 value값 : \(response)")
                     
                     for group in response{
-
+                        
                         if group.name != nil{
                             self.manage_groups.append(ManageGroupStruct(result: group.result, idx: group.idx!, name: group.name!))
                         }
@@ -835,8 +835,8 @@ class FriendVollehMainViewmodel: ObservableObject{
                     }else{
                         print("메인에서 편집 화면으로 넘어와서 편집 완료")
                         
-//                        let detail_index = self.my_friend_volleh_card_struct.firstIndex(where: {$0.card_idx == self.selected_card_idx})
-            
+                        //                        let detail_index = self.my_friend_volleh_card_struct.firstIndex(where: {$0.card_idx == self.selected_card_idx})
+                        
                         
                         //********채팅 서버에 보낼 태그 모델*********
                         var tag_model : [TagModel] = []
@@ -893,7 +893,7 @@ class FriendVollehMainViewmodel: ObservableObject{
             }
             , receiveValue: {response in
                 print("카드 상세 데이터 가져온 것 확인 : \(response)")
-            
+                
                 self.my_card_detail_struct = FriendVollehCardStruct()
                 
                 //해당하는 카드 없거나 만료됨
@@ -901,58 +901,58 @@ class FriendVollehMainViewmodel: ObservableObject{
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_friend_card_detail_finish" : "no result"])
                 }else{
-                print("만료날짜 원래 데이터 확인 : \(response.expiration_at)")
-                
+                    print("만료날짜 원래 데이터 확인 : \(response.expiration_at)")
+                    
                     let first_filtered_day = self.string_to_date(expiration: response.expiration_at!)
-                print("날짜 변환했는지 확인 : \(first_filtered_day)")
-                self.card_date = first_filtered_day
-                
+                    print("날짜 변환했는지 확인 : \(first_filtered_day)")
+                    self.card_date = first_filtered_day
+                    
                     let time_filtered = self.string_to_time(expiration: String(response.expiration_at!.split(separator: " ")[1]))
-                self.card_time = time_filtered
-                print("시간 변환 확인 : \(self.card_time)")
-                
-                self.friend_volleh_card_detail = FriendVollehCardDetailModel(card_idx: response.card_idx!, kinds: response.kinds!, expiration_at: response.expiration_at, lock_state: response.lock_state, like_count: response.like_count, like_state: response.like_state, tags: response.tags, share_list: response.share_list, creator: response.creator, is_favor_friend: response.is_favor_friend, cur_user: response.cur_user)
-                
-                //태그 set, array에 이름 저장
-                self.user_selected_tag_set.removeAll()
-                self.user_selected_tag_list.removeAll()
-                
-                                if response.tags != nil{
-                                    for tag in response.tags!{
-                                        self.user_selected_tag_set.insert(tag.tag_name)
-                                        self.user_selected_tag_list.append(tag.tag_name)
-                                        if self.volleh_category_tag_struct.contains(where: {
-                                            $0.category_name == tag.tag_name
-                                        }){
-                                            //태그 데이터중 카테고리는 뷰에 selected category로 세팅해놔야 하므로 뷰에 알리는 것.
-                                            NotificationCenter.default.post(name: Notification.send_selected_card_category, object: nil, userInfo: ["selected_category" : tag.tag_name])
-                                        }
-                                    }
-                                }
-                print("카드 정보 가져와서 태그 저장한 것 확인: \(self.user_selected_tag_list)")
-
-                                //알릴 사람들 set, array, dictionary에 저장
-                                if response.share_list != nil{
-                                    print("카드 상세 데이터 share_list 널 아닐 때")
-                                    for person in response.share_list!{
-                                        if person.idx_kinds == "friend"{
-                                            self.show_card_friend_set.insert(person.unique_idx)
-                                            self.show_card_friend_array.append(person.unique_idx)
-                                            self.show_card_friend_name.updateValue(person.name, forKey: person.unique_idx)
-
-                                        }
-                                        print("알릴 그룹 set 저장됐는지 확인 : \( self.show_card_friend_set)")
-                                        if person.idx_kinds == "group"{
-                                            self.show_card_group_set.insert(person.unique_idx)
-                                            self.show_card_group_array.append(person.unique_idx)
-                                            self.show_card_group_name.updateValue(person.name, forKey: person.unique_idx)
-                                        }
-                                    }
-                                    print("알릴 친구들 저장됐는지 확인 : \(self.show_card_group_name)")
-                                }
-                
-                //뷰 업데이트 위해 보내기
-                NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_friend_card_detail_finish" : response.expiration_at])
+                    self.card_time = time_filtered
+                    print("시간 변환 확인 : \(self.card_time)")
+                    
+                    self.friend_volleh_card_detail = FriendVollehCardDetailModel(card_idx: response.card_idx!, kinds: response.kinds!, expiration_at: response.expiration_at, lock_state: response.lock_state, like_count: response.like_count, like_state: response.like_state, tags: response.tags, share_list: response.share_list, creator: response.creator, is_favor_friend: response.is_favor_friend, cur_user: response.cur_user)
+                    
+                    //태그 set, array에 이름 저장
+                    self.user_selected_tag_set.removeAll()
+                    self.user_selected_tag_list.removeAll()
+                    
+                    if response.tags != nil{
+                        for tag in response.tags!{
+                            self.user_selected_tag_set.insert(tag.tag_name)
+                            self.user_selected_tag_list.append(tag.tag_name)
+                            if self.volleh_category_tag_struct.contains(where: {
+                                $0.category_name == tag.tag_name
+                            }){
+                                //태그 데이터중 카테고리는 뷰에 selected category로 세팅해놔야 하므로 뷰에 알리는 것.
+                                NotificationCenter.default.post(name: Notification.send_selected_card_category, object: nil, userInfo: ["selected_category" : tag.tag_name])
+                            }
+                        }
+                    }
+                    print("카드 정보 가져와서 태그 저장한 것 확인: \(self.user_selected_tag_list)")
+                    
+                    //알릴 사람들 set, array, dictionary에 저장
+                    if response.share_list != nil{
+                        print("카드 상세 데이터 share_list 널 아닐 때")
+                        for person in response.share_list!{
+                            if person.idx_kinds == "friend"{
+                                self.show_card_friend_set.insert(person.unique_idx)
+                                self.show_card_friend_array.append(person.unique_idx)
+                                self.show_card_friend_name.updateValue(person.name, forKey: person.unique_idx)
+                                
+                            }
+                            print("알릴 그룹 set 저장됐는지 확인 : \( self.show_card_friend_set)")
+                            if person.idx_kinds == "group"{
+                                self.show_card_group_set.insert(person.unique_idx)
+                                self.show_card_group_array.append(person.unique_idx)
+                                self.show_card_group_name.updateValue(person.name, forKey: person.unique_idx)
+                            }
+                        }
+                        print("알릴 친구들 저장됐는지 확인 : \(self.show_card_group_name)")
+                    }
+                    
+                    //뷰 업데이트 위해 보내기
+                    NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_friend_card_detail_finish" : response.expiration_at])
                 }
                 
             })
@@ -1081,12 +1081,12 @@ class FriendVollehMainViewmodel: ObservableObject{
                     //있는 데이터 제거 후 추가
                     self.friend_list_struct.removeAll()
                     
-//                    for friend in response{
-//                        
-//                        if friend.nickname != nil{
-//                            self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx!, nickname: friend.nickname!, profile_photo: friend.profile_photo, state: friend.state ?? 0))
-//                        }
-//                    }
+                    //                    for friend in response{
+                    //
+                    //                        if friend.nickname != nil{
+                    //                            self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx!, nickname: friend.nickname!, profile_photo: friend.profile_photo, state: friend.state ?? 0))
+                    //                        }
+                    //                    }
                     print("친구 데이터 넣어졌는지 확인: \(self.friend_list_struct)")
                 }
             })
@@ -1112,12 +1112,11 @@ class FriendVollehMainViewmodel: ObservableObject{
                 if result == result{
                     if result == "ok"{
                         print("신고하기 완료")
-                        self.request_result_alert = .success
+                        NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["report_result" : "ok"])
                         
                     }else{
                         print("신고하기 실패")
-                        self.request_result_alert = .fail
-                        
+                        NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["report_result" : "fail"])
                     }
                 }
             })
@@ -1146,16 +1145,16 @@ class FriendVollehMainViewmodel: ObservableObject{
                     print("좋아요 ok")
                     
                     var clicked_card : Int? = -1
-                        clicked_card =  self.friend_volleh_card_struct.firstIndex(where: {
-                           $0.card_idx == card_idx
-                       }) ?? -1
+                    clicked_card =  self.friend_volleh_card_struct.firstIndex(where: {
+                        $0.card_idx == card_idx
+                    }) ?? -1
                     if clicked_card != -1{
-                       self.friend_volleh_card_struct[clicked_card!].like_count += 1
-                       self.friend_volleh_card_struct[clicked_card!].like_state = 1
+                        self.friend_volleh_card_struct[clicked_card!].like_count += 1
+                        self.friend_volleh_card_struct[clicked_card!].like_state = 1
                     }else{
                         clicked_card =  self.my_friend_volleh_card_struct.firstIndex(where: {
-                           $0.card_idx == card_idx
-                       })
+                            $0.card_idx == card_idx
+                        })
                         
                         self.my_friend_volleh_card_struct[clicked_card!].like_count += 1
                         self.my_friend_volleh_card_struct[clicked_card!].like_state = 1
@@ -1195,16 +1194,16 @@ class FriendVollehMainViewmodel: ObservableObject{
                     print("좋아요 취소 ok")
                     
                     var clicked_card : Int? = -1
-                        clicked_card =  self.friend_volleh_card_struct.firstIndex(where: {
-                           $0.card_idx == card_idx
-                       }) ?? -1
+                    clicked_card =  self.friend_volleh_card_struct.firstIndex(where: {
+                        $0.card_idx == card_idx
+                    }) ?? -1
                     if clicked_card != -1{
-                       self.friend_volleh_card_struct[clicked_card!].like_count -= 1
-                       self.friend_volleh_card_struct[clicked_card!].like_state = 0
+                        self.friend_volleh_card_struct[clicked_card!].like_count -= 1
+                        self.friend_volleh_card_struct[clicked_card!].like_state = 0
                     }else{
                         clicked_card =  self.my_friend_volleh_card_struct.firstIndex(where: {
-                           $0.card_idx == card_idx
-                       })
+                            $0.card_idx == card_idx
+                        })
                         
                         self.my_friend_volleh_card_struct[clicked_card!].like_count -= 1
                         self.my_friend_volleh_card_struct[clicked_card!].like_state = 0
@@ -1307,7 +1306,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                         if user.idx == Int(self.my_idx!){
                             self.today_boring_friends_model.insert(BoringFriendsModel(idx: user.idx, nickname: user.nickname, profile_photo_path: user.profile_photo_path, state: user.state, kinds: user.kinds), at: 0)
                         }else{
-                        self.today_boring_friends_model.append(BoringFriendsModel(idx: user.idx, nickname: user.nickname, profile_photo_path: user.profile_photo_path, state: user.state, kinds: user.kinds))
+                            self.today_boring_friends_model.append(BoringFriendsModel(idx: user.idx, nickname: user.nickname, profile_photo_path: user.profile_photo_path, state: user.state, kinds: user.kinds))
                         }
                     }
                     print("심심기간인 친구들 가져온 것 확인: \(self.today_boring_friends_model)")
@@ -1341,20 +1340,20 @@ class FriendVollehMainViewmodel: ObservableObject{
                 print("오늘 심심기간 설정 통신 응답: \(response)")
                 if response["result"].stringValue == "ok"{
                     print("심심기간 정보 확인: \(self.today_boring_friends_model)")
-                   let model_idx =  self.today_boring_friends_model.firstIndex(where: {
+                    let model_idx =  self.today_boring_friends_model.firstIndex(where: {
                         $0.idx == Int(self.my_idx!)
                     }) ?? -1
                     
                     //기존에 심심기간 설정이 됐던 경우라면 삭제
                     if action == 1{
-//                        self.today_boring_friends_model.append(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""))
+                        //                        self.today_boring_friends_model.append(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname, state: 1, kinds: ""))
                         self.today_boring_friends_model.insert(BoringFriendsModel(idx: Int(self.my_idx!)!, nickname: self.my_nickname!, state: 1, kinds: ""), at: 0)
-
+                        
                     }
                     //기존에 심심기간 설정이 안됐었던 경우라면 추가
                     else{
                         self.today_boring_friends_model.remove(at: model_idx)
-                       
+                        
                     }
                     
                     //뷰 업데이트 위해 보내기
@@ -1381,8 +1380,8 @@ class FriendVollehMainViewmodel: ObservableObject{
                     break
                 }
             }, receiveValue: {response in
-    
-        print("관심친구 설정 통신 response: \(response)")
+                
+                print("관심친구 설정 통신 response: \(response)")
                 let result = response["result"].string
                 if result == "ok"{
                     print("관심친구 설정 완료")
@@ -1393,20 +1392,20 @@ class FriendVollehMainViewmodel: ObservableObject{
                     print("관심친구설정 오류")
                     NotificationCenter.default.post(name: Notification.set_interest_friend, object: nil, userInfo: ["set_interest_friend" : "error", "friend_idx": String(f_idx)])
                 }
-    })
+            })
     }
     
     //카드 만들 때 현재 시간 +10분인 경우에만 만들기 가능
     func make_card_time_check(make_time : String) -> Bool{
         print("들어온 카드 약속 날: \(make_time)")
-
+        
         let format = DateFormatter()
         format.dateFormat = "yyyy-MM-dd HH:mm:ss"
         format.timeZone = TimeZone(abbreviation: "UTC")
-
+        
         let today_format = Int(Date().timeIntervalSince1970)+3600*9
-                    let timeintervel = TimeInterval(today_format)
-                    let korean_time  = Date(timeIntervalSince1970: timeintervel)
+        let timeintervel = TimeInterval(today_format)
+        let korean_time  = Date(timeIntervalSince1970: timeintervel)
         let today_string = format.string(from: korean_time)
         
         let today = format.date(from: today_string)
@@ -1457,10 +1456,10 @@ class FriendVollehMainViewmodel: ObservableObject{
                     }else{
                         changed_lock_state = "잠금"
                     }
-                //뷰 업데이트 위해 보내기
-                NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["lock" : changed_lock_state, "card_idx": String(card_idx)])
+                    //뷰 업데이트 위해 보내기
+                    NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["lock" : changed_lock_state, "card_idx": String(card_idx)])
                 }
-    })}
+            })}
     
     //친구 카드 참여자 목록 가져오기
     func get_friend_card_apply_people(card_idx: Int){
@@ -1472,25 +1471,25 @@ class FriendVollehMainViewmodel: ObservableObject{
                 case .finished:
                     break
                 }
-                }, receiveValue: {response in
-                    print("카드 참여자 response: \(response)")
+            }, receiveValue: {response in
+                print("카드 참여자 response: \(response)")
+                
+                let result = response.array
+                if (result?.count)! > 0{
+                    print("참여자 있을 때")
                     
-                    let result = response.array
-                    if (result?.count)! > 0{
-                        print("참여자 있을 때")
-                        
-                        let json_string = """
+                    let json_string = """
                                 \(result)
                                 """
-                        let json_data = json_string.data(using: .utf8)
-                        
-                        let apply_users = try? JSONDecoder().decode([ApplyUserStruct].self, from: json_data!)
-                        self.apply_user_struct = apply_users!
-                        
-                    }else{
-                        print("참여자 없음")
-                    }
-                })
+                    let json_data = json_string.data(using: .utf8)
+                    
+                    let apply_users = try? JSONDecoder().decode([ApplyUserStruct].self, from: json_data!)
+                    self.apply_user_struct = apply_users!
+                    
+                }else{
+                    print("참여자 없음")
+                }
+            })
     }
     
 }
