@@ -67,6 +67,14 @@ struct TopNavBar: View {
             .padding([.top,.leading, .trailing], UIScreen.main.bounds.width/20)
         .navigationBarHidden(true)
         .navigationBarTitle("", displayMode: .inline)
+            .onAppear{
+                if ViewRouter.get_view_router().fcm_destination == "manage_friend"{
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
+                    self.go_to_manage = true
+                    }
+                }
+            }
         
     }
 }
