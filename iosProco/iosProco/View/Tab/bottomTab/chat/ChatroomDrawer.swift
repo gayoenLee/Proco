@@ -181,6 +181,7 @@ struct ChatroomDrawer: View {
         .onAppear{
             //친구 탭 클릭시 read chatroom으로 가져오는 데이터
             print("드로어에서 채팅방 데이터: \(SockMgr.socket_manager.current_chatroom_info_struct)")
+            
             let alarm_info = UserDefaults.standard.string(forKey: "\(my_idx)_chatroom_alarm_\(chatroom_idx)") ?? ""
             if alarm_info == ""{
                 self.alarm_state = true
@@ -255,16 +256,11 @@ extension ChatroomDrawer{
         HStack{
             Button(action: {
                 if self.alarm_state{
-                    
+                    print("알림이 켜져있을 때 끄는 것")
                     SockMgr.socket_manager.chatroom_alarm_setting_event(chatroom_idx: Int(chatroom_idx)!, state: 0)
                     
-                    //                    if alarm_result{
-                    //                    self.alarm_state = false
-                    //                        print("채팅방 알림 설정 서버 응답 완료 후 false로 변경: \(self.alarm_state)")
-                    //                    }
-                    
                 }else{
-                    
+                    print("알림이 켜져있을 때 켜는 것")
                     SockMgr.socket_manager.chatroom_alarm_setting_event(chatroom_idx: Int(chatroom_idx)!, state: 1)
                     
                 }
@@ -275,17 +271,25 @@ extension ChatroomDrawer{
             })
             .onReceive(NotificationCenter.default.publisher(for: Notification.alarm_changed), perform: { value in
                 print("알림 설정 결과 받음: \(value)")
+                
                 if let user_info = value.userInfo, let check_result = user_info["alarm_changed"]{
+                    
                     print("알림 설정 결과 받음: \(check_result)")
-                    if check_result as! Int == 0 {
+                    
+                    if check_result as! String == "chat_room"{
                         
-                        UserDefaults.standard.set("0", forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(chatroom_idx)")
+                        let state = user_info["state"] as! String
                         
-                        self.alarm_state = false
-                        
-                    }else{
-                        UserDefaults.standard.set("1", forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(chatroom_idx)")
-                        self.alarm_state = true
+                        if state == "0" {
+                            
+                            UserDefaults.standard.set("0", forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(chatroom_idx)")
+                            
+                            self.alarm_state = false
+                            
+                        }else{
+                            UserDefaults.standard.set("1", forKey: "\(ChatDataManager.shared.my_idx!)_chatroom_alarm_\(chatroom_idx)")
+                            self.alarm_state = true
+                        }
                     }
                 }
             })
@@ -461,48 +465,58 @@ struct ChatRoomUserProfileView: View{
                 .fill(Color.black)
                 .opacity(0.5)
             
-            VStack {
-                VStack{
-                    
-                    HStack{
-                        //프로필 닫기
+            
+            VStack{
+                
+                HStack{
+                    //프로필 닫기
+                    Button(action: {
+                        withAnimation {
+                            self.show_profile.toggle()
+                        }
+                        
+                    }) {
                         Image("profile_close_btn")
                             .resizable()
-                            .frame(width: 11, height: 11)
-                            .onTapGesture {
-                                withAnimation{
-                                    self.show_profile.toggle()
-                                }
-                            }
-                        if Int(ChatDataManager.shared.my_idx!) != friend.user_idx!{
+                            .frame(width: 12, height: 12)
+                    }
+                    
+                    .padding(.leading,UIScreen.main.bounds.width/30)
+                    if Int(ChatDataManager.shared.my_idx!) != friend.user_idx!{
                         HStack{
                             Spacer()
-                            Image("context_menu_btn")
-                                .resizable()
-                                .frame(width: 15, height: 15)
+                            Button(action: {
+                                
+                                print("추방하기, 신고하기 액션시트 띄우기 클릭")
+                                self.show_context_menu = true
+                            }){
+                                Image("context_menu_btn")
+                                    .resizable()
+                                    .frame(width: 4, height: 15)
+                                    .padding([.leading,.trailing],UIScreen.main.bounds.width/20)
+                                
+                            }
                         }
-                        .onTapGesture {
-                            print("추방하기, 신고하기 액션시트 띄우기 클릭")
-                            self.show_context_menu = true
-                        }
+                        
                         .actionSheet(isPresented: self.$show_context_menu){
                             ActionSheet(title: Text("\(friend.nickname!)님을"), message: Text(""), buttons: //방장에게만 보이는 버튼(닉네임으로 비교)
                                             Int(ChatDataManager.shared.my_idx!) == SockMgr.socket_manager.creator_idx ? [ .default(Text("추방하기"), action: {
-                                //추방하시겠습니까 알람 띄우기
-                                self.check_banish.toggle()
-                                //추방할 사람의 유저 모델 정보 가져오기
-                                print("추방하려는 사람의 idx: \(selected_friend_idx)")
-                            }), .default(Text("신고하기"), action: {
-                                //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
-                                        self.show_profile.toggle()
-                                        
-                                        self.show_report_view.toggle()
-                                        }), .cancel(Text("취소"))] : [.default(Text("신고하기"), action: {
-                                        //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
-                                                //self.show_profile.toggle()
+                                                //추방하시겠습니까 알람 띄우기
+                                                self.check_banish.toggle()
+                                                //추방할 사람의 유저 모델 정보 가져오기
+                                                print("추방하려는 사람의 idx: \(selected_friend_idx)")
+                                            }), .default(Text("신고하기"), action: {
+                                                //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
+                                                self.show_profile.toggle()
+                                                print("신고!!\(self.selected_friend_idx)")
                                                 
+                                                self.show_report_view.toggle()
+                                            }), .cancel(Text("취소"))] : [.default(Text("신고하기"), action: {
+                                                //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
+                                                //self.show_profile.toggle()
+                                                print("신고!!\(self.selected_friend_idx)")
                                                 self.show_report_view = true
-                                                }), .cancel(Text("취소"))])
+                                            }), .cancel(Text("취소"))])
                         }
                         .alert(isPresented: $check_banish){
                             Alert(title: Text("추방하기"), message: Text("추방하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
@@ -522,124 +536,116 @@ struct ChatRoomUserProfileView: View{
                                 self.check_banish.toggle()
                             }))
                         }
-                        }
-                        
-//                        HStack{
-//                            Spacer()
-//                            Image("report_icon")
-//                                .resizable()
-//                                .frame(width: 18, height: 20)
-//                                .onTapGesture{
-//                            //선택한 친구의 idx를 manage_viewmodel에 저장해 나중에 그룹에 추가하는 통신시 사용
-//                                    self.show_profile.toggle()
-//
-//                                    self.show_report_view.toggle()
-//                          }
-//                        }
                     }
-                    .padding()
-
-                    //프로필 이미지, 이름
-                    HStack{
-                        Spacer()
-                        if friend.profile_photo == "" || friend.profile_photo == nil{
-                            Image("main_profile_img")
+                }
+                .padding([.leading, .trailing],UIScreen.main.bounds.width/30)
+                .padding(.top, UIScreen.main.bounds.width/20)
+                HStack{
+                    NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_feed)
+                    NavigationLink("",destination:  NormalChatRoom(main_vm: FriendVollehMainViewmodel() ,group_main_vm: GroupVollehMainViewmodel(),socket: SockMgr.socket_manager), isActive: self.$go_private_chatroom)
+                }.frame(width: 5, height: UIScreen.main.bounds.width/30, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
+                //프로필 이미지
+                HStack{
+                    Spacer()
+                    if friend.profile_photo == "" || friend.profile_photo == nil{
+                        Image("main_profile_img")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                    }else{
+                        KFImage(URL(string: friend.profile_photo!))
+                            .placeholder{Image("main_profile_img")
                                 .resizable()
-                                .frame(width: 50, height: 50)
-                        }else{
-                            KFImage(URL(string: friend.profile_photo!))
-                                .placeholder{Image("main_profile_img")
+                                .frame(width: 48, height: 48)
+                            }
+                            .loadDiskFileSynchronously()
+                            .cacheMemoryOnly()
+                            .fade(duration: 0.25)
+                            .setProcessor(img_processor)
+                            .onProgress{receivedSize, totalSize in
+                                print("on progress: \(receivedSize), \(totalSize)")
+                            }
+                            .onSuccess{result in
+                                print("성공 : \(result)")
+                            }
+                            .onFailure{error in
+                                print("실패 이유: \(error)")
+                                
+                                Image("main_profile_img")
                                     .resizable()
                                     .frame(width: 48, height: 48)
-                                }
-                                .loadDiskFileSynchronously()
-                                .cacheMemoryOnly()
-                                .fade(duration: 0.25)
-                                .setProcessor(img_processor)
-                                .onProgress{receivedSize, totalSize in
-                                    print("on progress: \(receivedSize), \(totalSize)")
-                                }
-                                .onSuccess{result in
-                                    print("성공 : \(result)")
-                                }
-                                .onFailure{error in
-                                    print("실패 이유: \(error)")
-                                    
-                                    Image("main_profile_img")
-                                        .resizable()
-                                        .frame(width: 48, height: 48)
-                                }
-                        }
-                        
-                        Spacer()
+                            }
                     }
-                    NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_feed)
                     
-                    HStack{
-                        Spacer()
-                        Text(friend.nickname!)
-                            .font(.custom(Font.n_bold, size: 15))
-                            .foregroundColor(.proco_black)
-                        Spacer()
-                    }
                     Spacer()
-                    //채팅하기, 심심풀이 보기, 추방하기 버튼
-                    HStack{
-                        Button(action: {
+                }
+                
+                //이름
+                HStack{
+                    Spacer()
+                    Text(friend.nickname!)
+                        .font(.custom(Font.n_bold, size: 15))
+                        .foregroundColor(.proco_black)
+                    Spacer()
+                }
+                .padding(.bottom,UIScreen.main.bounds.width/50)
+                //채팅하기, 심심풀이 보기, 추방하기 버튼
+                HStack{
+                    Button(action: {
+                        
+                        calendar_vm.calendar_owner.user_idx = friend.user_idx!
+                        calendar_vm.calendar_owner.profile_photo_path = friend.profile_photo ?? ""
+                        calendar_vm.calendar_owner.user_nickname = friend.nickname!
+                        calendar_vm.calendar_owner.watch_user_idx = Int(ChatDataManager.shared.my_idx!)!
+                        SimSimFeedPage.calendar_owner_idx = friend.user_idx!
+                        self.go_feed = true
+                        
+                    }){
+                        HStack{
                             
-                            calendar_vm.calendar_owner.user_idx = friend.user_idx!
-                            calendar_vm.calendar_owner.profile_photo_path = friend.profile_photo ?? ""
-                            calendar_vm.calendar_owner.user_nickname = friend.nickname!
-                            calendar_vm.calendar_owner.watch_user_idx = Int(ChatDataManager.shared.my_idx!)!
-                            SimSimFeedPage.calendar_owner_idx = friend.user_idx!
-                            self.go_feed = true
+                            Image("profile_calendar")
+                                .resizable()
+                                .frame(width: 17, height: 19)
                             
-                        }){
-                            HStack{
-                                
-                                Image("profile_calendar")
-                                    .resizable()
-                                    .frame(width: 17, height: 19)
-                                
-                                Text("심심풀이 보기")
-                                    .foregroundColor(Color.proco_black)
-                                    .font(.custom(Font.t_extra_bold, size: 13))
-                            }
-                        }
-                        .padding(.leading, UIScreen.main.bounds.width/20)
-                        Spacer()
-                        Divider()
-                        Spacer()
-                        Button(action: {
-                            print("채팅하기 클릭한 친구 정보: \(friend)")
-                            ChatDataManager.shared.check_chat_already(my_idx: Int(ChatDataManager.shared.my_idx!)!, friend_idx: friend.user_idx!, nickname: friend.nickname!)
-                            
-                            self.go_private_chatroom = true
-                        }){
-                            HStack{
-                                
-                                Image("profile_chat_btn")
-                                    .resizable()
-                                    .frame(width: 17, height: 19)
-                                
-                                Text("채팅하기")
-                                    .foregroundColor(Color.proco_black)
-                                    .font(.custom(Font.t_extra_bold, size: 13))
-                            }
-                            .padding(.trailing, UIScreen.main.bounds.width/10)
+                            Text("심심풀이 보기")
+                                .foregroundColor(Color.proco_black)
+                                .font(.custom(Font.t_extra_bold, size: 13))
                         }
                     }
-                    .padding()
-                    
-                    NavigationLink("",destination:  NormalChatRoom(main_vm: FriendVollehMainViewmodel() ,group_main_vm: GroupVollehMainViewmodel(),socket: SockMgr.socket_manager), isActive: self.$go_private_chatroom)
+                    .padding(.leading, UIScreen.main.bounds.width/7)
+                    Spacer()
+                    Divider()
+                    Spacer()
+                    Button(action: {
+                        print("채팅하기 클릭한 친구 정보: \(friend)")
+                        ChatDataManager.shared.check_chat_already(my_idx: Int(ChatDataManager.shared.my_idx!)!, friend_idx: friend.user_idx!, nickname: friend.nickname!)
+                        
+                        self.go_private_chatroom = true
+                    })
+                    {
+                        HStack{
+                            
+                            Image("profile_chat_btn")
+                                .resizable()
+                                .frame(width: 17, height: 19)
+                            
+                            Text("채팅하기")
+                                .foregroundColor(Color.proco_black)
+                                .font(.custom(Font.t_extra_bold, size: 13))
+                        }
+                        .padding(.trailing, UIScreen.main.bounds.width/7)
+                    }
                 }
-                .frame(minWidth: UIScreen.main.bounds.width*0.9, idealWidth: UIScreen.main.bounds.width*0.9, maxWidth: UIScreen.main.bounds.width*0.9, minHeight: UIScreen.main.bounds.width*0.6, idealHeight: UIScreen.main.bounds.width*0.6, maxHeight: UIScreen.main.bounds.width*0.7, alignment: .top)
-                .fixedSize(horizontal: true, vertical: true)
-                .background(RoundedRectangle(cornerRadius: 27)
-                                .fill(Color.white.opacity(1)))
-                .overlay(RoundedRectangle(cornerRadius: 27).stroke(Color.black, lineWidth: 1))
+                .padding(.bottom,UIScreen.main.bounds.width/50)
+                
             }
+            .frame(minWidth: UIScreen.main.bounds.width*0.9, idealWidth: UIScreen.main.bounds.width*0.9, maxWidth: UIScreen.main.bounds.width*0.9, minHeight: UIScreen.main.bounds.width*0.4, idealHeight: UIScreen.main.bounds.width*0.51, maxHeight: UIScreen.main.bounds.width*0.7, alignment: .top)
+            .fixedSize(horizontal: true, vertical: true)
+            .background(RoundedRectangle(cornerRadius: 27)
+                            .fill(Color.white.opacity(1)))
+            .overlay(RoundedRectangle(cornerRadius: 27).stroke(Color.black, lineWidth: 1))
+            
         }
+        .padding(.all, UIScreen.main.bounds.width/40)
     }
 }
 
