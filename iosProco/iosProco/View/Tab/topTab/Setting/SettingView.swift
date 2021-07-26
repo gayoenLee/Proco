@@ -258,21 +258,21 @@ private extension SettingView{
     var FeedDisclosureSettingView: some View{
         
         HStack{
-                Text("심심풀이")
-                    .font(.custom(Font.n_bold, size: 18))
-                    .foregroundColor(Color.proco_black)
+            Text("심심풀이")
+                .font(.custom(Font.n_bold, size: 18))
+                .foregroundColor(Color.proco_black)
             
             Spacer()
-
-                HStack{
-                    Text("\(self.current_calendar_state)")
-                        .font(.custom(Font.n_extra_bold, size: 15))
-                        .foregroundColor(Color.gray)
-                    
-                    Image("right_light")
-                        .resizable()
-                        .frame(width: 5.62, height: 11.24)
-                }
+            
+            HStack{
+                Text("\(self.current_calendar_state)")
+                    .font(.custom(Font.n_extra_bold, size: 15))
+                    .foregroundColor(Color.gray)
+                
+                Image("right_light")
+                    .resizable()
+                    .frame(width: 5.62, height: 11.24)
+            }
         }
         .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
         .onTapGesture {
