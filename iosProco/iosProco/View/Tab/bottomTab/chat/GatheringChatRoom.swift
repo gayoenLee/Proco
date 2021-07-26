@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct GatheringChatRoom: View {
+    
+    @Environment(\.presentationMode) var presentation
+
     @ObservedObject var socket : SockMgr
     @ObservedObject var calendar_vm = CalendarViewModel()
 
@@ -84,8 +87,13 @@ struct GatheringChatRoom: View {
                     
                     Button(action: {
                         
-                        SockMgr.socket_manager.selected_tab = 2
-                        self.go_back = true
+                        ViewRouter.get_view_router().fcm_destination = ""
+                        //일반, 모임, 친구 채팅방에서 각각 뒤로가기시 보이는 탭 설정하기 위함, from_tab :  채팅탭에서 왔는지 여부
+                        if self.from_tab{
+                            SockMgr.socket_manager.selected_tab = 2
+
+                            self.go_back = true}
+                        else{self.presentation.wrappedValue.dismiss()}
                     }){
                         Image("left")
                             .resizable()

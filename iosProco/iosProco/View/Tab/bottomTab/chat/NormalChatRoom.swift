@@ -121,6 +121,8 @@ struct NormalChatRoom: View {
                 HStack{
                     Button(action: {
                         print("뒤로가기 클릭")
+                        
+                        ViewRouter.get_view_router().fcm_destination = ""
                         //일반, 모임, 친구 채팅방에서 각각 뒤로가기시 보이는 탭 설정하기 위함, from_tab :  채팅탭에서 왔는지 여부
                         if self.from_tab{
                             SockMgr.socket_manager.selected_tab = 0
@@ -475,7 +477,7 @@ struct NormalChatRoom: View {
             
             //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
             if show_profile{
-                ChatRoomUserProfileView(friend: user_profile_info!, show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_user_idx, show_report_view: self.$show_report_view, go_feed:self.$go_feed, calendar_vm: self.calendar_vm, go_private_chatroom: self.$go_private_chatroom, show_context_menu: self.$show_context_menu)
+                ChatRoomUserProfileView(friend: user_profile_info ?? UserInDrawerStruct(), show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_user_idx, show_report_view: self.$show_report_view, go_feed:self.$go_feed, calendar_vm: self.calendar_vm, go_private_chatroom: self.$go_private_chatroom, show_context_menu: self.$show_context_menu)
 
             }
         }

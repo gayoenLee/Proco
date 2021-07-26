@@ -88,6 +88,7 @@ struct ChatFriendRoomView: View {
                 HStack{
                     Button(action: {
                         print("뒤로가기 클릭")
+                        ViewRouter.get_view_router().fcm_destination = ""
                         //self.presentation.wrappedValue.dismiss()
                         if self.from_tab{
                             SockMgr.socket_manager.selected_tab = 1
