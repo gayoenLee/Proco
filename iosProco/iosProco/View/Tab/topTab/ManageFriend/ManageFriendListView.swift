@@ -249,7 +249,8 @@ struct ManageFriendListView: View {
                                 $0.idx == Int(friend_idx)
                             })
                             withAnimation(.spring()) {
-                            self.friend_list_model.remove(at: model_idx!)
+                                self.friend_list_model.remove(at: model_idx!)
+                                self.total_friend_num -= 1
                             }
                         }
                     }else{
@@ -404,7 +405,7 @@ extension ManageFriendListView{
         HStack{
             //돌아가기 버튼
             Button(action: {
-                
+                ViewRouter.get_view_router().fcm_destination = ""
                 self.presentation.wrappedValue.dismiss()
             }){
                 Image("left")
