@@ -30,7 +30,7 @@ class SockMgr : ObservableObject {
     
     let objectWillChange = ObservableObjectPublisher()
     var cancellation: AnyCancellable?
- 
+    
     //채팅 방 목록 데이터 모델
     @Published var chat_room_struct : [ChatRoomModel] = []{
         didSet{
@@ -364,6 +364,17 @@ class SockMgr : ObservableObject {
                 }
             }, receiveValue: {response in
                 print("채팅방 회원  신고하기 resopnse: \(response)")
+                let result = response["result"].string
+                if result == result{
+                    if result == "ok"{
+                        print("신고하기 완료")
+                        NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["report_result" : "ok"])
+                        
+                    }else{
+                        print("신고하기 실패")
+                        NotificationCenter.default.post(name: Notification.event_finished, object: nil, userInfo: ["report_result" : "fail"])
+                    }
+                }
                 
             })
     }
@@ -869,13 +880,20 @@ class SockMgr : ObservableObject {
     
     //************노티피케이션 알림 만들기
     //TODO 클릭시 이동처리
-    func create_noti(){
+    func create_noti(title: String, message : String, room_kind: String, chatroom_idx: Int){
         let content = UNMutableNotificationContent()
-        content.title = "알림"
-        content.subtitle = "새로운 메세지가 도착했습니다."
+        let chatroom_idx_str = String(chatroom_idx)
+        content.title = "\(title)"
+        content.body = "\(message)"
+        content.categoryIdentifier = "chat"
+        ChatDataManager.shared.read_chatroom(chatroom_idx: chatroom_idx)
+        let room_kinds = SockMgr.socket_manager.current_chatroom_info_struct.kinds
+        print("어떤 채팅방인지 확인: \(room_kinds)")
+        
+        content.userInfo = ["room_kind" : room_kinds, "chatroom_idx" : chatroom_idx_str, "foreground_msg" : "ok"]
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        let request = UNNotificationRequest(identifier: "proco", content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: "foreground", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
@@ -1309,7 +1327,7 @@ class SockMgr : ObservableObject {
         }
     }
     /*
-     모임 카드 신청한 사람이 수락 됐다는 이벤트 받은 것.
+     모임 카드 신청한 사람이 수락 됐다는 이벤트 받은 것. & 임시 채팅방이 만들어진 경우
      1. 받은 데이터 모델 저장.
      2. 서버에 채팅방 참여할 수 있도록 채팅방 번호와 이벤트 보내기.
      */
@@ -1386,7 +1404,8 @@ class SockMgr : ObservableObject {
                     //TODO 채팅 목록을 보고 있었을 경우
                 }else if self.current_view == 222{
                     print("join room이벤트를 채팅 목록을 보고 있을 때 받은 경우")
-                    self.create_noti()
+                    
+                    self.create_noti(title: "", message: "\(nickname!):\(content)", room_kind: "meeting", chatroom_idx: chatroom_idx)
                     
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.new_message_in_room_normal, object: nil, userInfo: ["new_message_in_room_normal" : chatroom_idx])
@@ -1394,7 +1413,7 @@ class SockMgr : ObservableObject {
                     //그 외 경우
                 }else{
                     print("join room이벤트를 채팅 관련 뷰가 아닌 다른 곳에서 받은 경우")
-                    self.create_noti()
+                    self.create_noti(title: "", message: "\(nickname!):\(content)", room_kind: "meeting", chatroom_idx: chatroom_idx)
                 }
                 
             }else{
@@ -1706,21 +1725,21 @@ class SockMgr : ObservableObject {
     }
     
     //상태 업데이트 이벤트 응답 서버에서 받은 경우
-        func get_state_update(){
-            socket.on("server_to_clientupdate_user_state"){data, ack in
-                print("상태 온오프 변경한 이벤트 받음 : \(data)")
-                
-                let result = JSON(data).arrayValue[0]
-               
-                
-                let user_idx = result["user_idx"].intValue
-                let state = result["state"].intValue
-                let state_data = result["state_data"].stringValue
-                      
-                //뷰 업데이트 위해 보내기
-                NotificationCenter.default.post(name: Notification.update_user_state, object: nil, userInfo: ["user_idx" : String(user_idx) , "state" : String(state)])
-            }
+    func get_state_update(){
+        socket.on("server_to_clientupdate_user_state"){data, ack in
+            print("상태 온오프 변경한 이벤트 받음 : \(data)")
+            
+            let result = JSON(data).arrayValue[0]
+            
+            
+            let user_idx = result["user_idx"].intValue
+            let state = result["state"].intValue
+            let state_data = result["state_data"].stringValue
+            
+            //뷰 업데이트 위해 보내기
+            NotificationCenter.default.post(name: Notification.update_user_state, object: nil, userInfo: ["user_idx" : String(user_idx) , "state" : String(state)])
         }
+    }
     
     //친구랑 볼래에서 카드 만들었을 경우 진행하는 이벤트
     func make_chat_room_friend(chatroom_idx: Int, idx: Int, nickname: String){
@@ -1753,7 +1772,7 @@ class SockMgr : ObservableObject {
     func send_message(message_idx: Int, chatroom_idx: Int, user_idx: Int, content: String, kinds: String, created_at: String, front_created_at: CLong){
         print("user read list확인: \(ChatDataManager.shared.user_read_list)")
         print("user read list확인22: \(db.user_read_list)")
-
+        
         //에러가 난 경우 에러난 메세지를 찾기 위해 front_created_at을 보내는 것.
         let parameters = ["idx": message_idx, "chatroom_idx": chatroom_idx, "user_idx": user_idx, "content": content, "kinds": kinds, "created_at": created_at, "front_created_at": front_created_at] as [String : Any]
         // print("메세지 보내기 이벤트에서 파라미터들 확인: \(parameters)")
@@ -2109,7 +2128,8 @@ class SockMgr : ObservableObject {
                 }
                 else{
                     print("다른 채팅방을 보고 있거나 다른 화면을 보고 있을 때")
-                    self.create_noti()
+                    let sender_name = ChatDataManager.shared.get_user_nickname(user_idx: user_idx)
+                    self.create_noti(title: "", message: "\(sender_name):\(content)", room_kind: kinds, chatroom_idx: chatroom_idx)
                 }
             }
             
@@ -2127,7 +2147,7 @@ class SockMgr : ObservableObject {
                 //deleted_at 추가하는 것으로 변경. 1/17
                 ChatDataManager.shared.delete_exit_user(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
                 //나간 유저의 read last idx도 제거해서 업데이트해야 읽음처리 가능.
-             db.get_friend_unread_num(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
+                db.get_friend_unread_num(chatroom_idx: chatroom_idx, user_idx: out_user_idx)
                 
                 print("업데이트한 user read list: \(ChatDataManager.shared.user_read_list)")
                 print("업데이트한 user read list:2 \(db.user_read_list)")
@@ -2203,19 +2223,19 @@ class SockMgr : ObservableObject {
                         print("[추방] 내가 추방 당할 때 채팅방 목록을 보고 있었을 때 -> 채팅방목록에서 채팅방 안보이도록 제거" )
                         
                         var remove_idx : Int?
-                            remove_idx = SockMgr.socket_manager.group_chat_model.firstIndex(where: {
+                        remove_idx = SockMgr.socket_manager.group_chat_model.firstIndex(where: {
                             $0.chatroom_idx == chatroom_idx
                         }) ?? -1
                         
                         if remove_idx != -1{
                             print("모임 채팅방에서 추방당한 경우 ")
-
+                            
                             SockMgr.socket_manager.group_chat_model.remove(at: remove_idx!)
                         }else{
                             print("친구 채팅방에서 추방당한 경우 ")
                             remove_idx = SockMgr.socket_manager.friend_chat_model.firstIndex(where: {
-                            $0.chatroom_idx == chatroom_idx
-                        })!
+                                $0.chatroom_idx == chatroom_idx
+                            })!
                             SockMgr.socket_manager.friend_chat_model.remove(at: remove_idx!)
                         }
                     }
@@ -2324,7 +2344,7 @@ class SockMgr : ObservableObject {
                 
                 
                 //뷰 업데이트 위해 보내기
-                NotificationCenter.default.post(name: Notification.new_message, object: nil, userInfo: ["new message" : "server"])
+                NotificationCenter.default.post(name:  Notification.new_message, object: nil, userInfo: ["new message" : "server"])
                 
                 let user_model = JSON(data[2])
                 let new_user_idx = user_model["idx"].intValue
@@ -2481,7 +2501,7 @@ class SockMgr : ObservableObject {
                 }
                 else{
                     print("다른 채팅방을 보고 있거나 다른 화면을 보고 있을 때")
-                    self.create_noti()
+                    self.create_noti(title: "", message: content, room_kind: kinds, chatroom_idx: chatroom_idx)
                 }
                 
             }
@@ -2612,8 +2632,11 @@ class SockMgr : ObservableObject {
                 
                 UserDefaults.standard.setValue("\(state)", forKey: "\(db.my_idx!)!_chatroom_alarm_\(chatroom_idx)")
                 self.chatroom_alarm_changed = true
-                //뷰 업데이트 위해 보내기
-                NotificationCenter.default.post(name: Notification.alarm_changed, object: nil, userInfo: ["alarm_changed" : state])
+                
+                let state_string = String(state)
+                
+                //뷰 업데이트 위해 보내기 - 설정에서 채팅 알림 : alarm_changed = chat_alarm, 채팅방 알림: alarm_changed = chat_room
+                NotificationCenter.default.post(name: Notification.alarm_changed, object: nil, userInfo: ["alarm_changed" : "chat_room","state" : state_string])
                 
                 print("채팅방 알림 설정 success: \(self.chatroom_alarm_changed)")
             }else{

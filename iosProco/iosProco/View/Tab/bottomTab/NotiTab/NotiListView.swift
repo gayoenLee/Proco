@@ -244,12 +244,14 @@ struct NotiRow: View{
                 
             case "모임카드수정", "모임유저참가신청", "모임수락", "관심친구모임카드":
                 self.group_card_vm.selected_card_idx = noti.unique_idx!
+                self.group_card_vm.my_group_card_struct = []
+                self.group_card_vm.my_group_card_struct.append(GroupCardStruct(card_idx: noti.unique_idx, title: "", kinds: "", expiration_at: "", address: "", map_lat: "", map_lng: "", cur_user: 0, apply_user:  0, introduce: "", card_photo_path: "", lock_state: 0, like_state: 0, like_count: 0, creator_attend_count: 0, tags: [], creator: nil, offset: 0.0, chatroom_idx: "", server_idx: -1))
                 return self.go_group_card_detail = true
                 
             case "관심친구심심기간":
         
                 calendar_vm.calendar_owner.profile_photo_path = noti.image_path ?? ""
-                calendar_vm.calendar_owner.user_idx = noti.idx!
+                calendar_vm.calendar_owner.user_idx = noti.unique_idx!
                 calendar_vm.calendar_owner.user_nickname = noti.content_indicator!
                 calendar_vm.calendar_owner.watch_user_idx = Int(UserDefaults.standard.string(forKey: "user_id")!)!
                 SimSimFeedPage.calendar_owner_idx = noti.unique_idx!

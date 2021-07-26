@@ -15,9 +15,6 @@ struct MakeCardViewGroup: View {
     
     @ObservedObject var main_vm: GroupVollehMainViewmodel
     
-    //모임 소개 텍스트 에디터의 placeholder
-    @State var introduce_placeholder = "내용을 입력해주세요"
-    
     //추가 완료 후 메인 뷰로 이동하기 위한 토글 값
     @State private var make_success : Bool = false
     //카테고리 최소 1개 선택 안했을 경우 띄우는 알림창
@@ -151,6 +148,11 @@ struct MakeCardViewGroup: View {
             }
             .onAppear{
                 print("모여볼래 카드 만드는 뷰 넘어옴")
+                self.main_vm.card_name = ""
+                self.main_vm.user_selected_tag_set.removeAll()
+                self.main_vm.user_selected_tag_list.removeAll()
+                self.main_vm.card_date = Date()
+                self.main_vm.card_time = Date()
             }
             .navigationBarColor(background_img: "meeting_wave_bg", btn_img: "left")
             .navigationBarTitle("방 만들기", displayMode: .inline)
@@ -606,48 +608,54 @@ extension MakingView {
                 Spacer()
             }
             .padding(.leading)
-            
-            //여러줄의 텍스트 입력을 위해서는 text editor 사용.
-            //text에는 바인딩값만 넣을 수 있음
-            TextEditor(text: self.$main_vm.input_introduce)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(self.main_vm.input_introduce == "모임을 소개해주세요" ? .gray : .primary)
-                .colorMultiply(Color.light_gray)
-                .cornerRadius(3)
-                .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
-                .onChange(of: self.main_vm.input_introduce) { value in
-                    print("그룹 소개 onchange 들어옴")
-                    if self.main_vm.input_introduce == "모임을 소개해주세요"{
-                        self.main_vm.input_introduce = ""
+            HStack{
+                //여러줄의 텍스트 입력을 위해서는 text editor 사용.
+                TextEditor(text: self.$main_vm.input_introduce)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .foregroundColor(.primary)
+                    .colorMultiply(Color.light_gray)
+                    .cornerRadius(3)
+                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)
+                    .overlay(
+                        HStack{
+                            if self.main_vm.input_introduce.count <= 0{
+                                
+                                Text("모임을 소개해주세요")
+                                    .foregroundColor(.gray)
+                                    .font(.custom(Font.n_bold, size: 15))
+                                    .padding([.leading, .top])
+                            }
+                        }
+                        , alignment: .topLeading)
+                    .onChange(of: self.main_vm.input_introduce) { value in
+                        print("그룹 소개 onchange 들어옴")
+                        
+                        //현재 몇 글자 작성중인지 표시
+                        self.introduce_txt_count = "\(value.count)/1000"
+                        if value.count > 1000 {
+                            print("그룹 소개 1000글자 넘음")
+                            self.main_vm.input_introduce = String(value.prefix(1000))
+                        }
                     }
-                    //현재 몇 글자 작성중인지 표시
-                    self.introduce_txt_count = "\(value.count)/1000"
-                    if value.count > 1000 {
-                        print("그룹 소개 1000글자 넘음")
-                        self.main_vm.input_introduce = String(value.prefix(1000))
-                    }
-                }
-                //텍스트 에디터의 placeholder값 넣기 위해
-                .onAppear{
-                    // 키보드가 나타나면 placeholder값 지움
-                    NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (noti) in
-                        withAnimation {
-                            if self.main_vm.input_introduce == "내용을 입력해주세요" {
-                                self.main_vm.input_introduce = ""
+                    //텍스트 에디터의 placeholder값 넣기 위해
+                    .onAppear{
+                        // 키보드가 나타나면 placeholder값 지움
+                        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (noti) in
+                            withAnimation {
+                                
+                                
                             }
                             
-                        }
-                        
-                        // 사용자가 입력하지 않고 키보드를 다시 내렸을 경우 placeholder 다시 보여줌
-                        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (noti) in
-                            withAnimation {
-                                if self.main_vm.input_introduce == "" {
-                                    self.main_vm.input_introduce = "내용을 입력해주세요"
+                            // 사용자가 입력하지 않고 키보드를 다시 내렸을 경우 placeholder 다시 보여줌
+                            NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (noti) in
+                                withAnimation {
+                                    
                                 }
                             }
                         }
                     }
-                }
+                
+            }
         }
     }
     

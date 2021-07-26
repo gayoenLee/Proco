@@ -73,44 +73,63 @@ struct FriendStateDialogContents : View{
     var body: some View{
         VStack{
             HStack{
-                Image("profile_close_btn")
-                    .resizable()
-                    .frame(width: 9, height: 9)
-                    .onTapGesture {
-                        withAnimation{
-                            self.show_friend_info.toggle()
-                        }
+                Button(action: {
+                    withAnimation {
+                    self.show_friend_info.toggle()
                     }
-                    .padding(.leading)
+                    
+                }) {
+                    Image("profile_close_btn")
+                        .resizable()
+                        .frame(width: 12, height: 12)
+                }
+                
+                .padding(.leading,UIScreen.main.bounds.width/30)
                 
                 HStack{
                     Spacer()
-                    Image("context_menu_icon")
-                        .resizable()
-                        .frame(width: 3, height: 15)
-                }
-                .onTapGesture{
-                    print("신고하기 클릭")
-                    self.show_report_view = true
+                    Button(action: {
+                        print("신고하기 클릭")
+                        
+                        //kinds: 카드, unique_idx : 카드 idx, report_kinds: string, content
+                        //신고하기 모달창 띄우기
+                        self.show_report_view = true
+                    }){
+                        HStack{
+                            Image("report_icon")
+                                .resizable()
+                                .frame(width: UIScreen.main.bounds.width/25, height: UIScreen.main.bounds.width/25)
+                                .foregroundColor(Color.orange)
+                                .background(Color.white)
+                            Text("신고")
+                                .font(.custom(Font.n_bold, size: 12))
+                                .foregroundColor(.proco_black)
+                        }
+                    }
+                    
                 }
                 
             }
-            .padding([.leading, .trailing])
+            .padding([.leading, .trailing],UIScreen.main.bounds.width/30)
             .padding(.top, UIScreen.main.bounds.width/30)
+           
             
-            //일반 채팅방 화면으로 이동.
-            NavigationLink("",
-                           destination: NormalChatRoom(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket: self.socket, from_tab: false)        .navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true),
-                           isActive: self.$go_to_chat)
-            
-            NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()).navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true), isActive: self.$go_to_feed)
-            
-            //마이페이지 이동(내 다이얼로그인 경우)
-            NavigationLink("",destination: MyPage(main_vm: SettingViewModel())        .navigationBarTitle("", displayMode: .inline)
-                            .navigationBarHidden(true), isActive: self.$go_my_page)
-            
+            //네비게이션링크모음
+            HStack{
+                NavigationLink("",
+                               destination: NormalChatRoom(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket: self.socket, from_tab: false)        .navigationBarTitle("", displayMode: .inline)
+                                .navigationBarHidden(true),
+                               isActive: self.$go_to_chat)
+                
+                NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()).navigationBarTitle("", displayMode: .inline)
+                                .navigationBarHidden(true), isActive: self.$go_to_feed)
+                
+                //마이페이지 이동(내 다이얼로그인 경우)
+                NavigationLink("",destination: MyPage(main_vm: SettingViewModel())        .navigationBarTitle("", displayMode: .inline)
+                                .navigationBarHidden(true), isActive: self.$go_my_page)
+            }.frame(width: 5, height: UIScreen.main.bounds.width/30, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
+
+            //프로필
             HStack{
                 Spacer()
                 
@@ -184,7 +203,7 @@ struct FriendStateDialogContents : View{
                     }
                 }
             }
-            
+            //이름, 관심아이콘
             HStack{
                 Spacer()
                 
@@ -245,7 +264,7 @@ struct FriendStateDialogContents : View{
                 Spacer()
             }
             .padding(.bottom,UIScreen.main.bounds.width/50)
-            
+            //심심풀이보기 , 채팅하기
             HStack{
                 //내 다이얼로그인 경우 마이페이지 버튼
                 if is_friend && Int(self.main_vm.my_idx!) == self.main_vm.friend_info_struct.idx!{
@@ -391,6 +410,10 @@ struct FriendStateDialogContents : View{
         .navigationBarHidden(true)
         .cornerRadius(15)
         .onAppear{
+            print("친구다이얼로그표시")
+            print("[idx확인]친구 : \(self.main_vm.friend_info_struct.idx)")
+            print("[idx확인]그룹 idx : \(self.group_main_vm.creator_info.idx)")
+            print("[idx확인]캘린더 idx : \(self.calendar_vm.calendar_owner.user_idx)")
             if is_friend{
                 print("친구 한 명 다이얼로그 나옴: \(self.main_vm.friend_info_struct)")
                 self.interest_friend = self.main_vm.friend_info_struct.kinds == "관심친구" ? true : false
@@ -398,8 +421,13 @@ struct FriendStateDialogContents : View{
             }
         }
         .sheet(isPresented: self.$show_report_view) {
-            ReportView(show_report: self.$show_report_view, type: "", selected_user_idx: -1, main_vm: self.main_vm, socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
+            
+            if is_friend{
+                ReportView(show_report: self.$show_report_view, type: "일반회원", selected_user_idx: self.main_vm.friend_info_struct.idx! , main_vm: self.main_vm , socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
+            }
+            else{
+                ReportView(show_report: self.$show_report_view, type: "일반회원", selected_user_idx: self.group_main_vm.creator_info.idx! , main_vm: self.main_vm , socket_manager: SockMgr(), group_main_vm: GroupVollehMainViewmodel())
+            }
         }
     }
 }
-

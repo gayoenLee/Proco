@@ -229,29 +229,37 @@ class ChatDataManager : ObservableObject{
         var query : String = ""
         
         //모임일 경우 온,오프라인 구분 추가로 해줘야 하므로 쿼리가 다름.
-        if kinds == "모임"{
-         query = """
-        SELECT
-       CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_ROOM.deleted_at, CHAT_ROOM.state, CHAT_ROOM.room_name,CHAT_CARD.expiration_at
-        FROM CHAT_USER
-         LEFT JOIN CHAT_ROOM
-        ON CHAT_USER.chatroom_idx = CHAT_ROOM.idx
-         LEFT JOIN CHAT_CARD
-        ON CHAT_ROOM.idx = CHAT_CARD.chatroom_idx
-         WHERE CHAT_ROOM.kinds IN('온라인 모임', '오프라인 모임') AND CHAT_USER.user_idx = \(user_idx) AND (CHAT_USER.deleted_at IS NULL OR CHAT_USER.deleted_at = '')
-"""
-        }else{
-            query = """
-           SELECT
-                  CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_ROOM.deleted_at, CHAT_ROOM.state, CHAT_ROOM.room_name,CHAT_CARD.expiration_at
-           FROM CHAT_USER
-            LEFT JOIN CHAT_ROOM
-           ON CHAT_USER.chatroom_idx = CHAT_ROOM.idx
-            LEFT JOIN CHAT_CARD
-           ON CHAT_ROOM.idx = CHAT_CARD.chatroom_idx
-            WHERE CHAT_ROOM.kinds = '\(kinds)' AND CHAT_USER.user_idx = \(user_idx) AND (CHAT_USER.deleted_at IS NULL OR CHAT_USER.deleted_at = '')
-   """
-        }
+        //약속이 취소된 모임을 구분하기 위해 deleted_at 이 현재시간+1일 이후인 채팅방은 받지않도록 한다. 기획(약속이 취소된 채팅방은 삭제된지 1일 이후로 보이지 않게하기)
+                var today_date = Date()
+                let int_format = Int(today_date.timeIntervalSince1970)+3600*9-3600*24
+                let timeintervel = TimeInterval(int_format)
+                let korean_time  = Date(timeIntervalSince1970: timeintervel)
+                
+             //   print("현재시간 변경 korean_time: \(korean_time),korean_time:")
+                //모임일 경우 온,오프라인 구분 추가로 해줘야 하므로 쿼리가 다름.
+                if kinds == "모임"{
+                 query = """
+                SELECT
+               CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_ROOM.deleted_at, CHAT_ROOM.state, CHAT_ROOM.room_name,CHAT_CARD.expiration_at
+                FROM CHAT_USER
+                 LEFT JOIN CHAT_ROOM
+                ON CHAT_USER.chatroom_idx = CHAT_ROOM.idx
+                 LEFT JOIN CHAT_CARD
+                ON CHAT_ROOM.idx = CHAT_CARD.chatroom_idx
+                 WHERE CHAT_ROOM.kinds IN('온라인 모임', '오프라인 모임') AND CHAT_USER.user_idx = \(user_idx) AND (CHAT_USER.deleted_at IS NULL OR CHAT_USER.deleted_at = '') AND (CHAT_ROOM.deleted_at > '\(korean_time)'  OR CHAT_ROOM.deleted_at = '')
+        """
+                }else{
+                    query = """
+                   SELECT
+                    CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_ROOM.deleted_at,CHAT_ROOM.state, CHAT_ROOM.room_name,CHAT_CARD.expiration_at
+                   FROM CHAT_USER
+                    LEFT JOIN CHAT_ROOM
+                   ON CHAT_USER.chatroom_idx = CHAT_ROOM.idx
+                    LEFT JOIN CHAT_CARD
+                   ON CHAT_ROOM.idx = CHAT_CARD.chatroom_idx
+                    WHERE CHAT_ROOM.kinds = '\(kinds)' AND CHAT_USER.user_idx = \(user_idx) AND (CHAT_USER.deleted_at IS NULL OR CHAT_USER.deleted_at = '') AND (CHAT_ROOM.deleted_at > '\(korean_time)'  OR CHAT_ROOM.deleted_at = '')
+           """
+                }
         print("방 종류 쿼리문 확인 : \(query)")
         var stmt: OpaquePointer? = nil
         var kinds = ""
@@ -3256,6 +3264,48 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
         
             //  return unread_num
     }
+    
+    //노티에 띄울 유저 닉네임 정보 가져오기
+    func get_user_nickname(user_idx: Int) -> String{
+        let query = "SELECT * FROM CHAT_USER WHERE user_idx = \(user_idx)"
+        
+        print("쿼리문 확인: \(query)")
+        var name_statement: OpaquePointer? = nil
+        let errormsg = String(cString: sqlite3_errmsg(name_statement)!)
+        var result_nickname : String = ""
+        
+        if sqlite3_prepare_v2(self.db, query, -1, &name_statement, nil) == SQLITE_OK{
+            print("유저 닉네임  가져오는데 prepare ")
+            
+            switch sqlite3_step(name_statement) {
+            case SQLITE_ROW:
+                
+                //0은 첫번째 컬럼을 말함.
+                let chatroom_idx = Int(sqlite3_column_int(name_statement,0))
+                let user_idx = Int(sqlite3_column_int(name_statement, 1))
+                //created_at값이 널일 경우를 체크
+                guard let queryResultCol1 = sqlite3_column_text(name_statement, 2) else {
+                    print("유저 닉네임 가져오는데 nil 임")
+                    return ""
+                }
+                let nickname = String(cString: queryResultCol1)
+                result_nickname = nickname
+                
+            case SQLITE_DONE:
+                print("유저 닉네임 가져오기 done")
+                break
+            default:
+                break
+            }
+            }else{
+            print("유저 닉네임 가져오는데 에러 발생: \(errormsg)")
+        }
+        sqlite3_finalize(name_statement)
+        sqlite3_close(name_statement)
+        
+        return result_nickname
+    }
+    
 }
     
 

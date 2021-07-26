@@ -6,6 +6,7 @@
 // 모여볼래 신청자, 참가자 리스트 뷰
 
 import SwiftUI
+import Kingfisher
 
 struct ApplyPeopleListView: View {
     
@@ -13,26 +14,28 @@ struct ApplyPeopleListView: View {
     
     //신청자 정보를 담고 있는 곳
     @State private var check_owner = true
-   @Binding var show_view : Bool
+    @Binding var show_view : Bool
+    let scale = UIScreen.main.scale
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 40, height: 40)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
     var body: some View {
-    
+        
         VStack{
             //상단 돌아가기, 제목, 수정하기 버튼 탭
             HStack{
                 //돌아가기 버튼
                 Button(action: {
-                 
+                    
                     self.show_view.toggle()
                     print("돌아가기 클릭 :")
                 }){
-                Image( "left")
-                    .resizable()
-                    .frame(width: 8.51 , height: 17)
-                    .padding(.leading, UIScreen.main.bounds.width/20)
-                  
+                    Image( "left")
+                        .resizable()
+                        .frame(width: 8.51 , height: 17)
+                        .padding(.leading, UIScreen.main.bounds.width/20)
+                    
                 }
-                  
+                
                 Spacer()
                 
                 Text("신청자 목록")
@@ -40,7 +43,7 @@ struct ApplyPeopleListView: View {
                     .foregroundColor(.proco_black)
                     .padding()
                 Spacer()
-          
+                
             }
             .padding()
             
@@ -52,149 +55,77 @@ struct ApplyPeopleListView: View {
                             .font(.custom(Font.n_extra_bold, size: 18))
                             .foregroundColor(.proco_black)
                     }else{
-                      
-                            //신청자 카테고리
-                            HStack{
-                                Text("신청자")
-                                    .font(.custom(Font.n_extra_bold, size: 18))
-                                    .foregroundColor(.proco_black)
-                                Spacer()
-                            }
-                            .padding(.leading)
-                            //모든 신청자들중 상태가 거절, 수락이 처리되지 않은 사람들만 보여준다.
-                            //수락 또는 거절 클릭시 신청자 리스트에서 제거
-                            ForEach(main_vm.apply_user_struct.filter{
-                                $0.kinds == "대기중"
-                                
-                            }){ user in
-                                HStack{
-                                    
-                                    Image(main_vm.apply_user_struct[main_vm.get_user_index(item: user)].profile_photo_path ?? "main_profile_img")
-                                        .resizable()
-                                        .frame(width: UIScreen.main.bounds.width/5, height: UIScreen.main.bounds.width/5)
-                                        .cornerRadius(50)
-                                    Text(main_vm.apply_user_struct[main_vm.get_user_index(item: user)].nickname!)
-                                        .font(.custom(Font.n_bold, size: 16))
-                                        .foregroundColor(.proco_black)
-                                    
-                                    Spacer()
-                                    
-                                    //주최자에게만 버튼이 보이도록 함 - 드로어, 메인의 경우 나눠야 함.
-                                    // 드로어에서 신청자 목록 보기로 넘어왔을 때 내가 만든 방인 경우
-                                    //주최자에게만 버튼이 보이도록 함 - 드로어, 메인의 경우 나눠야 함.
-                                    // 드로어에서 신청자 목록 보기로 넘어왔을 때 내가 만든 방인 경우
-                                    if  SockMgr.socket_manager.current_chatroom_info_struct.creator_idx == Int(ChatDataManager.shared.my_idx!){
-                                        Button(action: {
-                                            
-                                            print("드로어에서 신청자 목록 보기로 넘어왔을 때 내가 만든 방인 경우 수락")
-                                            //수락하고자 하는 사람의 idx 뷰모델에 저장해서 통신시 사용.
-                                            self.main_vm.apply_user_idx = main_vm.apply_user_struct[main_vm.get_user_index(item: user)].idx!
-                                            print("수락하려는 사람의 idx: \(self.main_vm.apply_user_idx)")
-                                            self.main_vm.apply_user_struct[main_vm.get_user_index(item: user)].kinds = "수락됨"
-                                            //수락하려는 사람의 프로필 사진 경로, 닉네임 저장해서 채팅 서버에 보낼 때 사용.
-                                            self.main_vm.apply_user_nickname = main_vm.apply_user_struct[main_vm.get_user_index(item: user)].nickname!
-                                            self.main_vm.apply_user_profile_photo = main_vm.apply_user_struct[main_vm.get_user_index(item: user)].profile_photo_path ?? ""
-                                            
-                                            //수락하는 통신
-                                            self.main_vm.apply_accept()
-                                            
-                                        }){
-                                            Text("수락")
-                                                .padding()
-                                                .background(Color.proco_sky_blue)
-                                                .foregroundColor(Color.proco_blue)
-                                                .cornerRadius(20)
-                                            
-                                        }
-                                        
-                                        Button(action: {
-                                            //거절하고자 하는 사람의 idx 뷰모델에 저장해서 통신시 사용.
-                                            self.main_vm.apply_user_idx = main_vm.apply_user_struct[main_vm.get_user_index(item: user)].idx!
-                                            //참가 신청 거절하는 통신
-                                            self.main_vm.apply_decline()
-                                            
-                                        }){
-                                            Text("거절")
-                                                .padding()
-                                                .background(Color.white_pink)
-                                                .foregroundColor(Color.proco_red)
-                                                .cornerRadius(20)
-                                        }
-                                        .padding(.trailing, UIScreen.main.bounds.width/40)
-                                    }
-                                    else if self.check_owner{
-                                        
-                                        Button(action: {
-                                            //수락하고자 하는 사람의 idx 뷰모델에 저장해서 통신시 사용.
-                                            self.main_vm.apply_user_idx = main_vm.apply_user_struct[main_vm.get_user_index(item: user)].idx!
-                                            self.main_vm.apply_user_struct[main_vm.get_user_index(item: user)].kinds = "수락됨"
-                                            //수락하려는 사람의 프로필 사진 경로, 닉네임 저장해서 채팅 서버에 보낼 때 사용.
-                                            self.main_vm.apply_user_nickname = main_vm.apply_user_struct[main_vm.get_user_index(item: user)].nickname!
-                                            self.main_vm.apply_user_profile_photo = main_vm.apply_user_struct[main_vm.get_user_index(item: user)].profile_photo_path ?? ""
-                                            
-                                            //수락하는 통신
-                                            self.main_vm.apply_accept()
-                                            
-                                        }){
-                                            Text("수락")
-                                                .padding()
-                                                .background(Color.proco_sky_blue)
-                                                .foregroundColor(Color.proco_blue)
-                                                .cornerRadius(20)
-                                            
-                                        }
-                                        
-                                        Button(action: {
-                                            //거절하고자 하는 사람의 idx 뷰모델에 저장해서 통신시 사용.
-                                            self.main_vm.apply_user_idx = main_vm.apply_user_struct[main_vm.get_user_index(item: user)].idx!
-                                            //참가 신청 거절하는 통신
-                                            self.main_vm.apply_decline()
-                                            
-                                        }){
-                                            Text("거절")
-                                                .padding()
-                                                .background(Color.white_pink)
-                                                .foregroundColor(Color.proco_red)
-                                                .cornerRadius(20)
-                                        }
-                                        .padding(.trailing, UIScreen.main.bounds.width/40)
-                                    }
-                                    else{
-                                        //주최자가 아닐 경우 수락, 거절 버튼 안 보임
-                                    }
-                                }
-                            }
-
-                            HStack{
-                                Text("참여자")
-                                    .font(.custom(Font.n_extra_bold, size: 18))
-                                    .foregroundColor(.proco_black)
-                                Spacer()
-                            }
-                            .padding(.leading)
                         
-                            //참가 신청 수락된 사용자만 보여주는 리스트.
-                            ForEach(main_vm.apply_user_struct.filter{
-                                $0.kinds == "수락됨"
-                            }){ user in
-                                
-                                HStack{
-                                    Image(main_vm.apply_user_struct[main_vm.get_user_index(item: user)].profile_photo_path ?? "main_profile_img")
-                                        .resizable()
-                                        .frame(width: UIScreen.main.bounds.width/5, height: UIScreen.main.bounds.width/5)
-                                        .cornerRadius(50)
-                                    
-                                    Text(main_vm.apply_user_struct[main_vm.get_user_index(item: user)].nickname!)
-                                        .font(.custom(Font.n_bold, size: 16))
-                                        .foregroundColor(.proco_black)
-                                    
-                                    Spacer()
-                                }
-                            }
+                        //신청자 카테고리
+                        HStack{
+                            Text("신청자")
+                                .font(.custom(Font.n_extra_bold, size: 18))
+                                .foregroundColor(.proco_black)
+                            Spacer()
+                        }
+                        .padding(.leading)
+                        //모든 신청자들중 상태가 거절, 수락이 처리되지 않은 사람들만 보여준다.
+                        //수락 또는 거절 클릭시 신청자 리스트에서 제거
+                        ForEach(main_vm.apply_user_struct.filter{
+                            $0.kinds == "대기중"
+                            
+                        }){ user in
+                            
+                            ApplyPeopleRow(main_vm: self.main_vm, show_view: self.$show_view, user: user)
+                      
+                        }
+                        
+                        HStack{
+                            Text("참여자")
+                                .font(.custom(Font.n_extra_bold, size: 18))
+                                .foregroundColor(.proco_black)
+                            Spacer()
+                        }
+                        .padding(.leading)
+                        
+                        //참가 신청 수락된 사용자만 보여주는 리스트.
+                        ForEach(main_vm.apply_user_struct.filter{
+                            $0.kinds == "수락됨"
+                        }){ user in
+                            
+                            ApplyPeopleRow(main_vm: self.main_vm, show_view: self.$show_view, user: user)
+
+                        }
                     }
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.apply_meeting_result), perform: {value in
+            
+            if let user_info = value.userInfo{
+                let check_result = user_info["owner_event"]
+                print("참가 거절 후 데이터 확인: \(String(describing: check_result))")
+                
+                //참가 거절한 경우
+                if check_result as! String == "owner_decline"{
+                    let friend_idx = user_info["user_idx"] as! String
+                    
+                        let model_idx = self.main_vm.apply_user_struct.firstIndex(where: {
+                            $0.idx! == Int(friend_idx)
+                        })
+                        withAnimation(.spring()) {
+                            print("참가 거절당한 유저인경우")
+                            main_vm.apply_user_struct.remove(at: model_idx!)
+                        }
+                    
+                }else if check_result as! String == "owner_accept"{
+                    let friend_idx = user_info["user_idx"] as! String
+                    
+                        withAnimation(.spring()) {
+                            let model_idx = self.main_vm.apply_user_struct.firstIndex(where: {
+                                $0.idx! == Int(friend_idx)
+                            })
+                            self.main_vm.apply_user_struct[model_idx!].kinds = "수락됨"
+                        }
+                    
+                }
+            }
+        })
         .navigationBarHidden(true)
         .navigationBarTitle("", displayMode: .inline)
         .onAppear{
@@ -207,5 +138,141 @@ struct ApplyPeopleListView: View {
             
         }
         
+    }
+}
+
+struct ApplyPeopleRow : View{
+    
+    @ObservedObject var main_vm: GroupVollehMainViewmodel
+    
+    //신청자 정보를 담고 있는 곳
+    @State private var check_owner = true
+    @Binding var show_view : Bool
+    let scale = UIScreen.main.scale
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 40, height: 40)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    
+    @State var user : ApplyUserStruct
+    
+    var body: some View{
+        HStack{
+            HStack{
+                
+                profile_img
+                
+                nickname
+                
+                Spacer()
+                
+                if user.kinds == "수락됨"{
+                    
+                }else{
+                //주최자에게만 버튼이 보이도록 함 - 드로어, 메인의 경우 나눠야 함.
+                // 드로어에서 신청자 목록 보기로 넘어왔을 때 내가 만든 방인 경우
+                if  SockMgr.socket_manager.current_chatroom_info_struct.creator_idx == Int(ChatDataManager.shared.my_idx!) || self.check_owner{
+                    
+                    accept_btn
+                        decline_btn
+                }
+                else{
+                    //주최자가 아닐 경우 수락, 거절 버튼 안 보임
+                }
+                }
+            }
+        }
+    }
+    
+}
+
+extension ApplyPeopleRow{
+    
+    var profile_img : some View{
+        
+        HStack{
+        if user.profile_photo_path == nil || user.profile_photo_path == ""{
+            
+            Image("main_profile_img")
+                .resizable()
+                .frame(width: UIScreen.main.bounds.width/10, height: UIScreen.main.bounds.width/10)
+        }else{
+            
+            KFImage(URL(string: user.profile_photo_path!))
+                .placeholder{Image("main_profile_img")
+                    .resizable()
+                    .frame(width:  UIScreen.main.bounds.width/10, height:  UIScreen.main.bounds.width/10)
+                }
+                .loadDiskFileSynchronously()
+                .cacheMemoryOnly()
+                .fade(duration: 0.25)
+                .setProcessor(img_processor)
+                .onProgress{receivedSize, totalSize in
+                    print("on progress: \(receivedSize), \(totalSize)")
+                }
+                .onSuccess{result in
+                    print("성공 : \(result)")
+                }
+                .onFailure{error in
+                    print("실패 이유: \(error)")
+                    
+                    Image("main_profile_img")
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                }
+        }
+        }
+    }
+    
+    var nickname : some View{
+        HStack{
+            Text(user.nickname!)
+                .font(.custom(Font.n_bold, size: 16))
+                .foregroundColor(.proco_black)
+        }
+    }
+    
+    var accept_btn : some View{
+        HStack{
+            Button(action: {
+                
+                print("드로어에서 신청자 목록 보기로 넘어왔을 때 내가 만든 방인 경우 수락")
+                //수락하고자 하는 사람의 idx 뷰모델에 저장해서 통신시 사용.
+                self.main_vm.apply_user_idx = user.idx!
+                
+                //수락하려는 사람의 프로필 사진 경로, 닉네임 저장해서 채팅 서버에 보낼 때 사용.
+                self.main_vm.apply_user_nickname = user.nickname!
+                self.main_vm.apply_user_profile_photo = user.profile_photo_path ?? ""
+                
+                //수락하는 통신
+                self.main_vm.apply_accept()
+                
+            }){
+                Text("수락")
+                    .padding()
+                    .background(Color.proco_sky_blue)
+                    .foregroundColor(Color.proco_blue)
+                    .cornerRadius(20)
+                
+            }
+ 
+        }
+    }
+    
+    var decline_btn : some View{
+        HStack{
+            Button(action: {
+                //거절하고자 하는 사람의 idx 뷰모델에 저장해서 통신시 사용.
+                self.main_vm.apply_user_idx = user.idx!
+                //참가 신청 거절하는 통신
+                self.main_vm.apply_decline()
+                
+            }){
+                Text("거절")
+                    .padding()
+                    .background(Color.white_pink)
+                    .foregroundColor(Color.proco_red)
+                    .cornerRadius(20)
+            }
+            .padding(.trailing, UIScreen.main.bounds.width/40)
+   
+        }
     }
 }

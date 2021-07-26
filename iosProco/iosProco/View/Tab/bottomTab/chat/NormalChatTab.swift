@@ -11,8 +11,7 @@ import SQLite3
 
 struct NormalChatTab: View {
     
-   // @ObservedObject var chat_data_mgr : ChatDataManager
-    @ObservedObject var socket : SockMgr
+   @ObservedObject var socket : SockMgr
     
     @State private var go_to_chat = false
     
@@ -62,6 +61,26 @@ struct NormalChatTab: View {
             socket.normal_chat_model.removeAll()
 
             ChatDataManager.shared.set_room_data(kinds: "일반")
+            
+            if ViewRouter.get_view_router().fcm_destination == "normal_chat_room"{
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){
+                SockMgr.socket_manager.current_view = 333
+                //1.해당 카드의 chatroom_idx를 소켓 클래스의 publish변수에 저장
+                print("일반 채팅방 1개 클릭")
+                socket.enter_chatroom_idx = SockMgr.socket_manager.enter_chatroom_idx
+
+                //2.chat_user테이블에서 데이터 꺼내오기(채팅방입장시 user read이벤트 보낼 때 사용.)
+                ChatDataManager.shared.get_info_for_unread(chatroom_idx:  SockMgr.socket_manager.enter_chatroom_idx)
+
+                //일반 채팅방 읽음 처리 위해서 해당 채팅방의 마지막 메세지의 idx 가져오기(채팅방 1개 클릭시 입장하기 전에)
+                ChatDataManager.shared.get_last_message_idx(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx)
+                print("일반 채팅 탭뷰에서 채팅방 1개 클릭 후 채팅룸 idx저장했는지 확인: \(socket.enter_chatroom_idx)")
+                //드로어에서 카드 정보 보여주기 예외 처리 위해서 채팅방 정보 가져오기
+                ChatDataManager.shared.read_chatroom(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx)
+
+                self.go_to_chat = true
+                }
+            }
             
         }
         .onDisappear{

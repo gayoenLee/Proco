@@ -93,12 +93,12 @@ struct FriendVollehMainView: View {
                                         Spacer()
                                         //오른쪽으로 스와이프시 빨간색 배경, 주황색 배경
                                         RoundedRectangle(cornerRadius: 5.0)
-                                                .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
-                                                .foregroundColor(  Color.proco_red .opacity(main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0 < 0 ? 1 : 0))
-
+                                            .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
+                                            .foregroundColor(  Color.proco_red .opacity(main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0 < 0 ? 1 : 0))
+                                        
                                         RoundedRectangle(cornerRadius: 5.0)
-                                                .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
-                                                .foregroundColor(    Color.main_orange .opacity(main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0 < 0 ? 1 : 0))
+                                            .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
+                                            .foregroundColor(    Color.main_orange .opacity(main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].offset ?? 0 < 0 ? 1 : 0))
                                         
                                     }
                                 }
@@ -107,70 +107,70 @@ struct FriendVollehMainView: View {
                                 Group{
                                     HStack{
                                         Spacer()
-                                           
-                                                //수정 버튼
-                                                HStack{
-                                                    Button(action: {
-                                                        self.main_vm.selected_card_idx = self.main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].card_idx!
-                                                        
-                                                        
-                                                        //수정하는 페이지로 이동
-                                                        self.go_to_edit  = true
-                                                        print("수정하는 페이지 이동 구분값: \(self.go_to_edit)")
-                                                        
-                                                    }){
-                                                        VStack{
-                                                            Image("swipe_edit_icon")
-                                                                .resizable()
-                                                                .frame(width:18.89, height: 19.03)
-                                                            Image("swipe_edit_txt")
-                                                                .resizable()
-                                                                .frame(width:20, height: 13)
-                                                        }
-                                                    }
-                                                    .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width*0.3)
-                                                    
-                                                    
-                                                    //삭제버튼
-                                                    Button(action: {
-                                                        //지우려는 카드의 행과 idx정보 저장.
-                                                        self.main_vm.selected_card_idx = self.main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].card_idx!
-                                                        
-                                                        withAnimation(.default){
-                                                            self.show_delete_alert.toggle()
-                                                        }
-                                                    }, label: {
-                                                        
-                                                        VStack{
-                                                            Image("swipe_del_icon")
-                                                                .resizable()
-                                                                .frame(width:16, height: 22)
-                                                            Image("swipe_del_txt")
-                                                                .resizable()
-                                                                .frame(width:20, height: 13)
-                                                        }
-                                                    })
-                                                    .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.3)
-                                                    //.padding()
-                                                    .alert(isPresented: $show_delete_alert){
-                                                        Alert(title: Text("카드 삭제하기"), message: Text("내 카드를 지우시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
-                                                            
-                                                            self.main_vm.my_friend_volleh_card_struct.removeAll{$0.card_idx == self.main_vm.selected_card_idx}
-                                                            
-                                                            //확인 눌렀을 때 통신 시작
-                                                            //                                                        self.main_vm.delete_friend_volleh_card()
-                                                            
-                                                            //카드 idx로 채팅방 idx 가져오기
-                                                            let chatroom_idx =     ChatDataManager.shared.get_chatroom_from_card(card_idx: Int(self.main_vm.selected_card_idx))
-                                                            
-                                                            SockMgr.socket_manager.exit_room(chatroom_idx: chatroom_idx, idx: Int(main_vm.my_idx!)!, nickname: main_vm.my_nickname!, profile_photo_path: "", kinds: nil)
-                                                            
-                                                        }), secondaryButton: Alert.Button.default(Text("취소"), action: {
-                                                            self.show_delete_alert.toggle()
-                                                        }))
-                                                    }
+                                        
+                                        //수정 버튼
+                                        HStack{
+                                            Button(action: {
+                                                self.main_vm.selected_card_idx = self.main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].card_idx!
+                                                
+                                                
+                                                //수정하는 페이지로 이동
+                                                self.go_to_edit  = true
+                                                print("수정하는 페이지 이동 구분값: \(self.go_to_edit)")
+                                                
+                                            }){
+                                                VStack{
+                                                    Image("swipe_edit_icon")
+                                                        .resizable()
+                                                        .frame(width:18.89, height: 19.03)
+                                                    Image("swipe_edit_txt")
+                                                        .resizable()
+                                                        .frame(width:20, height: 13)
                                                 }
+                                            }
+                                            .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width*0.3)
                                             
+                                            
+                                            //삭제버튼
+                                            Button(action: {
+                                                //지우려는 카드의 행과 idx정보 저장.
+                                                self.main_vm.selected_card_idx = self.main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].card_idx!
+                                                
+                                                withAnimation(.default){
+                                                    self.show_delete_alert.toggle()
+                                                }
+                                            }, label: {
+                                                
+                                                VStack{
+                                                    Image("swipe_del_icon")
+                                                        .resizable()
+                                                        .frame(width:16, height: 22)
+                                                    Image("swipe_del_txt")
+                                                        .resizable()
+                                                        .frame(width:20, height: 13)
+                                                }
+                                            })
+                                            .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.3)
+                                            //.padding()
+                                            .alert(isPresented: $show_delete_alert){
+                                                Alert(title: Text("카드 삭제하기"), message: Text("내 카드를 지우시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
+                                                    
+                                                    self.main_vm.my_friend_volleh_card_struct.removeAll{$0.card_idx == self.main_vm.selected_card_idx}
+                                                    
+                                                    //확인 눌렀을 때 통신 시작
+                                                    //                                                        self.main_vm.delete_friend_volleh_card()
+                                                    
+                                                    //카드 idx로 채팅방 idx 가져오기
+                                                    let chatroom_idx =     ChatDataManager.shared.get_chatroom_from_card(card_idx: Int(self.main_vm.selected_card_idx))
+                                                    
+                                                    SockMgr.socket_manager.exit_room(chatroom_idx: chatroom_idx, idx: Int(main_vm.my_idx!)!, nickname: main_vm.my_nickname!, profile_photo_path: "", kinds: nil)
+                                                    
+                                                }), secondaryButton: Alert.Button.default(Text("취소"), action: {
+                                                    self.show_delete_alert.toggle()
+                                                }))
+                                            }
+                                        }
+                                        
                                     }
                                 }
                                 Group{
@@ -233,12 +233,12 @@ struct FriendVollehMainView: View {
                     })
                     .padding(.trailing)
                     
-//                    //친구 카드 상세 페이지 - 액티비티로 변경함.
-//                    NavigationLink("", destination: FriendVollehCardDetail(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket:   SockMgr.socket_manager,calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline)
-//                                    .navigationBarHidden(true), isActive: self.$show_friend_card_detail)
-//
-//                    //친구 카드 리스트
-//                    friend_card_list
+                    //친구 카드 상세 페이지 - 액티비티로 변경함.
+                    NavigationLink("", destination: FriendVollehCardDetail(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(),socket:   SockMgr.socket_manager,calendar_vm: self.calendar_vm).navigationBarTitle("", displayMode: .inline)
+                                    .navigationBarHidden(true), isActive: self.$show_friend_card_detail)
+                    
+                    //친구 카드 리스트
+                    friend_card_list
                     
                 }
                 .onReceive(NotificationCenter.default.publisher(for: Notification.clicked_like), perform: {value in
@@ -267,6 +267,7 @@ struct FriendVollehMainView: View {
                     self.state_on = UserDefaults.standard.integer(forKey: "\(user_idx)_state")
                     self.my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
                     print("저장됐던 유저 상태 확인:\(user_idx) \(self.state_on)")
+                    
                     
                 }
                 .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
