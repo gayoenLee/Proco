@@ -68,224 +68,224 @@ struct GroupVollehCardDetail: View {
     @State private var invite_result_txt : String = ""
     
     var body: some View {
-      
-            VStack{
-                if self.show_no_result{
-                    
-                    HStack{
-                        Image("left")
-                            .resizable()
-                            .frame(width: 10, height: 17)
-                            .padding(.leading, UIScreen.main.bounds.width/20)
-                            .onTapGesture {
-                                withAnimation{
-                                    self.presentation.wrappedValue.dismiss()
-                                    //self.show_current_view.toggle()
-                                }
+        
+        VStack{
+            if self.show_no_result{
+                
+                HStack{
+                    Image("left")
+                        .resizable()
+                        .frame(width: 10, height: 17)
+                        .padding(.leading, UIScreen.main.bounds.width/20)
+                        .onTapGesture {
+                            withAnimation{
+                                self.presentation.wrappedValue.dismiss()
+                                //self.show_current_view.toggle()
                             }
-                        
-                        Spacer()
-                    }
-                    .padding()
-                    Spacer()
+                        }
                     
-                    HStack{
-                        
-                        Text("찾을 수 없는 카드입니다.")
-                            .font(.custom(Font.n_extra_bold, size: 20))
-                            .foregroundColor(.proco_black)
-                        
-                        Spacer()
-                    }
-                    .padding()
                     Spacer()
-                }else{
-                    ScrollView(.vertical, showsIndicators: false){
-                        VStack{
-                            Group{
-                                //상단 돌아가기, 제목, 수정하기 버튼 탭
-                                HStack{
-                                    //돌아가기 버튼
-                                    Image("left")
-                                        .resizable()
-                                        .frame(width: 10, height: 17)
-                                        .padding(.leading, UIScreen.main.bounds.width/20)
-                                        .onTapGesture {
-                                            withAnimation{
-                                                self.presentation.wrappedValue.dismiss()
-                                                //self.show_current_view.toggle()
-                                            }
+                }
+                .padding()
+                Spacer()
+                
+                HStack{
+                    
+                    Text("찾을 수 없는 카드입니다.")
+                        .font(.custom(Font.n_extra_bold, size: 20))
+                        .foregroundColor(.proco_black)
+                    
+                    Spacer()
+                }
+                .padding()
+                Spacer()
+            }else{
+                ScrollView(.vertical, showsIndicators: false){
+                    VStack{
+                        Group{
+                            //상단 돌아가기, 제목, 수정하기 버튼 탭
+                            HStack{
+                                //돌아가기 버튼
+                                Image("left")
+                                    .resizable()
+                                    .frame(width: 10, height: 17)
+                                    .padding(.leading, UIScreen.main.bounds.width/20)
+                                    .onTapGesture {
+                                        withAnimation{
+                                            self.presentation.wrappedValue.dismiss()
+                                            //self.show_current_view.toggle()
                                         }
+                                    }
+                                
+                                Spacer()
+                                /*
+                                 수정 하기 버튼
+                                 - 주인만 가능.
+                                 - 드로어에서 넘어온 경우, 메인에서 상세 페이지로 넘어온 경우
+                                 */
+                                if Int(self.main_vm.my_idx!) == self.main_vm.card_detail_struct.creator!.idx{
                                     
-                                    Spacer()
-                                    /*
-                                     수정 하기 버튼
-                                     - 주인만 가능.
-                                     - 드로어에서 넘어온 경우, 메인에서 상세 페이지로 넘어온 경우
-                                     */
-                                    if Int(self.main_vm.my_idx!) == self.main_vm.card_detail_struct.creator!.idx{
+                                    Button(action: {
                                         
-                                        Button(action: {
-                                            
-                                            self.main_vm.selected_card_idx =  main_vm.my_card_detail_struct.card_idx!
-                                            print("메인에서 상세 페이지로 들어온 후 카드 정보 수정하기 이동. card idx: \(self.main_vm.selected_card_idx)")
-                                            
-                                            //self.main_vm.get_detail_card()
-                                            
-                                            self.go_edit_from_main.toggle()
-                                        }){
-                                            Image(systemName: "pencil.circle")
-                                                .padding()
-                                        }
+                                        self.main_vm.selected_card_idx =  main_vm.my_card_detail_struct.card_idx!
+                                        print("메인에서 상세 페이지로 들어온 후 카드 정보 수정하기 이동. card idx: \(self.main_vm.selected_card_idx)")
+                                        
+                                        //self.main_vm.get_detail_card()
+                                        
+                                        self.go_edit_from_main.toggle()
+                                    }){
+                                        Image(systemName: "pencil.circle")
+                                            .padding()
                                     }
                                 }
                             }
-                            .padding(.top, UIScreen.main.bounds.width/20)
+                        }
+                        .padding(.top, UIScreen.main.bounds.width/20)
+                        
+                        Spacer()
+                        
+                        //내 카드인 경우 신고하기 버튼 안보임
+                        if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator?.idx{
+                            
+                        }else{
+                            report_btn
+                        }
+                        
+                        //모임 이미지는 선택 가능한 옵션임.
+                        if main_vm.my_card_detail_struct.card_photo_path != "" && main_vm.my_card_detail_struct.card_photo_path != nil{
+                            
+                            card_img
+                                .padding(.bottom)
+                        }
+                        
+                        Group{
+                            
+                            HStack{
+                                card_category_and_title
+                                Spacer()
+                                card_like
+                            }
+                            card_tags
+                            RoundedRectangle(cornerRadius: 20)
+                                .foregroundColor(.light_gray)
+                                .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
+                                .overlay(
+                                    host_info
+                                )
                             
                             Spacer()
                             
-                            //내 카드인 경우 신고하기 버튼 안보임
-                            if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator?.idx{
+                            //날짜
+                            date_view
+                            //시간
+                            time_view
+                        }
+                        HStack{
+                            NavigationLink(destination: ApplyPeopleListView(main_vm: self.main_vm, show_view: $go_people_list) .navigationBarTitle("", displayMode: .inline)
+                                            .navigationBarHidden(true), isActive: self.$go_people_list){
                                 
-                            }else{
-                                report_btn
-                            }
-                            
-                            //모임 이미지는 선택 가능한 옵션임.
-                            if main_vm.my_card_detail_struct.card_photo_path != "" && main_vm.my_card_detail_struct.card_photo_path != nil{
+                                apply_people_list_title
                                 
-                                card_img
-                                    .padding(.bottom)
-                            }
-                            
-                            Group{
-                                
-                                HStack{
-                                    card_category_and_title
-                                    Spacer()
-                                    card_like
-                                }
-                                card_tags
-                                RoundedRectangle(cornerRadius: 20)
-                                    .foregroundColor(.light_gray)
-                                    .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
-                                    .overlay(
-                                        host_info
-                                    )
-                                
-                                Spacer()
-                                
-                                //날짜
-                                date_view
-                                //시간
-                                time_view
-                            }
-                            HStack{
-                                NavigationLink(destination: ApplyPeopleListView(main_vm: self.main_vm, show_view: $go_people_list) .navigationBarTitle("", displayMode: .inline)
-                                                .navigationBarHidden(true), isActive: self.$go_people_list){
+                            }.simultaneousGesture(TapGesture().onEnded{
+                                //참가자, 신청자 리스트 가져오는 통신 - 드로어에서 볼 경우, 메인에서 볼 경우 모두 진행.
+                                if socket_manager.is_from_chatroom{
+                                    print("is from chatroom true일 때 신청자 목록 페이지 이동 클릭")
+                                    self.main_vm.selected_card_idx = socket_manager.current_chatroom_info_struct.card_idx
+                                    print("채팅방 드로어에서 참가자, 신청자 리스트 가져올 경우")
+                                    // self.main_vm.get_apply_people_list()
                                     
-                                    apply_people_list_title
+                                    //캘린더에서 왔을 경우 신청자 참가자 통신
+                                }else if calendar_vm.from_calendar{
+                                    print("캘린더에서 왔을 경우")
+                                    self.main_vm.selected_card_idx = calendar_vm.group_card_detail_model.card_idx
+                                    //self.main_vm.get_apply_people_list()
                                     
-                                }.simultaneousGesture(TapGesture().onEnded{
-                                    //참가자, 신청자 리스트 가져오는 통신 - 드로어에서 볼 경우, 메인에서 볼 경우 모두 진행.
-                                    if socket_manager.is_from_chatroom{
-                                        print("is from chatroom true일 때 신청자 목록 페이지 이동 클릭")
-                                        self.main_vm.selected_card_idx = socket_manager.current_chatroom_info_struct.card_idx
-                                        print("채팅방 드로어에서 참가자, 신청자 리스트 가져올 경우")
-                                        // self.main_vm.get_apply_people_list()
-                                        
-                                        //캘린더에서 왔을 경우 신청자 참가자 통신
-                                    }else if calendar_vm.from_calendar{
-                                        print("캘린더에서 왔을 경우")
-                                        self.main_vm.selected_card_idx = calendar_vm.group_card_detail_model.card_idx
-                                        //self.main_vm.get_apply_people_list()
-                                        
-                                    }else{
-                                        //수락, 거절 버튼 예외처리 위해 메소드 실행.
-                                        self.main_vm.find_owner()
-                                        print("드로어 아닌 메인에서 참가자, 신청자 리스트 가져올 경우")
-                                        self.main_vm.get_apply_people_list()
-                                    }
-                                    //self.go_people_list = true
-                                })
-                            }
-                            
-                            Group{
-                                if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
-                                    if self.main_vm.my_card_detail_struct.kinds! == "오프라인 모임"{
-                                        location
-                                    }
                                 }else{
-                                    if self.main_vm.card_detail_struct.kinds! == "오프라인 모임"{
-                                        location
-                                    }
+                                    //수락, 거절 버튼 예외처리 위해 메소드 실행.
+                                    self.main_vm.find_owner()
+                                    print("드로어 아닌 메인에서 참가자, 신청자 리스트 가져올 경우")
+                                    self.main_vm.get_apply_people_list()
                                 }
-                                
-                                //세부사항 부분
-                                meeting_introduce
-                                
-                                //프로코 이용 규칙
-                                Divider()
-                                    .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width/30, alignment: .center)
-                                proco_rules
-                                
-                                //동적링크를 통해 들어와서 참여하기 클릭시 채팅방으로 이동시키는 것.
-                                NavigationLink("",destination: GatheringChatRoom(socket: SockMgr.socket_manager).navigationBarHidden(true)
-                                                .navigationBarTitle(""), isActive: self.$go_invited_room)
-                                
-                                //드로어에서 카드 상세 페이지 -> 카드 수정 화면 이동
-                                NavigationLink("",
-                                               destination: EditGroupCard( main_vm: self.main_vm ).navigationBarTitle("", displayMode: .inline)
-                                                .navigationBarHidden(true),
-                                               isActive: self.$go_edit_from_chat)
-                                
-                                //드로어 - 초대하기 - 채팅방으로 다시 이동
-                                NavigationLink("",
-                                               destination: NormalChatRoom(main_vm: FriendVollehMainViewmodel(), group_main_vm: self.main_vm,socket: self.socket).navigationBarTitle("", displayMode: .inline)
-                                                .navigationBarHidden(true),
-                                               isActive: self.$go_back_chatroom)
-                                
-                                //이용규칙 뷰 이동
-                                NavigationLink("",destination: TermContentsView(url: "https://withproco.com/tos.html?view=tos#tos_items_11"), isActive: self.$show_proco_rules)
-                                
-                                //신고하기 페이지 이동
-                                NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "카드", selected_user_idx: -1, main_vm: FriendVollehMainViewmodel(), socket_manager: SockMgr(), group_main_vm: self.main_vm), isActive: self.$show_report_view)
-                                
-                                
-                                if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator!.idx && SockMgr.socket_manager.detail_to_invite == false{
-                                    
+                                //self.go_people_list = true
+                            })
+                        }
+                        
+                        Group{
+                            if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                                if self.main_vm.my_card_detail_struct.kinds! == "오프라인 모임"{
+                                    location
                                 }
-                                else if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator!.idx && SockMgr.socket_manager.detail_to_invite ==
-                                            true{
-                                 
-                                    invite_btn
-                                        .onReceive(NotificationCenter.default.publisher(for: Notification.new_message), perform: {value in
+                            }else{
+                                if self.main_vm.card_detail_struct.kinds! == "오프라인 모임"{
+                                    location
+                                }
+                            }
+                            
+                            //세부사항 부분
+                            meeting_introduce
+                            
+                            //프로코 이용 규칙
+                            Divider()
+                                .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width/30, alignment: .center)
+                            proco_rules
+                            
+                            //동적링크를 통해 들어와서 참여하기 클릭시 채팅방으로 이동시키는 것.
+                            NavigationLink("",destination: GatheringChatRoom(socket: SockMgr.socket_manager).navigationBarHidden(true)
+                                            .navigationBarTitle(""), isActive: self.$go_invited_room)
+                            
+                            //드로어에서 카드 상세 페이지 -> 카드 수정 화면 이동
+                            NavigationLink("",
+                                           destination: EditGroupCard( main_vm: self.main_vm ).navigationBarTitle("", displayMode: .inline)
+                                            .navigationBarHidden(true),
+                                           isActive: self.$go_edit_from_chat)
+                            
+                            //드로어 - 초대하기 - 채팅방으로 다시 이동
+                            NavigationLink("",
+                                           destination: NormalChatRoom(main_vm: FriendVollehMainViewmodel(), group_main_vm: self.main_vm,socket: self.socket).navigationBarTitle("", displayMode: .inline)
+                                            .navigationBarHidden(true),
+                                           isActive: self.$go_back_chatroom)
+                            
+                            //이용규칙 뷰 이동
+                            NavigationLink("",destination: TermContentsView(url: "https://withproco.com/tos.html?view=tos#tos_items_11"), isActive: self.$show_proco_rules)
+                            
+                            //신고하기 페이지 이동
+                            NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "모임카드", selected_user_idx: -1, main_vm: FriendVollehMainViewmodel(), socket_manager: SockMgr(), group_main_vm: self.main_vm), isActive: self.$show_report_view)
+                            
+                            
+                            if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator!.idx && SockMgr.socket_manager.detail_to_invite == false{
+                                
+                            }
+                            else if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator!.idx && SockMgr.socket_manager.detail_to_invite ==
+                                        true{
+                                
+                                invite_btn
+                                    .onReceive(NotificationCenter.default.publisher(for: Notification.new_message), perform: {value in
+                                        
+                                        if let user_info = value.userInfo,let check_result = user_info["new_message_link"]{
                                             
-                                            if let user_info = value.userInfo,let check_result = user_info["new_message_link"]{
-                                                
-                                                print("내 카드에 초대하기 동적링크 데이터 확인: \(String(describing: check_result))")
-                                                
-                                                //친구 신청 취소한 경우
-                                                if check_result as! String == "ok"{
-                                                    let chatroom_idx = user_info["chatroom_idx"] as! String
-                                                    if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
-                                                        self.invite_ok = true
-                                                        self.invite_result_txt = "초대가 완료됐습니다."
-                                                    }
-                                                }else if check_result as! String == "fail"{
-                                                    let chatroom_idx = user_info["chatroom_idx"] as! String
-                                                    if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
-                                                        self.invite_ok = true
-                                                        self.invite_result_txt = "다시 시도해주세요"
-                                                    }
+                                            print("내 카드에 초대하기 동적링크 데이터 확인: \(String(describing: check_result))")
+                                            
+                                            //친구 신청 취소한 경우
+                                            if check_result as! String == "ok"{
+                                                let chatroom_idx = user_info["chatroom_idx"] as! String
+                                                if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
+                                                    self.invite_ok = true
+                                                    self.invite_result_txt = "초대가 완료됐습니다."
+                                                }
+                                            }else if check_result as! String == "fail"{
+                                                let chatroom_idx = user_info["chatroom_idx"] as! String
+                                                if SockMgr.socket_manager.enter_chatroom_idx == Int(chatroom_idx){
+                                                    self.invite_ok = true
+                                                    self.invite_result_txt = "다시 시도해주세요"
                                                 }
                                             }
-                                        })
-                                        .alert(isPresented: self.$invite_ok){
-                                            Alert(title: Text("초대하기"), message: Text(self.invite_result_txt), dismissButton: Alert.Button.default(Text("확인")))
                                         }
-                                }else{
-                                    
+                                    })
+                                    .alert(isPresented: self.$invite_ok){
+                                        Alert(title: Text("초대하기"), message: Text(self.invite_result_txt), dismissButton: Alert.Button.default(Text("확인")))
+                                    }
+                            }else{
+                                
                                 apply_btn
                                     .alert(isPresented: self.$apply_result){
                                         switch self.apply_ok{
@@ -304,6 +304,8 @@ struct GroupVollehCardDetail: View {
                                     .onReceive(NotificationCenter.default.publisher(for: Notification.apply_meeting_result)){value in
                                         print("참가 신청 완료 노티 받음: \(value)")
                                         if let user_info = value.userInfo, let data = user_info["apply_meeting_result"]{
+                                            
+                                            print("참가 신청 후 노티 처리 안")
                                             if data as! String == "ok"{
                                                 
                                                 self.apply_ok = "ok"
@@ -315,90 +317,90 @@ struct GroupVollehCardDetail: View {
                                                 if data as! String == "already exist"{
                                                     
                                                     self.apply_ok = "already exist"
-
+                                                    
                                                 }else if data as! String == "not permitted"{
                                                     
                                                     self.apply_ok = "not permitted"
                                                     
                                                 }else{
-                                                self.apply_ok = "fail"
-                                                print("fail통신: \(self.apply_ok)")
+                                                    self.apply_ok = "fail"
+                                                    print("fail통신: \(self.apply_ok)")
                                                 }
                                             }
                                             self.apply_result = true
                                         }
                                     }
-                                }
                             }
-                        }.padding()
-                    }
-                }
-            }
-            .sheet(isPresented: self.$show_location_detail){
-                MapDetailInfoView(vm: self.main_vm)
-            }
-            .onAppear{
-                print("-------------------------------상세 페이지 나타남 동적링크에서 왔는지: \(socket_manager.is_dynamic_link), 선택한 카드idx: \(self.main_vm.selected_card_idx)------------------------")
-                if socket_manager.is_dynamic_link{
-                    
-                    self.main_vm.selected_card_idx = self.socket.selected_card_idx
-                    print("동적링크에서 들어온 경우 카드 idx: \(self.main_vm.selected_card_idx)")
-                }
-                if  SockMgr.socket_manager.detail_to_invite{
-                    self.apply_btn_txt = "초대하기"
-                }
-                //이걸 해야 지도 데이터 부분에서 분기처리가 됨.
-                self.main_vm.is_just_showing = true
-                
-                self.main_vm.get_group_card_detail(card_idx: self.main_vm.selected_card_idx)
-                
-            }
-            .navigationBarTitle("", displayMode: .inline)
-            .navigationBarHidden(true)
-            .onDisappear{
-                print("-------------------------------상세 페이지 사라짐------------------------")
-                //이렇게 해야 메인에서 다른 카드 상세 페이지 갈 때 데이터 중복 안됨.
-                main_vm.my_card_detail_struct.creator!.idx = -1
-                
-                //카드 만들기에서 이값들을 초기화하면 지도 뷰로 이동했다가 다시 돌아갈경우 문제 발생해서 여기에서 없앰
-                //            self.main_vm.user_selected_tag_set.removeAll()
-                //            self.main_vm.user_selected_tag_list.removeAll()
-                //            self.main_vm.card_name = ""
-                //            self.main_vm.card_date = Date()
-                //            self.main_vm.card_time = Date()
-                //            self.main_vm.input_introduce = ""
-            }
-            // 이 알림이 띄워지는지 테스트해봐야함.
-            .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
-                print("모임카드 상세 데이터 통신 완료 노티 받음")
-                
-                if let user_info = value.userInfo, let data = user_info["get_group_card_detail_finish"]{
-                    print("친구카드 상세 데이터 통신 완료 받았음: \(data)")
-                    
-                    if data as! String == "no result"{
-                        
-                        self.show_no_result = true
-                    }else{
-                        print("맵 데이터 상세페이지에서 확인: \(main_vm.map_data)")
-                        if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
-                            
-                            self.expiration_at = String.kor_date_string(date_string: self.main_vm.my_card_detail_struct.expiration_at!)
-                            
-                            self.meeting_time = String.msg_time_formatter(date_string: self.main_vm.my_card_detail_struct.expiration_at!)
-                            
-                        }else{
-                            
-                            self.expiration_at = String.kor_date_string(date_string: self.main_vm.card_detail_struct.expiration_at!)
-                            self.meeting_time = String.msg_time_formatter(date_string: self.main_vm.card_detail_struct.expiration_at!)
-                            
                         }
-                        print("날짜 확인: \(self.expiration_at)")
-                    }
-                }else{
-                    print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
+                    }.padding()
                 }
             }
-            .overlay(FriendStateDialog(main_vm: FriendVollehMainViewmodel(),group_main_vm: self.main_vm, calendar_vm: CalendarViewModel(), show_friend_info: self.$show_creator_dialog, socket: SockMgr.socket_manager, state_on: self.$creator_state_on, is_friend : false))
+        }
+        .sheet(isPresented: self.$show_location_detail){
+            MapDetailInfoView(vm: self.main_vm)
+        }
+        .onAppear{
+            print("-------------------------------상세 페이지 나타남 동적링크에서 왔는지: \(socket_manager.is_dynamic_link), 선택한 카드idx: \(self.main_vm.selected_card_idx)------------------------")
+            if socket_manager.is_dynamic_link{
+                
+                self.main_vm.selected_card_idx = self.socket.selected_card_idx
+                print("동적링크에서 들어온 경우 카드 idx: \(self.main_vm.selected_card_idx)")
+            }
+            if  SockMgr.socket_manager.detail_to_invite{
+                self.apply_btn_txt = "초대하기"
+            }
+            //이걸 해야 지도 데이터 부분에서 분기처리가 됨.
+            self.main_vm.is_just_showing = true
+            
+            self.main_vm.get_group_card_detail(card_idx: self.main_vm.selected_card_idx)
+            
+        }
+        .navigationBarTitle("", displayMode: .inline)
+        .navigationBarHidden(true)
+        .onDisappear{
+            print("-------------------------------상세 페이지 사라짐------------------------")
+            //이렇게 해야 메인에서 다른 카드 상세 페이지 갈 때 데이터 중복 안됨.
+            main_vm.my_card_detail_struct.creator!.idx = -1
+            
+            //카드 만들기에서 이값들을 초기화하면 지도 뷰로 이동했다가 다시 돌아갈경우 문제 발생해서 여기에서 없앰
+            //            self.main_vm.user_selected_tag_set.removeAll()
+            //            self.main_vm.user_selected_tag_list.removeAll()
+            //            self.main_vm.card_name = ""
+            //            self.main_vm.card_date = Date()
+            //            self.main_vm.card_time = Date()
+            //            self.main_vm.input_introduce = ""
+        }
+        // 이 알림이 띄워지는지 테스트해봐야함.
+        .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
+            print("모임카드 상세 데이터 통신 완료 노티 받음")
+            
+            if let user_info = value.userInfo, let data = user_info["get_group_card_detail_finish"]{
+                print("친구카드 상세 데이터 통신 완료 받았음: \(data)")
+                
+                if data as! String == "no result"{
+                    
+                    self.show_no_result = true
+                }else{
+                    print("맵 데이터 상세페이지에서 확인: \(main_vm.map_data)")
+                    if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                        
+                        self.expiration_at = String.kor_date_string(date_string: self.main_vm.my_card_detail_struct.expiration_at!)
+                        
+                        self.meeting_time = String.msg_time_formatter(date_string: self.main_vm.my_card_detail_struct.expiration_at!)
+                        
+                    }else{
+                        
+                        self.expiration_at = String.kor_date_string(date_string: self.main_vm.card_detail_struct.expiration_at!)
+                        self.meeting_time = String.msg_time_formatter(date_string: self.main_vm.card_detail_struct.expiration_at!)
+                        
+                    }
+                    print("날짜 확인: \(self.expiration_at)")
+                }
+            }else{
+                print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
+            }
+        }
+        .overlay(FriendStateDialog(main_vm: FriendVollehMainViewmodel(),group_main_vm: self.main_vm, calendar_vm: CalendarViewModel(), show_friend_info: self.$show_creator_dialog, socket: SockMgr.socket_manager, state_on: self.$creator_state_on, is_friend : false))
         
     }
 }
@@ -470,7 +472,7 @@ extension GroupVollehCardDetail{
         .padding()
         .alert(isPresented: self.$socket.show_dynamick_link_alert){
             if self.socket.accept_dynamic_link_result == "already exist"{
-              return  Alert(title: Text("참여"), message: Text("이미 참여한 약속입니다."), dismissButton: .default(Text("확인")))
+                return  Alert(title: Text("참여"), message: Text("이미 참여한 약속입니다."), dismissButton: .default(Text("확인")))
             }else if  self.socket.accept_dynamic_link_result == "not permitted"{
                 return  Alert(title: Text("참여"), message: Text("참여할 권한이 없습니다."), dismissButton: .default(Text("확인")))
             }else{
@@ -539,9 +541,9 @@ extension GroupVollehCardDetail{
              - 흐름: 동적링크 생성-> 메세지 보내기 이벤트
              - 주의 : 친구 채팅방 카드이므로 소켓 매니저 클래스의 which_type_room변수를 GROUP로 만들기.
              */
+            
+            if Int(self.main_vm.my_idx!) != self.main_vm.my_card_detail_struct.creator!.idx{
                 
-                if Int(self.main_vm.my_idx!) != self.main_vm.my_card_detail_struct.creator!.idx{
-                    
                 Button(action: {
                     print("참가 신청 버튼 클릭")
                     
@@ -565,7 +567,7 @@ extension GroupVollehCardDetail{
                 .cornerRadius(25)
                 .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
                 //.disabled(main_vm.appply_end)
-                }
+            }
             
         }
     }
