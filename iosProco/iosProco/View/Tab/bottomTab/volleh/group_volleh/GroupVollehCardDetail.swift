@@ -100,6 +100,7 @@ struct GroupVollehCardDetail: View {
                 .padding()
                 Spacer()
             }else{
+                
                 ScrollView(.vertical, showsIndicators: false){
                     VStack{
                         Group{
@@ -118,38 +119,17 @@ struct GroupVollehCardDetail: View {
                                     }
                                 
                                 Spacer()
-                                /*
-                                 수정 하기 버튼
-                                 - 주인만 가능.
-                                 - 드로어에서 넘어온 경우, 메인에서 상세 페이지로 넘어온 경우
-                                 */
-                                if Int(self.main_vm.my_idx!) == self.main_vm.card_detail_struct.creator!.idx{
+                                
+                                //내 카드인 경우 신고하기 버튼 안보임
+                                if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator?.idx{
                                     
-                                    Button(action: {
-                                        
-                                        self.main_vm.selected_card_idx =  main_vm.my_card_detail_struct.card_idx!
-                                        print("메인에서 상세 페이지로 들어온 후 카드 정보 수정하기 이동. card idx: \(self.main_vm.selected_card_idx)")
-                                        
-                                        //self.main_vm.get_detail_card()
-                                        
-                                        self.go_edit_from_main.toggle()
-                                    }){
-                                        Image(systemName: "pencil.circle")
-                                            .padding()
-                                    }
+                                }else{
+                                    report_btn
                                 }
+
                             }
                         }
-                        .padding(.top, UIScreen.main.bounds.width/20)
-                        
-                        Spacer()
-                        
-                        //내 카드인 경우 신고하기 버튼 안보임
-                        if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator?.idx{
-                            
-                        }else{
-                            report_btn
-                        }
+                        .padding(.top, UIScreen.main.bounds.width/30)
                         
                         //모임 이미지는 선택 가능한 옵션임.
                         if main_vm.my_card_detail_struct.card_photo_path != "" && main_vm.my_card_detail_struct.card_photo_path != nil{
@@ -165,6 +145,7 @@ struct GroupVollehCardDetail: View {
                                 Spacer()
                                 card_like
                             }
+                            .padding(.top, UIScreen.main.bounds.width/30)
                             card_tags
                             RoundedRectangle(cornerRadius: 20)
                                 .foregroundColor(.light_gray)
@@ -180,6 +161,8 @@ struct GroupVollehCardDetail: View {
                             //시간
                             time_view
                         }
+                        
+                        if main_vm.my_card_detail_struct.kinds!.contains("오프라인") || main_vm.card_detail_struct.kinds!.contains("오프라인"){
                         HStack{
                             NavigationLink(destination: ApplyPeopleListView(main_vm: self.main_vm, show_view: $go_people_list) .navigationBarTitle("", displayMode: .inline)
                                             .navigationBarHidden(true), isActive: self.$go_people_list){
@@ -192,22 +175,20 @@ struct GroupVollehCardDetail: View {
                                     print("is from chatroom true일 때 신청자 목록 페이지 이동 클릭")
                                     self.main_vm.selected_card_idx = socket_manager.current_chatroom_info_struct.card_idx
                                     print("채팅방 드로어에서 참가자, 신청자 리스트 가져올 경우")
-                                    // self.main_vm.get_apply_people_list()
                                     
                                     //캘린더에서 왔을 경우 신청자 참가자 통신
                                 }else if calendar_vm.from_calendar{
                                     print("캘린더에서 왔을 경우")
                                     self.main_vm.selected_card_idx = calendar_vm.group_card_detail_model.card_idx
-                                    //self.main_vm.get_apply_people_list()
                                     
                                 }else{
                                     //수락, 거절 버튼 예외처리 위해 메소드 실행.
                                     self.main_vm.find_owner()
                                     print("드로어 아닌 메인에서 참가자, 신청자 리스트 가져올 경우")
-                                    self.main_vm.get_apply_people_list()
                                 }
                                 //self.go_people_list = true
                             })
+                        }
                         }
                         
                         Group{
@@ -336,6 +317,7 @@ struct GroupVollehCardDetail: View {
                 }
             }
         }
+        .padding(.trailing)
         .sheet(isPresented: self.$show_location_detail){
             MapDetailInfoView(vm: self.main_vm)
         }
@@ -361,16 +343,14 @@ struct GroupVollehCardDetail: View {
             print("-------------------------------상세 페이지 사라짐------------------------")
             //이렇게 해야 메인에서 다른 카드 상세 페이지 갈 때 데이터 중복 안됨.
             main_vm.my_card_detail_struct.creator!.idx = -1
+            //다른 카드 상세페이지 들어갔다가 카드 만들기 하면 카드 만들기에서 이전 데이터 보임
+            self.main_vm.input_location.removeAll()
+            self.main_vm.card_name.removeAll()
+            self.main_vm.user_selected_tag_set.removeAll()
+            self.main_vm.user_selected_tag_list.removeAll()
+            self.main_vm.input_introduce.removeAll()
             
-            //카드 만들기에서 이값들을 초기화하면 지도 뷰로 이동했다가 다시 돌아갈경우 문제 발생해서 여기에서 없앰
-            //            self.main_vm.user_selected_tag_set.removeAll()
-            //            self.main_vm.user_selected_tag_list.removeAll()
-            //            self.main_vm.card_name = ""
-            //            self.main_vm.card_date = Date()
-            //            self.main_vm.card_time = Date()
-            //            self.main_vm.input_introduce = ""
         }
-        // 이 알림이 띄워지는지 테스트해봐야함.
         .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
             print("모임카드 상세 데이터 통신 완료 노티 받음")
             
@@ -552,7 +532,7 @@ extension GroupVollehCardDetail{
                     }else{
                         self.main_vm.apply_group_card(card_idx: self.main_vm.selected_card_idx)
                         //참가 신청 확인 모달 띄우기
-                        main_vm.card_result_alert(main_vm.alert_type)
+                        //main_vm.card_result_alert(main_vm.alert_type)
                     }
                 }){
                     
@@ -606,11 +586,11 @@ extension GroupVollehCardDetail{
                         if main_vm.my_card_detail_struct.tags!.count > 0{
                             Capsule()
                                 .foregroundColor(main_vm.my_card_detail_struct.tags![0].tag_name == "사교/인맥" ?  .proco_yellow : main_vm.my_card_detail_struct.tags![0].tag_name == "게임/오락" ? .proco_pink : main_vm.my_card_detail_struct.tags![0].tag_name == "문화/공연/축제" ? .proco_olive : main_vm.my_card_detail_struct.tags![0].tag_name == "운동/스포츠" ? .proco_green : main_vm.my_card_detail_struct.tags![0].tag_name == "취미/여가" ? .proco_mint : main_vm.my_card_detail_struct.tags![0].tag_name == "스터디" ? .proco_blue : .proco_red)
-                                .frame(width: 100, height: 35)
+                                .frame(width: 72, height: 23)
                                 .overlay(
                                     Text(main_vm.my_card_detail_struct.tags![0].tag_name)
                                         .frame(minWidth: 0, maxWidth: .infinity)
-                                        .font(.custom(Font.t_extra_bold, size: 15))
+                                        .font(.custom(Font.t_extra_bold, size: 12))
                                         .foregroundColor(.proco_white)
                                 )
                         }
@@ -618,12 +598,11 @@ extension GroupVollehCardDetail{
                         if main_vm.card_detail_struct.tags!.count > 0{
                             Capsule()
                                 .foregroundColor(main_vm.card_detail_struct.tags![0].tag_name == "사교/인맥" ?  .proco_yellow : main_vm.card_detail_struct.tags![0].tag_name == "게임/오락" ? .proco_pink : main_vm.card_detail_struct.tags![0].tag_name == "문화/공연/축제" ? .proco_olive : main_vm.card_detail_struct.tags![0].tag_name == "운동/스포츠" ? .proco_green : main_vm.card_detail_struct.tags![0].tag_name == "취미/여가" ? .proco_mint : main_vm.card_detail_struct.tags![0].tag_name == "스터디" ? .proco_blue : .proco_red)
-                                .frame(width: 110, height: 50)
+                                .frame(width: 72, height: 23)
                                 .overlay(
                                     Text(main_vm.card_detail_struct.tags![0].tag_name)
-                                        .font(.custom(Font.t_extra_bold, size: 15))
-                                        .foregroundColor(.proco_white)
-                                        .padding(.trailing, UIScreen.main.bounds.width/60) )
+                                        .font(.custom(Font.t_extra_bold, size: 12))
+                                        .foregroundColor(.proco_white))
                         }
                     }
                     Spacer()
@@ -684,14 +663,35 @@ extension GroupVollehCardDetail{
                         //내 카드인 경우
                         if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
                             
-                            Image(main_vm.my_card_detail_struct.like_state == 0 ? "heart" : "heart_fill")
-                                .resizable()
-                                .frame(width: 20, height: 18)
+                            if main_vm.my_card_detail_struct.like_state == 0{
+                                Image(systemName:  "heart" )
+                                    .resizable()
+                                    .frame(width: 20, height: 18)
+                                    .foregroundColor(Color.proco_red)
+
+                            }else{
+                                Image(systemName: "heart.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 18)
+                                    .foregroundColor(Color.proco_red)
+
+                            }
                             
                         }else{
-                            Image(main_vm.card_detail_struct.like_state == 0 ? "heart" : "heart_fill")
-                                .resizable()
-                                .frame(width: 20, height: 18)
+                            
+                            if main_vm.card_detail_struct.like_state == 0{
+                                Image(systemName:  "heart" )
+                                    .resizable()
+                                    .frame(width: 20, height: 18)
+                                    .foregroundColor(Color.proco_red)
+
+                            }else{
+                                Image(systemName: "heart.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 18)
+                                    .foregroundColor(Color.proco_red)
+
+                            }
                         }
                         if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
                             
@@ -831,6 +831,7 @@ extension GroupVollehCardDetail{
                             .foregroundColor(.proco_black)
                     }
                     Spacer()
+                    
                     Text(main_vm.my_card_detail_struct.creator_attend_count ?? 0 > 0 ? "프로코 모임을 \(main_vm.my_card_detail_struct.creator_attend_count!)회 참여해봤어요!" : "모임 주최 스타트")
                         .font(.custom(Font.n_bold, size: 13))
                         .foregroundColor(Color.proco_black)
@@ -838,14 +839,34 @@ extension GroupVollehCardDetail{
                 }
             }else{
                 HStack{
-                    //내 프로필
-                    Image(main_vm.card_detail_struct.creator?.profile_photo_path == "" || main_vm.my_card_detail_struct.creator?.profile_photo_path == nil ? "main_profile_img" : main_vm.my_card_detail_struct.creator?.profile_photo_path! as! String)
-                        .resizable()
-                        .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                        .cornerRadius(50)
-                        .scaledToFit()
-                        .padding([.leading], UIScreen.main.bounds.width/30)
                     
+                    if main_vm.card_detail_struct.creator?.profile_photo_path == "" || main_vm.card_detail_struct.creator?.profile_photo_path == nil{
+                        
+                        Image("main_profile_img")
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
+                            .cornerRadius(50)
+                            .scaledToFit()
+                            .padding([.leading], UIScreen.main.bounds.width/30)
+                        
+                        
+                    }else{
+                        KFImage(URL(string: (main_vm.card_detail_struct.creator?.profile_photo_path!)!))
+                            .loadDiskFileSynchronously()
+                            .cacheMemoryOnly()
+                            .fade(duration: 0.25)
+                            .setProcessor(img_processor)
+                            .onProgress{receivedSize, totalSize in
+                                print("on progress: \(receivedSize), \(totalSize)")
+                            }
+                            .onSuccess{result in
+                                print("성공 : \(result)")
+                            }
+                            .onFailure{error in
+                                print("실패 이유: \(error)")
+                            }
+                    }
+
                     VStack{
                         Text("주최자")
                             .font(.custom(Font.t_regular, size: 10))
@@ -857,7 +878,7 @@ extension GroupVollehCardDetail{
                             .foregroundColor(.proco_black)
                     }
                     Spacer()
-                    Text(main_vm.card_detail_struct.creator_attend_count ?? 0 > 0 ? "프로코 모임을 \(main_vm.card_detail_struct.creator_attend_count!)회 참여해봤어요!" : "모임 주최 스타트")
+                    Text(main_vm.card_detail_struct.creator_attend_count ?? 0 > 0 ? "프로코 모임을 \(main_vm.card_detail_struct.creator_attend_count!)회 참여해봤어요!" : "주최자의 첫 모임")
                         .font(.custom(Font.n_bold, size: 13))
                         .foregroundColor(Color.proco_black)
                         .padding(.trailing)
@@ -891,25 +912,32 @@ extension GroupVollehCardDetail{
             }
             .padding(.bottom)
             
-            //내 카드인 경우
-            if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+            ZStack{
+                RoundedRectangle(cornerRadius: 20)
+                    .foregroundColor(.light_gray)
+                    .frame(minWidth: UIScreen.main.bounds.width*0.95, idealWidth: UIScreen.main.bounds.width*0.95, maxWidth: UIScreen.main.bounds.width*0.95, minHeight: UIScreen.main.bounds.height*0.1, alignment: .leading)
                 
-                Text("\(self.main_vm.my_card_detail_struct.introduce ?? "")")
-                    .font(.custom(Font.n_bold, size: 13))
-                    .foregroundColor(Color.proco_black)
-                    .lineLimit(nil)
-                    .multilineTextAlignment(.leading)
-                //.background(Color.gray.opacity(0.5))
-            }else{
-                
-                Text("\(self.main_vm.card_detail_struct.introduce ?? "")")
-                    .font(.custom(Font.n_bold, size: 13))
-                    .foregroundColor(Color.proco_black)
-                    .lineLimit(nil)
-                    .multilineTextAlignment(.leading)
-                //.background(Color.gray.opacity(0.5))
-                
+                //내 카드인 경우
+                if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
+                    
+                    Text("\(self.main_vm.my_card_detail_struct.introduce ?? "")")
+                        .font(.custom(Font.n_bold, size: 13))
+                        .foregroundColor(Color.proco_black)
+                        .lineLimit(nil)
+                        .multilineTextAlignment(.leading)
+                        .padding()
+                }else{
+                    
+                    Text("\(self.main_vm.card_detail_struct.introduce ?? "")")
+                        .font(.custom(Font.n_bold, size: 13))
+                        .foregroundColor(Color.proco_black)
+                        .lineLimit(nil)
+                        .multilineTextAlignment(.leading)
+                        .padding()
+                }
             }
+            .fixedSize(horizontal:false , vertical : true)
+
         }
         .padding([.leading, .top])
     }
