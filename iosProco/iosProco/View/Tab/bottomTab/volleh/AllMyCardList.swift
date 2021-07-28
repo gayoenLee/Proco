@@ -26,7 +26,10 @@ struct AllMyCardList: View {
     @State private var show_lock_alert : Bool = false
     //카드 잠금인지 잠금해제인지 이벤트 종류 알기 위해 저장할값 - 토스트에 띄움
     @State private var lock_event_kind : String = ""
-    
+    //카드 잠금 이벤트시 토스트 띄우기 위한 구분값
+    @State private var show_group_card_lock_alert : Bool = false
+    //카드 잠금인지 잠금해제인지 이벤트 종류 알기 위해 저장할값 - 토스트에 띄움
+    @State private var group_card_lock_event_kind : String = ""
     var body: some View {
         NavigationView{
         VStack{
@@ -114,7 +117,7 @@ struct AllMyCardList: View {
                         .shadow(color: .gray, radius: 2, x: 0, y: 2)
                         .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.4)
                         .overlay(
-                            MyGroupVollehCard(main_vm: self.group_vm, my_group_card: card, current_card_index: group_vm.get_index(item: card))
+                            MyGroupVollehCard(main_vm: self.group_vm, my_group_card: card, current_card_index: group_vm.get_index(item: card), show_lock_alert: self.$show_group_card_lock_alert, lock_event_kind: self.$group_card_lock_event_kind)
                         )
                         //한번 탭했을 때 상세 페이지로 이동.
                         .onTapGesture {
@@ -144,6 +147,7 @@ struct AllMyCardList: View {
             
         }
         .overlay(overlayView: Toast.init(dataModel: Toast.ToastDataModel.init(title: "카드가 \(self.lock_event_kind)되었습니다.", image: "checkmark"), show: self.$show_lock_alert), show: self.$show_lock_alert)
+        .overlay(overlayView: Toast.init(dataModel: Toast.ToastDataModel.init(title: "카드가 \(self.group_card_lock_event_kind)되었습니다.", image: "checkmark"), show: self.$show_group_card_lock_alert), show: self.$show_group_card_lock_alert)
         .onAppear{
             SockMgr.socket_manager.get_all_my_cards()
             print("저장한 내 카드 리스트 확인: \(SockMgr.socket_manager.group_card), \(SockMgr.socket_manager.friend_card)")

@@ -85,8 +85,8 @@ struct MyCardListView: View {
                     .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
                         print("내 카드 잠금 통신 완료 받음.: \(value)")
                         
-                        if let user_info = value.userInfo{
-                            let check_result = user_info["lock"]
+                        if let user_info = value.userInfo,  let check_result = user_info["lock"]{
+                           
                             print("내 카드 잠금 데이터 확인: \(check_result)")
                             
                             if check_result as! String == "잠금"{
@@ -148,11 +148,24 @@ private extension MyCardListView{
                     self.main_viewmodel.cancel_like_card(card_idx: self.my_volleh_card_struct.card_idx!)
                 }
             }){
-                
-                Image(self.my_volleh_card_struct.like_state == 0 ? "heart" : "heart_fill")
+                if self.my_volleh_card_struct.like_state == 0 {
+                    
+                    Image(systemName: "heart")
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width/21, height: UIScreen.main.bounds.width/25)
+                        .padding([.leading], UIScreen.main.bounds.width/20)
+                        .foregroundColor(Color.proco_red)
+
+                    
+                }else{
+                    
+                Image(systemName: "heart.fill")
                     .resizable()
-                    .frame(width: UIScreen.main.bounds.width/17, height: UIScreen.main.bounds.width/20)
+                    .frame(width: UIScreen.main.bounds.width/21, height: UIScreen.main.bounds.width/25)
                     .padding([.leading], UIScreen.main.bounds.width/20)
+                    .foregroundColor(Color.proco_red)
+
+                }
             }
             
             Text(my_volleh_card_struct.like_count > 0 ? "좋아요 \(my_volleh_card_struct.like_count)개" : "")
