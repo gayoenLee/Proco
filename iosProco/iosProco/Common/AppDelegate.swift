@@ -21,7 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate,  UNUserNotificationCenter
     
     var view_router = ViewRouter()
     let gcmMessageIDKey = "gcm.message_id"
-    
+    var sock_mgr = SockMgr.socket_manager
     /*
      FCM에서 중요 함수 1,2,3가지 주석에 포함.
      1.앱이 포그라운드에서 푸시를받았을 때
@@ -31,183 +31,188 @@ class AppDelegate: UIResponder, UIApplicationDelegate,  UNUserNotificationCenter
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
 
-        let userInfo = response.notification.request.content.userInfo as? [String: AnyObject]
+        let userInfo = response.notification.request.content.userInfo as! [String: AnyObject]
         print("노티 받음 111 : \(userInfo)")
-        let is_foreground_msg = userInfo?["foreground_msg"] as? String
+        let is_foreground_msg = userInfo["foreground_msg"] as? String
         print("포그라운드 메세지인지 : \(is_foreground_msg)")
         
         if is_foreground_msg == "ok"{
-            
-            let room_kind = userInfo?["room_kind"] as! String
-            let chatroom_idx = userInfo!["chatroom_idx"] as! String
-            SockMgr.socket_manager.enter_chatroom_idx = Int(chatroom_idx)!
-            print("포그라운드 메세지일 경우 클릭했을 때: \(chatroom_idx), \(room_kind)")
-            DispatchQueue.main.async {
-            switch room_kind {
-            case "친구":
-                print("친구 채팅방")
-                ViewRouter.get_view_router().current_page = .chat_tab
-                ViewRouter.get_view_router().fcm_destination = "friend_chat_room"
-            case "일반":
-                print("일반 채팅방")
-                ViewRouter.get_view_router().current_page = .chat_tab
-                ViewRouter.get_view_router().fcm_destination = "normal_chat_room"
-            case "모임":
-                print("모임 채팅방")
-                ViewRouter.get_view_router().current_page = .chat_tab
-                ViewRouter.get_view_router().fcm_destination = "group_chat_room"
-            default:
-                print("그 외")
-            }
-            }
-        }else{
-            
-        let noti_type = String(describing: userInfo?["noti_type"])
-        
-        switch noti_type{
-        case "chat":
-            print("채팅 메세지인 경우")
-            let chatroom_idx_string = String(describing: userInfo!["chatroom_idx"]!)
-            let chatroom_idx = Int(chatroom_idx_string)!
-            print("채팅방: \(chatroom_idx)")
-
-            let content = String(describing: userInfo!["content"]!)
-            let created_at = String(describing: userInfo!["created_at"]!)
-            let front_created_at = String(describing: userInfo!["front_created_at"]!)
-            let chatting_idx_string = String(describing: userInfo!["idx"]!)
-            let chatting_idx = Int(chatting_idx_string)!
-            let kinds = String(describing: userInfo!["kinds"]!)
-            print("채팅 메세지 어떤 채팅방 종류인지: \(kinds)")
-            let user_idx_string = String(describing: userInfo!["user_idx"]!)
-            let user_idx = Int(user_idx_string) 
-            
-            //새로 받은 메세지 저장.
-            ChatDataManager.shared.insert_chatting(chatroom_idx: chatroom_idx, chatting_idx: chatting_idx, user_idx: user_idx!, content: content, kinds: kinds, created_at: created_at, front_created_at: front_created_at)
-            
-            //친구 채팅인 경우.
-            SockMgr.socket_manager.enter_chatroom_idx = chatroom_idx
-            
-            //2.chat_user테이블에서 데이터 꺼내오기(채팅방입장시 user read이벤트 보낼 때 사용.)
-            ChatDataManager.shared.get_info_for_unread(chatroom_idx: chatroom_idx)
-            //친구랑 볼래 - 채팅방 읽음 처리 위해서 해당 채팅방의 마지막 메세지의 idx 가져오기(채팅방 1개 클릭시 입장하기 전에)
-            ChatDataManager.shared.get_last_message_idx(chatroom_idx: chatroom_idx)
-            
-            DispatchQueue.main.async {
-                ChatDataManager.shared.read_chatroom(chatroom_idx: chatroom_idx)
-                let room_kinds = SockMgr.socket_manager.current_chatroom_info_struct.kinds
-                print("어떤 채팅방인지 확인: \(room_kinds)")
-                
-                if room_kinds == "친구"{
-                print("앱딜리게이트에서 친구 채팅룸으로 화면 변경.")
-                self.view_router.current_page = .chat_room
                     
-                }else if room_kinds == "일반"{
-                    print("앱딜리게이트에서 일반 채팅룸으로 화면 변경.")
-                    self.view_router.current_page = .normal_chat_room
-                    
+                    let room_kind = userInfo["room_kind"] as! String
+                    let chatroom_idx = userInfo["chatroom_idx"] as! String
+                    SockMgr.socket_manager.enter_chatroom_idx = Int(chatroom_idx)!
+                    print("포그라운드 메세지일 경우 클릭했을 때: \(chatroom_idx), \(room_kind)")
+                    DispatchQueue.main.async {
+                    switch room_kind {
+                    case "친구":
+                        print("친구 채팅방")
+                        ViewRouter.get_view_router().current_page = .chat_tab
+                        ViewRouter.get_view_router().fcm_destination = "friend_chat_room"
+                    case "일반":
+                        print("일반 채팅방")
+                        ViewRouter.get_view_router().current_page = .chat_tab
+                        ViewRouter.get_view_router().fcm_destination = "normal_chat_room"
+                    case "모임":
+                        print("모임 채팅방")
+                        ViewRouter.get_view_router().current_page = .chat_tab
+                        ViewRouter.get_view_router().fcm_destination = "group_chat_room"
+                    default:
+                        print("그 외")
+                    }
+                    }
                 }else{
-                    print("앱딜리게이트에서 모임 채팅룸으로 화면 변경.")
-                    self.view_router.current_page = .group_chat_room
                     
+                    let noti_type = userInfo["noti_type"] as? String
+                
+                switch noti_type{
+                case "chat":
+                    print("채팅 메세지인 경우")
+                    let chatroom_idx_string = String(describing: userInfo["chatroom_idx"]!)
+                    let chatroom_idx = Int(chatroom_idx_string)!
+                    print("채팅방: \(chatroom_idx)")
+
+                    let content = String(describing: userInfo["content"]!)
+                    let created_at = String(describing: userInfo["created_at"]!)
+                    let front_created_at = String(describing: userInfo["front_created_at"]!)
+                    let chatting_idx_string = String(describing: userInfo["idx"]!)
+                    let chatting_idx = Int(chatting_idx_string)!
+                    let kinds = String(describing: userInfo["kinds"]!)
+                    print("채팅 메세지 어떤 채팅방 종류인지: \(kinds)")
+                    let user_idx_string = String(describing: userInfo["user_idx"]!)
+                    let user_idx = Int(user_idx_string)
+                    
+                    //새로 받은 메세지 저장.
+                    ChatDataManager.shared.insert_chatting(chatroom_idx: chatroom_idx, chatting_idx: chatting_idx, user_idx: user_idx!, content: content, kinds: kinds, created_at: created_at, front_created_at: front_created_at)
+                    
+                    //친구 채팅인 경우.
+                    SockMgr.socket_manager.enter_chatroom_idx = chatroom_idx
+                    
+                    //2.chat_user테이블에서 데이터 꺼내오기(채팅방입장시 user read이벤트 보낼 때 사용.)
+                    ChatDataManager.shared.get_info_for_unread(chatroom_idx: chatroom_idx)
+                    //친구랑 볼래 - 채팅방 읽음 처리 위해서 해당 채팅방의 마지막 메세지의 idx 가져오기(채팅방 1개 클릭시 입장하기 전에)
+                    ChatDataManager.shared.get_last_message_idx(chatroom_idx: chatroom_idx)
+                    
+                    DispatchQueue.main.async {
+                        ChatDataManager.shared.read_chatroom(chatroom_idx: chatroom_idx)
+                        let room_kinds = SockMgr.socket_manager.current_chatroom_info_struct.kinds
+                        print("어떤 채팅방인지 확인: \(room_kinds)")
+                        
+                        if room_kinds == "친구"{
+                        print("앱딜리게이트에서 친구 채팅룸으로 화면 변경.")
+                        self.view_router.current_page = .chat_room
+                            
+                        }else if room_kinds == "일반"{
+                            print("앱딜리게이트에서 일반 채팅룸으로 화면 변경.")
+                            self.view_router.current_page = .normal_chat_room
+                            
+                        }else{
+                            print("앱딜리게이트에서 모임 채팅룸으로 화면 변경.")
+                            self.view_router.current_page = .group_chat_room
+                            
+                        }
+                    }
+                    break
+                //4.친구 요청 도착시---no, 5.--- no
+                case "friend_request":
+                print("친구 요청 관련 노티")
+                    self.view_router.current_page = .manage_friend_tab
+                    break
+                //6.친구가 좋아요 표시한 경우
+                case "friend_card_like":
+                print("친구가 좋아요 표시한 경우")
+                    self.view_router.current_page = .notice_tab
+                    break
+                //7.내가 참가한 친구 카드 수정시
+                case  "friend_card_updated":
+                print("내가 참가한 친구 카드 수정시")
+                    self.view_router.current_page = .notice_tab
+                    break
+                //8.내가 참가한 친구 카드 삭제시
+                case "friend_card_deleted":
+                print("내가 참가한 친구 카드 삭제시")
+                    self.view_router.current_page = .notice_tab
+                    break
+                //9.내가 참가한 모임 카드 수정시
+                case "meeting_card_updated":
+                print("내가 참가한 모임 카드 수정시")
+                    self.view_router.current_page = .notice_tab
+                    break
+                //10.내가 참가한 모임 카드 삭제시
+                case "meeting_card_deleted":
+                print("내가 참가한 모임 카드 삭제시")
+                    self.view_router.current_page = .notice_tab
+                    break
+                //11.내가 만든 모임카드에 누군가 참가 신청시
+                case "meeting_card_applied":
+                print("")
+                    self.view_router.current_page = .notice_tab
+                    break
+                //12.내가 신청한 모임 요청이 수락됨.
+                case "meeting_card_admitted":
+                print("내가 신청한 모임 요청이 수락됨.")
+                self.view_router.current_page = .notice_tab
+                    break
+                //13.내가 신청한 모임카드 요청이 거절됨.
+                case  "meeting_card_denied":
+                print("내가 신청한 모임카드 요청이 거절됨.")
+                self.view_router.current_page = .notice_tab
+                    break
+                //14.내가 만든 모임카드에서 유저가 나감...삭제됨
+                
+                //15.친구 카드 일정 당일 예약 미리알림
+                case "friend_promise":
+                print(".친구 카드 일정 당일 예약 미리알림")
+                    self.view_router.current_page = .notice_tab
+                    break
+                //16.모임 카드 일정 당일 예약 미리 알림
+                case "meeting_promise":
+                print("모임 카드 일정 당일 예약 미리 알림")
+                self.view_router.current_page = .notice_tab
+                    break
+                //17.내가 설정한 심심기간에 좋아요 표시
+                case "calendar_interest":
+                print("내가 설정한 심심기간에 좋아요 표시")
+                self.view_router.current_page = .notice_tab
+                    break
+                //18.달력에 좋아요
+               case "calendar_like":
+                print("달력에 좋아요")
+                self.view_router.current_page = .notice_tab
+                break
+                //19.내 관심친구가 친구카드 만듬
+               case "interest_friend_card_created":
+                print("내 관심친구가 친구카드 만듬")
+                self.view_router.current_page = .notice_tab
+                break
+                //20.내 관심친구가 모임카드 만듬
+                case "interest_meeting_card_created":
+                    print("내 관심친구가 모임카드 만듬")
+                    self.view_router.current_page = .notice_tab
+                    break
+                //21.내 관심친구가 달력 심심on 설정.
+                case "interest_user_on":
+                    print("내 관심친구가 달력 심심on 설정.")
+                    break
+                //22.내 관심친구가 심심기간 등록.
+                case "interest_days_changed":
+                    print("내 관심친구가 심심기간 등록.")
+                    self.view_router.current_page = .notice_tab
+                    break
+                default:
+                print("")
+                    self.view_router.current_page = .notice_tab
+                    break
+            }
+                
+                    if let aps = userInfo["aps"] as? [String: AnyObject] {
+                        // Do what you want with the notification
+                        print("확인: \(aps)")
+                        print("확인: \(userInfo["aps"])")
+                    }
+
                 }
-            }
-        //4.친구 요청 도착시---no, 5.--- no
-        case "friend_request":
-        print("친구 요청 관련 노티")
-            self.view_router.current_page = .manage_friend_tab
-            
-        //6.친구가 좋아요 표시한 경우
-        case "friend_card_like":
-        print("친구가 좋아요 표시한 경우")
-            self.view_router.current_page = .notice_tab
-            
-        //7.내가 참가한 친구 카드 수정시
-        case  "friend_card_updated":
-        print("내가 참가한 친구 카드 수정시")
-            self.view_router.current_page = .notice_tab
-            
-        //8.내가 참가한 친구 카드 삭제시
-        case "friend_card_deleted":
-        print("내가 참가한 친구 카드 삭제시")
-            self.view_router.current_page = .notice_tab
-            
-        //9.내가 참가한 모임 카드 수정시
-        case "meeting_card_updated":
-        print("내가 참가한 모임 카드 수정시")
-            self.view_router.current_page = .notice_tab
-            
-        //10.내가 참가한 모임 카드 삭제시
-        case "meeting_card_deleted":
-        print("내가 참가한 모임 카드 삭제시")
-            self.view_router.current_page = .notice_tab
-        //11.내가 만든 모임카드에 누군가 참가 신청시
-        case "meeting_card_applied":
-        print("")
-            self.view_router.current_page = .notice_tab
-            
-        //12.내가 신청한 모임 요청이 수락됨.
-        case "meeting_card_admitted":
-        print("내가 신청한 모임 요청이 수락됨.")
-        self.view_router.current_page = .notice_tab
-            
-        //13.내가 신청한 모임카드 요청이 거절됨.
-        case  "meeting_card_denied":
-        print("내가 신청한 모임카드 요청이 거절됨.")
-        self.view_router.current_page = .notice_tab
-        
-        //14.내가 만든 모임카드에서 유저가 나감...삭제됨
-        
-        //15.친구 카드 일정 당일 예약 미리알림
-        case "friend_promise":
-        print(".친구 카드 일정 당일 예약 미리알림")
-            self.view_router.current_page = .notice_tab
-            
-        //16.모임 카드 일정 당일 예약 미리 알림
-        case "meeting_promise":
-        print("모임 카드 일정 당일 예약 미리 알림")
-        self.view_router.current_page = .notice_tab
-            
-        //17.내가 설정한 심심기간에 좋아요 표시
-        case "calendar_interest":
-        print("내가 설정한 심심기간에 좋아요 표시")
-        self.view_router.current_page = .notice_tab
-            
-        //18.달력에 좋아요
-       case "calendar_like":
-        print("달력에 좋아요")
-        self.view_router.current_page = .notice_tab
-        
-        //19.내 관심친구가 친구카드 만듬
-       case "interest_friend_card_created":
-        print("내 관심친구가 친구카드 만듬")
-        self.view_router.current_page = .notice_tab
-        //20.내 관심친구가 모임카드 만듬
-        case "interest_meeting_card_created":
-            print("내 관심친구가 모임카드 만듬")
-            self.view_router.current_page = .notice_tab
-        //21.내 관심친구가 달력 심심on 설정.
-        case "interest_user_on":
-            print("내 관심친구가 달력 심심on 설정.")
-
-        //22.내 관심친구가 심심기간 등록.
-        case "interest_days_changed":
-            print("내 관심친구가 심심기간 등록.")
-            self.view_router.current_page = .notice_tab
-            
-        default:
-        print("")
-            self.view_router.current_page = .notice_tab
-    }
-        
-        if let aps = userInfo!["aps"] as? [String: AnyObject] {
-                // Do what you want with the notification
-                print("확인: \(aps)")
-            print("확인: \(userInfo!["aps"])")
-            }
-
-        }
-        completionHandler()
-        }
+                completionHandler()
+                }
     
     //FCM1.앱이 포그라운드에 있을 때 푸시를 받은 경우 호출되는 함수 - 노티 클릭 이벤트와는 상관 없음.
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
