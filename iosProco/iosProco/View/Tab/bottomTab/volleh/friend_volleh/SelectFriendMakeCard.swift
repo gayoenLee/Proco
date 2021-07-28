@@ -15,45 +15,82 @@ struct SelectFriendMakeCard: View {
     @StateObject var main_viewmodel : FriendVollehMainViewmodel
     //---검색 관련해서 사용 변수들---
     //친구 검색창에 사용하는 변수
-    @State var search_text = ""
+    @State private var search_text = ""
     //사용자가 현재 검색창에 텍스트를 입력중인가를 알 수 있는 변수
-    @State var is_searching = false
+    @State private var is_searching = false
     //키보드에서 엔터 버튼 클릭시 검색 완료를 알리기 위한 변수
-    @State var end_search = false
+    @State private var end_search = false
     
     var body: some View {
         VStack{
+            
             HStack{
                 Button(action: {
-                    //request할 때 share_list 데이터 모델에 넣어서 보내기 위함.
+                    
                     self.presentation.wrappedValue.dismiss()
-                    print("그룹 선택 후에 sharelist에 들어갔는지 확인 : \(main_viewmodel.pra)")
                     
                 }){
-                    Text("확인")
-                    
+              
+                    Text("취소")
+                        .padding()
+                        .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/25))
+                        .foregroundColor(.proco_white)
+                        .background(Color.proco_black)
+                        .cornerRadius(20)
+                        
                 }
                 
+                Spacer()
+                
                 Button(action: {
-                    self.presentation.wrappedValue.dismiss()
-                }){
-                    Text("취소")
+                    self.main_viewmodel.show_card_group_array = Array(self.main_viewmodel.show_card_group_set)
                     
+                    self.main_viewmodel.show_card_friend_array = Array(self.main_viewmodel.show_card_friend_set)
+                    
+                    //알릴 친구들 선택 완료 후 돌아가서 선택한 그룹과 친구들 이름 보여주기 위해 데이터 넣는 메소드
+                    self.main_viewmodel.store_names()
+                    print("확인 버튼 눌렀을 때 선택한 그룹들 : \(self.main_viewmodel.show_card_group_array)")
+                    self.presentation.wrappedValue.dismiss()
+                    
+                }){
+                    
+                    Text("확인")
+                        .padding()
+                        .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/25))
+                        .foregroundColor(.proco_white)
+                        .background(Color.proco_black)
+                        .cornerRadius(20)
+                        
                 }
-            }            .padding(UIScreen.main.bounds.width/10)
+            }
+            .padding([.top, .leading, .trailing])
+            HStack{
 
-            SearchFriendBarInVolleh(main_viewmodel: self.main_viewmodel, search_text: $search_text, is_searching: $is_searching, end_search: $end_search)
+                SearchFriendBarInVolleh(main_viewmodel: self.main_viewmodel, search_text: $search_text, is_searching: $is_searching, end_search: $end_search)
+                    .padding(.top)
+            }
             if end_search{
+                
                 List{
                     Text("그룹")
+                        .font(.custom(Font.n_regular, size: 15))
+                        .foregroundColor(Color.gray)
+                    
                     ForEach((main_viewmodel.manage_groups).filter({"\($0)".contains(search_text)
+                        
                     }), id: \.self){ group in
+                        
                         GroupListMakeCard(main_viewmodel: self.main_viewmodel, group_struct: group, search_text: $search_text, is_searching: $is_searching, end_search: $end_search)
                     }
                     
                     Text("친구")
+                        .font(.custom(Font.n_regular, size: 14))
+                        .foregroundColor(Color.gray)
+                    
                     ForEach((main_viewmodel.friend_list_struct).filter({"\($0)".contains(search_text)
+                        
                     }), id: \.self){ friend in
+                        
                         FriendListMakeCard(main_viewmodel: self.main_viewmodel, friend_model: friend, search_text: $search_text, is_searching: $is_searching, end_search: $end_search)
                     }
                 }
@@ -62,6 +99,9 @@ struct SelectFriendMakeCard: View {
                 
                 List{
                     Text("그룹")
+                        .font(.custom(Font.n_regular, size: 14))
+                        .foregroundColor(Color.gray)
+                    
                     if main_viewmodel.manage_groups.isEmpty{
                         ProgressView()
                     }else{
@@ -69,7 +109,11 @@ struct SelectFriendMakeCard: View {
                             GroupListMakeCard(main_viewmodel: self.main_viewmodel, group_struct: self.main_viewmodel.manage_groups[group_index], search_text: $search_text, is_searching: $is_searching, end_search: $end_search)
                         }
                     }
+                    
                     Text("친구")
+                        .font(.custom(Font.n_regular, size: 14))
+                        .foregroundColor(Color.gray)
+                    
                     if main_viewmodel.friend_list_struct.isEmpty{
                         ProgressView()
                     }else{
@@ -82,14 +126,13 @@ struct SelectFriendMakeCard: View {
             
             Spacer()
         }
+        .navigationBarTitle("", displayMode: .inline)
+        .navigationBarHidden(true)
         .onAppear{
             print("알릴 친구들 뷰 on appear")
             main_viewmodel.get_all_people()
         }
-
-        
     }
-    
 }
 
 struct SearchFriendBarInVolleh: View{
@@ -103,8 +146,6 @@ struct SearchFriendBarInVolleh: View{
     
     @State var text: String = ""
     @State private var log: String = "Logs: "
-    
-    
     
     var body: some View {
         HStack {
@@ -162,8 +203,8 @@ struct SearchFriendBarInVolleh: View{
                 .transition(.move(edge: .trailing))
                 .animation(.spring())
             }
-            
+        }
         }
     }
-}
+
 
