@@ -51,7 +51,7 @@ struct FriendFilterModal: View {
                         .padding()
                 }
             }
-            .padding()
+            .padding(UIScreen.main.bounds.width/30)
             
             HStack{
                 Text("심심태그")
@@ -90,6 +90,7 @@ struct FriendFilterModal: View {
             
             DatePicker("", selection: $viewmodel.filter_start_date,  displayedComponents: [.date])
                 .datePickerStyle(GraphicalDatePickerStyle())
+                .environment(\.locale, Locale.init(identifier: "ko_KR"))
             
             Button(action: {
                 //date -> string변환
