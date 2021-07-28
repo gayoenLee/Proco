@@ -173,7 +173,7 @@ struct ManageAddressBookFriendRow: View{
                 
                 RoundedRectangle(cornerRadius: 5.0)
                     .foregroundColor(.main_orange)
-                    .frame(width: 50, height: 30)
+                    .frame(width: 73, height: 30)
                     .overlay(
                         HStack{
                             Image("tag_plus")
