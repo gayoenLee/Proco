@@ -18,37 +18,41 @@ struct FriendListMakeCard: View {
     //키보드에서 엔터 버튼 클릭시 검색 완료를 알리기 위한 변수
     @Binding var end_search: Bool
     
+    var is_selected: Bool{
+        main_viewmodel.show_card_friend_set.contains(friend_model.idx ?? -1)
+    }
+    
     var body: some View {
         HStack{
+            
+            Text(friend_model.nickname!)
+                .padding()
+            Spacer()
+            
             //체크박스 클릭시 뷰모델에 set에 저장하고 배열로 변환해서 바로 array에도 저장.
             Button(action: {
+                
                 //선택한 그룹이 이미 선택됐던 거라면 뷰모델에 저장한 선택 리스트 안에서 제거.
-                if main_viewmodel.show_card_friend_set.contains(self.friend_model.idx!){
+                if is_selected{
                     main_viewmodel.show_card_friend_set.remove(self.friend_model.idx!)
-                    main_viewmodel.show_card_friend_array = Array(main_viewmodel.show_card_friend_set)
-                    print("이미 선택한 그룹 선택 후 리스트 확인 : \( main_viewmodel.show_card_friend_array)")
                     
-                    //선택한 친구 카드 추가 메인에서 보여주기 위해 친구 idx를 키로 친구 이름도 삭제
-                    main_viewmodel.show_card_friend_name.removeValue(forKey: self.friend_model.idx!)
-                }else{
+                }else if is_selected == false{
+                    
                     main_viewmodel.show_card_friend_set.insert(self.friend_model.idx!)
-                    main_viewmodel.show_card_friend_array = Array(main_viewmodel.show_card_friend_set)
+                  
                     print("처음 그룹 선택 후 리스트 확인 : \( main_viewmodel.show_card_friend_array)")
-                    
-                    //선택한 친구 카드 추가 메인에서 보여주기 위해 친구 이름도 저장
-                    main_viewmodel.show_card_friend_name.updateValue(self.friend_model.nickname!, forKey: self.friend_model.idx!)
                 }
                 
             }){
-                if main_viewmodel.show_card_friend_set.contains(self.friend_model.idx!){
-                    Image(systemName: "checkmark.circle.fill")
+                if is_selected{
+                    Image("checked_small")
                         .renderingMode(.original)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                     
                 }else{
-                    Image(systemName: "circle")
+                    Image("check_small")
                         .renderingMode(.original)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -59,9 +63,6 @@ struct FriendListMakeCard: View {
             }
             .padding()
             
-            Text(friend_model.nickname!)
-                .padding()
-            Spacer()
         }
     }
 }
