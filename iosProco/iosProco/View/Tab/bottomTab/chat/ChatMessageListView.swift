@@ -168,11 +168,23 @@ extension ChatMessageListView{
             print("플러스 컨텐츠 클릭")
             
         }){
-            Image("circle_plus_icon")
-                .resizable()
-                .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+            
+            if show_contents_menu{
+                
+                Image(systemName: "xmark.circle")
+                    .resizable()
+                    .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+                    .foregroundColor(Color.proco_black)
+                
+            }else{
+                Image("circle_plus_icon")
+                    .resizable()
+                    .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+                    .foregroundColor(Color.gray)
+            }
         }
     }
+    
     
     var send_img_btn : some View{
         Button(action: {
@@ -267,7 +279,10 @@ extension ChatMessageListView{
             print("앨범에서 사진 보내기 취소")
         }){
             Image(systemName: "chevron.left.square")
-                .foregroundColor(.gray)
+                .resizable()
+                .frame(width: 24, height: 24)
+                .foregroundColor(.proco_black)
+                
         }
     }
     
@@ -281,8 +296,8 @@ extension ChatMessageListView{
                 VStack{
                     Image(systemName: "photo")
                         .resizable()
-                        .frame(width: 100, height: 100)
-                        .foregroundColor(.proco_pink)
+                        .frame(width: 90, height: 90)
+                        .foregroundColor(.proco_mint)
                     
                     Text("앨범")
                         .font(.custom(Font.t_extra_bold, size: 15))

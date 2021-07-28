@@ -471,9 +471,11 @@ struct NormalChatRoom: View {
             HStack{
                 ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(), show_profile: self.$show_profile,selected_user_idx: self.$selected_user_idx, show_menu: self.$show_menu)
                     .background(Color.white)
-                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.9)
+                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.94)
                     .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.08: UIScreen.main.bounds.width)
+                    .padding(.bottom)
             }
+            .padding(.bottom)
             
             //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
             if show_profile{

@@ -77,6 +77,7 @@ struct ChatroomDrawer: View {
                     Group{
                         //친구와 카드 만들기: 카드 만드는 페이지로 이동 > 완료시 동적 링크 채팅방에 보내기
                         make_card_with_friend_btn
+                            .padding(.top)
                         
                         
                         //내가 만든 카드에 초대하기 버튼 클릭시 내가 만든 카드 리스트 페이지로 이동, api서버에 내 모든 카드 리스트 가져오는 통신 진행.
@@ -153,7 +154,7 @@ struct ChatroomDrawer: View {
                     chatroom_setting_btn
                     chatroom_alarm_btn
                 }
-                .padding(.trailing)
+                .padding([.trailing, .bottom])
             }
             .padding()
             //            //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰

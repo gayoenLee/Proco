@@ -56,7 +56,7 @@ struct ChatroomSettingView: View {
                             .foregroundColor(.gray)
                     }else{
                         Text(SockMgr.socket_manager.current_chatroom_info_struct.room_name)
-                            .font(.custom(Font.n_extra_bold, size: UIScreen.main.bounds.width/25))
+                            .font(.custom(Font.n_regular, size: UIScreen.main.bounds.width/25))
                             .foregroundColor(.proco_black)
                     }
                     

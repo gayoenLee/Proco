@@ -18,16 +18,7 @@ struct GatheringChatTab: View {
     
     var body: some View {
         VStack{
-            HStack{
-                Capsule()
-                    .fill(Color.black)
-                    .overlay(Text("참가 확정 모임")
-                                .foregroundColor(Color.white)
-                                .padding(UIScreen.main.bounds.width/20))
-                    .frame(width: UIScreen.main.bounds.width/2, height: UIScreen.main.bounds.width/10)
-                    .padding()
-                Spacer()
-            }
+
             NavigationLink("", destination: GatheringChatRoom( socket: socket).navigationBarHidden(true)
                             .navigationBarTitle(""), isActive: self.$go_to_chat)
             ScrollView{
@@ -108,7 +99,11 @@ struct GatheringChatRow : View{
     }
     
     var promise_day: String{
-        String.dot_form_date_string(date_string: gathering_chat.promise_day!)
+        if gathering_chat.promise_day != "" || gathering_chat.promise_day != nil{
+        return String.dot_form_date_string(date_string: gathering_chat.promise_day!)
+        }else{
+            return ""
+        }
     }
     
     //채팅방 알림 설정
