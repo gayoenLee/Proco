@@ -50,6 +50,10 @@ struct GroupVollehMainView: View {
     
     //내 프로필 클릭시 나타나는 다이얼로그
     @State private var my_info_dialog : Bool = false
+    //카드 잠금 이벤트시 토스트 띄우기 위한 구분값
+    @State private var show_lock_alert : Bool = false
+    //카드 잠금인지 잠금해제인지 이벤트 종류 알기 위해 저장할값 - 토스트에 띄움
+    @State private var lock_event_kind : String = ""
     
     @ViewBuilder
     var body: some View {
@@ -84,8 +88,13 @@ struct GroupVollehMainView: View {
                             .padding()
                     }
                     DisclosureGroup(isExpanded:$open_my_meetings, content: {
+                        
                         if main_vm.my_group_card_struct.isEmpty{
+                            
                             Text("내가 만든 모임이 아직 없네요.")
+                                .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/25))
+                                .foregroundColor(.gray)
+                                .padding(.top)
                         }else{
                             
                             NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm)          .navigationBarTitle("", displayMode: .inline)
@@ -95,18 +104,18 @@ struct GroupVollehMainView: View {
                             ForEach(main_vm.my_group_card_struct){ card in
                                 ZStack{
                                     // 1. hstack 버튼들 배경
-                                    HStack{
+                                    HStack(spacing: 0){
                                         Spacer()
                                         //오른쪽으로 스와이프시 빨간색 배경, 주황색 배경
-                                        HStack{
-                                            Color.red
-                                                .frame(width: UIScreen.main.bounds.width*0.3)
-                                                .opacity(main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset! < 0 ? 1 : 0)
+                                        RoundedRectangle(cornerRadius: 5.0)
+                                            .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
+                                            .foregroundColor(Color.proco_red .opacity(main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset ?? 0 < 0 ? 1 : 0))
                                             
-                                            Color.orange
-                                                .frame(width: UIScreen.main.bounds.width*0.3)
-                                                .opacity(main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset! < 0 ? 1 : 0)
-                                        }
+                                        RoundedRectangle(cornerRadius: 5.0)
+                                            .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
+                                            .foregroundColor(    Color.main_orange .opacity(main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset ?? 0 < 0 ? 1 : 0))
+                                        
+                                        
                                     }
                                     
                                     //2.hstack 버튼 액션 선언
@@ -124,7 +133,6 @@ struct GroupVollehMainView: View {
                                                     print("이동하려는 카드 idx: \(self.main_vm.selected_card_idx)")
                                                     //수정하는 페이지 카드 정보 갖고 오는 통신 진행.-> 상세페이지에서 하는 것으로 변경.
 //                                                    self.main_vm.get_detail_card()
-                                                  
                                                     withAnimation(.default){
                                                         
                                                         //수정하는 페이지로 이동
@@ -135,10 +143,14 @@ struct GroupVollehMainView: View {
                                                 , label: {
                                                     VStack{
                                                         Image("swipe_edit_icon")
+                                                            .resizable()
+                                                            .frame(width:18.89, height: 19.03)
                                                         Image("swipe_edit_txt")
+                                                            .resizable()
+                                                            .frame(width:20, height: 13)
                                                     }
                                                 })
-                                                .frame(width: UIScreen.main.bounds.width*0.2)
+                                                .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width*0.3)
                                                 
                                                 //삭제버튼
                                                 Button(action: {
@@ -153,11 +165,14 @@ struct GroupVollehMainView: View {
                                                 , label: {
                                                     VStack{
                                                         Image("swipe_del_icon")
+                                                            .resizable()
+                                                            .frame(width:16, height: 22)
                                                         Image("swipe_del_txt")
+                                                            .resizable()
+                                                            .frame(width:20, height: 13)
                                                     }
                                                 })
-                                                .frame(width: UIScreen.main.bounds.width*0.2)
-                                                .padding()
+                                                .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.3)
                                                 .alert(isPresented: $show_delete_alert){
                                                     Alert(title: Text("카드 삭제하기"), message: Text("내 카드를 지우시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
                                                         
@@ -186,7 +201,7 @@ struct GroupVollehMainView: View {
                                         .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.4)
                                         .overlay(
                                     MyGroupVollehCard(main_vm: self.main_vm,
-                                                      my_group_card: main_vm.my_group_card_struct[main_vm.get_index(item: card)], current_card_index: self.main_vm.get_index(item: card) ))
+                                                      my_group_card: main_vm.my_group_card_struct[main_vm.get_index(item: card)], current_card_index: self.main_vm.get_index(item: card), show_lock_alert : self.$show_lock_alert, lock_event_kind: self.$lock_event_kind))
                                     
                                         
                                         //스와이프해서 수정, 삭제 위해 offset을 데이터 모델에 임의로 넣어줬음. 이 값을 이용한 것.
@@ -213,10 +228,10 @@ struct GroupVollehMainView: View {
                                         .onEnded({ (value) in
                                             withAnimation(.default){
                                                 
-                                                if value.translation.width < UIScreen.main.bounds.width * -0.15{
+                                                if value.translation.width < UIScreen.main.bounds.width * -0.01{
                                                     print("on ended에 들어옴 : offset 확인2")
                                                     
-                                                    main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset! = UIScreen.main.bounds.width * -0.6
+                                                    main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset! = UIScreen.main.bounds.width * -0.4
                                                 }
                                                 else{
                                                     print("on ended에 들어옴 : offset 확인3")
@@ -240,8 +255,12 @@ struct GroupVollehMainView: View {
                     NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm), isActive : self.$go_to_detail)
                     
                     DisclosureGroup(isExpanded:$open_all_meeting_cards, content: {
+                        
                         if main_vm.group_card_struct.isEmpty{
+                            
                             Text("만들어진 모임이 아직 없네요")
+                                .font(.custom(Font.n_bold, size: UIScreen.main.bounds.width/25))
+                                .foregroundColor(.gray)
                         }else{
                             
                             ForEach(self.main_vm.group_card_struct){ card in
@@ -285,6 +304,7 @@ struct GroupVollehMainView: View {
         }
         .background(Color.proco_dark_white)
         .overlay(MyInfoDialog(main_vm: self.main_vm, show_friend_info: $my_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, profile_photo_path: self.$my_photo_path))
+        .overlay(overlayView: Toast.init(dataModel: Toast.ToastDataModel.init(title: "카드가 \(self.lock_event_kind)되었습니다.", image: "checkmark"), show: self.$show_lock_alert), show: self.$show_lock_alert)
         //필터 뷰
         .sheet(isPresented: $show_filter){
             GroupFilterModal(main_vm: self.main_vm, show_filter: self.$show_filter)
@@ -356,6 +376,7 @@ extension GroupVollehMainView{
                                     .resizable()
                                     .frame(width: 40, height: 40)
                             }
+                            .padding([.leading], UIScreen.main.bounds.width/30)
                     }
                 }
                 .onTapGesture {
@@ -456,9 +477,7 @@ extension GroupVollehMainView{
         Button(action: {
             print("신청 목록 보기 버튼 클릭")
             self.go_to_apply_list.toggle()
-            //신청 목록 가져오는 통신
             self.main_vm.get_my_apply_list()
-            
         }){
             Text("신청목록 보기")
                 .foregroundColor(Color.proco_white)
