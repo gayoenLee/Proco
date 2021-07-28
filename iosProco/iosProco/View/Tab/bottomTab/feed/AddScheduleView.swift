@@ -95,6 +95,7 @@ struct AddScheduleView: View {
                     .foregroundColor(Color.proco_black)
                     //다이얼로그식 캘린더 스타일
                     .datePickerStyle(CompactDatePickerStyle())
+                    .environment(\.locale, Locale.init(identifier: "ko_KR"))
             }
             .padding()
             //시간 입력 칸
@@ -108,6 +109,7 @@ struct AddScheduleView: View {
                     .foregroundColor(Color.proco_black)
                     .labelsHidden()
                     .datePickerStyle(GraphicalDatePickerStyle())
+                    .environment(\.locale, Locale.init(identifier: "ko_KR"))
             }
             .padding()
             //메모 입력 필드
