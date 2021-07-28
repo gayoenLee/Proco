@@ -179,11 +179,21 @@ extension FriendCardListView{
             self.main_vm.cancel_like_card(card_idx: self.friend_volleh_card_struct.card_idx!)
             }
         }){
-            
-            Image(self.friend_volleh_card_struct.like_state == 0 ? "heart" : "heart_fill")
-            .resizable()
-            .frame(width: UIScreen.main.bounds.width/17, height: UIScreen.main.bounds.width/20)
-            .padding([.leading], UIScreen.main.bounds.width/20)
+            if self.friend_volleh_card_struct.like_state == 0{
+                Image(systemName: "heart")
+                .resizable()
+                    .frame(width: UIScreen.main.bounds.width/21, height: UIScreen.main.bounds.width/25)
+                .padding([.leading], UIScreen.main.bounds.width/20)
+                    .foregroundColor(Color.proco_red)
+
+            }else{
+                Image(systemName: "heart.fill")
+                .resizable()
+                    .frame(width: UIScreen.main.bounds.width/21, height: UIScreen.main.bounds.width/25)
+                .padding([.leading], UIScreen.main.bounds.width/20)
+                    .foregroundColor(Color.proco_red)
+
+            }
         }
             
             Text(friend_volleh_card_struct.like_count > 0 ? "좋아요 \(friend_volleh_card_struct.like_count)개" : "")

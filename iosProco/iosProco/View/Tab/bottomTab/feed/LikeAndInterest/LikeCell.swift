@@ -13,9 +13,19 @@ struct LikeCell: View {
     
     var body: some View {
         HStack{
-            Image(like_total_model.clicked_like_myself ? "heart_fill" : "heart")
-                .resizable()
-                .frame(width: UIScreen.main.bounds.width/30, height: UIScreen.main.bounds.width/30)
+            if like_total_model.clicked_like_myself{
+                Image(systemName: "heart.fill" )
+                    .resizable()
+                    .frame(width: UIScreen.main.bounds.width/30, height: UIScreen.main.bounds.width/30)
+                    .foregroundColor(Color.proco_red)
+
+            }else{
+                Image(systemName:  "heart")
+                    .resizable()
+                    .frame(width: UIScreen.main.bounds.width/30, height: UIScreen.main.bounds.width/30)
+                    .foregroundColor(Color.proco_red)
+
+            }
            
             Text(like_total_model.like_num > 0 ? String(like_total_model.like_num) : "")
                 .font(.system(size: 6))
