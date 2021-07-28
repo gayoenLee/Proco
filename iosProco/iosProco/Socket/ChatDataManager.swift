@@ -1446,6 +1446,8 @@ SELECT CHAT_ROOM.kinds, CHAT_ROOM.idx, CHAT_CHATTING.content, CHAT_CHATTING.crea
     //채팅방 목록 리스트 데이터 안읽은 메세지, 카드 만든 사람 완성하기
     func set_room_data(kinds: String){
         chatroom_idx_list.removeAll()
+        SockMgr.socket_manager.group_chat_model.removeAll()
+        
         get_kinds_chatroom_idx(kinds: kinds, user_idx: Int(self.my_idx!)!)
         
         print("채팅방 뷰 데이터 만들기 위한 메소드 들어옴 리스트 확인:\(self.chatroom_idx_list)")
