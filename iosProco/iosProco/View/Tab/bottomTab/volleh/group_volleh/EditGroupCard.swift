@@ -158,13 +158,14 @@ struct EditGroupCard: View {
                         if main_vm.my_card_detail_struct.kinds == "오프라인 모임" || main_vm.card_detail_struct.kinds == "오프라인 모임"{
                             
                             self.is_offline_meeting = true
-                            print("카드 편집에서 오프라인 미팅임;")
+                            print("카드 편집에서 오프라인 미팅임")
                         }else{
                             self.is_offline_meeting = false
                             print("카드 편집에서 온라인 미팅임;")
                         }
                         
                         self.card_img_url = main_vm.card_detail_struct.card_photo_path ?? ""
+                        print("카드 수정 페이지 - 모임 카드 이미지 확인: \(self.card_img_url)")
                     }else{
                         print("모임 카드 상세 데이터 통신 노티 아님")
                     }
@@ -179,7 +180,7 @@ struct EditGroupCard: View {
                     self.main_vm.get_group_card_detail(card_idx: self.main_vm.selected_card_idx)
                 }
             }
-            .navigationBarColor(background_img: "meeting_wave_bg", btn_img: "left")
+            .navigationBarColor(background_img: "meeting_wave_bg")
             .navigationBarTitle("카드 수정")
             .navigationBarItems(leading:
                                     Button(action: {
@@ -362,6 +363,7 @@ struct EditingView: View{
                 
                 if data as! String == "ok"{
                     self.card_img_url = ""
+                    self.main_vm.my_card_detail_struct.card_photo_path = ""
                 }
             }
         })
@@ -388,11 +390,6 @@ struct EditingView: View{
                 print("친구 메인에서 오늘 심심기간 설정 서버 통신 후 노티 응답 실패: .")
             }
         }
-        .onAppear{
-            
-        }
-        
-        
     }
 }
 
@@ -408,8 +405,8 @@ extension EditingView {
             }
             .padding([.top, .leading])
             
-            if  card_img_url != "" && self.main_vm.group_card_img_data == nil{
-                
+            if  self.main_vm.my_card_detail_struct.card_photo_path != ""{
+                Text("여기로")
                 KFImage(URL(string: self.main_vm.my_card_detail_struct.card_photo_path!))
                     .loadDiskFileSynchronously()
                     .cacheMemoryOnly()
@@ -427,7 +424,7 @@ extension EditingView {
                     .overlay(
                         Button(action: {
                             print("카드 이미지 선택 버튼 클릭")
-                            
+
                             self.show_img_picker.toggle()
                         }){
                             Image("plus_img_btn")
@@ -436,8 +433,8 @@ extension EditingView {
                         }, alignment: .center)
                 
                 
-            }else if pickerResult != nil{
-                
+            }else if self.main_vm.my_card_detail_struct.card_photo_path == ""{
+                Text("피커리절트")
                 Image.init(uiImage: pickerResult!)
                     .resizable()
                     //이미지 채우기
@@ -684,8 +681,8 @@ extension EditingView {
                                 .frame(width: 16, height: 16)
                             
                             Text(main_vm.user_selected_tag_list[tag_index])
-                                .frame(minWidth: 0, maxWidth: .infinity)
-                                .font(.custom(Font.n_bold, size: 14))
+                                .lineLimit(nil)
+                                .multilineTextAlignment(.leading)                                .font(.custom(Font.n_bold, size: 14))
                                 .foregroundColor(.proco_black)
                         }
                     }
