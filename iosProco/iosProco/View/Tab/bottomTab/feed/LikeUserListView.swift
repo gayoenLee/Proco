@@ -58,6 +58,7 @@ struct LikeUserListView: View {
                     ProgressView()
                     
                 }else{
+                    VStack{
                     //검색할 경우에는 보여주지 않기
                     if (isSearching == false && end_search == false){
                         
@@ -71,6 +72,8 @@ struct LikeUserListView: View {
                             LikeUserCell(main_vm: self.main_vm, like_user_model: user)
                         }
                     }
+                    }
+                    .padding()
                 }
                 Spacer()
             }

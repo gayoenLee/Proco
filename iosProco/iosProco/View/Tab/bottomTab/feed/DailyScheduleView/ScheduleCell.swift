@@ -167,9 +167,13 @@ struct CalendarCardTimeView : View{
     
     var body: some View{
         Group{
+            HStack{
             Text(String.date_to_kor_time(date: info.start_time))
                 .font(.custom(Font.n_bold, size: 12))
                 .foregroundColor(Color.gray)
+            Spacer()
+            }
+            .padding(.top, UIScreen.main.bounds.width/30)
         }
     }
 }
@@ -229,6 +233,8 @@ struct CalendarCardLocationPeopleView : View{
                         .foregroundColor(Color.proco_black)
                     
                 }
+                
+                Spacer()
             }
         }
     }

@@ -40,7 +40,7 @@ struct ScheduleListView: View {
     var body: some View {
         VStack(alignment: .leading){
         schedule_like_preview
-            .padding([.leading])
+            .padding([.leading], UIScreen.main.bounds.width/40)
         schedule_preview_list
             .animation(.easeInOut)
             .onAppear(perform: setUpScheduleSlideShow)
