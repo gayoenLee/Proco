@@ -59,6 +59,10 @@ struct FriendVollehCardDetail: View {
     //카드 초대하기 후 알림창에 보여줄 텍스트뷰
     @State private var invite_result_txt : String = ""
     
+    //잠금 이벤트 완료 후 토스트 띄우기 위해 사용하는 구분값
+    @State private var show_interest_alert : Bool = false
+    @State private var interest_event_kind : String = ""
+    
     var body: some View{
         
         VStack{
@@ -105,6 +109,8 @@ struct FriendVollehCardDetail: View {
                     Spacer()
                 }
                 Group{
+                    VStack{
+                        Spacer()
                     //카드 주인의 프로필 사진, 이름
                     owner_profile
                     HStack{
@@ -141,6 +147,8 @@ struct FriendVollehCardDetail: View {
                         Spacer()
                     }
                     Spacer()
+                }
+                    .overlay(overlayView: self.interest_event_kind == "관심친구해제" ?  Toast.init(dataModel: Toast.ToastDataModel.init(title: "관심 친구를 취소했습니다.", image: "checkmark"), show: self.$show_interest_alert) :  Toast.init(dataModel: Toast.ToastDataModel.init(title: "관심친구로 설정했습니다.", image: "checkmark"), show: self.$show_interest_alert), show: self.$show_interest_alert)
                 }
                 
                 //동적링크를 통해 초대된 채팅방으로 이동
@@ -240,10 +248,6 @@ struct FriendVollehCardDetail: View {
             //캘린더에서 넘어온 경우 true로 해줬던 값 다시 바꿔주기
             calendar_vm.from_calendar = false
         }
-        //카드 상세 정보 가져왔을 때 no result인 경우 띄우는 알림창
-        //        .alert(isPresented: self.$no_result_alert, content: {
-        //            Alert(title: Text("알림"), message: Text("찾을 수 없는 정보입니다."), dismissButton: .default(Text("확인")))
-        //        })
         .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
             print("친구카드 상세 데이터 통신 완료 노티 받음")
             if let user_info = value.userInfo, let data = user_info["get_friend_card_detail_finish"]{
@@ -552,10 +556,21 @@ private extension FriendVollehCardDetail{
                 }
             }){
                 
-                Image(self.main_vm.friend_volleh_card_detail.like_state == 1 ? "heart_fill" : "heart")
-                    .resizable()
-                    .frame(width: 18, height:16)
-                    .padding([.leading], UIScreen.main.bounds.width/20)
+                if self.main_vm.friend_volleh_card_detail.like_state == 1{
+                    Image(systemName:  "heart.fill" )
+                        .resizable()
+                        .frame(width: 18, height:16)
+                        .padding([.leading], UIScreen.main.bounds.width/20)
+                        .foregroundColor(Color.red)
+                }else{
+                    Image(systemName:  "heart" )
+                        .resizable()
+                        .frame(width: 18, height:16)
+                        .padding([.leading], UIScreen.main.bounds.width/20)
+                        .foregroundColor(Color.red)
+
+                }
+                
             }
             Button(action: {
                 let card_idx = main_vm.friend_volleh_card_detail.card_idx
@@ -717,9 +732,14 @@ private extension FriendVollehCardDetail{
                                 print("알림 설정 결과 받음: \(check_result)")
                                 if check_result as! String == "set_ok_관심친구"{
                                     self.main_vm.friend_volleh_card_detail.is_favor_friend = 1
+                                    self.interest_event_kind = "관심친구"
+                                    self.show_interest_alert = true
+                                    
                                 }else if check_result as! String == "set_ok_관심친구해제"{
                                     
                                     self.main_vm.friend_volleh_card_detail.is_favor_friend = 0
+                                    self.interest_event_kind = "관심친구해제"
+                                    self.show_interest_alert = true
                                     
                                 }
                             }
