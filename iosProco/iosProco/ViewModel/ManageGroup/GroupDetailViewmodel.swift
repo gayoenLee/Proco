@@ -180,7 +180,7 @@ class GroupDetailViewmodel: ObservableObject{
                 print("친구 편집 뷰모델의 receive value값 : \(String(describing: response))")
                 //모두 제거하고 다시 가져오기
                 self.friend_list_struct.removeAll()
-                
+                self.group_details.removeAll()
                 for friend in response{
                     if friend.nickname != nil{
                         self.friend_list_struct.append(GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds))

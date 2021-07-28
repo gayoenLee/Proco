@@ -789,7 +789,7 @@ class FriendVollehMainViewmodel: ObservableObject{
     
     //내 카드 편집 통신
     func edit_my_card(){
-        cancellation = APIClient.edit_friend_volleh_card(card_idx: self.selected_card_idx, type: "친구", time: self.card_expire_time, tags: self.user_selected_tag_list, share_list: self.pra)
+        cancellation = APIClient.edit_friend_volleh_card(card_idx: self.selected_card_idx, type: "친구", time: self.card_expire_time, tags: self.user_selected_tag_list, share_list: [])
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: {result in
                 switch result{
@@ -1490,6 +1490,34 @@ class FriendVollehMainViewmodel: ObservableObject{
                     print("참여자 없음")
                 }
             })
+    }
+    
+    //카드 만들기시 알릴 친구들 선택 완료 후 이름 보여주기 위해 이름 넣는 메소드
+    func store_names(){
+        self.show_card_group_name.removeAll()
+        self.show_card_friend_name.removeAll()
+        
+        for group in self.show_card_group_array{
+            var model_idx : Int? = -1
+                model_idx = self.manage_groups.firstIndex(where: {
+                $0.idx! == group
+            }) ?? -1
+            
+            if model_idx != -1{
+                self.show_card_group_name.updateValue(self.manage_groups[model_idx!].name!, forKey: group)
+            }
+        }
+        
+        for friend in self.show_card_friend_array{
+            var model_idx: Int? = -1
+            model_idx = self.friend_list_struct.firstIndex(where: {
+                $0.idx! == friend
+            }) ?? -1
+            
+            if model_idx != -1{
+                self.show_card_friend_name.updateValue(self.friend_list_struct[model_idx!].nickname!, forKey: friend)
+            }
+        }
     }
     
 }

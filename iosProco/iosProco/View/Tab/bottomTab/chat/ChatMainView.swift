@@ -22,17 +22,28 @@ struct ChatMainView: View {
                         if title == "친구"{
                             Image(isSelected == true ? "friend_chat_tab_title_active" : "friend_chat_tab_title_inactive")
                                 .resizable()
-                                .frame(width: UIScreen.main.bounds.width/10, height: UIScreen.main.bounds.width/10)
-
+                                .frame(width: 46, height: 40)
                         }
                         else if title == "모임"{
-                            Image(isSelected == true ?"group_chat_tab_title_active" : "group_chat_tab_title_inactive")
-                                .resizable()
-                                .frame(width: UIScreen.main.bounds.width/10, height: UIScreen.main.bounds.width/10)
+                            
+                            if isSelected == true{
+                                
+                                Image("group_chat_tab_title_active" )
+                                    .resizable()
+                                    .frame(width: 62, height: 40)
+
+                            }else{
+                                
+                                Image("group_chat_tab_title_inactive")
+                                    .resizable()
+                                    .frame(width: 46, height: 40)
+
+                            }
+                          
                         }else{
                             Image(isSelected == true ? "normal_chat_tab_title_active" : "normal_chat_tab_title_inactive")
                                 .resizable()
-                                .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
+                                .frame(width: 32, height: 21)
                         }
                     }
                     .frame(width: UIScreen.main.bounds.width*0.25, height: UIScreen.main.bounds.width*0.2)

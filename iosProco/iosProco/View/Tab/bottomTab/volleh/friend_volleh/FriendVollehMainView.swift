@@ -113,7 +113,6 @@ struct FriendVollehMainView: View {
                                             Button(action: {
                                                 self.main_vm.selected_card_idx = self.main_vm.my_friend_volleh_card_struct[self.main_vm.get_index(item: item)].card_idx!
                                                 
-                                                
                                                 //수정하는 페이지로 이동
                                                 self.go_to_edit  = true
                                                 print("수정하는 페이지 이동 구분값: \(self.go_to_edit)")
@@ -151,7 +150,6 @@ struct FriendVollehMainView: View {
                                                 }
                                             })
                                             .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.3)
-                                            //.padding()
                                             .alert(isPresented: $show_delete_alert){
                                                 Alert(title: Text("카드 삭제하기"), message: Text("내 카드를 지우시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
                                                     
@@ -249,27 +247,6 @@ struct FriendVollehMainView: View {
                 .sheet(isPresented: $show_filter_modal){
                     FriendFilterModal(show_filter_modal: $show_filter_modal, viewmodel: self.main_vm)
                 }
-                .navigationBarTitle("", displayMode: .inline)
-                .navigationBarHidden(true)
-                .onAppear{
-                    print("*************친구랑 볼래 메인 뷰 나타남****************")
-                    self.main_vm.applied_filter = false
-                    
-                    //user defaults에서 내 닉네임 꺼내오는 메소드 실행. 그래야 내 카드만 골라서 보여줄 수 있음.
-                    main_vm.get_my_nickname()
-                    
-                    //카드 데이터 갖고 오는 통신-> 끝나면 전체 카드 내가 클릭한 좋아요 목록 가져오는 통신(카드마다 내가 좋아요 클릭했는지 여부 알기 위해 좋아요 유저 목록 미리 가져와야 함.)
-                    main_vm.get_friend_volleh_cards()
-                    
-                    print("내 닉네임 확인 : \(main_vm.my_nickname)")
-                    //on, off 상태 표시하기 위해 user defaults에서 가져와서 세팅
-                    let user_idx = ChatDataManager.shared.my_idx!
-                    self.state_on = UserDefaults.standard.integer(forKey: "\(user_idx)_state")
-                    self.my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
-                    print("저장됐던 유저 상태 확인:\(user_idx) \(self.state_on)")
-                    
-                    
-                }
                 .onReceive( NotificationCenter.default.publisher(for: Notification.get_data_finish)){value in
                     print("친구랑 볼래에서 오늘 심심기간 초기 설정 노티 받음")
                     if let user_info = value.userInfo, let check_boring = user_info["set_today_boring_data"]{
@@ -287,9 +264,6 @@ struct FriendVollehMainView: View {
                     }else{
                         print("친구 메인에서 초기에 오늘 심심기간인지 노티 아님.")
                     }
-                }
-                .onDisappear{
-                    print("*************친구랑 볼래 메인 뷰 사라짐****************")
                 }
                 .onReceive( NotificationCenter.default.publisher(for: Notification.set_boring_today)){value in
                     print("친구랑 볼래에서 오늘 심심기간 설정 노티 받음")
@@ -311,6 +285,28 @@ struct FriendVollehMainView: View {
             }
             
             //여기에 다이얼로그 오버레이해야 스크롤뷰 위치에 따라 오버레이 높이 결정되는 문제 해결됨.
+        }
+        .navigationBarTitle("", displayMode: .inline)
+        .navigationBarHidden(true)
+        .onAppear{
+            print("*************친구랑 볼래 메인 뷰 나타남****************")
+            self.main_vm.applied_filter = false
+            
+            //user defaults에서 내 닉네임 꺼내오는 메소드 실행. 그래야 내 카드만 골라서 보여줄 수 있음.
+            main_vm.get_my_nickname()
+            
+            //카드 데이터 갖고 오는 통신-> 끝나면 전체 카드 내가 클릭한 좋아요 목록 가져오는 통신(카드마다 내가 좋아요 클릭했는지 여부 알기 위해 좋아요 유저 목록 미리 가져와야 함.)
+            main_vm.get_friend_volleh_cards()
+            
+            //on, off 상태 표시하기 위해 user defaults에서 가져와서 세팅
+            let user_idx = ChatDataManager.shared.my_idx!
+            self.state_on = UserDefaults.standard.integer(forKey: "\(user_idx)_state")
+            self.my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
+            print("내 닉네임 확인 : \(main_vm.my_nickname), 내 프로필: \(self.my_photo_path)")
+            print("저장됐던 유저 상태 확인:\(user_idx) \(self.state_on)")
+        }
+        .onDisappear{
+            print("*************친구랑 볼래 메인 뷰 사라짐****************")
         }
         .background(Color.proco_dark_white)
         .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: self.calendar_vm,show_friend_info: $friend_info_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true))
@@ -361,6 +357,7 @@ private extension FriendVollehMainView{
                             }
                             .overlay(self.today_is_boring ? Circle()
                                         .stroke(Color.proco_yellow , lineWidth: 2) : nil)
+                            .padding([.leading], UIScreen.main.bounds.width/30)
                         
                     }
                     
@@ -398,8 +395,13 @@ private extension FriendVollehMainView{
                             
                             
                         }){
+                            VStack{
+                                Image(self.today_is_boring ? "already_simsim_img" : "lead_simsim_img")
+//                                    .resizable()
+//                                    .frame(width: 37.5, height: 20.17)
                             Image(self.today_is_boring ? "boring_set_btn" : "not_boring_set_btn")
-                            
+                            }
+                             
                         }
                         .alert(isPresented: self.$set_boring_today_alert, content: {
                             Alert(title: Text(""), message: Text(self.today_is_boring == true ? "오늘을 심심한 날 설정을 취소할까요?" : "오늘을 심심한 날로 설정할까요?"), primaryButton: Alert.Button.default(Text("확인"), action: {
@@ -561,10 +563,10 @@ private extension FriendVollehMainView{
                             }else{
                                 
                                 KFImage(URL(string: friend.profile_photo_path!))
-                                    .placeholder{Image("main_profile_img")
-                                        .resizable()
-                                        .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                                    }
+//                                    .placeholder{Image("main_profile_img")
+//                                        .resizable()
+//                                        .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
+//                                    }
                                     .loadDiskFileSynchronously()
                                     .cacheMemoryOnly()
                                     .fade(duration: 0.25)
@@ -596,7 +598,7 @@ private extension FriendVollehMainView{
                                         .resizable()
                                         .frame(width: 15, height: 15)
                                     
-                                    Text("나")
+                                    Text("나(\(friend.nickname))")
                                         .font(.custom(Font.n_bold, size: 10))
                                         .foregroundColor(.proco_black)
                                 }

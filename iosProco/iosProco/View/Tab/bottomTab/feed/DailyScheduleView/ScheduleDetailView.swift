@@ -136,6 +136,7 @@ extension ScheduleDetailView{
             .datePickerStyle(CompactDatePickerStyle())
             .font(.custom(Font.t_extra_bold, size: 16))
             .foregroundColor(Color.proco_black)
+            .environment(\.locale, Locale.init(identifier: "ko_KR"))
     }
     
     var date_info : some View{
@@ -161,6 +162,7 @@ extension ScheduleDetailView{
         DatePicker("시간", selection: self.$main_vm.schedule_start_time, displayedComponents: .hourAndMinute)
             .labelsHidden()
             .datePickerStyle(GraphicalDatePickerStyle())
+            .environment(\.locale, Locale.init(identifier: "ko_KR"))
             .font(.custom(Font.t_extra_bold, size: 16))
             .foregroundColor(Color.proco_black)
     }

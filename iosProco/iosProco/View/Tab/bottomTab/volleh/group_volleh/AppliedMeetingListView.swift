@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AppliedMeetingListView: View {
-    @ObservedObject var main_vm : GroupVollehMainViewmodel
+    @StateObject var main_vm : GroupVollehMainViewmodel
     @StateObject var calendar_vm : CalendarViewModel
     
     //다른 사람 모임 카드 상세 페이지 들어갈 때 - 참가 모임
@@ -18,6 +18,7 @@ struct AppliedMeetingListView: View {
     
     var body: some View {
         NavigationView{
+            VStack{
             ScrollView{
                 VStack{
                     
@@ -98,9 +99,14 @@ struct AppliedMeetingListView: View {
                     }
                 }
             }
+            }
+            .onAppear{
+                //신청 목록 가져오는 통신
+               // self.main_vm.get_my_apply_list()
+            }
         }
-        .navigationBarColor(background_img: "meeting_wave_bg", btn_img: "left")
-        .navigationBarTitle("모임 신청 목록")
+//        .navigationBarColor(background_img: "meeting_wave_bg")
+//        .navigationBarTitle("모임 신청 목록")
     }
 }
 

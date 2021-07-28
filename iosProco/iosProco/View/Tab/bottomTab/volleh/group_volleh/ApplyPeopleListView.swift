@@ -45,16 +45,10 @@ struct ApplyPeopleListView: View {
                 Spacer()
                 
             }
-            .padding()
+            .padding(UIScreen.main.bounds.width/30)
             
             ScrollView{
                 VStack{
-                    if main_vm.apply_user_struct.count <= 0{
-                        
-                        Text("아직 신청자가 없습니다")
-                            .font(.custom(Font.n_extra_bold, size: 18))
-                            .foregroundColor(.proco_black)
-                    }else{
                         
                         //신청자 카테고리
                         HStack{
@@ -66,6 +60,18 @@ struct ApplyPeopleListView: View {
                         .padding(.leading)
                         //모든 신청자들중 상태가 거절, 수락이 처리되지 않은 사람들만 보여준다.
                         //수락 또는 거절 클릭시 신청자 리스트에서 제거
+                    if main_vm.apply_user_struct.filter({
+                        $0.kinds! == "대기중"
+                        
+                    }).count<=0{
+                        
+                        Text("아직 신청자가 없습니다")
+                            .font(.custom(Font.n_regular, size: 15))
+                            .foregroundColor(.proco_black)
+                            .padding([.top, .bottom])
+                        
+                    }else{
+                        
                         ForEach(main_vm.apply_user_struct.filter{
                             $0.kinds == "대기중"
                             
@@ -74,7 +80,7 @@ struct ApplyPeopleListView: View {
                             ApplyPeopleRow(main_vm: self.main_vm, show_view: self.$show_view, user: user)
                       
                         }
-                        
+                    }
                         HStack{
                             Text("참여자")
                                 .font(.custom(Font.n_extra_bold, size: 18))
@@ -85,13 +91,14 @@ struct ApplyPeopleListView: View {
                         
                         //참가 신청 수락된 사용자만 보여주는 리스트.
                         ForEach(main_vm.apply_user_struct.filter{
-                            $0.kinds == "수락됨"
+                            $0.kinds == "수락됨" || $0.kinds == "모임장"
+                            
                         }){ user in
                             
                             ApplyPeopleRow(main_vm: self.main_vm, show_view: self.$show_view, user: user)
 
                         }
-                    }
+                    
                 }
             }
         }
@@ -149,7 +156,7 @@ struct ApplyPeopleRow : View{
     @State private var check_owner = true
     @Binding var show_view : Bool
     let scale = UIScreen.main.scale
-    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 40, height: 40)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/7)) |> RoundCornerImageProcessor(cornerRadius: 25)
     
     @State var user : ApplyUserStruct
     
@@ -163,7 +170,7 @@ struct ApplyPeopleRow : View{
                 
                 Spacer()
                 
-                if user.kinds == "수락됨"{
+                if user.kinds == "수락됨" || user.kinds == "모임장"{
                     
                 }else{
                 //주최자에게만 버튼이 보이도록 함 - 드로어, 메인의 경우 나눠야 함.
@@ -179,6 +186,7 @@ struct ApplyPeopleRow : View{
                 }
             }
         }
+        .padding(.leading)
     }
     
 }
@@ -192,13 +200,13 @@ extension ApplyPeopleRow{
             
             Image("main_profile_img")
                 .resizable()
-                .frame(width: UIScreen.main.bounds.width/10, height: UIScreen.main.bounds.width/10)
+                .frame(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/7)
         }else{
             
             KFImage(URL(string: user.profile_photo_path!))
                 .placeholder{Image("main_profile_img")
                     .resizable()
-                    .frame(width:  UIScreen.main.bounds.width/10, height:  UIScreen.main.bounds.width/10)
+                    .frame(width:  UIScreen.main.bounds.width/7, height:  UIScreen.main.bounds.width/7)
                 }
                 .loadDiskFileSynchronously()
                 .cacheMemoryOnly()
@@ -247,6 +255,7 @@ extension ApplyPeopleRow{
             }){
                 Text("수락")
                     .padding()
+                    .font(.custom(Font.n_bold, size: 16))
                     .background(Color.proco_sky_blue)
                     .foregroundColor(Color.proco_blue)
                     .cornerRadius(20)
@@ -267,6 +276,7 @@ extension ApplyPeopleRow{
             }){
                 Text("거절")
                     .padding()
+                    .font(.custom(Font.n_bold, size: 16))
                     .background(Color.white_pink)
                     .foregroundColor(Color.proco_red)
                     .cornerRadius(20)

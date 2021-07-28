@@ -975,7 +975,7 @@ public class CalendarViewModel: ObservableObject{
                         
                         let stored_bored_date = self.date_to_string(date: $0.date!)
                         print("string으로 변환한 날짜: \(stored_bored_date)")
-                        return   stored_bored_date == bored_date
+                        return   stored_bored_date.split(separator: " ")[0] == bored_date
                     })!
                     print("idx저장하려는 배열 append idx: \(append_idx)")
                     
@@ -993,7 +993,7 @@ public class CalendarViewModel: ObservableObject{
                     append_idx = self.small_interest_model.firstIndex(where: {
                         let stored_bored_date = self.date_to_string(date: $0.date!)
                         print("string으로 변환한 날짜: \(stored_bored_date)")
-                        return   stored_bored_date == bored_date
+                        return   stored_bored_date.split(separator: " ")[0] == bored_date
                     })!
                     print("날짜 한 칸 - idx저장하려는 배열 append idx: \(append_idx)")
                     

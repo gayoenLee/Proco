@@ -34,10 +34,24 @@ struct MakeCardView: View {
     //현재 시간 기준 +10분인 경우에만 카드 만들 수 있음. 아닌 경우 경고문구 보여주기
     @State private var card_time_not_allow : Bool = false
     
+    //상단으로 스크롤시키기 위함.
+    @State private var start_offset : CGFloat = 0
+    @State private var scroll_view_offset : CGFloat = 0
+    
+    
+    //7. safeArea  함수 생성
+
+    func getSafeArea() ->UIEdgeInsets  {
+        return UIApplication.shared.windows.first?.safeAreaInsets ?? UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    }
+    
     var body: some View {
         NavigationView{
         VStack{
+            ScrollViewReader{scrollview in
+                
             ScrollView{
+                VStack{
                 //완료 버튼을 제외한 카드 만들기 뷰
                 SelectedView(viewmodel: self.main_viewmodel, tag_category_struct: self.tag_category_struct, go_to_select_friends: self.$go_to_select_friends, category_alert: self.$category_alert, selected_category: self.$selected_category, card_time_not_allow: self.$card_time_not_allow)
                 /*
@@ -89,12 +103,21 @@ struct MakeCardView: View {
                         }else{
                             print("현재 시간 10분 후 아님")
                             self.card_time_not_allow = true
+                          
+                            withAnimation(.default){
+                                scrollview.scrollTo("scroll_to_top", anchor: .top)
+                            }
+                            
                         }
                     }else{
                         print("카드에 태그 포함 안돼 있음.")
                         
                         //카테고리 최소 1개 선택 안함.
                         category_alert.toggle()
+                        
+                        withAnimation(.default){
+                            scrollview.scrollTo("scroll_to_top", anchor: .top)
+                        }
                     }
                 }){
                     Text("완료")
@@ -127,17 +150,37 @@ struct MakeCardView: View {
                         }))
                     }
                 }
-                
+                }
+                .id("scroll_to_top")
             }
             .padding(.bottom, UIScreen.main.bounds.width/40)
         }
+        }
+        .overlay(
+            GeometryReader{proxy -> Color in
+                
+                DispatchQueue.main.async {
+                    if start_offset == 0{
+                        self.start_offset = proxy.frame(in: .global).minY
+                    }
+                    
+                    let offset = proxy.frame(in: .global).minY
+                    self.scroll_view_offset = offset - start_offset
+                    
+                    print("스크롤뷰 오프셋: \(self.scroll_view_offset)")
+                }
+                
+                return Color.clear
+                
+            }
+            .frame(width: 0, height: 0, alignment: .top)
+        )
         //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         .onAppear{
 
-            
             let total_people_array = main_viewmodel.show_card_friend_array + main_viewmodel.show_card_group_array
             
             self.total_show_people = total_people_array.count
@@ -146,10 +189,12 @@ struct MakeCardView: View {
         .onDisappear{
             print("카드 만들기 뷰 사라짐!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         }
-        .navigationBarColor(background_img: "wave_bg", btn_img: "left")
+        .navigationBarColor(background_img: "wave_bg")
         .navigationBarTitle("카드 만들기", displayMode: .inline)
         .navigationBarItems(leading:
                                 Button(action: {
+                                    
+                                    
                                     self.presentationMode.wrappedValue.dismiss()
                                 }){
                                     Image("left")
@@ -174,7 +219,6 @@ struct SelectedView : View {
     //카드 만들 때 10분 이후인 경우에만 만들 수 있도록 경고문구
     @Binding var card_time_not_allow : Bool
     
-    //알릴 친구들 선택에서 아무도 선택하지 않았을 경우 모든 친구텍스트 보여주기 위해 두 어레이 count합치는 것.
     var body: some View{
         VStack{
             Group{
@@ -248,7 +292,7 @@ struct SelectedView : View {
                         .foregroundColor(.proco_black)
                     
                     //뷰모델에서 친구 리스트 데이터를 모두 갖고 오면 다음 뷰로 이동한다.
-                    NavigationLink("", destination: SelectFriendMakeCard(main_viewmodel: self.viewmodel), isActive: self.$go_to_select_friends)
+                    NavigationLink("", destination: SelectFriendMakeCard(main_viewmodel: self.viewmodel).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$go_to_select_friends)
                     
                     Button(action: {
                         print("친구 목록 가져오기 버튼 클릭")
@@ -287,6 +331,7 @@ struct SelectedView : View {
                         
                         //그룹
                         selected_show_group
+                           
                     }
                     //선택한 친구가 있을 경우에 보여주는 예외처리
                     if viewmodel.show_card_friend_array.count > 0 {
@@ -294,6 +339,7 @@ struct SelectedView : View {
                         selected_show_friend
                     }
                 }
+                .padding()
             }
         }
     }
@@ -312,6 +358,7 @@ private extension SelectedView {
             DatePicker("", selection: $viewmodel.card_date, in: Date()..., displayedComponents: .date)
                 //다이얼로그식 캘린더 스타일
                 .datePickerStyle(CompactDatePickerStyle())
+                .environment(\.locale, Locale.init(identifier: "ko_KR"))
             Spacer()
         }
         .padding()
@@ -328,6 +375,7 @@ private extension SelectedView {
             DatePicker("시간을 설정해주세요", selection: $viewmodel.card_time, displayedComponents: .hourAndMinute)
                 .labelsHidden()
                 .datePickerStyle( GraphicalDatePickerStyle())
+                .environment(\.locale, Locale.init(identifier: "ko_KR"))
         }
         .padding()
     }
@@ -375,9 +423,13 @@ private extension SelectedView {
                     self.viewmodel.user_input_tag_value = String(value.prefix(10))
                 }
             })
+            .padding()
         }
         .background(Color.light_gray)
         .cornerRadius(25.0)
+        .padding([.leading, .top, .bottom],UIScreen.main.bounds.width/35)
+
+        
     }
     
     var plus_tag_btn : some View{
@@ -401,11 +453,11 @@ private extension SelectedView {
                 
             }){
                 Capsule()
-                    .frame(width: UIScreen.main.bounds.width/3, height: UIScreen.main.bounds.width/8)
+                    .frame(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/8)
                     .foregroundColor(Color.proco_black)
                     .overlay(
                         Text("추가")
-                            .font(.custom(Font.t_extra_bold, size: 15))
+                            .font(.custom(Font.t_extra_bold, size: 14))
                             .foregroundColor(.proco_white))
                 
             }
@@ -428,6 +480,7 @@ private extension SelectedView {
                         .foregroundColor(viewmodel.user_selected_tag_list[tag_index] == "사교/인맥" ? .proco_yellow : viewmodel.user_selected_tag_list[tag_index] == "게임/오락" ? .proco_pink : viewmodel.user_selected_tag_list[tag_index] == "문화/공연/축제" ? .proco_olive : viewmodel.user_selected_tag_list[tag_index] == "운동/스포츠" ? .proco_green : viewmodel.user_selected_tag_list[tag_index] == "취미/여가" ? .proco_mint : viewmodel.user_selected_tag_list[tag_index] == "스터디" ? .proco_blue : .proco_red )
                         .frame(width: 90, height: 22)
                         .overlay(
+                            
                             Button(action: {
                                 print("선택한 태그 리스트들 확인\(viewmodel.user_selected_tag_list) ")
                                 
@@ -447,7 +500,8 @@ private extension SelectedView {
                                 }
                             }){
                                 Text(viewmodel.user_selected_tag_list[tag_index])
-                                    .frame(minWidth: 0, maxWidth: .infinity)
+                                    .lineLimit(nil)
+                                    .multilineTextAlignment(.leading)
                                     .font(.custom(Font.n_bold, size: 14))
                                     .foregroundColor(.proco_white)
                                 
@@ -506,9 +560,24 @@ private extension SelectedView {
     var selected_show_group : some View{
         
         ForEach(0..<viewmodel.show_card_group_array.count, id: \.self){ group in
+            
+            
             let selected_item = viewmodel.show_card_group_array[group]
             
-            Button(action: {
+            HStack{
+                
+                Image("small_x")
+                    .resizable()
+                    .frame(width: 6, height: 6)
+                
+                Text(self.viewmodel.show_card_group_name[selected_item]!)
+                    .font(.custom(Font.t_extra_bold, size: 15))
+                    .foregroundColor(.proco_black)
+                    .padding(UIScreen.main.bounds.width/60)
+                    .background(Color.proco_black)
+                    .cornerRadius(27.0)
+        }
+            .onTapGesture {
                 if viewmodel.show_card_group_set.contains(viewmodel.show_card_group_array[group]){
                     print("이미 선택했던 그룹을 다시 클릭했으므로 제거")
                     //선택한 그룹 set에서 제거
@@ -524,21 +593,8 @@ private extension SelectedView {
                 }else{
                     print("새로 그룹 선택")
                 }
-                
-            }){
-                HStack{
-                    Image("small_x")
-                        .resizable()
-                        .frame(width: 6, height: 6)
-                    
-                    Text(self.viewmodel.show_card_group_name[selected_item]!)
-                        .frame(minWidth: 0, maxWidth: 130, minHeight: 0, maxHeight: 45)       .font(.system(size: UIScreen.main.bounds.width/25))
-                        .foregroundColor(.proco_black)
-                }
             }
-            .overlay(RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.proco_black,lineWidth: 1))
-            .scaledToFit()
+            
         }
     }
     
@@ -548,7 +604,19 @@ private extension SelectedView {
             
             let selected_friend = viewmodel.show_card_friend_array[person]
             
-            Button(action: {
+            HStack{
+                Image("small_x")
+                    .resizable()
+                    .frame(width: 6, height: 6)
+                
+                Text(self.viewmodel.show_card_friend_name[selected_friend]!)
+                    .font(.custom(Font.t_extra_bold, size: 15))
+                    .foregroundColor(.proco_black)
+                    .padding(UIScreen.main.bounds.width/60)
+                    .background(Color.proco_black)
+                    .cornerRadius(27.0)
+            }
+            .onTapGesture {
                 if viewmodel.show_card_friend_set.contains(viewmodel.show_card_friend_array[person]){
                     //선택한 친구 set, list에서 제거
                     viewmodel.show_card_friend_set.remove(viewmodel.show_card_friend_array[person])
@@ -559,25 +627,9 @@ private extension SelectedView {
                     //선택한 그룹 리스트 업데이트
                     viewmodel.show_card_friend_array = Array(self.viewmodel.show_card_friend_set)
                 }else{
-                    
-                }
-            }){
-                HStack{
-                    Image("small_x")
-                        .resizable()
-                        .frame(width: 6, height: 6)
-                    
-                    Text(self.viewmodel.show_card_friend_name[selected_friend]!)
-                        .frame(minWidth: 0, maxWidth: 100, minHeight: 0, maxHeight: 30)       .font(.system(size: UIScreen.main.bounds.width/25))
-                        .foregroundColor(.proco_black)
-                }
                 
+                }
             }
-            .padding()
-            .overlay(RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.proco_black,lineWidth: 1))
-            .scaledToFit()
-            
         }
     }
 }

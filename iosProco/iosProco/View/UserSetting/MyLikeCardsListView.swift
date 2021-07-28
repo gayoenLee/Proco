@@ -177,11 +177,22 @@ private extension MyLikeFriendCardsRow{
             self.main_vm.cancel_like_card(card_idx:  self.friend_card_model.card_idx!)
             }
         }){
+            if self.friend_card_model.like_state == 0{
+                
+                Image(systemName: "heart")
+                .resizable()
+                .frame(width: UIScreen.main.bounds.width/17, height: UIScreen.main.bounds.width/20)
+                .padding([.leading], UIScreen.main.bounds.width/20)
+                    .foregroundColor(Color.proco_red)
+                
+            }else{
+                Image(systemName: "heart.fill")
+                .resizable()
+                .frame(width: UIScreen.main.bounds.width/17, height: UIScreen.main.bounds.width/20)
+                .padding([.leading], UIScreen.main.bounds.width/20)
+                    .foregroundColor(Color.proco_red)
 
-            Image(self.friend_card_model.like_state == 0 ? "heart" : "heart_fill")
-            .resizable()
-            .frame(width: UIScreen.main.bounds.width/17, height: UIScreen.main.bounds.width/20)
-            .padding([.leading], UIScreen.main.bounds.width/20)
+            }
         }
 
             Text(friend_card_model.like_count > 0 ? "좋아요 \(friend_card_model.like_count)개" : "")
@@ -434,10 +445,23 @@ private extension MyLikeGroupCardsRow{
                 }
 
             }){
-            Image(group_card_model.like_state == 0 ? "heart" : "heart_fill")
-            .resizable()
-            .frame(width: 14, height: 12)
+                
+                if group_card_model.like_state == 0{
+                    Image(systemName: "heart" )
+                    .resizable()
+                    .frame(width: 14, height: 12)
+                        .foregroundColor(Color.proco_red)
 
+
+                }else{
+                    Image(systemName: "heart.fill")
+                    .resizable()
+                    .frame(width: 14, height: 12)
+                        .foregroundColor(Color.proco_red)
+
+
+                }
+                
             }
             Text(group_card_model.like_count ?? 0 > 0 ? "좋아요\(group_card_model.like_count!)개" : "")
                 .font(.custom(Font.t_extra_bold, size: 12))

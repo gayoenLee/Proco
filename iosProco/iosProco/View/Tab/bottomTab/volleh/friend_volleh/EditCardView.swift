@@ -25,6 +25,9 @@ struct EditCardView: View {
     @State private var is_offline_meeting : Bool = true
     @State private var go_to_select_friends : Bool = false
     
+    //카드에 친구가 참가중인 경우 수정 불가
+    @State private var show_disallow_edit_toast : Bool = false
+    
     var body: some View {
         NavigationView{
         VStack{
@@ -37,7 +40,10 @@ struct EditCardView: View {
                     Spacer()
                     
                     Button(action: {
-                        
+                    //친구가 참가중인 카드는 수정 불가하도록 처리
+                        if main_viewmodel.friend_volleh_card_detail.cur_user ?? 0 > 1{
+                            self.show_disallow_edit_toast = true
+                        }else{
                         if self.main_viewmodel.category_is_selected(){
                             
                             self.main_viewmodel.make_card_date()
@@ -45,7 +51,7 @@ struct EditCardView: View {
                             print("마지막에 share list값 확인 : \(Array(self.main_viewmodel.add_card_struct.share_list))")
                             
                             //카드 수정 통신시에 share_list파라미터 dictionary로 만드는 메소드 실행.
-                            main_viewmodel.make_dictionary()
+                           // main_viewmodel.make_dictionary()
                             
                             //태그 데이터 보낼 때 카테고리, 태그 2개 순서대로 보내야 함.
                             let category_idx = self.main_viewmodel.user_selected_tag_list.firstIndex(where: {
@@ -67,6 +73,7 @@ struct EditCardView: View {
                             //카테고리 최소 1개 선택 안함.
                             self.category_alert.toggle()
                             
+                        }
                         }
                     }){
                         Text("완료")
@@ -95,7 +102,8 @@ struct EditCardView: View {
                 }
             }
         }
-        .navigationBarColor(background_img: "wave_bg", btn_img: "card_dialog_close_icon")
+        .overlay(overlayView: Toast.init(dataModel: Toast.ToastDataModel.init(title: "친구가 참가중인 카드는 수정할 수 없습니다.", image: "exclamationmark.circle.fill"), show: self.$show_disallow_edit_toast), show: self.$show_disallow_edit_toast)
+        .navigationBarColor(background_img: "wave_bg")
         .navigationBarTitle("카드 수정")
         .navigationBarItems(leading:
                                 Button(action: {
@@ -104,7 +112,7 @@ struct EditCardView: View {
                                     Image("left")
                                 })
         .onAppear{
-            print("상세 페이지 나타남")
+            print("친구 카드 수정 페이지 나타남")
             self.main_viewmodel.get_card_detail(card_idx: self.main_viewmodel.selected_card_idx)
         }
         }
@@ -187,17 +195,17 @@ struct FreindVollehMyCardEditView : View {
                         .foregroundColor(.proco_black)
                     
                     //뷰모델에서 친구 리스트 데이터를 모두 갖고 오면 다음 뷰로 이동한다.
-                    NavigationLink("", destination: SelectFriendMakeCard(main_viewmodel: self.viewmodel), isActive: self.$go_to_select_friends)
+//                    NavigationLink("", destination: SelectFriendMakeCard(main_viewmodel: self.viewmodel), isActive: self.$go_to_select_friends)
                     
-                    Button(action: {
-                        print("알릴 친구들 보여주기 true로 바꿈")
-                        //친구 추가하기 위해 친구 목록, 그룹 목록 리스트있는 뷰로 이동.
-                        self.go_to_select_friends = true
-                    }){
-                        Image("pencil")
-                            .resizable()
-                            .frame(width: 22, height: 22)
-                    }
+//                    Button(action: {
+//                        print("알릴 친구들 보여주기 true로 바꿈")
+//                        //친구 추가하기 위해 친구 목록, 그룹 목록 리스트있는 뷰로 이동.
+//                       // self.go_to_select_friends = true
+//                    }){
+//                        Image("pencil")
+//                            .resizable()
+//                            .frame(width: 22, height: 22)
+//                    }
                     Spacer()
                     
                     //알릴 사람을 아무도 선정하지 않았을 경우에만 보여줌
@@ -258,6 +266,7 @@ private extension FreindVollehMyCardEditView {
             DatePicker("", selection: $viewmodel.card_date, in: Date()..., displayedComponents: .date)
                 //다이얼로그식 캘린더 스타일
                 .datePickerStyle(CompactDatePickerStyle())
+                .environment(\.locale, Locale.init(identifier: "ko_KR"))
             Spacer()
         }
         .padding()
@@ -274,6 +283,7 @@ private extension FreindVollehMyCardEditView {
                         .hourAndMinute)
                 .labelsHidden()
                 .datePickerStyle( GraphicalDatePickerStyle())
+                .environment(\.locale, Locale.init(identifier: "ko_KR"))
         }
         .padding()
     }
@@ -296,7 +306,7 @@ private extension FreindVollehMyCardEditView {
             
             //태그 입력 칸. 텍스트필드에서 엔터키 누를 때도 사용자 입력값 받고 또는 추가 버튼 클릭시에도 받음.
             //onCommit: 사용자가 엔터키 눌렀을 때 이벤트
-            TextField("직접입력(필수x), 최대 10글자까지 입력 가능합니다", text: $viewmodel.user_input_tag_value, onCommit:{
+            TextField("직접입력(필수x), 최대 10글자", text: $viewmodel.user_input_tag_value, onCommit:{
                 //뷰모델에서 선택한 태그 갯수 체크하는 메소드의 결과값
                 self.tag_num_over_three = viewmodel.limit_tag_num(tag_list: self.viewmodel.user_selected_tag_list)
                 
@@ -325,10 +335,11 @@ private extension FreindVollehMyCardEditView {
         }
         .background(Color.light_gray)
         .cornerRadius(25.0)
-        .padding(UIScreen.main.bounds.width/25)
-    }
+        .padding([.leading, .top, .bottom
+        ],UIScreen.main.bounds.width/30)    }
     
     var plus_tag_btn : some View{
+        
         HStack{
             //태그 추가하기 버튼
             Button(action: {
@@ -346,11 +357,11 @@ private extension FreindVollehMyCardEditView {
                 self.viewmodel.user_input_tag_value = ""
             }){
                 Capsule()
-                    .frame(width: UIScreen.main.bounds.width/10, height: UIScreen.main.bounds.width/8)
+                    .frame(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/8)
                     .foregroundColor(Color.proco_black)
                     .overlay(
                         Text("추가")
-                            .font(.custom(Font.t_extra_bold, size: 15))
+                            .font(.custom(Font.t_extra_bold, size: 14))
                             .foregroundColor(.proco_white))
                     .padding(.trailing, UIScreen.main.bounds.width/20)
             }
@@ -406,6 +417,7 @@ private extension FreindVollehMyCardEditView {
                 if viewmodel.volleh_category_tag_struct.contains(where: {
                     $0.category_name == viewmodel.user_selected_tag_list[tag_index]
                 }){
+                    
                 }else{
                     
                     HStack{
@@ -434,8 +446,8 @@ private extension FreindVollehMyCardEditView {
                                     .frame(width: 16, height: 16)
                                 
                                 Text(viewmodel.user_selected_tag_list[tag_index])
-                                    .frame(minWidth: 0, maxWidth: .infinity)
-                                    .font(.custom(Font.n_bold, size: 14))
+                                    .lineLimit(nil)
+                                    .multilineTextAlignment(.leading)                                    .font(.custom(Font.n_bold, size: 14))
                                     .foregroundColor(.proco_black)
                             }
                         }
@@ -450,33 +462,19 @@ private extension FreindVollehMyCardEditView {
         ForEach(0..<viewmodel.show_card_group_array.count, id: \.self){ group in
             let selected_item = viewmodel.show_card_group_array[group]
             
-            Button(action: {
-                if viewmodel.show_card_group_set.contains(viewmodel.show_card_group_array[group]){
-                    print("이미 선택했던 그룹을 다시 클릭했으므로 제거")
-                    //선택한 그룹 set에서 제거
-                    viewmodel.show_card_group_set.remove(viewmodel.show_card_group_array[group])
-                    
-                    
-                    print("그룹 어레이 바뀌기 전 : \(viewmodel.show_card_group_array[group])")
-                    //그룹 이름 저장한 dictionary
-                    self.viewmodel.show_card_group_name.removeValue(forKey: self.viewmodel.show_card_group_array[group])
-                    
-                    //선택한 그룹 list에서 제거
-                    viewmodel.show_card_group_array = Array(self.viewmodel.show_card_group_set)
-                }else{
-                    print("새로 그룹 선택")
-                }
+            HStack{
                 
-            }){
+                Image("small_x")
+                    .resizable()
+                    .frame(width: 6, height: 6)
+                
                 Text(self.viewmodel.show_card_group_name[selected_item]!)
-                    .frame(minWidth: 0, maxWidth: .infinity)
-                    .font(.system(size: UIScreen.main.bounds.width/25))
+                    .font(.custom(Font.t_extra_bold, size: 15))
                     .foregroundColor(.proco_black)
-                
-            }
-            .overlay(RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.proco_black,lineWidth: 1))
-            .scaledToFit()
+                    .padding(UIScreen.main.bounds.width/60)
+                    .background(Color.proco_black)
+                    .cornerRadius(27.0)
+        }
         }
     }
     
@@ -487,34 +485,18 @@ private extension FreindVollehMyCardEditView {
             
             let selected_friend = viewmodel.show_card_friend_array[person]
             
-            Button(action: {
-                if viewmodel.show_card_friend_set.contains(viewmodel.show_card_friend_array[person]){
-                    //선택한 친구 set, list에서 제거
-                    viewmodel.show_card_friend_set.remove(viewmodel.show_card_friend_array[person])
-                    
-                    //친구 이름 저장한 dictionary
-                    self.viewmodel.show_card_friend_name.removeValue(forKey: self.viewmodel.show_card_friend_array[person])
-                    
-                    //선택한 그룹 리스트 업데이트
-                    viewmodel.show_card_friend_array = Array(self.viewmodel.show_card_friend_set)
-                }else{
-                    
-                }
-            }){
-                HStack{
-                    Image("small_x")
-                        .resizable()
-                        .frame(width: 6, height: 6)
-                    
-                    Text(self.viewmodel.show_card_friend_name[selected_friend]!)
-                        .frame(minWidth: 0, maxWidth: 100, minHeight: 0, maxHeight: 30)       .font(.system(size: UIScreen.main.bounds.width/25))
-                        .foregroundColor(.proco_black)
-                }
+            HStack{
+                Image("small_x")
+                    .resizable()
+                    .frame(width: 6, height: 6)
+                
+                Text(self.viewmodel.show_card_friend_name[selected_friend]!)
+                    .font(.custom(Font.t_extra_bold, size: 15))
+                    .foregroundColor(.proco_black)
+                    .padding(UIScreen.main.bounds.width/60)
+                    .background(Color.proco_black)
+                    .cornerRadius(27.0)
             }
-            .padding()
-            .overlay(RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.proco_black,lineWidth: 1))
-            .scaledToFit()
             
         }
     }

@@ -102,7 +102,11 @@ struct FriendChatTabRow : View{
     }
     
     var promise_day : String{
-        String.dot_form_date_string(date_string: friend_chat.promise_day!)
+        if friend_chat.promise_day != "" || friend_chat.promise_day != nil{
+       return String.dot_form_date_string(date_string: friend_chat.promise_day!)
+        }else{
+            return ""
+        }
     }
     //채팅방 알림 설정
     var room_alarm_state : Bool{

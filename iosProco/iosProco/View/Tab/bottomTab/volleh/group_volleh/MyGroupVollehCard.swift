@@ -16,6 +16,12 @@ struct MyGroupVollehCard: View {
     
     var current_card_index : Int
     @State private var expiration_at = ""
+    
+    //카드 잠금 이벤트시 토스트 띄우기 위한 구분값
+    @Binding var show_lock_alert : Bool
+    //카드 잠금인지 잠금해제인지 이벤트 종류 알기 위해 저장할값 - 토스트에 띄움
+    @Binding var lock_event_kind : String
+    
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 43, height: 43)) |> RoundCornerImageProcessor(cornerRadius: 5)
     
     //모임 카드 이미지가 없는 경우 왼쪽에 공백 생기는 문제 해결 위함.
@@ -70,6 +76,38 @@ struct MyGroupVollehCard: View {
         }
         //화면 하나에 카드 여러개 보여주기 위해 조정하는 값
         .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.09)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
+            print("내 카드 잠금 통신 완료 받음.: \(value)")
+            
+            if let user_info = value.userInfo{
+                if let check_result = user_info["lock"]{
+                print("내 카드 잠금 데이터 확인: \(check_result)")
+                
+                if check_result as! String == "잠금"{
+                    let card = user_info["card_idx"] as! String
+                    let card_idx = Int(card)
+                    print("내 카드 잠금한 idx: \(card_idx)")
+                    
+                    if card_idx == self.my_group_card.card_idx{
+                        
+                        self.my_group_card.lock_state = 1
+                        self.lock_event_kind = "잠금"
+                        self.show_lock_alert = true
+                    }
+                }else if check_result as! String == "잠금해제"{
+                    
+                    let card = user_info["card_idx"] as! String
+                    let card_idx = Int(card)
+                    print("잠금 취소한 idx: \(card_idx)")
+                    if card_idx == self.my_group_card.card_idx{
+                        self.my_group_card.lock_state = 0
+                        self.lock_event_kind = "잠금 해제"
+                        self.show_lock_alert = true
+                    }
+                }
+                }
+            }
+        })
         .onReceive(NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
             
             if let user_info = value.userInfo, let data = user_info["group_card_edited"]{
@@ -254,9 +292,21 @@ extension MyGroupVollehCard{
                 }
                 
             }){
-            Image(my_group_card.like_state == 0 ? "heart" : "heart_fill")
-            .resizable()
-            .frame(width: 14, height: 12)
+                
+                if my_group_card.like_state == 0{
+                    Image(systemName: "heart")
+                    .resizable()
+                        .frame(width: UIScreen.main.bounds.width/21, height: UIScreen.main.bounds.width/25)
+                        .foregroundColor(Color.proco_red)
+
+                }else{
+                    Image(systemName: "heart.fill")
+                    .resizable()
+                        .frame(width: UIScreen.main.bounds.width/21, height: UIScreen.main.bounds.width/25)
+                        .foregroundColor(Color.proco_red)
+
+                }
+          
             
             }
             Text(my_group_card.like_count ?? 0 > 0 ? "좋아요\(my_group_card.like_count!)개" : "")

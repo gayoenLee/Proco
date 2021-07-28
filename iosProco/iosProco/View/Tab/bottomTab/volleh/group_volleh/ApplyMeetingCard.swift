@@ -143,10 +143,18 @@ extension ApplyMeetingCard{
                 }
                 
             }){
-                Image(apply_card.like_state == 0 ? "heart" : "heart_fill")
-                    .resizable()
-                    .frame(width: 14, height: 12)
                 
+                if apply_card.like_state == 0{
+                    Image(systemName: "heart")
+                        .resizable()
+                        .frame(width: 14, height: 12)
+                        .foregroundColor(Color.red)
+                }else{
+                    Image(systemName: "heart.fill")
+                        .resizable()
+                        .frame(width: 14, height: 12)
+                        .foregroundColor(Color.red)
+                }
             }
             Text(apply_card.like_count ?? 0 > 0 ? "좋아요\(apply_card.like_count!)개" : "")
                 .font(.custom(Font.t_extra_bold, size: 12))

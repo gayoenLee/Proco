@@ -161,9 +161,23 @@ extension GroupVollehCard {
                 }
                 
             }){
-            Image(group_card.like_state == 0 ? "heart" : "heart_fill")
-            .resizable()
-            .frame(width: 14, height: 12)
+                
+                if group_card.like_state == 0 {
+                    
+                    Image(systemName:  "heart")
+                    .resizable()
+                        .frame(width: UIScreen.main.bounds.width/21, height: UIScreen.main.bounds.width/25)
+                        .foregroundColor(Color.proco_red)
+
+                    
+                }else{
+                    
+                    Image(systemName: "heart.fill")
+                    .resizable()
+                        .frame(width: UIScreen.main.bounds.width/21, height: UIScreen.main.bounds.width/25)
+                        .foregroundColor(Color.proco_red)
+
+                }
             
             }
             Text(group_card.like_count ?? 0 > 0 ? "좋아요\(group_card.like_count!)개" : "")

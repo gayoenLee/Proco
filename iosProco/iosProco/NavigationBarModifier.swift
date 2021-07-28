@@ -14,12 +14,12 @@ struct NavigationBarModifier : ViewModifier{
     var ui_img : UIImage{
         UIImage(named: "\(String(describing: background_img))")!
     }
-    var btn_img : String?
-    var back_btn_img :UIImage{
-        UIImage(named: "\(String(describing: btn_img))")!
-    }
+//    var btn_img : String?
+//    var back_btn_img :UIImage{
+//        UIImage(named: "\(String(describing: btn_img))")!
+//    }
     
-    init(ui_img: UIImage, back_btn_img : UIImage) {
+    init(ui_img: UIImage) {
       let coloredAppearance = UINavigationBarAppearance()
         
       coloredAppearance.configureWithOpaqueBackground()
@@ -48,8 +48,8 @@ struct NavigationBarModifier : ViewModifier{
   }
 
 extension View {
-    func navigationBarColor(background_img: String, btn_img: String) -> some View {
-        self.modifier(NavigationBarModifier(ui_img: UIImage(named: "\(background_img)")!, back_btn_img: UIImage(named: "\(btn_img)")!))
+    func navigationBarColor(background_img: String) -> some View {
+        self.modifier(NavigationBarModifier(ui_img: UIImage(named: "\(background_img)")!))
   }
 }
 

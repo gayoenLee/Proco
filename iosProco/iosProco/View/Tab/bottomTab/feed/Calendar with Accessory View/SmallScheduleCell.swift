@@ -35,10 +35,19 @@ struct SmallScheduleCell: View {
                     
                     print("좋아요 아이콘 클릭, 상태: \(smallSchedule.clicked_like_myself)")
                 }){
-                    Image(smallSchedule.clicked_like_myself ? "heart_fill" : "heart")
-                        .resizable()
-                        .frame(width: UIScreen.main.bounds.width/50, height: UIScreen.main.bounds.width/50)
-                        .foregroundColor(Color.red)
+                    
+                    if smallSchedule.clicked_like_myself{
+                        Image(systemName: "heart.fill")
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width/50, height: UIScreen.main.bounds.width/50)
+                            .foregroundColor(Color.red)
+                    }else{
+                        Image(systemName: "heart")
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width/50, height: UIScreen.main.bounds.width/50)
+                            .foregroundColor(Color.red)
+                    }
+              
                 }
                 
                 if smallSchedule.like_num > 0{
