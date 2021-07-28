@@ -43,6 +43,8 @@ struct GroupFilterModal: View {
                     self.selected_location = "전체"
                     self.selected_category.removeAll()
                     self.main_vm.filter_start_date = Date()
+                    self.main_vm.selected_filter_tag_list.removeAll()
+                    self.main_vm.selected_filter_tag_set.removeAll()
                     
                     print("리셋 아이콘 클릭")
                 }){
@@ -82,6 +84,7 @@ struct GroupFilterModal: View {
                         //태그 카테고리 뷰
                         //1개 클릭시 뷰모델에 user_selected_tag_set에 저장됨.
                         GroupFilterCategoryView(viewmodel: self.main_vm, category_model: self.main_vm.category_tag_struct[category_index], tag_num_over_three: self.$tag_num_over_three, selected_category: self.$selected_category, is_for_filter: true)
+                        
                     }.padding(.leading, UIScreen.main.bounds.width/30)
                 }
             }.frame(height: UIScreen.main.bounds.width/9)
@@ -113,6 +116,7 @@ struct GroupFilterModal: View {
             
             DatePicker("", selection: $main_vm.filter_start_date, displayedComponents: [.date])
                 .datePickerStyle(GraphicalDatePickerStyle())
+                .environment(\.locale, Locale.init(identifier: "ko_KR"))
             
             Spacer()
             Button(action: {
