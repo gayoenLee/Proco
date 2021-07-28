@@ -9,5 +9,5 @@ import Foundation
 
 struct ResponseAddGroup: Codable{
     var result: String
-    var group_idx: String?
+    var group_idx: Int?
 }
