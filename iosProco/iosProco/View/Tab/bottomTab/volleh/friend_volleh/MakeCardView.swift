@@ -38,16 +38,34 @@ struct MakeCardView: View {
     @State private var start_offset : CGFloat = 0
     @State private var scroll_view_offset : CGFloat = 0
     
-    
-    //7. safeArea  함수 생성
 
+    //7. safeArea  함수 생성
     func getSafeArea() ->UIEdgeInsets  {
         return UIApplication.shared.windows.first?.safeAreaInsets ?? UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
-    
+   
     var body: some View {
-        NavigationView{
+ 
         VStack{
+            HStack{
+                
+                Button(action: {
+                    print("돌아가기 클릭")
+                    self.presentationMode.wrappedValue.dismiss()
+                }){
+                    Image("left")
+                        .resizable()
+                        .frame(width: 8.51, height: 17)
+                }
+                Spacer()
+                
+                Text("약속 만들기")
+                    .font(.custom(Font.n_extra_bold, size: 22))
+                    .foregroundColor(Color.proco_black)
+                
+                Spacer()
+            }.padding()
+            
             ScrollViewReader{scrollview in
                 
             ScrollView{
@@ -154,7 +172,7 @@ struct MakeCardView: View {
                 .id("scroll_to_top")
             }
             .padding(.bottom, UIScreen.main.bounds.width/40)
-        }
+            }
         }
         .overlay(
             GeometryReader{proxy -> Color in
@@ -180,7 +198,6 @@ struct MakeCardView: View {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         .onAppear{
-
             let total_people_array = main_viewmodel.show_card_friend_array + main_viewmodel.show_card_group_array
             
             self.total_show_people = total_people_array.count
@@ -189,18 +206,10 @@ struct MakeCardView: View {
         .onDisappear{
             print("카드 만들기 뷰 사라짐!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         }
-        .navigationBarColor(background_img: "wave_bg")
-        .navigationBarTitle("카드 만들기", displayMode: .inline)
-        .navigationBarItems(leading:
-                                Button(action: {
-                                    
-                                    
-                                    self.presentationMode.wrappedValue.dismiss()
-                                }){
-                                    Image("left")
-                                })
-        }
+        .navigationBarHidden(true)
+        
     }
+
 }
 
 struct SelectedView : View {
@@ -312,12 +321,10 @@ struct SelectedView : View {
                         
                         Text("모든친구")
                             .font(.custom(Font.t_extra_bold, size: 13))
-                            .foregroundColor(.proco_black)
-                            .padding(UIScreen.main.bounds.width*0.01)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.proco_black, lineWidth: 1)
-                            )
+                            .foregroundColor(.proco_white)
+                            .padding(UIScreen.main.bounds.width/60)
+                            .background(Color.proco_black)
+                            .cornerRadius(27.0)
                     }
                     
                 }
@@ -572,7 +579,7 @@ private extension SelectedView {
                 
                 Text(self.viewmodel.show_card_group_name[selected_item]!)
                     .font(.custom(Font.t_extra_bold, size: 15))
-                    .foregroundColor(.proco_black)
+                    .foregroundColor(.proco_white)
                     .padding(UIScreen.main.bounds.width/60)
                     .background(Color.proco_black)
                     .cornerRadius(27.0)
@@ -611,7 +618,7 @@ private extension SelectedView {
                 
                 Text(self.viewmodel.show_card_friend_name[selected_friend]!)
                     .font(.custom(Font.t_extra_bold, size: 15))
-                    .foregroundColor(.proco_black)
+                    .foregroundColor(.proco_white)
                     .padding(UIScreen.main.bounds.width/60)
                     .background(Color.proco_black)
                     .cornerRadius(27.0)
