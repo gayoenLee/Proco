@@ -17,6 +17,28 @@ struct BigMapContainedView: View {
  
         VStack{
             
+            HStack{
+                Button(action: {
+                    
+                    print("뒤로 가기 버튼 클릭")
+                    self.vm.is_making = false
+                    self.presentation.wrappedValue.dismiss()
+                }){
+                    Image("left")
+                        .resizable()
+                        .frame(width: 8.51, height: 17)
+                }
+                
+                Spacer()
+                
+                Text("장소")
+                    .font(.custom(Font.n_extra_bold, size: 22))
+                    .foregroundColor(Color.proco_black)
+                
+                Spacer()
+            }
+            .padding()
+            
             MyWebView(vm: self.vm, url: "https://withproco.com/map/search_map.html?device=ios")
             
             Spacer()

@@ -8,17 +8,35 @@
 import SwiftUI
 
 struct AppliedMeetingListView: View {
-    @StateObject var main_vm : GroupVollehMainViewmodel
-    @StateObject var calendar_vm : CalendarViewModel
+    @Environment(\.presentationMode) var presentationMode : Binding<PresentationMode>
+
+    @ObservedObject var main_vm : GroupVollehMainViewmodel = GroupVollehMainViewmodel()
     
     //다른 사람 모임 카드 상세 페이지 들어갈 때 - 참가 모임
     @State private var go_to_detail: Bool = false
-    //신청 후 대기중인 모임 리스트에서 상세 페이지 이동시
-    @State private var go_to_wating_detail: Bool = false
     
     var body: some View {
-        NavigationView{
+
             VStack{
+                
+                HStack{
+                    Button(action: {
+                        print("돌아가기 클릭")
+                        self.presentationMode.wrappedValue.dismiss()
+                    }){
+                        Image("left")
+                            .resizable()
+                            .frame(width: 8.51, height: 17)
+                    }
+                    Spacer()
+                    
+                    Text("모임 신청 목록")
+                        .font(.custom(Font.n_extra_bold, size: 22))
+                        .foregroundColor(Color.proco_black)
+                    
+                    Spacer()
+                }.padding()
+                
             ScrollView{
                 VStack{
                     
@@ -35,11 +53,22 @@ struct AppliedMeetingListView: View {
                         }
                         .padding([.top, .leading, .bottom])
                         
-                        NavigationLink("", destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm), isActive: self.$go_to_detail)
+                        if main_vm.apply_meeting_struct.filter({
+                            
+                            $0.apply_kinds == "수락됨"
+                        
+                        }).count <= 0 {
+                            Text("참가하는 모임이 없습니다.")
+                                .font(.custom(Font.n_regular, size: 15))
+                                .foregroundColor(.gray)
+                                .padding([.top, .bottom])
+                        }
                         
                         ForEach(main_vm.apply_meeting_struct.filter({
                             $0.apply_kinds == "수락됨"
+                            
                         })){ card in
+                             
                             HStack{
                                 RoundedRectangle(cornerRadius: 25.0)
                                     .foregroundColor(.proco_white)
@@ -48,12 +77,12 @@ struct AppliedMeetingListView: View {
                                     .overlay(
                                         Button(action: {
                                             // 상세 페이지로 가려는 카드의 idx값을 뷰모델에 저장.
-                                            self.main_vm.selected_card_idx = self.main_vm.apply_meeting_struct[self.main_vm.apply_index(item: card)].card_idx!
+                                           // self.main_vm.selected_card_idx = card.card_idx!
                                             
-                                            self.go_to_detail.toggle()
+                                            self.go_to_detail = true
                                         }){
                                             
-                                            ApplyMeetingCard(main_vm: self.main_vm, apply_card: $main_vm.apply_meeting_struct[main_vm.apply_index(item: card)])
+                                            ApplyMeetingCard(main_vm: self.main_vm, apply_card: card)
                                                 .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width/2.5)
                                                 .padding()
                                         })
@@ -64,8 +93,6 @@ struct AppliedMeetingListView: View {
                             .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width/30, alignment: .center)
                             .foregroundColor(Color.light_gray)
                         
-                        NavigationLink("", destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm), isActive: self.$go_to_wating_detail)
-                        
                         HStack{
                             Text("신청모임")
                                 .font(.custom(Font.t_extra_bold, size: 16))
@@ -73,6 +100,15 @@ struct AppliedMeetingListView: View {
                             Spacer()
                         }
                         .padding([.top, .leading, .bottom])
+                        
+                        if main_vm.apply_meeting_struct.filter({
+                            $0.apply_kinds == "대기중"
+                        }).count <= 0 {
+                            Text("신청 대기중인 모임이 없습니다.")
+                                .font(.custom(Font.n_regular, size: 15))
+                                .foregroundColor(.gray)
+                                .padding([.top, .bottom])
+                        }
                         
                         ForEach(main_vm.apply_meeting_struct.filter({
                             $0.apply_kinds == "대기중"
@@ -84,13 +120,15 @@ struct AppliedMeetingListView: View {
                                     .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.4)
                                     .overlay(
                                         Button(action: {
-                                            // 상세 페이지로 가려는 카드의 idx값을 뷰모델에 저장.
-                                            self.main_vm.selected_card_idx = self.main_vm.apply_meeting_struct[self.main_vm.apply_index(item: card)].card_idx!
                                             
-                                            self.go_to_wating_detail.toggle()
+                                            print("신청한 모임 카드 상세 페이지 이동: \(card)")
+                                            // 상세 페이지로 가려는 카드의 idx값을 뷰모델에 저장.
+                                            self.main_vm.selected_card_idx = card.card_idx!
+                                            
+                                            self.go_to_detail = true
                                         }){
                                             
-                                            ApplyMeetingCard(main_vm: self.main_vm, apply_card: $main_vm.apply_meeting_struct[main_vm.apply_index(item: card)])
+                                            ApplyMeetingCard(main_vm: self.main_vm, apply_card: card)
                                                 .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width/2.5)
                                                 .padding()
                                         }
@@ -99,14 +137,15 @@ struct AppliedMeetingListView: View {
                     }
                 }
             }
+                NavigationLink("", destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: CalendarViewModel()), isActive: self.$go_to_detail)
             }
+            .navigationBarHidden(true)
+            .navigationBarTitle("", displayMode: .inline)
             .onAppear{
                 //신청 목록 가져오는 통신
-               // self.main_vm.get_my_apply_list()
+                self.main_vm.get_my_apply_list()
             }
-        }
-//        .navigationBarColor(background_img: "meeting_wave_bg")
-//        .navigationBarTitle("모임 신청 목록")
+        
     }
 }
 
