@@ -134,8 +134,8 @@ struct SignupProfileView: View {
             
             //회원가입에 성공했을 경우 메인화면으로 보내기, 네비게이션 뷰에서 버튼 없이 화면 이동 가능한 방법.
             NavigationLink("", destination: EnrolledFriendListView(), isActive: self.$login_success)
-
-            NavigationLink("", destination: LoginMenuView(), isActive: self.$login_fail)
+            //07 29  베타 출시 전 소셜로그인 제거 -> 일반로그인페이지로 변경
+            NavigationLink("", destination: NormalLoginView(), isActive: self.$login_fail)
             
             //프로필 이미지 선택시 갤러리
             NavigationLink("", destination:  ImagePicker(image: self.$selected_image, image_url: self.$image_url, ui_image: self.$ui_image), isActive: self.$show_image_picker)

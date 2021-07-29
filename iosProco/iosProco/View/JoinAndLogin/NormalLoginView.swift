@@ -29,10 +29,13 @@ struct NormalLoginView:View{
     //최상단 뷰로 이동하기 위한 변수, 아이디 & 비번 찾기에서 쓰임
     @State private var is_active: Bool = false
     
+    @State private var apple_join_ok = false
+    @State private var kakao_join_ok :Bool = false
+    
     var body: some View {
         NavigationView{
         VStack{
-            top_nav_bar
+          //  top_nav_bar
                 
             Spacer()
             RoundedRectangle(cornerRadius: 25.0)
@@ -78,12 +81,14 @@ struct NormalLoginView:View{
                         
                         find_id_pwd_btn
                         Spacer()
+                        signup_view
                     }
                 )
-                .padding(.bottom)
+                //.padding(.bottom)
             
             Spacer()
         }
+        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
         .background(Image("login_bg").resizable().scaledToFill())
         .alert(isPresented: $show_alert){
             Alert(title: Text("로그인"), message: Text("로그인을 다시 시도해주세요"), dismissButton: .default(Text("확인")))
@@ -166,21 +171,21 @@ struct NormalLoginView:View{
 }
 
 extension NormalLoginView{
-    
-    var top_nav_bar: some View{
-        HStack{
-            Button(action: {
-                self.presentation.wrappedValue.dismiss()
-                
-            }){
-                Image("left")
-                    .resizable()
-                    .frame(width: 8.51, height: 17)
-            }
-            Spacer()
-        }
-        .padding([.top, .bottom, .leading])
-    }
+    //07 29  베타 출시 전 소셜로그인 제거 일반로그인이 앱 초기화면으로 변경되면서 뒤로가기 버튼 제거
+//    var top_nav_bar: some View{
+//        HStack{
+//            Button(action: {
+//                self.presentation.wrappedValue.dismiss()
+//
+//            }){
+//                Image("left")
+//                    .resizable()
+//                    .frame(width: 8.51, height: 17)
+//            }
+//            Spacer()
+//        }
+//        .padding([.top, .bottom, .leading])
+//    }
     
     var id_input_txt_field: some View{
         TextField("아이디(핸드폰 번호)", text: $login_id)
@@ -265,6 +270,25 @@ extension NormalLoginView{
 
                 Spacer()
             }
+        }
+    
+    var signup_view : some View{
+            HStack(alignment: .center)
+               {
+            NavigationLink(
+                destination: SignupTermsView(apple_login: self.$apple_join_ok, kakao_login: self.$kakao_join_ok)){
+                
+                Text("아직 프로코 회원이 아니신가요?")
+                    .font(.custom(Font.n_regular, size: 15))
+                    .foregroundColor(Color.proco_black)
+                    .frame(minWidth: 0, maxWidth: .infinity)
+                    .padding()
+            }
+            //.navigationBarTitle("login")
+    //        .padding([.leading, .trailing], 20)
+    //        .padding(.bottom, UIScreen.main.bounds.width*0.3)
+            
+        }
         }
     
     
