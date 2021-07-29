@@ -70,8 +70,10 @@ struct EnrolledFriendListView: View {
         }
         .onAppear{
             print("친구 요청하는 뷰 나타남.")
-            //TODO 핸드폰 인증시 번호 저장해야함.
-             self.vm.get_enrolled_friends(contacts: [self.phone_number])
+
+            self.vm.getContacts()
+                        let phonenumber_list = self.vm.contacts_model.map({$0.telephone})
+                        self.vm.get_enrolled_friends(contacts: phonenumber_list)
             
             DispatchQueue.main.asyncAfter(deadline: .now()+1.0){
                 self.show_friend_list = true
