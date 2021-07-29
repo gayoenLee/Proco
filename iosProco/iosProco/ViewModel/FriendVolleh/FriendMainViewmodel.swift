@@ -428,7 +428,7 @@ class FriendVollehMainViewmodel: ObservableObject{
     //----------------------------------------------------
     ///내 아이디 갖고와서 카드 리스트에 내 카드만 보여주기 위해 비교할 때 이용.
     func get_my_nickname(){
-        self.my_nickname = UserDefaults.standard.string(forKey: "nickname")!
+        self.my_nickname = UserDefaults.standard.string(forKey: "nickname") ?? ""
         
     }
     
