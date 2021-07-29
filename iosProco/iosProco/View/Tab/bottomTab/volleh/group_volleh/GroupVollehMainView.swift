@@ -13,7 +13,7 @@ import Kingfisher
 struct GroupVollehMainView: View {
     @ObservedObject var db : ChatDataManager = ChatDataManager()
     
-    @ObservedObject var main_vm = GroupVollehMainViewmodel()
+    @StateObject var main_vm = GroupVollehMainViewmodel()
     //카드 만들기 페이지로 이동시 사용하는 값.
     @State private var go_to_make_card : Bool = false
     //카드 편집 페이지로 이동시 사용하는 값.
@@ -73,7 +73,7 @@ struct GroupVollehMainView: View {
                         //프로필 사진, 카드 만들기 버튼, on off버튼
                         user_profile_view
                         NavigationLink("",
-                                       destination: AppliedMeetingListView(main_vm: self.main_vm, calendar_vm: self.calendar_vm),
+                                       destination: AppliedMeetingListView(main_vm: self.main_vm),
                                        isActive: self.$go_to_apply_list)
                         
                         //신청목록보기, 필터, 지도로보기 버튼
@@ -311,9 +311,6 @@ struct GroupVollehMainView: View {
         }
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
-        //.navigationViewStyle(StackNavigationViewStyle())
-        
-        .edgesIgnoringSafeArea(.all)
         .onAppear{
             self.main_vm.applied_filter = false
 
@@ -476,8 +473,8 @@ extension GroupVollehMainView{
             .overlay(
         Button(action: {
             print("신청 목록 보기 버튼 클릭")
-            self.go_to_apply_list.toggle()
-            self.main_vm.get_my_apply_list()
+            self.go_to_apply_list = true
+            
         }){
             Text("신청목록 보기")
                 .foregroundColor(Color.proco_white)
