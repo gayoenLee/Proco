@@ -28,16 +28,17 @@ struct ProcoMainCalendarView: View {
     
     @State private var go_mypage : Bool = false
     @State private var go_setting_page : Bool = false
+    @State private var add_schedule : Bool = false
     
     //boring days
     //여기에서 받은 boring days를 elegant calendar manager에 넘겨줘서 monthly calendar manager에서 사용할 수 있게 하는 것.
-    init(ascSmallSchedules: [SmallSchedule], initialMonth: Date?, ascSchedules: [Schedule], ascInterest: [InterestModel],boring_days: [Date], main_vm: CalendarViewModel, ascSmallInterest: [SmallInterestModel], calendarOwner: CalendarOwnerModel, go_mypage: Bool?,previousMonth : Date, go_setting_page: Bool?) {
+    init(ascSmallSchedules: [SmallSchedule], initialMonth: Date?, ascSchedules: [Schedule], ascInterest: [InterestModel],boring_days: [Date], main_vm: CalendarViewModel, ascSmallInterest: [SmallInterestModel], calendarOwner: CalendarOwnerModel, go_mypage: Bool?,previousMonth : Date, go_setting_page: Bool?, add_schedule: Bool?) {
         //여기에서 value가 연도 달력에서 몇년도까지 날짜를 셋팅할   인지 설정하는 것.
         let configuration = CalendarConfiguration(
             calendar: currentCalendar,
             startDate: Calendar.current.date(byAdding: .day, value: -360*2, to: initialMonth!)!,
             endDate: Calendar.current.date(byAdding: .day, value: 360*2, to: initialMonth!)!)
-        print("순서2. 프로코 메인 캘린더뷰에서 init안 initial month")
+        print("순서2. 프로코 메인 캘린더뷰에서 init안 initial month ")
         // print("프로코 메인 캘린더뷰 Schedule 데이터 확인: \(ascSchedules)")
         
         calendarManager = ElegantCalendarManager(
@@ -63,6 +64,7 @@ struct ProcoMainCalendarView: View {
         self.main_vm = main_vm
         self.go_mypage = go_mypage ?? false
         self.go_setting_page = go_setting_page ?? false
+        self.add_schedule = add_schedule ?? false
         
         calendarManager.datasource = self
         calendarManager.delegate = self
@@ -71,7 +73,6 @@ struct ProcoMainCalendarView: View {
     var body: some View {
         
         //VStack{
-         
             ZStack{
                 VStack(alignment: .leading){
                     NavigationLink("",destination: MyPage(main_vm: SettingViewModel()), isActive: self.$go_mypage)
@@ -124,7 +125,7 @@ struct ProcoMainCalendarView: View {
                             if calendar_owner_data.user_idx == Int(self.main_vm.my_idx!)!{
                                 
                                 ZStack(alignment: .bottom){  //일정 추가하는 버튼
-                                    PlusScheduleButtonView(main_vm: self.main_vm)
+                                    PlusScheduleButtonView(add_schedule: self.$add_schedule, main_vm: self.main_vm)
                                     
                                 }
                             }
@@ -149,6 +150,9 @@ struct ProcoMainCalendarView: View {
         .sheet(isPresented: self.$go_setting_page){
             FeedDisclosureSettingView(main_vm: self.main_vm)
         }
+            .fullScreenCover(isPresented: self.$add_schedule){
+                AddScheduleView(main_vm: self.main_vm, back_to_calendar: self.$add_schedule).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true)
+            }
         .onReceive(NotificationCenter.default.publisher(for: Notification.calendar_personal_schedule), perform: {value in
             print("개인 스케줄 추가 노티 받음.")
             
