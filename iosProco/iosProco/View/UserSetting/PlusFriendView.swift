@@ -10,10 +10,10 @@ import Kingfisher
 
 struct PlusFriendView: View {
     @Environment(\.presentationMode) var presentation
-
+    
     @ObservedObject var manage_vm : ManageFriendViewModel
     @State private var go_add_phone_number_view : Bool = false
-
+    
     //친구 요청 통신 실패시 알림 띄우기 위함.
     @State private var request_fail : Bool = false
     //추천 친구 리스트 많을 경우 시간 소요-> 프로그래스바 띄우기
@@ -70,37 +70,37 @@ struct PlusFriendView: View {
                 Spacer()
                 
             }else{
-            
-            ScrollView{
-                VStack{
-                    if self.manage_vm.enrolled_friends_model.count > 0 || self.manage_vm.contacts_model.count > 0{
-                    
-                    //친구 요청 보낼 친구 리스트
-                    ForEach(self.manage_vm.enrolled_friends_model){friend in
-                        ManageEnrolledFriendRow(manage_vm: self.manage_vm, friend_model: friend, request_fail: self.$request_fail)
-                    }
-                    
-                    //초대문자 보낼 친구 리스트
-                    ForEach(self.manage_vm.contacts_model){friend in
-                        ManageAddressBookFriendRow(manage_vm: self.manage_vm, friend_model: friend, request_fail: self.$request_fail)
-                    }
-                    }else{
-                        Spacer()
-
-                        HStack{
-                            Spacer()
-                        Text("추천 친구가 없습니다.")
-                            .font(.custom(Font.n_extra_bold, size: 18))
-                            .foregroundColor(Color.proco_black)
+                
+                ScrollView{
+                    VStack{
+                        if self.manage_vm.enrolled_friends_model.count > 0 || self.manage_vm.contacts_model.count > 0{
                             
+                            //친구 요청 보낼 친구 리스트
+                            ForEach(self.manage_vm.enrolled_friends_model){friend in
+                                ManageEnrolledFriendRow(manage_vm: self.manage_vm, friend_model: friend, request_fail: self.$request_fail)
+                            }
+                            
+                            //초대문자 보낼 친구 리스트
+                            ForEach(self.manage_vm.contacts_model){friend in
+                                ManageAddressBookFriendRow(manage_vm: self.manage_vm, friend_model: friend, request_fail: self.$request_fail)
+                            }
+                        }else{
                             Spacer()
-
+                            
+                            HStack{
+                                Spacer()
+                                Text("추천 친구가 없습니다.")
+                                    .font(.custom(Font.n_extra_bold, size: 18))
+                                    .foregroundColor(Color.proco_black)
+                                
+                                Spacer()
+                                
+                            }
+                            Spacer()
+                            
                         }
-                        Spacer()
-
                     }
                 }
-            }
             }
             
         }
@@ -108,7 +108,9 @@ struct PlusFriendView: View {
         .navigationBarHidden(true)
         .onAppear{
             print("친구 추가하기 뷰 나타남")
-            self.manage_vm.get_enrolled_friends(contacts: ["01048077540"])
+            self.manage_vm.getContacts()
+            let phonenumber_list = self.manage_vm.contacts_model.map({$0.telephone})
+            self.manage_vm.get_enrolled_friends(contacts: phonenumber_list)
             
             DispatchQueue.main.asyncAfter(deadline: .now()+1.0){
                 self.show_friend_list = true
@@ -186,26 +188,26 @@ struct ManageAddressBookFriendRow: View{
                         })
             }else{
                 
-            RoundedRectangle(cornerRadius: 5.0)
-                .foregroundColor(.main_orange)
-                .frame(width: 50, height: 30)
-                .overlay(
-                    Button(action: {
-                        print("초대 클릭")
-                        self.manage_vm.send_invite_message(contacts: [friend_model.telephone])
-                    }){
-                        HStack{
-                            Image("tag_plus")
-                                .resizable()
-                                .frame(width: 10, height: 10)
-                            
-                            Text("초대")
-                                .font(.custom(Font.t_extra_bold, size: 11))
-                                .foregroundColor(Color.proco_white)
-                        }
-                    })
-                    }
-                
+                RoundedRectangle(cornerRadius: 5.0)
+                    .foregroundColor(.main_orange)
+                    .frame(width: 50, height: 30)
+                    .overlay(
+                        Button(action: {
+                            print("초대 클릭")
+                            self.manage_vm.send_invite_message(contacts: [friend_model.telephone])
+                        }){
+                            HStack{
+                                Image("tag_plus")
+                                    .resizable()
+                                    .frame(width: 10, height: 10)
+                                
+                                Text("초대")
+                                    .font(.custom(Font.t_extra_bold, size: 11))
+                                    .foregroundColor(Color.proco_white)
+                            }
+                        })
+            }
+            
             
         }
         .padding()
@@ -216,7 +218,7 @@ struct ManageAddressBookFriendRow: View{
                 print("초대 문자 이벤트 \(data)")
                 
                 if data as! String == "ok"{
-                   
+                    
                     let friend_contact = user_info["contact"] as! String
                     //초대 문자 보낸 사람 전화번호와 노티에서 받은 전화번호가 같을 경우에만 뷰 변경.
                     if friend_contact == friend_model.telephone{
@@ -229,14 +231,14 @@ struct ManageAddressBookFriendRow: View{
                         
                         print("노티 받은 후 저장하기 전 데이터: \(invited_friends)")
                         if !invited_friends.contains(where: {$0 == friend_contact}){
-                        invited_friends.append(friend_model.telephone)
-                          //다시 저장
-                        UserDefaults.standard.set(invited_friends, forKey: "\(my_idx)_invited_friends")
-                        
-                    print("초대 문자 이벤트 초대 완료로 변경하기")
-                        friend_model.sent_invite_msg = true
+                            invited_friends.append(friend_model.telephone)
+                            //다시 저장
+                            UserDefaults.standard.set(invited_friends, forKey: "\(my_idx)_invited_friends")
+                            
+                            print("초대 문자 이벤트 초대 완료로 변경하기")
+                            friend_model.sent_invite_msg = true
                         }
-
+                        
                     }else{
                         friend_model.sent_invite_msg = false
                     }
@@ -309,28 +311,28 @@ struct ManageEnrolledFriendRow:  View{
                 }
                 
             }else{
-             //친구 요청 아직 안한 경우
-            RoundedRectangle(cornerRadius: 5.0)
-                .foregroundColor(.main_orange)
-                .frame(width: 73, height: 30)
-                .overlay(
-                    Button(action: {
-
-                        print("친구 요청 클릭: \(friend_model.idx)")
-                       self.manage_vm.add_friend_request(f_idx: friend_model.idx)
-                    }){
-                
-                        HStack{
-                            Image("tag_plus")
-                                .resizable()
-                                .frame(width: 10, height: 10)
-                            Text("친구 요청")
-                                .font(.custom(Font.t_extra_bold, size: 11))
-                                .foregroundColor(Color.proco_white)
+                //친구 요청 아직 안한 경우
+                RoundedRectangle(cornerRadius: 5.0)
+                    .foregroundColor(.main_orange)
+                    .frame(width: 73, height: 30)
+                    .overlay(
+                        Button(action: {
+                            
+                            print("친구 요청 클릭: \(friend_model.idx)")
+                            self.manage_vm.add_friend_request(f_idx: friend_model.idx)
+                        }){
+                            
+                            HStack{
+                                Image("tag_plus")
+                                    .resizable()
+                                    .frame(width: 10, height: 10)
+                                Text("친구 요청")
+                                    .font(.custom(Font.t_extra_bold, size: 11))
+                                    .foregroundColor(Color.proco_white)
+                            }
+                            
                         }
-                        
-                    }
-                )
+                    )
             }
         }
         .padding()
@@ -393,7 +395,7 @@ struct ManageEnrolledFriendRow:  View{
                 }
             }
         })
-      
+        
     }
 }
 
