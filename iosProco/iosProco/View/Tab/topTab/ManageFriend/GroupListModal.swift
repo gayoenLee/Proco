@@ -18,6 +18,12 @@ struct GroupListModal: View{
     
     var body: some View{
         VStack{
+            HStack(alignment: .center){
+                Text("추가할 그룹을 선택해주세요")
+                    .font(.custom(Font.n_regular, size: 15))
+                    .foregroundColor(Color.proco_black)
+            }
+            .padding()
             ScrollView{
             ForEach(self.manage_group_struct){group in
                 //그룹1개 뷰
@@ -34,14 +40,16 @@ struct GroupListModal: View{
                 }){
                     
                     Text("취소")
-                        .font(.custom(Font.t_regular, size: 18))
-                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .font(.custom(Font.t_regular, size: 17))
                         .padding()
-                        .foregroundColor(.proco_black)
-                        .background(Color.proco_white)
+                        .foregroundColor(.proco_white)
                 }
+                .frame(minWidth: 0, maxWidth: .infinity)
+                .background(Color.main_green)
+                .cornerRadius(25)
+                .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
             }
-            .padding()
+            .padding(.bottom)
         
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
