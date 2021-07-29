@@ -63,7 +63,7 @@ struct AddScheduleView: View {
                     self.main_vm.add_personal_schedule(title: self.title, content: self.schedule_memo, schedule_date: String(schedule_date), schedule_start_time: String(schedule_start_time))
                     
                     //캘린더뷰로 돌아감.
-                    //self.back_to_calendar = false
+                    self.back_to_calendar = false
                     
                 }){
                     Image("check_end_btn")
