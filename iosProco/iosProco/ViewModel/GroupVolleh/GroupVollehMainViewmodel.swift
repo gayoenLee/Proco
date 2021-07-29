@@ -1052,46 +1052,12 @@ class GroupVollehMainViewmodel: ObservableObject{
                     let json_data = try? JSONDecoder().decode([MyApplyMeetingStruct].self, from: data!)
                     
                     print("참가 신청 목록이 있을 경우 : \(json_data)")
-                    for meeting in json_data!{
-                        print("user확인 \(meeting)")
-                        
-                        self.apply_meeting_struct.append(MyApplyMeetingStruct( creator: meeting.creator, card_idx: meeting.card_idx, kinds: meeting.kinds, apply_user: meeting.apply_user, introduce: meeting.introduce ?? "", apply_kinds: meeting.apply_kinds, tags: meeting.tags!, map_lat: meeting.map_lat, map_lng: meeting.map_lng, expiration_at: meeting.expiration_at, address: meeting.address, title: meeting.title, cur_user: meeting.cur_user, card_photo_path: meeting.card_photo_path ?? "", lock_state: meeting.lock_state, like_count: meeting.like_count, like_state: meeting.like_state))
-                        
-                    }
-                    print("데이터 들어간 것확인 \( self.apply_meeting_struct))")
+
+                    self.apply_meeting_struct = json_data!
                 }
             })
     }
-    
-    //모임 신청 목록에서 상세 페이지 갈 때
-    func get_apply_detail(){
-        let detail_index = self.apply_meeting_struct.firstIndex(where: { $0.card_idx == self.selected_card_idx})
-        
-        self.apply_meeting_detail_struct.creator = self.apply_meeting_struct[detail_index!].creator
-        
-        self.creator_name = self.apply_meeting_detail_struct.creator!.nickname!
-        self.creator_image = self.apply_meeting_detail_struct.creator?.profile_photo_path ?? ""
-        ///상세 페이지 데이터 뷰모델 안의 변수들에 넣어줌.
-        self.card_name = self.apply_meeting_detail_struct.title!
-        //조심 : 데이터를 새로운 변수에 넣어줄 때 왼쪽에 넣을 변수, 오른쪽에 넣을 값을 갖고 있는 변수 위치로 해줘야 데이터 들어감.
-        //지역
-        self.input_location = self.apply_meeting_detail_struct.address!
-        //소개글
-        self.input_introduce = self.apply_meeting_detail_struct.introduce!
-        
-        //태그 set, array에 이름 저장
-        if self.apply_meeting_detail_struct.tags != nil{
-            for tag in self.apply_meeting_detail_struct.tags!{
-                self.user_selected_tag_set.insert(tag.tag_name)
-                self.user_selected_tag_list.append(tag.tag_name)
-            }}
-        
-        let total_day  = String(self.apply_meeting_detail_struct.expiration_at!.split(separator: " ")[0])
-        self.year = String(total_day.split(separator: "-")[0])
-        self.month = String(total_day.split(separator: "-")[1])
-        self.date = String(total_day.split(separator: "-")[2])
-        
-    }
+
     //필터 전체, 채팅만, 만나서 종류 설정 어떻게 해놨는지 저장.
     @Published var filter_kind : String? = ""{
         didSet{
@@ -1193,7 +1159,7 @@ class GroupVollehMainViewmodel: ObservableObject{
             }, receiveValue: {response in
                 print("모여볼래 카드 상세 정보 가져오기 response 확인: \(response)")
                 
-                if response.result == "no result"{
+                if response.result == "no result" || response.result == "Not found."{
                     
                     //뷰 업데이트 위해 보내기
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["get_group_card_detail_finish" : "no result"])
