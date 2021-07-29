@@ -31,11 +31,7 @@ class ViewRouter:  ObservableObject {
         }
     }
     //fcm 클릭해서 화면을 들어왔을 때........
-    @Published var fcm_destination : String = ""{
-        didSet{
-            objectWillChange.send()
-        }
-    }
+    @Published var fcm_destination : String = ""
 
 }
 
