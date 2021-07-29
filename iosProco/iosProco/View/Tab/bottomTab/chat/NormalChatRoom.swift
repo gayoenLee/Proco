@@ -450,6 +450,7 @@ struct NormalChatRoom: View {
             }
             .onDisappear(perform: {
                 print("채팅룸 사라짐")
+            ViewRouter.get_view_router().fcm_destination = ""
                 SockMgr.socket_manager.is_first_temp_room = false
 
                 SockMgr.socket_manager.exit_chatroom(chatroom_idx: SockMgr.socket_manager.enter_chatroom_idx)

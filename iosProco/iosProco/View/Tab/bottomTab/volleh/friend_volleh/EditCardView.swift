@@ -29,8 +29,27 @@ struct EditCardView: View {
     @State private var show_disallow_edit_toast : Bool = false
     
     var body: some View {
-        NavigationView{
+      
         VStack{
+            
+            HStack{
+                
+                Button(action: {
+                    print("돌아가기 클릭")
+                    self.presentationMode.wrappedValue.dismiss()
+                }){
+                    Image("left")
+                        .resizable()
+                        .frame(width: 8.51, height: 17)
+                }
+                Spacer()
+                
+                Text("약속 수정")
+                    .font(.custom(Font.n_extra_bold, size: 22))
+                    .foregroundColor(Color.proco_black)
+                
+                Spacer()
+            }.padding()
             
             ScrollView{
                 VStack{
@@ -102,21 +121,20 @@ struct EditCardView: View {
                 }
             }
         }
-        .overlay(overlayView: Toast.init(dataModel: Toast.ToastDataModel.init(title: "친구가 참가중인 카드는 수정할 수 없습니다.", image: "exclamationmark.circle.fill"), show: self.$show_disallow_edit_toast), show: self.$show_disallow_edit_toast)
-        .navigationBarColor(background_img: "wave_bg")
-        .navigationBarTitle("카드 수정")
-        .navigationBarItems(leading:
-                                Button(action: {
-                                    self.presentationMode.wrappedValue.dismiss()
-                                }){
-                                    Image("left")
-                                })
+        .overlay(overlayView: Toast.init(dataModel: Toast.ToastDataModel.init(title: "친구가 참가중인 약속은 수정할 수 없습니다.", image: "exclamationmark.circle.fill"), show: self.$show_disallow_edit_toast), show: self.$show_disallow_edit_toast)
+   //     .navigationBarColor(background_img: "wave_bg")
+//        .navigationBarTitle("카드 수정")
+//        .navigationBarItems(leading:
+//                                Button(action: {
+//                                    self.presentationMode.wrappedValue.dismiss()
+//                                }){
+//                                    Image("left")
+//                                })
         .onAppear{
             print("친구 카드 수정 페이지 나타남")
             self.main_viewmodel.get_card_detail(card_idx: self.main_viewmodel.selected_card_idx)
         }
-        }
-
+        .navigationBarHidden(true)
     }
 }
 

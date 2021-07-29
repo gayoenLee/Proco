@@ -56,8 +56,35 @@ struct MakeCardViewGroup: View {
     }
     
     var body: some View {
-        NavigationView{
+   
             VStack{
+                HStack{
+                    
+                    Button(action: {
+                        print("돌아가기 클릭")
+                        self.main_vm.card_name = ""
+                                     self.main_vm.user_selected_tag_set.removeAll()
+                                     self.main_vm.user_selected_tag_list.removeAll()
+                                     self.main_vm.card_date = Date()
+                                     self.main_vm.card_time = Date()
+                        self.main_vm.card_name.removeAll()
+                        self.main_vm.input_introduce.removeAll()
+                        
+                        self.presentationMode.wrappedValue.dismiss()
+                    }){
+                        Image("left")
+                            .resizable()
+                            .frame(width: 8.51, height: 17)
+                    }
+                    Spacer()
+                    
+                    Text("약속 만들기")
+                        .font(.custom(Font.n_extra_bold, size: 22))
+                        .foregroundColor(Color.proco_black)
+                    
+                    Spacer()
+                }.padding()
+                
                 ScrollViewReader{scrollview in
                     
                     ScrollView{
@@ -164,6 +191,7 @@ struct MakeCardViewGroup: View {
                     }
                 }
             }
+            .navigationBarHidden(true)
             //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
             .onTapGesture {
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -184,21 +212,21 @@ struct MakeCardViewGroup: View {
                 //                self.main_vm.card_date = Date()
                 //                self.main_vm.card_time = Date()
             }
-            .navigationBarColor(background_img: "meeting_wave_bg")
-            .navigationBarTitle("방 만들기", displayMode: .inline)
-            .navigationBarItems(leading:
-                                    Button(action: {
-                                        self.main_vm.card_name = ""
-                                        self.main_vm.user_selected_tag_set.removeAll()
-                                        self.main_vm.user_selected_tag_list.removeAll()
-                                        self.main_vm.card_date = Date()
-                                        self.main_vm.card_time = Date()
-                                        
-                                        self.presentationMode.wrappedValue.dismiss()
-                                    }){
-                                        Image("left")
-                                    })
-        }
+//            .navigationBarColor(background_img: "meeting_wave_bg")
+//            .navigationBarTitle("방 만들기", displayMode: .inline)
+//            .navigationBarItems(leading:
+//                                    Button(action: {
+//                                        self.main_vm.card_name = ""
+//                                        self.main_vm.user_selected_tag_set.removeAll()
+//                                        self.main_vm.user_selected_tag_list.removeAll()
+//                                        self.main_vm.card_date = Date()
+//                                        self.main_vm.card_time = Date()
+//
+//                                        self.presentationMode.wrappedValue.dismiss()
+//                                    }){
+//                                        Image("left")
+//                                    })
+        
     }
 }
 

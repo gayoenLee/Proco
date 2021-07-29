@@ -48,9 +48,26 @@ struct EditGroupCard: View {
     }
     
     var body: some View{
-        NavigationView{
+  
             VStack{
-                
+                HStack{
+                    
+                    Button(action: {
+                        print("돌아가기 클릭")
+                        self.presentationMode.wrappedValue.dismiss()
+                    }){
+                        Image("left")
+                            .resizable()
+                            .frame(width: 8.51, height: 17)
+                    }
+                    Spacer()
+                    
+                    Text("모임 수정")
+                        .font(.custom(Font.n_extra_bold, size: 22))
+                        .foregroundColor(Color.proco_black)
+                    
+                    Spacer()
+                }.padding()
                 ScrollView{
                     
                     EditingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, selected_category: self.$selected_category, open_map: self.$open_map, selected_img: self.image_url, show_img_picker: self.$show_img_picker, go_to_edit: self.$go_to_edit, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult, card_img_url: self.$card_img_url)
@@ -116,14 +133,14 @@ struct EditGroupCard: View {
                     .alert(isPresented: $main_vm.show_alert){
                         switch main_vm.alert_type{
                         case .success:
-                            return Alert(title: Text("카드 편집"), message: Text("카드 편집이 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
+                            return Alert(title: Text("약속 편집"), message: Text("약속 편집이 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
                                 print("편집 알림 클릭 후 데이터 : \(self.main_vm.my_group_card_struct)")
                                 
                                 self.presentationMode.wrappedValue.dismiss()
                                 //go_to_edit.toggle()
                             }))
                         case .fail:
-                            return Alert(title: Text("카드 편집"), message: Text("카드 편집을 다시 시도해주세요."), dismissButton: Alert.Button.default(Text("확인"), action:{
+                            return Alert(title: Text("약속 편집"), message: Text("약속 편집을 다시 시도해주세요."), dismissButton: Alert.Button.default(Text("확인"), action:{
                                 
                             }))
                         }
@@ -180,15 +197,16 @@ struct EditGroupCard: View {
                     self.main_vm.get_group_card_detail(card_idx: self.main_vm.selected_card_idx)
                 }
             }
-            .navigationBarColor(background_img: "meeting_wave_bg")
-            .navigationBarTitle("카드 수정")
-            .navigationBarItems(leading:
-                                    Button(action: {
-                                        self.presentationMode.wrappedValue.dismiss()
-                                    }){
-                                        Image("left")
-                                    })
-        }
+            .navigationBarHidden(true)
+            //.navigationBarColor(background_img: "meeting_wave_bg")
+           // .navigationBarTitle("카드 수정")
+//            .navigationBarItems(leading:
+//                                    Button(action: {
+//                                        self.presentationMode.wrappedValue.dismiss()
+//                                    }){
+//                                        Image("left")
+//                                    })
+        
     }
 }
 
@@ -223,6 +241,7 @@ struct EditingView: View{
     
     var body: some View{
         VStack{
+            
             Group{
                 HStack{
                     VStack{

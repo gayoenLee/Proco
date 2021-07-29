@@ -62,6 +62,10 @@ struct ManageFriendListView: View {
     //친구 요청 모아놓은 목록 페이지 이동값
     @State private var go_friend_request_list : Bool = false
     
+    //잠금 이벤트 완료 후 토스트 띄우기 위해 사용하는 구분값
+    @State private var show_interest_alert : Bool = false
+    @State private var interest_event_kind : String = ""
+    
     var body: some View {
         
         VStack{
@@ -156,7 +160,7 @@ struct ManageFriendListView: View {
                                             .shadow(color: .gray, radius: 2, x: 0, y: 2)
                                             .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
                                             .overlay(
-                                                ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx)
+                                                ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx, show_interest_alert : self.$show_interest_alert,interest_event_kind: self.$interest_event_kind )
                                                     .padding()
                                                     .onTapGesture {
                                                         self.friend_vm.friend_info_struct.profile_photo_path = friend.profile_photo_path ?? ""
@@ -188,7 +192,7 @@ struct ManageFriendListView: View {
                                             .shadow(color: .gray, radius: 2, x: 0, y: 2)
                                             .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
                                             .overlay(
-                                                ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx)
+                                                ManageFriendRow(manage_viewmodel: self.manage_vm, friend_model: friend, show_group_list_modal: self.$show_group_list_modal, ask_delete_friend_model: self.$ask_delete_friend_model, delete_frined_idx: self.$delete_friend_idx, show_interest_alert : self.$show_interest_alert,interest_event_kind: self.$interest_event_kind )
                                                     .padding()
                                                     .onTapGesture {
                                                         self.friend_vm.friend_info_struct.profile_photo_path = friend.profile_photo_path ?? ""
@@ -343,6 +347,7 @@ struct ManageFriendListView: View {
             GroupListModal(manage_viewmodel: self.manage_vm, manage_group_struct: self.manage_vm.manage_groups, show_modal: self.$show_group_list_modal)
         }
         .overlay(FriendStateDialog(main_vm: self.friend_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: CalendarViewModel(),show_friend_info: self.$show_friend_profile, socket: SockMgr.socket_manager, state_on: self.$friend_state, is_friend : true))
+        .overlay(overlayView: self.interest_event_kind == "관심친구해제" ?  Toast.init(dataModel: Toast.ToastDataModel.init(title: "관심 친구를 취소했습니다.", image: "checkmark"), show: self.$show_interest_alert) :  Toast.init(dataModel: Toast.ToastDataModel.init(title: "관심친구로 설정했습니다.", image: "checkmark"), show: self.$show_interest_alert), show: self.$show_interest_alert)
         .overlay(overlayView:
                     manage_vm.active_friend_group_alert ==
                     .ok ?

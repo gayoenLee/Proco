@@ -797,7 +797,60 @@ class ManageFriendViewModel: ObservableObject{
             objectWillChange.send()
         }
     }
-    
+    //전체 연락처 가져오기
+        func getContacts(){
+            // 1.
+            let store = CNContactStore()
+            store.requestAccess(for: .contacts) { (granted, error) in
+                if let error = error {
+                    print("주소록 권한 요청에 실패", error)
+                    return
+                }
+                if granted {
+                    // 2.
+                    let keys = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey]
+                    let request = CNContactFetchRequest(keysToFetch: keys as [CNKeyDescriptor])
+                    do {
+                        // 3.
+                        try store.enumerateContacts(with: request, usingBlock: { (contact, stopPointer) in
+                            print("핸드폰 번호: \(contact.phoneNumbers.first?.value.stringValue ?? "")")
+                            print("이름: \(contact.familyName)\(contact.givenName)")
+                            
+                            let my_friend_phone = contact.phoneNumbers.first?.value.stringValue.replacingOccurrences(of: "-", with: "")
+                            print("형식 통일한 전화번호: \(String(describing: my_friend_phone))")
+                            
+                            let my_idx = UserDefaults.standard.string(forKey: "user_id")!
+                            
+                            //이미 초대 문자 보낸 친구 저장된 값 꺼내오기
+                            let sent_invite_friends = UserDefaults.standard.array(forKey: "\(my_idx)_invited_friends") as? [String] ?? []
+                            
+                            //주소록에 등록된 정보중 전화번호가 없는 경우도 있음.
+                            if my_friend_phone != nil{
+                                //이미 초대 문자 보낸 친구 : sent invite msg값 true
+                                if sent_invite_friends.contains(where: {
+                                                                    print("값 확이니ㅣㅣ: \($0)")
+                                                                  return  $0 == my_friend_phone!}){
+                                    
+                                    print("전화번호 포함하고 있음: \(my_friend_phone!)")
+
+                                    self.contacts_model.append(FetchedContactModel(firstName: contact.givenName, lastName: contact.familyName, telephone: my_friend_phone ?? "", profile_photo_path: "", sent_invite_msg: true))
+                                    print("데이터 바꼈는지: \(self.contacts_model)")
+                                    
+                                }else{
+                                self.contacts_model.append(FetchedContactModel(firstName: contact.givenName, lastName: contact.familyName, telephone: my_friend_phone ?? "", profile_photo_path: "", sent_invite_msg: false))
+                                }
+                            }
+                            
+                        })
+
+                    } catch let error {
+                        print("전화번호 가져오는데 실패", error)
+                    }
+                } else {
+                    print("접근 거부됨.")
+                }
+            }
+        }
     //연락처가져오기
     func fetchContacts() {
                 

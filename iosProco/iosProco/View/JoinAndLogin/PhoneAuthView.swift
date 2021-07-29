@@ -159,12 +159,10 @@ struct PhoneAuthView: View {
                     
                 }else if result_string == "already exist user"{
                     phone_viewmodel.request_result_alert = .already_exist_user
-                    
-                    phone_viewmodel.request_result_alert = .fail
-                    
+                                        
                 }else if result_string == "message sended"{
-                    print("4444")
                     phone_viewmodel.request_result_alert = .success
+
                 }else{
                     phone_viewmodel.request_result_alert = .fail
                 }

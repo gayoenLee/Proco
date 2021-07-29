@@ -54,7 +54,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
                             //이미지 데이터를 UIImage로 변환해서 jpeg로 만듬.
                             let ui_image : UIImage = newImage as! UIImage
                             print("ui image 확인: \(ui_image)")
-                            let image_data = ui_image.jpegData(compressionQuality: 0.2) ?? Data()
+                            let image_data = ui_image.jpegData(compressionQuality: 1.0) ?? Data()
                             print("이미지 데이터 확인: \(image_data)")
                             if self.parent.is_profile_img{
                                 //프로필 이미지 변경 통신

@@ -9,8 +9,8 @@ import SwiftUI
 import Kingfisher
 
 struct ApplyMeetingCard: View {
-    @ObservedObject var main_vm : GroupVollehMainViewmodel
-    @Binding var apply_card : MyApplyMeetingStruct
+    @StateObject var main_vm : GroupVollehMainViewmodel
+    @State var apply_card : MyApplyMeetingStruct
     @State private var expiration_at = ""
     let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 43, height: 43)) |> RoundCornerImageProcessor(cornerRadius: 5)
     

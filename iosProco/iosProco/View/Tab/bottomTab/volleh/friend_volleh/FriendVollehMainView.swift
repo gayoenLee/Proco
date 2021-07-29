@@ -14,7 +14,7 @@ struct FriendVollehMainView: View {
     
     //필터 버튼 클릭시 나오는 모달창 구분값
     @State private var show_filter_modal = false
-    @ObservedObject var main_vm = FriendVollehMainViewmodel()
+    @StateObject var main_vm = FriendVollehMainViewmodel()
     @State var volleh_category_struct = VollehTagCategoryStruct()
     
     //카드 만들기 페이지로 이동시 사용하는 값.
@@ -290,6 +290,8 @@ struct FriendVollehMainView: View {
         .navigationBarHidden(true)
         .onAppear{
             print("*************친구랑 볼래 메인 뷰 나타남****************")
+            if ViewRouter.get_view_router().init_root_view != "origin"{
+                
             self.main_vm.applied_filter = false
             
             //user defaults에서 내 닉네임 꺼내오는 메소드 실행. 그래야 내 카드만 골라서 보여줄 수 있음.
@@ -304,6 +306,8 @@ struct FriendVollehMainView: View {
             self.my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
             print("내 닉네임 확인 : \(main_vm.my_nickname), 내 프로필: \(self.my_photo_path)")
             print("저장됐던 유저 상태 확인:\(user_idx) \(self.state_on)")
+            
+            }
         }
         .onDisappear{
             print("*************친구랑 볼래 메인 뷰 사라짐****************")
@@ -419,7 +423,7 @@ private extension FriendVollehMainView{
                             }))
                         })
                         
-                        NavigationLink("", destination: MakeCardView(main_viewmodel: self.main_vm, tag_category_struct: self.volleh_category_struct)
+                        NavigationLink("", destination: MakeCardView(main_viewmodel: self.main_vm, tag_category_struct: self.volleh_category_struct).navigationBarHidden(true)
                                        , isActive: self.$go_to_make_card)
                         
                         //카드 추가하기 버튼

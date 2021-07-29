@@ -14,8 +14,7 @@ struct ManageAccountView: View {
     @State private var go_change_pwd: Bool = false
     //로그아웃 클릭시 알림창 띄우기 위한 구분값
     @State private var ask_logout: Bool = false
-    //로그아웃한 사용자를 로그인 페이지로 돌려보내기 위해 화면이동 구분값.
-    @State private var logout_ok: Bool = false
+
     //탈퇴하기 클릭시 알림창 띄우기 위함.
     @State private var exit_click : Bool = false
     //마이페이지 이동 구분값
@@ -33,10 +32,6 @@ struct ManageAccountView: View {
             NavigationLink("",destination: MyPage(main_vm: self.main_vm).navigationBarTitle("마이페이지"), isActive: self.$go_my_page)
             
             NavigationLink("",destination: SettingChangePwdView(main_vm: self.main_vm).navigationBarTitle("비밀번호 변경"), isActive: self.$go_change_pwd)
-            
-            //로그아웃하는 사용자를 로그인 화면으로 이동시킴.
-            NavigationLink("",destination: LoginMenuView().navigationBarBackButtonHidden(true)
-                            .navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$logout_ok)
             
             
             List{
@@ -61,7 +56,8 @@ struct ManageAccountView: View {
                         
                         if data as! String == "ok"{
                             print("로그아웃 성공")
-                            self.logout_ok.toggle()
+                            ViewRouter.get_view_router().init_root_view = "origin"
+                            
                         }
                         else{
                             self.show_error_toast = true
@@ -176,20 +172,17 @@ private extension ManageAccountView{
         .onReceive(NotificationCenter.default.publisher(for: Notification.get_data_finish), perform: {value in
             
             if let user_info = value.userInfo,  let check_result = user_info["delete_exit_user"]{
-               
                 
                 print("회원 탈퇴 처리 데이터 확인: \(String(describing: check_result))")
                 
                 //회원 탈퇴한 경우
                  if check_result as! String == "ok"{
                  
-                    self.logout_ok = true
+                    ViewRouter.get_view_router().init_root_view = "origin"
                 }else if check_result as! String == "error"{
                     
-        
                 }
             }
-            
         })
     }
 }

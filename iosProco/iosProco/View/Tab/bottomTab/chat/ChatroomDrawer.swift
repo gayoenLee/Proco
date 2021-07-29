@@ -341,7 +341,7 @@ extension ChatroomDrawer{
         HStack{
             
             
-            Text("친구와 카드 만들기")
+            Text("친구와 약속 만들기")
                 .font(.custom(Font.n_extra_bold, size:  UIScreen.main.bounds.width/15))
                 .foregroundColor(.proco_black)
             
@@ -363,7 +363,7 @@ extension ChatroomDrawer{
     var invite_my_card_btn : some View{
         HStack{
             
-            Text("내 카드에 초대하기")
+            Text("내 약속에 초대하기")
                 .font(.custom(Font.n_extra_bold, size:  UIScreen.main.bounds.width/15))
                 .foregroundColor(.proco_black)
             Spacer()

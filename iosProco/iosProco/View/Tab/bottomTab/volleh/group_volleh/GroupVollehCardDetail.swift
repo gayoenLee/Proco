@@ -61,7 +61,10 @@ struct GroupVollehCardDetail: View {
     //참가 신청 완료시 텍스트 변경하기 위함.
     @State private var apply_btn_txt : String = "참여하기"
     
-    let card_img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)) |> RoundCornerImageProcessor(cornerRadius: 40)
+    //let card_img_processor =   DownsamplingImageProcessor(size: CGSize(width: 200, height: 50)) |> RoundCornerImageProcessor(cornerRadius: 25)
+  
+    let card_img_processor = CroppingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.2)) |> DownsamplingImageProcessor(size:CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.2))
+        |> RoundCornerImageProcessor(cornerRadius: 25) |> ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.2), mode: .aspectFit)
     //카드 초대하기 후 알림창 띄울 때 사용 구분값
     @State private var invite_ok: Bool = false
     //카드 초대하기 후 알림창에 보여줄 텍스트뷰
@@ -137,7 +140,7 @@ struct GroupVollehCardDetail: View {
                             card_img
                                 .padding(.bottom)
                         }
-                        
+
                         Group{
                             
                             HStack{
@@ -390,7 +393,7 @@ extension GroupVollehCardDetail{
     var card_img : some View{
         
         HStack{
-            
+           
             KFImage(URL(string: (self.main_vm.my_card_detail_struct.card_photo_path!)))
                 .loadDiskFileSynchronously()
                 .cacheMemoryOnly()
@@ -405,8 +408,9 @@ extension GroupVollehCardDetail{
                 .onFailure{error in
                     print("실패 이유: \(error)")
                 }
-            
+
         }
+       
     }
     
     var accept_invitation_btn: some View{
@@ -912,7 +916,7 @@ extension GroupVollehCardDetail{
             }
             .padding(.bottom)
             
-            ZStack{
+            ZStack(alignment: .topLeading){
                 RoundedRectangle(cornerRadius: 20)
                     .foregroundColor(.light_gray)
                     .frame(minWidth: UIScreen.main.bounds.width*0.95, idealWidth: UIScreen.main.bounds.width*0.95, maxWidth: UIScreen.main.bounds.width*0.95, minHeight: UIScreen.main.bounds.height*0.1, alignment: .leading)

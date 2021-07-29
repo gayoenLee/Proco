@@ -37,10 +37,8 @@ struct LikeUserListView: View {
                 Spacer()
                 
                 Text("좋아요한 사람들")
-                    .font(.custom(Font.n_bold, size: 25))
+                    .font(.custom(Font.n_extra_bold, size: 22))
                     .foregroundColor(Color.proco_black)
-                    .padding()
-                    .padding(.bottom)
                 
                 Spacer()
             }

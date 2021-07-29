@@ -9,16 +9,12 @@ import SwiftUI
 
 struct PlusScheduleButtonView: View {
     //스케줄 추가하는 뷰로 이동할 때 사용하는 구분값.
-    @State private var add_schedule: Bool = false
+    @Binding var add_schedule: Bool
     @StateObject var main_vm: CalendarViewModel
     
     var body: some View {
         
         VStack{
-            //스케줄 추가하는 화면으로 이동시킴.
-            NavigationLink("",destination: AddScheduleView(main_vm: self.main_vm, back_to_calendar: self.$add_schedule).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$add_schedule)
-                //binding이용해서 스케줄 추가 완료시 false로 변경시킨 후 현재 화면으로 다시 돌아오게 함.
-                .isDetailLink(false)
             
             Button(action: {
                 

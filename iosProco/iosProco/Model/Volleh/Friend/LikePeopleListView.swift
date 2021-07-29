@@ -15,33 +15,61 @@ struct LikePeopleListView : View{
     @State private var show_dialog : Bool = false
     @State private var state_on : Int? = 0
     var body: some View{
-        NavigationView{
+        // NavigationView{
         VStack{
-            ForEach(self.main_vm.card_like_user_model){user in
-                LikeUserRow(main_vm : self.main_vm, like_user_model: user, show_dialog: self.$show_dialog)
+            HStack{
+                Button(action: {
+                    
+                    print("뒤로 가기 버튼 클릭")
+                    
+                    self.presentation.wrappedValue.dismiss()
+                }){
+                    Image("left")
+                        .resizable()
+                        .frame(width: 8.51, height: 17)
+                }
+                
+                Spacer()
+                
+                Text("좋아요한 사람들")
+                    .font(.custom(Font.n_extra_bold, size: 22))
+                    .foregroundColor(Color.proco_black)
+                
+                Spacer()
+            }
+            .padding()
+            
+            ScrollView{
+                VStack{
+                    ForEach(self.main_vm.card_like_user_model){user in
+                        LikeUserRow(main_vm : self.main_vm, like_user_model: user, show_dialog: self.$show_dialog)
+                    }
+                }
+                .padding([.leading, .trailing])
             }
             Spacer()
         }
+        .navigationBarHidden(true)
         .onAppear{
             main_vm.get_like_card_users(card_idx: card_idx)
         }
         .overlay(FriendStateDialog(main_vm: self.main_vm, group_main_vm: GroupVollehMainViewmodel(), calendar_vm: CalendarViewModel(),show_friend_info: $show_dialog, socket: SockMgr.socket_manager, state_on: self.$state_on, is_friend : true))
-        .navigationBarTitle("좋아요한 사람", displayMode: .inline)
-        .navigationBarItems(leading:
-        Button(action: {
-            print("뒤로 가기 클릭")
-            presentation.wrappedValue.dismiss()
-        }){
-            Image("left")
-        })
-        }
+        //        .navigationBarTitle("좋아요한 사람", displayMode: .inline)
+        //        .navigationBarItems(leading:
+        //        Button(action: {
+        //            print("뒤로 가기 클릭")
+        //            presentation.wrappedValue.dismiss()
+        //        }){
+        //            Image("left")
+        //        })
+        // }
     }
 }
 
 struct LikeUserRow : View{
     
     @StateObject var main_vm : FriendVollehMainViewmodel
-
+    
     var like_user_model : Creator
     //이미지 원처럼 보이게 하기 위해 scale값을 곱함.
     let scale = UIScreen.main.scale
@@ -84,8 +112,8 @@ struct LikeUserRow : View{
         .onTapGesture {
             
             if like_user_model.idx == Int(self.main_vm.my_idx!){}else{
-            self.main_vm.friend_info_struct = GetFriendListStruct(idx: like_user_model.idx,nickname: like_user_model.nickname, profile_photo_path: like_user_model.profile_photo_path ?? "", state: 0, kinds:  "")
-            self.show_dialog = true
+                self.main_vm.friend_info_struct = GetFriendListStruct(idx: like_user_model.idx,nickname: like_user_model.nickname, profile_photo_path: like_user_model.profile_photo_path ?? "", state: 0, kinds:  "")
+                self.show_dialog = true
             }
         }
     }

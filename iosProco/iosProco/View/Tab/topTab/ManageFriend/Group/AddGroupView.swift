@@ -95,6 +95,14 @@ struct AddGroupView: View {
                 
                 HStack{
                     TextField("그룹 이름을 입력하세요", text: self.$viewmodel.input_group_name)
+                        //IOS14부터 onchange사용 가능
+                        .onChange(of: self.viewmodel.input_group_name) { value in
+                            print("그룹 이름 편집 onchangee 들어옴")
+                            if value.count > 15 {
+                                print("그룹 이름 15글자 넘음")
+                                self.viewmodel.input_group_name = String(value.prefix(15))
+                            }
+                        }
                         .padding(.leading, UIScreen.main.bounds.width/20)
                         .keyboardType(.default)
                         .font(.custom(Font.n_regular, size: 15))
@@ -152,6 +160,10 @@ struct AddGroupView: View {
                 Spacer()
                 
             }
+        }
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         .sheet(isPresented: self.$go_to_add_friend, content: {
             PlusGroupMemberView(viewmodel: self.viewmodel, friend_model: self.friend_model)

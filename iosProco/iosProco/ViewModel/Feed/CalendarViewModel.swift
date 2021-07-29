@@ -1178,6 +1178,8 @@ public class CalendarViewModel: ObservableObject{
         return date!
     }
     
+    
+    //개인일정의 경우 일정 추가 또는 수정시 뷰 동적으로 변화시켜줘야 해서 심심기간처럼 개인일정이 있는 날짜
     //캘린더 - 내 일정 리스트 가져오기
     func get_personal_schedules(user_idx: Int, date_start: String, date_end: String){
         cancellation = APIClient.get_personal_schedules(user_idx: user_idx, date_start: date_start, date_end: date_end)
