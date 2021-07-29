@@ -21,7 +21,8 @@ struct FriendFilterModal: View {
             //상단 제목 라인
             HStack{
                 Button(action: {
-                    
+                    viewmodel.selected_filter_tag_list.removeAll()
+                    viewmodel.selected_filter_tag_set.removeAll()
                     show_filter_modal.toggle()
                     
                 }, label: {

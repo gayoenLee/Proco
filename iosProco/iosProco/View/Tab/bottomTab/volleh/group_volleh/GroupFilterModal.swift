@@ -25,6 +25,10 @@ struct GroupFilterModal: View {
             //상단 제목 라인
             HStack{
                 Button(action: {
+                    self.selected_category.removeAll()
+                    self.main_vm.filter_start_date = Date()
+                    self.main_vm.selected_filter_tag_list.removeAll()
+                    self.main_vm.selected_filter_tag_set.removeAll()
                     show_filter = false
                 }){
                     Image("left")
