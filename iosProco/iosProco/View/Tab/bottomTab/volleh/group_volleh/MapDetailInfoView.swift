@@ -20,7 +20,7 @@ struct MapDetailInfoView: View {
                 Spacer()
                 Text("모임 위치")
                     .foregroundColor(Color.proco_black)
-                    .font(.custom(Font.t_extra_bold, size: 22))
+                    .font(.custom(Font.n_extra_bold, size: 22))
                 Spacer()
             }   
             .padding()
