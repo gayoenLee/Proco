@@ -22,6 +22,9 @@ struct ManageFriendRow: View{
     //삭제하려는 친구 idx
     @Binding var delete_frined_idx: Int
     @State private var show_delete_alert : Bool = false
+    //잠금 이벤트 완료 후 토스트 띄우기 위해 사용하는 구분값
+    @Binding var show_interest_alert : Bool
+    @Binding var interest_event_kind : String
     
     let img_processor = DownsamplingImageProcessor(size:CGSize(width: 44.86, height: 44.86))
         |> RoundCornerImageProcessor(cornerRadius: 25)
@@ -160,11 +163,15 @@ extension ManageFriendRow{
                         
                         if friend_model.idx! == Int(friend_idx){
                             self.friend_model.kinds = "관심친구"
+                            self.interest_event_kind = "관심친구"
+                            self.show_interest_alert = true
                                               }
                     }else if data as! String == "set_ok_관심친구해제"{
                         let friend_idx = user_info["friend_idx"] as! String
                         if friend_model.idx! == Int(friend_idx){
                             self.friend_model.kinds = "관심친구해제"
+                            self.interest_event_kind = "관심친구해제"
+                            self.show_interest_alert = true
                         }
                     }else{
                         print("관심친구 이벤트 오류 발생")
