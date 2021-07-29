@@ -13,6 +13,9 @@ struct TopNavBar: View {
     @State private var go_to_manage : Bool = false
     //설정화면으로 이동
     @State private var go_to_setting : Bool = false
+    
+    //랜딩페이지 이동
+    @State private var go_to_intro : Bool = false
     var page_name: String
     
     var body: some View {
@@ -20,6 +23,9 @@ struct TopNavBar: View {
         NavigationLink("",destination:ManageFriendListView(), isActive: self.$go_to_manage)
         //환경 설정으로 이동
         NavigationLink("", destination: SettingView(), isActive: self.$go_to_setting)
+        
+        NavigationLink("",destination: UseMethodView(url: "https://withproco.com/ProcoGuidePage.html"), isActive: self.$go_to_intro)
+        
             //상단 네비게이션바
             HStack{
                 Text("\(page_name)")
@@ -36,6 +42,14 @@ struct TopNavBar: View {
 //                            .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
 //                            .aspectRatio(contentMode: .fill)                                       .foregroundColor(Color.yellow)
 //                    }
+                    Button(action: {
+                        self.go_to_intro = true
+                    }){
+                        Image(systemName: "questionmark.circle")
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
+                            .foregroundColor(Color.proco_black)
+                    }
                     
                     //친구관리 버튼
                     Button(action: {
@@ -46,9 +60,9 @@ struct TopNavBar: View {
                             .resizable()
                             .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                             .aspectRatio(contentMode: .fill)
-                            .foregroundColor(Color.yellow)
                         
                     }
+                    .padding(.leading, UIScreen.main.bounds.width/30)
                     
                     //환경 설정 버튼
                     Button(action: {
@@ -60,8 +74,9 @@ struct TopNavBar: View {
                             .resizable()
                             .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                             .aspectRatio(contentMode: .fill)
-                            .foregroundColor(Color.yellow)
                     }
+                    .padding(.leading, UIScreen.main.bounds.width/30)
+
                 }
             }
             .padding([.top,.leading, .trailing], UIScreen.main.bounds.width/20)
