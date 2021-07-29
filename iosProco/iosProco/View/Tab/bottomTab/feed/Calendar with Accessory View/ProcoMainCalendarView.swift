@@ -38,7 +38,7 @@ struct ProcoMainCalendarView: View {
             calendar: currentCalendar,
             startDate: Calendar.current.date(byAdding: .day, value: -360*2, to: initialMonth!)!,
             endDate: Calendar.current.date(byAdding: .day, value: 360*2, to: initialMonth!)!)
-        print("순서2. 프로코 메인 캘린더뷰에서 init안 initial month ")
+        print("순서2. 프로코 메인 캘린더뷰에서 init안 initial month")
         // print("프로코 메인 캘린더뷰 Schedule 데이터 확인: \(ascSchedules)")
         
         calendarManager = ElegantCalendarManager(

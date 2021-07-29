@@ -29,6 +29,7 @@ struct SimSimFeedPage: View {
     let img_processor = DownsamplingImageProcessor(size:CGSize(width: 41.5, height: 41.5))
         |> RoundCornerImageProcessor(cornerRadius: 25)
 
+    
     var body: some View {
         
         VStack{
@@ -37,7 +38,7 @@ struct SimSimFeedPage: View {
                 //친구 체크 통신 결과에 따라 - 친구 또는 내 피드 화면일 때
                 if main_vm.check_friend_result == "friend_allow"{
                     
-                    ProcoMainCalendarView(ascSmallSchedules: main_vm.small_schedules, initialMonth: main_vm.initial_month, ascSchedules: main_vm.schedules_model, ascInterest: main_vm.interest_model, boring_days: main_vm.selections, main_vm: self.main_vm, ascSmallInterest: self.main_vm.small_interest_model, calendarOwner: self.main_vm.calendar_owner, go_mypage: false, previousMonth:  self.previous_month, go_setting_page: false)
+                    ProcoMainCalendarView(ascSmallSchedules: main_vm.small_schedules, initialMonth: main_vm.initial_month, ascSchedules: main_vm.schedules_model, ascInterest: main_vm.interest_model, boring_days: main_vm.selections, main_vm: self.main_vm, ascSmallInterest: self.main_vm.small_interest_model, calendarOwner: self.main_vm.calendar_owner, go_mypage: false, previousMonth:  self.previous_month, go_setting_page: false, add_schedule: false)
                         .navigationBarTitle("", displayMode: .inline)
                         .navigationBarHidden(true)
                         .onAppear{
@@ -47,7 +48,7 @@ struct SimSimFeedPage: View {
                 //카드만 공개할 때
                 else if main_vm.check_friend_result == "friend_allow_card"{
                     
-                    ProcoMainCalendarView(ascSmallSchedules: main_vm.small_schedules, initialMonth: main_vm.initial_month, ascSchedules: main_vm.schedules_model, ascInterest: main_vm.interest_model,boring_days: main_vm.selections, main_vm: self.main_vm, ascSmallInterest: self.main_vm.small_interest_model, calendarOwner: self.main_vm.calendar_owner, go_mypage: false, previousMonth:  self.previous_month, go_setting_page: false)
+                    ProcoMainCalendarView(ascSmallSchedules: main_vm.small_schedules, initialMonth: main_vm.initial_month, ascSchedules: main_vm.schedules_model, ascInterest: main_vm.interest_model,boring_days: main_vm.selections, main_vm: self.main_vm, ascSmallInterest: self.main_vm.small_interest_model, calendarOwner: self.main_vm.calendar_owner, go_mypage: false, previousMonth:  self.previous_month, go_setting_page: false, add_schedule: false)
                     
                     //친구지만 비공개
                 }else if main_vm.check_friend_result == "friend_disallow"{
@@ -256,6 +257,7 @@ struct SimSimFeedPage: View {
                 main_vm.calendar_owner.user_idx = Int(self.main_vm.my_idx!)!
                 self.main_vm.check_is_friend(friend_idx: Int(self.main_vm.my_idx!)!)
             }else{
+                print("피드 탭 아닐 경우 친구 체크 통신")
             main_vm.check_is_friend(friend_idx: self.main_vm.calendar_owner.user_idx)
             }
             //친구 체크 통신 시간이 걸리는 것을 감안해서 뷰 로딩시간 만듬
