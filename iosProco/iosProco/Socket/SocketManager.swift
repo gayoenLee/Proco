@@ -16,8 +16,9 @@ import Alamofire
 import Firebase
 import UIKit
 
-let access_token = UserDefaults.standard.string(forKey: "access_token")
-let nickname = UserDefaults.standard.string(forKey: "\(UserDefaults.standard.string(forKey: "user_id")!)_nickname")
+var chat_server_ip :String = "http://1.242.147.163:5336/"
+var access_token = UserDefaults.standard.string(forKey: "access_token")
+var nickname = UserDefaults.standard.string(forKey: "nickname")
 //config 옵션 주석 추가할 것.
 var manager = SocketManager(socketURL: URL(string: "\(chat_server_ip)")!, config: [.log(true), .compress, .forceWebsockets(true), .connectParams(["token" : access_token!, "nickname": nickname!]), .reconnectWaitMax(2), .reconnectWait(1), .forceNew(false)])
 var socket = manager.defaultSocket

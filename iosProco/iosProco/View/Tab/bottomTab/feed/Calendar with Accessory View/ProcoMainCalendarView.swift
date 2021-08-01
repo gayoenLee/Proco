@@ -117,22 +117,22 @@ struct ProcoMainCalendarView: View {
                         })
                     
                     Spacer()
-                    VStack{
-                        Spacer()
-                        HStack{
-                            Spacer()
-                            
-                            if calendar_owner_data.user_idx == Int(self.main_vm.my_idx!)!{
-                                
-                                ZStack(alignment: .bottom){  //일정 추가하는 버튼
-                                    PlusScheduleButtonView(add_schedule: self.$add_schedule, main_vm: self.main_vm)
-                                    
-                                }
-                            }
-                        }
-                    }
-                    .padding(.bottom, UIScreen.main.bounds.width*0.2)
-                    .padding(.trailing, UIScreen.main.bounds.width/20)
+//                    VStack{
+//                        Spacer()
+//                        HStack{
+//                            Spacer()
+//
+//                            if calendar_owner_data.user_idx == Int(self.main_vm.my_idx!)!{
+//
+//                                ZStack(alignment: .bottom){  //일정 추가하는 버튼
+//                                    PlusScheduleButtonView(add_schedule: self.$add_schedule, main_vm: self.main_vm)
+//
+//                                }
+//                            }
+//                        }
+//                    }
+//                    .padding(.bottom, UIScreen.main.bounds.width*0.2)
+//                    .padding(.trailing, UIScreen.main.bounds.width/20)
                     Spacer()
                 }
                 Spacer()

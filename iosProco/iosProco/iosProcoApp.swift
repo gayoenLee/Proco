@@ -37,7 +37,7 @@ struct iosProcoApp: App {
                             }else if appDelegate.view_router.current_page == .notice_tab{
                                 print("액티브 알림탭 때")
                                 view_router.current_page = .notice_tab
-                                
+                                view_router.fcm_destination = "notice_tab"
                             }else if appDelegate.view_router.current_page == .normal_chat_room{
                                 print("일반 채팅방일 때")
                                 view_router.current_page = .chat_tab

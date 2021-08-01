@@ -20,7 +20,7 @@ struct SignupPasswordView: View {
     //모든 조건이 충족될 경우 true로 바뀌는 값
     @State private var all_is_ok : Bool = false
     //경고 알림에 띄울 텍스트값
-    @State private var first_alert_msg_txt : String = "비밀번호를 입력해주세요(숫자, 특수문자, 대문자 또는 소문자 최소1개씩) 8~20"
+    @State private var first_alert_msg_txt : String = "비밀번호를 입력해주세요"
     @State private var second_alert_msg_txt : String = ""
     @State  var first_pwd = ""
     @State  var second_pwd = ""
@@ -47,13 +47,13 @@ struct SignupPasswordView: View {
     }
 
     var body: some View {
-        
-        VStack{
-            VStack{
-            top_nav_bar
-           
-            Spacer()
+        NavigationView{
             VStack(alignment: .leading){
+            top_nav_bar
+                .padding(.bottom)
+           
+            
+            
                 //비밀번호 형식에 맞지 않을 경우 메시지가 나타나는 곳.
                 Section(footer:
                 
@@ -62,10 +62,9 @@ struct SignupPasswordView: View {
                     
                     first_pwd_input_field
                 }
-            }
-            .padding(.bottom, UIScreen.main.bounds.width/5)
+                .padding(.bottom)
             
-            VStack(alignment: .leading){
+            
                 //비밀번호 형식에 맞지 않을 경우 메시지가 나타나는 곳.
                 Section(footer:
                 
@@ -74,8 +73,8 @@ struct SignupPasswordView: View {
                     
                     second_pwd_input_field
                 }
-            }
-            .padding(.bottom, UIScreen.main.bounds.width/5)
+          
+
             Spacer()
             //프로필 사진, 닉네임 입력 페이지로 이동
             NavigationLink("",
@@ -93,7 +92,7 @@ struct SignupPasswordView: View {
             //이메일과 패스워드가 형식에 맞지 않을 경우 다음 버튼 활성화 안시킴.
             .disabled(all_is_ok == false)
         }
-        }
+        
         .onAppear{
             print("비밀번호 입력 페이지 나타남")
             self.show_pwd_form_wrong = true
@@ -106,6 +105,7 @@ struct SignupPasswordView: View {
         .background( Image("signup_second")
                          .resizable()
                          .scaledToFill())
+        }
         
     }
 }
@@ -113,7 +113,7 @@ struct SignupPasswordView: View {
 extension SignupPasswordView{
     
     var top_nav_bar: some View{
-        HStack{
+        HStack(alignment: .center){
                 Button(action: {
                     self.presentation.wrappedValue.dismiss()
                 }){
@@ -121,14 +121,19 @@ extension SignupPasswordView{
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
                 }
+                .frame(width: 45, height: 45, alignment: .leading)
+
             Spacer()
         Text("비밀번호 입력")
             .font(.custom(Font.n_extra_bold, size: 20))
             .foregroundColor(Color.proco_black)
+            .padding(.trailing)
+
             Spacer()
         }
-        .padding()
+        .padding([.trailing])
     }
+    
     
     var first_wrong_pwd_guide_txt: some View{
         
@@ -156,7 +161,7 @@ extension SignupPasswordView{
             .background(Color.proco_white)
             .cornerRadius(25.0)
             .shadow(color: .gray, radius: 2, x: 0, y: 2)
-            .padding([.leading, .trailing, .bottom], UIScreen.main.bounds.width/20)
+            .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
             .onChange(of: self.first_pwd, perform: {
                 print("비밀번호 on change들어옴: \($0)")
               let is_validate = self.validator_password($0)
@@ -201,10 +206,11 @@ extension SignupPasswordView{
                 if !is_same{
                     print("첫번째 비번: \(self.first_pwd), 두번째 비번: \(self.second_pwd)")
                     self.show_pwd_diff = true
-                    //self.second_alert_msg_txt = "비밀번호가 일치하지 않습니다."
+                    self.second_alert_msg_txt = "비밀번호가 일치하지 않습니다."
                     self.all_is_ok = false
                     
                 }else {
+                    self.second_alert_msg_txt = ""
                     self.show_pwd_diff = false
                     if self.show_pwd_form_wrong == false && self.show_pwd_diff == false{
                         self.all_is_ok = true
@@ -226,4 +232,3 @@ extension SignupPasswordView{
     }
     
 }
-

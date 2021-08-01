@@ -77,7 +77,7 @@ struct FindIdPasswordView: View{
                     }){
                         Image(self.phone_viewmodel.phone_is_valid ? "verify_active_btn" : "verify_inactive_btn")
                             .resizable()
-                            .frame(width: 82, height: 33)
+                            .frame(width: 82, height: 40)
                     }
                     .disabled(!self.phone_viewmodel.phone_is_valid)
                     .padding(.trailing, UIScreen.main.bounds.width/25)
@@ -99,13 +99,13 @@ struct FindIdPasswordView: View{
                 if !self.is_auth_number_result{
                     if auth_result == "invalid"{
                         Text("잘못된 인증번호 입니다")
-                            .font(.custom(Font.n_regular, size: 10))
+                            .font(.custom(Font.n_regular, size: 11))
                             .foregroundColor(Color.proco_red)
                             .padding([.leading])
                     }
                     else if auth_result == "auth_result"{
                         Text("이미 인증번호를 보냈습니다.")
-                            .font(.custom(Font.n_regular, size: 10))
+                            .font(.custom(Font.n_regular, size: 11))
                             .foregroundColor(Color.proco_red)
                             .padding([.leading])
                         

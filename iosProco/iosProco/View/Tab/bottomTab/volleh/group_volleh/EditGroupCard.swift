@@ -50,7 +50,7 @@ struct EditGroupCard: View {
     var body: some View{
   
             VStack{
-                HStack{
+                HStack(alignment: .center){
                     
                     Button(action: {
                         print("돌아가기 클릭")
@@ -59,15 +59,22 @@ struct EditGroupCard: View {
                         Image("left")
                             .resizable()
                             .frame(width: 8.51, height: 17)
+                            .padding(.leading)
+
                     }
+                    .frame(width: 45, height: 45, alignment: .leading)
+
                     Spacer()
                     
                     Text("모임 수정")
                         .font(.custom(Font.n_extra_bold, size: 22))
                         .foregroundColor(Color.proco_black)
+                        .padding(.trailing)
+
                     
                     Spacer()
-                }.padding()
+                }  .padding(.trailing)
+                
                 ScrollView{
                     
                     EditingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, selected_category: self.$selected_category, open_map: self.$open_map, selected_img: self.image_url, show_img_picker: self.$show_img_picker, go_to_edit: self.$go_to_edit, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult, card_img_url: self.$card_img_url)
@@ -237,7 +244,7 @@ struct EditingView: View{
     //카드 이미지
     @Binding var card_img_url : String?
     
-    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)) |> RoundCornerImageProcessor(cornerRadius: 40)
+    let img_processor =  CroppingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.4)) |> DownsamplingImageProcessor(size:CGSize(width: UIScreen.main.bounds.width*0.9, height:  UIScreen.main.bounds.width*0.4)) |> RoundCornerImageProcessor(cornerRadius: 5) |> ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width*0.9, height:  UIScreen.main.bounds.width*0.4), mode: .aspectFit)
     
     var body: some View{
         VStack{
@@ -259,7 +266,6 @@ struct EditingView: View{
                                 .foregroundColor(Color.proco_black)
                             Spacer()
                         }
-                        .padding()
                         meeting_title_tfd
                     }
                 }
@@ -425,7 +431,7 @@ extension EditingView {
             .padding([.top, .leading])
             
             if  self.main_vm.my_card_detail_struct.card_photo_path != ""{
-                Text("여기로")
+
                 KFImage(URL(string: self.main_vm.my_card_detail_struct.card_photo_path!))
                     .loadDiskFileSynchronously()
                     .cacheMemoryOnly()
@@ -453,7 +459,7 @@ extension EditingView {
                 
                 
             }else if self.main_vm.my_card_detail_struct.card_photo_path == ""{
-                Text("피커리절트")
+         
                 Image.init(uiImage: pickerResult!)
                     .resizable()
                     //이미지 채우기
@@ -539,7 +545,6 @@ extension EditingView {
         }
         .background(Color.light_gray)
         .cornerRadius(25.0)
-        .padding(.leading,UIScreen.main.bounds.width/25)
     }
     
     var category_selections : some View{

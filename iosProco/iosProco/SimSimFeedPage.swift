@@ -162,6 +162,41 @@ struct SimSimFeedPage: View {
         .sheet(isPresented: self.$go_mypage, content: {
             MyPage(main_vm: SettingViewModel())
         })
+        .onReceive(NotificationCenter.default.publisher(for: Notification.calendar_personal_schedule), perform: {value in
+            print("개인 스케줄 추가 노티 받음.")
+            
+            if let user_info = value.userInfo, let data = user_info["add_calendar_schedule"]{
+                print("개인 스케줄 추가 노티 데이터 \(data)")
+                
+                if data as! String == "new_ok"{
+                    
+                    let schedule_date = user_info["schedule_date"] as! String
+                    let date_form = self.main_vm.make_date(expiration: schedule_date)
+                    self.main_vm.schedules_model.removeAll()
+                    let schedule_info = user_info["data"] as! [ScheduleInfo]
+                    self.main_vm.schedules_model.append(Schedule(date: date_form, like_num: 0, liked_myself: false, like_idx: -1, schedule: schedule_info))
+                    print("개인 스케줄 추가 후 데이터 모델에 넣음: \(schedule_info)")
+                    
+                   // calendarManager.objectWillChange.send()
+                    //                    self.main_vm.schedule_start_date = Date()
+                    //                    self.main_vm.schedule_start_time = Date()
+                }else if data as! String == "already_exist_ok"{
+                    
+                    print("개인일정 이미 있던 경우")
+                    let schedule_data = user_info["data"] as! ScheduleInfo
+                    let model_idx = user_info["model_idx"] as! String
+                    self.main_vm.schedules_model.removeAll()
+                    
+                    self.main_vm.schedules_model[Int(model_idx)!].schedule.append(schedule_data)
+                    //calendarManager.objectWillChange.send()
+                    
+                    //                    self.main_vm.schedule_start_date = Date()
+                    //                    self.main_vm.schedule_start_time = Date()
+                }
+            }else{
+                print("개인 스케줄 추가 노티 아님")
+            }
+        })
         .onReceive(NotificationCenter.default.publisher(for: Notification.request_friend), perform: {value in
             
             if let user_info = value.userInfo{

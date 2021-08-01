@@ -196,7 +196,9 @@ struct SearchFriendBarInVolleh: View{
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     
                 }, label: {
-                    Text("Cancel")
+                    Text("취소")
+                        .font(.custom(Font.t_regular, size: 16))
+                        .foregroundColor(Color.proco_blue)
                         .padding(.trailing)
                         .padding(.leading, 0)
                 })

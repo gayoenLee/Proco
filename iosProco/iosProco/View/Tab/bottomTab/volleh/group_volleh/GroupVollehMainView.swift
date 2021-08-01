@@ -63,29 +63,35 @@ struct GroupVollehMainView: View {
             ScrollView(.vertical, showsIndicators: false){
                 VStack{
                     
-                    NavigationLink("",destination: MakeCardViewGroup(main_vm: self.main_vm) .navigationBarHidden(true), isActive: self.$go_to_make_card)
-                    
-                    //문제 해결: 이동 링크에도 네비게이션바 hidden관련 속성을 넣어줘야 back button이 쌓이지 않음.
-                    NavigationLink("", destination: EditGroupCard(main_vm: self.main_vm)
-                                   , isActive: self.$go_to_edit)
-
-                    Group{
-                        //프로필 사진, 카드 만들기 버튼, on off버튼
-                        user_profile_view
+                    HStack{
+                        NavigationLink("",destination: MakeCardViewGroup(main_vm: self.main_vm) .navigationBarHidden(true), isActive: self.$go_to_make_card)
+                        
+                        //문제 해결: 이동 링크에도 네비게이션바 hidden관련 속성을 넣어줘야 back button이 쌓이지 않음.
+                        NavigationLink("", destination: EditGroupCard(main_vm: self.main_vm)
+                                       , isActive: self.$go_to_edit)
+                        
                         NavigationLink("",
                                        destination: AppliedMeetingListView(main_vm: self.main_vm),
                                        isActive: self.$go_to_apply_list)
+                        NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm), isActive : self.$go_to_detail)
+                        
+                    }.frame(width: 0, height: 0)
+                    Group{
+                        //프로필 사진, 카드 만들기 버튼, on off버튼
+                        user_profile_view
+                            .padding(.top)
+                        
                         
                         //신청목록보기, 필터, 지도로보기 버튼
-                            HStack{
-                                my_applied_meetings_btn
-                                Spacer()
+                        HStack{
+                            my_applied_meetings_btn
+                            Spacer()
                             //필터 버튼 클릭시 지금.이날.모두.접속 선택하는 다이얼로그 나옴.
                             filter_btn
                             //전체로 보기
-                                select_view_all_btn
-                            }
-                            .padding()
+                            select_view_all_btn
+                        }
+                        .padding()
                     }
                     DisclosureGroup(isExpanded:$open_my_meetings, content: {
                         
@@ -110,7 +116,7 @@ struct GroupVollehMainView: View {
                                         RoundedRectangle(cornerRadius: 5.0)
                                             .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
                                             .foregroundColor(Color.proco_red .opacity(main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset ?? 0 < 0 ? 1 : 0))
-                                            
+                                        
                                         RoundedRectangle(cornerRadius: 5.0)
                                             .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width*0.35)
                                             .foregroundColor(    Color.main_orange .opacity(main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset ?? 0 < 0 ? 1 : 0))
@@ -124,7 +130,7 @@ struct GroupVollehMainView: View {
                                         HStack{
                                             //수정 버튼
                                             HStack{
-                                 
+                                                
                                                 
                                                 Button(action: {
                                                     //수정하려는 카드의 idx값을 이용해 데이터 꺼낼 때 사용.
@@ -132,7 +138,7 @@ struct GroupVollehMainView: View {
                                                     
                                                     print("이동하려는 카드 idx: \(self.main_vm.selected_card_idx)")
                                                     //수정하는 페이지 카드 정보 갖고 오는 통신 진행.-> 상세페이지에서 하는 것으로 변경.
-//                                                    self.main_vm.get_detail_card()
+                                                    //                                                    self.main_vm.get_detail_card()
                                                     withAnimation(.default){
                                                         
                                                         //수정하는 페이지로 이동
@@ -187,7 +193,7 @@ struct GroupVollehMainView: View {
                                                         
                                                         print("확인클릭하고 데이터 삭제")
                                                         //확인 눌렀을 때 통신 시작
-                                                          main_vm.delete_group_card()
+                                                        main_vm.delete_group_card()
                                                     }), secondaryButton: Alert.Button.default(Text("취소"), action: {
                                                     }))
                                                 }
@@ -198,12 +204,13 @@ struct GroupVollehMainView: View {
                                     RoundedRectangle(cornerRadius: 25.0)
                                         .foregroundColor(.proco_white)
                                         .shadow(color: .gray, radius: 2, x: 0, y: 2)
-                                        .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.4)
+                                        .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.45)
                                         .overlay(
-                                    MyGroupVollehCard(main_vm: self.main_vm,
-                                                      my_group_card: main_vm.my_group_card_struct[main_vm.get_index(item: card)], current_card_index: self.main_vm.get_index(item: card), show_lock_alert : self.$show_lock_alert, lock_event_kind: self.$lock_event_kind))
-                                    
-                                        
+                                            MyGroupVollehCard(main_vm: self.main_vm,
+                                                              my_group_card: main_vm.my_group_card_struct[main_vm.get_index(item: card)], current_card_index: self.main_vm.get_index(item: card), show_lock_alert : self.$show_lock_alert, lock_event_kind: self.$lock_event_kind)
+                                                .padding()
+                                        )
+                                        .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width/2.5)
                                         //스와이프해서 수정, 삭제 위해 offset을 데이터 모델에 임의로 넣어줬음. 이 값을 이용한 것.
                                         .offset(x:main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].offset!)
                                         //한번 탭했을 때 상세 페이지로 이동.
@@ -214,7 +221,7 @@ struct GroupVollehMainView: View {
                                             self.main_vm.selected_card_idx = self.main_vm.my_group_card_struct[self.main_vm.get_index(item: card)].card_idx!
                                             print("이동하려는 카드 idx: \( self.main_vm.selected_card_idx)")
                                             //상세 페이지 카드 정보 갖고 오는 통신 진행. -> 상세 페이지에서 진행.
-                                   
+                                            
                                             self.go_to_my_detail.toggle()
                                             
                                         }
@@ -250,9 +257,9 @@ struct GroupVollehMainView: View {
                             .foregroundColor(.proco_black)
                             .padding(.leading, UIScreen.main.bounds.width/20)
                     })
-                    .padding(.trailing)
+                    .padding([.trailing, .leading])
                     
-                    NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.main_vm, socket: SockMgr.socket_manager, calendar_vm: self.calendar_vm), isActive : self.$go_to_detail)
+                    
                     
                     DisclosureGroup(isExpanded:$open_all_meeting_cards, content: {
                         
@@ -265,7 +272,7 @@ struct GroupVollehMainView: View {
                             
                             ForEach(self.main_vm.group_card_struct){ card in
                                 HStack{
-                              
+                                    
                                     RoundedRectangle(cornerRadius: 25.0)
                                         .foregroundColor(.proco_white)
                                         .shadow(color: .gray, radius: 2, x: 0, y: 2)
@@ -279,14 +286,14 @@ struct GroupVollehMainView: View {
                                             }, label: {
                                                 GroupVollehCard(main_vm: self.main_vm,
                                                                 group_card: main_vm.group_card_struct[self.main_vm.get_other_card_index(item: card)])
-
+                                                    
                                                     .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width/2.5)
-                                                    .padding()
+                                                // .padding()
                                             })
-                                    )
+                                        )
                                 }
                                 
-                                        .padding(.bottom, UIScreen.main.bounds.width/20)
+                                // .padding(.bottom, UIScreen.main.bounds.width/40)
                                 
                             }
                         }
@@ -297,7 +304,7 @@ struct GroupVollehMainView: View {
                             .foregroundColor(.proco_black)
                             .padding(.leading, UIScreen.main.bounds.width/20)
                     })
-                    .padding(.trailing)
+                    .padding([.trailing, .leading])
                     
                 }
             }
@@ -313,7 +320,7 @@ struct GroupVollehMainView: View {
         .navigationBarHidden(true)
         .onAppear{
             self.main_vm.applied_filter = false
-
+            
             print("*************모여 볼래 메인 뷰 나타남****************")
             my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
             
@@ -327,9 +334,6 @@ struct GroupVollehMainView: View {
         .onDisappear{
             print("*************모여 볼래 메인 뷰 사라짐****************")
         }
-       // .navigationBarTitle("", displayMode: .inline)
-        //.navigationBarHidden(true)
-        .edgesIgnoringSafeArea(.all)
         
     }
 }
@@ -338,12 +342,12 @@ extension GroupVollehMainView{
     
     var user_profile_view: some View{
         //상단에 내 프로필, on.off버튼, 필터 버튼 그룹
-      
-            HStack{
+        
+        HStack{
+            
+            ZStack(alignment: .bottomTrailing){
                 
-                ZStack(alignment: .bottomTrailing){
-                    
-                    if self.my_photo_path == "" {
+                if self.my_photo_path == "" {
                     //내 프로필
                     Image("main_profile_img")
                         .resizable()
@@ -352,116 +356,118 @@ extension GroupVollehMainView{
                         .cornerRadius(50)
                         .scaledToFit()
                         .padding([.leading], UIScreen.main.bounds.width/30)
-                        
-                    }else{
-                        
-                        KFImage(URL(string: self.my_photo_path))
-                            .loadDiskFileSynchronously()
-                            .cacheMemoryOnly()
-                            .fade(duration: 0.25)
-                            .setProcessor(img_processor)
-                            .onProgress{receivedSize, totalSize in
-                                print("on progress: \(receivedSize), \(totalSize)")
-                            }
-                            .onSuccess{result in
-                                print("성공 : \(result)")
-                            }
-                            .onFailure{error in
-                                print("실패 이유: \(error)")
-                                
-                                Image("main_profile_img")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                            }
-                            .padding([.leading], UIScreen.main.bounds.width/30)
-                    }
-                }
-                .onTapGesture {
-                    self.my_info_dialog = true
                     
-                }
-                
-                Spacer()
-                Group{
-                    HStack{
-                        
-                        Text(main_vm.my_nickname!)
-                            .font(.custom(Font.n_bold, size: 13))
-                            .foregroundColor(.proco_black)
-                        
-                        Spacer()
-                        
-                        //카드 추가하기 버튼
-                        Button(action: {
+                }else{
+                    
+                    KFImage(URL(string: self.my_photo_path))
+                        .loadDiskFileSynchronously()
+                        .cacheMemoryOnly()
+                        .fade(duration: 0.25)
+                        .setProcessor(img_processor)
+                        .onProgress{receivedSize, totalSize in
+                            print("on progress: \(receivedSize), \(totalSize)")
+                        }
+                        .onSuccess{result in
+                            print("성공 : \(result)")
+                        }
+                        .onFailure{error in
+                            print("실패 이유: \(error)")
                             
-                            self.go_to_make_card.toggle()
-                            print("카드 추가하는 뷰로 이동 토글 값 : \(self.go_to_make_card)")
-                            
-                        }, label: {
-                            Image("main_plus_group")
-                        })
-                        .padding([.trailing], UIScreen.main.bounds.width/20)
-                    }
+                            Image("main_profile_img")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                        }
+                        .padding([.leading], UIScreen.main.bounds.width/30)
                 }
             }
+            .onTapGesture {
+                self.my_info_dialog = true
+                
+            }
+            
+            Spacer()
+            Group{
+                HStack{
+                    
+                    Text(main_vm.my_nickname!)
+                        .font(.custom(Font.n_bold, size: 13))
+                        .foregroundColor(.proco_black)
+                    
+                    Spacer()
+                    
+                    //카드 추가하기 버튼
+                    Button(action: {
+                        
+                        self.go_to_make_card.toggle()
+                        print("카드 추가하는 뷰로 이동 토글 값 : \(self.go_to_make_card)")
+                        
+                    }, label: {
+                        Image("main_plus_group")
+                    })
+                    .padding([.trailing], UIScreen.main.bounds.width/20)
+                }
+            }
+        }
     }
     
-        var filter_btn : some View{
-            HStack{
-                Button(action: {
-                    
-                    self.show_filter.toggle()
-                    //만약 필터 결과가 없을 시에 alert창 띄우기
-                   // self.main_vm.result_alert(main_vm.alert_type)
-                    
-                }){
-                   HStack{
+    var filter_btn : some View{
+        HStack{
+            Button(action: {
+                
+                self.show_filter.toggle()
+                //만약 필터 결과가 없을 시에 alert창 띄우기
+                // self.main_vm.result_alert(main_vm.alert_type)
+                
+            }){
+                HStack{
                     ZStack(alignment: .leading){
                         
-                Image("main_filter")
-                    .resizable()
-                    .frame(width: 18, height: 18)
+                        Image("main_filter")
+                            .resizable()
+                            .frame(width: 18, height: 18)
                         
                         if self.main_vm.applied_filter{
                             
-                        Image("check_end_btn")
-                            .resizable()
-                            .frame(width: 13, height: 13)
+                            Image("check_end_btn")
+                                .resizable()
+                                .frame(width: 13, height: 13)
                         }
                     }
                     Text("필터")
                         .font(.custom(Font.n_bold, size: 10))
                         .foregroundColor(.proco_black)
-                   }
                 }
             }
+            .frame(width: 50, height: 50)
+            
         }
+    }
     
     var select_view_all_btn : some View{
         HStack{
             
-        Button(action: {
-            main_vm.get_group_volleh_card_list()
-            self.main_vm.selected_filter_tag_set.removeAll()
-            self.main_vm.selected_filter_tag_list.removeAll()
-            print("전체보기 버튼 클릭")
-            self.main_vm.applied_filter = false
-
-        }){
-            
-            Text("전체보기")
-                .font(.custom(Font.n_bold, size: 10))
-                .foregroundColor(self.main_vm.applied_filter ?  .light_gray : .proco_white)
-                .cornerRadius(25)
-                .padding(UIScreen.main.bounds.width/40)
+            Button(action: {
+                main_vm.get_group_volleh_card_list()
+                self.main_vm.selected_filter_tag_set.removeAll()
+                self.main_vm.selected_filter_tag_list.removeAll()
+                print("전체보기 버튼 클릭")
+                self.main_vm.applied_filter = false
+                
+            }){
+                
+                Text("전체보기")
+                    .font(.custom(Font.n_bold, size: 10))
+                    .foregroundColor(self.main_vm.applied_filter ?  .light_gray : .proco_white)
+                    .cornerRadius(25)
+                    .padding(UIScreen.main.bounds.width/40)
+            }
+            .background(self.main_vm.applied_filter ? Color.gray :  Color.proco_black)
+            .overlay(Capsule()
+                        .stroke(self.main_vm.applied_filter ? Color.gray :  Color.proco_black, lineWidth: 1.5)
+                     
+            )
+            .cornerRadius(25.0)
         }
-        .background(self.main_vm.applied_filter ? Color.gray :  Color.proco_black)
-        .overlay(Capsule()
-                    .stroke(self.main_vm.applied_filter ? Color.gray :  Color.proco_black, lineWidth: 1.5)
-                    
-        )
-        .cornerRadius(25.0)
-    }
         .padding([.trailing], UIScreen.main.bounds.width/20)
     }
     
@@ -471,18 +477,18 @@ extension GroupVollehMainView{
             .foregroundColor(Color.proco_black)
             .frame(width: UIScreen.main.bounds.width*0.3, height: UIScreen.main.bounds.width/15)
             .overlay(
-        Button(action: {
-            print("신청 목록 보기 버튼 클릭")
-            self.go_to_apply_list = true
-            
-        }){
-            Text("신청목록 보기")
-                .foregroundColor(Color.proco_white)
-                .font(.custom(Font.t_extra_bold, size: 13))
-        }
-        .padding(UIScreen.main.bounds.width/20)
-        )
+                Button(action: {
+                    print("신청 목록 보기 버튼 클릭")
+                    self.go_to_apply_list = true
+                    
+                }){
+                    Text("신청목록 보기")
+                        .foregroundColor(Color.proco_white)
+                        .font(.custom(Font.t_extra_bold, size: 13))
+                }
+                .padding(UIScreen.main.bounds.width/20)
+            )
     }
     
-   
+    
 }

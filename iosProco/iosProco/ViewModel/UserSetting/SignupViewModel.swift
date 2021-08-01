@@ -56,13 +56,26 @@ class SignupViewModel : ObservableObject{
     //인증번호 6개 제한
     let authnum_limit = 6
     @Published var auth_num: String = ""{
-        didSet{
-            if auth_num.count > authnum_limit && oldValue.count <= authnum_limit {
-                auth_num = oldValue
+            didSet{
+                if auth_num.count > authnum_limit && oldValue.count <= authnum_limit {
+                    auth_num = oldValue
+                }
+                if auth_num.count == 6{
+                    auth_num_check = true
+                }
+                else{
+                    auth_num_check = false
+                }
+                
+                objectWillChange.send()
             }
-            objectWillChange.send()
         }
-    }
+        //인증번호 6개 입력시 다음버튼 활성화 하기 위해 사용
+        @Published var auth_num_check : Bool = false{
+            didSet{
+                objectWillChange.send()
+            }
+        }
     
     //첫번째 비밀번호가 정규식에 맞는지
     @Published var first_pwd_ok: Bool = false

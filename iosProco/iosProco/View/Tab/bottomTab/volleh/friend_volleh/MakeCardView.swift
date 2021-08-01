@@ -47,7 +47,7 @@ struct MakeCardView: View {
     var body: some View {
  
         VStack{
-            HStack{
+            HStack(alignment: .center){
                 
                 Button(action: {
                     print("돌아가기 클릭")
@@ -56,15 +56,21 @@ struct MakeCardView: View {
                     Image("left")
                         .resizable()
                         .frame(width: 8.51, height: 17)
+                        .padding(.leading)
+
                 }
+                .frame(width: 45, height: 45, alignment: .leading)
+
                 Spacer()
                 
                 Text("약속 만들기")
                     .font(.custom(Font.n_extra_bold, size: 22))
                     .foregroundColor(Color.proco_black)
+                    .padding(.trailing)
                 
                 Spacer()
-            }.padding()
+            }
+            .padding(.trailing)
             
             ScrollViewReader{scrollview in
                 
@@ -207,9 +213,7 @@ struct MakeCardView: View {
             print("카드 만들기 뷰 사라짐!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         }
         .navigationBarHidden(true)
-        
     }
-
 }
 
 struct SelectedView : View {
@@ -271,7 +275,7 @@ struct SelectedView : View {
                 Spacer()
                 
             }
-            .padding()
+            .padding([.leading, .trailing, .top])
             
             category_select_view
             Group{
@@ -279,7 +283,7 @@ struct SelectedView : View {
                     tag_textfield_view
                     plus_tag_btn
                 }
-                .padding()
+                .padding([.trailing])
             }
             //사용자가 선택한 태그값이 있을 때 이곳에 태그 리스트 보여줌.
             //이곳에서 다시 태그 클릭했을 때 삭제
@@ -322,7 +326,7 @@ struct SelectedView : View {
                         Text("모든친구")
                             .font(.custom(Font.t_extra_bold, size: 13))
                             .foregroundColor(.proco_white)
-                            .padding(UIScreen.main.bounds.width/60)
+                            .padding(UIScreen.main.bounds.width/40)
                             .background(Color.proco_black)
                             .cornerRadius(27.0)
                     }
@@ -406,6 +410,10 @@ private extension SelectedView {
             //onCommit: 사용자가 엔터키 눌렀을 때 이벤트
             TextField("직접입력(필수x), 최대 10글자", text: $viewmodel.user_input_tag_value, onCommit:{
                 
+                if viewmodel.user_input_tag_value == ""{
+                    
+                }
+                else{
                 //뷰모델에서 선택한 태그 갯수 체크하는 메소드의 결과값
                 self.tag_num_over_three = viewmodel.limit_tag_num(tag_list: self.viewmodel.user_selected_tag_list)
                 
@@ -422,6 +430,7 @@ private extension SelectedView {
                 
                 //엔터키 친 이후에 텍스트 필드 창에 있던 값 reset하기
                 self.viewmodel.user_input_tag_value = ""
+                }
             })
             //글자수 제한 적용 메소드. ios14부터만 사용 가능.
             .onChange(of: self.viewmodel.user_input_tag_value, perform: {value in
@@ -434,7 +443,7 @@ private extension SelectedView {
         }
         .background(Color.light_gray)
         .cornerRadius(25.0)
-        .padding([.leading, .top, .bottom],UIScreen.main.bounds.width/35)
+        .padding([.leading, .top, .bottom],UIScreen.main.bounds.width/40)
 
         
     }
@@ -459,13 +468,12 @@ private extension SelectedView {
                 self.viewmodel.user_input_tag_value = ""
                 
             }){
-                Capsule()
-                    .frame(width: UIScreen.main.bounds.width/7, height: UIScreen.main.bounds.width/8)
-                    .foregroundColor(Color.proco_black)
-                    .overlay(
                         Text("추가")
+                            .padding()
                             .font(.custom(Font.t_extra_bold, size: 14))
-                            .foregroundColor(.proco_white))
+                            .foregroundColor(.proco_white)
+                    .background(Color.proco_black)
+                    .cornerRadius(27.0)
                 
             }
         }

@@ -592,7 +592,7 @@ class FriendVollehMainViewmodel: ObservableObject{
                 if response.result == "ok"{
                     
                     var tags : [FriendVollehTags] = []
-                    for tag in response.tags{
+                    for tag in response.tags!{
                         tags.append(FriendVollehTags(idx: tag.idx, tag_name: tag.tag_name))
                     }
                     //////
@@ -608,8 +608,8 @@ class FriendVollehMainViewmodel: ObservableObject{
                      */
                     self.get_my_nickname()
                     let idx = Int(self.my_idx!)
-                    let chatroom_idx = Int(response.chatroom_idx)
-                    let card_idx = Int(response.card_idx)
+                    let chatroom_idx = Int(response.chatroom_idx!)
+                    let card_idx = Int(response.card_idx!)
                     print("내 idx가져왔는지 확인: \(String(describing: idx))")
                     
                     //1.데이터 모델에 저장.
@@ -620,16 +620,16 @@ class FriendVollehMainViewmodel: ObservableObject{
                     
                     let current_time = ChatDataManager.shared.make_created_at()
                     //TODO profile 사진 변경해야함
-                    ChatDataManager.shared.insert_user(chatroom_idx: response.chatroom_idx, user_idx: idx!, nickname: self.my_nickname!, profile_photo_path: "", read_last_idx: 0, read_start_idx: 0, temp_key: "", server_idx: response.server_idx, updated_at: current_time, deleted_at: "")
+                    ChatDataManager.shared.insert_user(chatroom_idx: response.chatroom_idx!, user_idx: idx!, nickname: self.my_nickname!, profile_photo_path: "", read_last_idx: 0, read_start_idx: 0, temp_key: "", server_idx: response.server_idx!, updated_at: current_time, deleted_at: "")
                     
                     //태그
-                    for tag in response.tags{
+                    for tag in response.tags!{
                         
-                        ChatDataManager.shared.insert_tag(chatroom_idx: response.chatroom_idx, tag_idx: tag.idx, tag_name: tag.tag_name)
+                        ChatDataManager.shared.insert_tag(chatroom_idx: response.chatroom_idx!, tag_idx: tag.idx, tag_name: tag.tag_name)
                     }
                     //card
                     let created_at = ChatDataManager.shared.make_created_at()
-                    ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: "친구", card_photo_path: "", lock_state: 0, title: "", introduce: "", address: "",  map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
+                    ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx!, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: "친구", card_photo_path: "", lock_state: 0, title: "", introduce: "", address: "",  map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
                     
                     //3.소켓으로 데이터 보내기
                     socket_manager.make_chat_room_friend(chatroom_idx: chatroom_idx, idx: idx!, nickname: self.my_nickname!)

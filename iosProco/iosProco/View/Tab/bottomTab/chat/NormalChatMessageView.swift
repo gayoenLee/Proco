@@ -88,10 +88,12 @@ struct NormalChatMessageView: View{
                     //.padding(.all)
                 }//스크롤뷰 끝
             }//스크롤뷰 리더 끝
+            Spacer()
             //채팅 입력창
             Divider()
                 .frame(width: UIScreen.main.bounds.width, height: 1)
                 .foregroundColor(Color.light_gray)
+         
             VStack{
             HStack{
                 if self.selected_image == nil{
@@ -103,16 +105,19 @@ struct NormalChatMessageView: View{
                                 msg_send_btn
                             
                         }.padding([.trailing])
-                        //앨범에서 선택한 이미지가 있을 경우
                     }
+
                 }
+                //앨범에서 선택한 이미지가 있을 경우
                 else {
                         cancel_send_img_btn
                         Spacer()
                         send_img_btn
                     
                 }
-            }
+            }.frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.08)
+            
+         
             if show_contents_menu{
                 
                 HStack{
@@ -132,6 +137,7 @@ struct NormalChatMessageView: View{
                 .animation(.easeOut)
             }
         }
+           
            // .padding([.leading, .trailing])
         .animation(.easeOut)
         }

@@ -111,20 +111,16 @@ struct PhoneAuthView: View {
                         
                     }else{
                         //다음 버튼 클릭시 인증번호 서버로 보내서 맞는지 확인하고 맞아야 이동 가능, self붙여야 데이터를 그대로 담아서 보낼 수 있음.
-                        NavigationLink("",destination: SignupPasswordView(info_viewmodel: self.phone_viewmodel), isActive: $go_next_stage )
+                        NavigationLink("",destination: SignupPasswordView(info_viewmodel: self.phone_viewmodel).navigationBarHidden(true), isActive: $go_next_stage )
                         
                         Button(action: {
                             send_auth_num()
                             
-                            //인증번호 서버에 보내서 response받은 후 disabled풀리면 그때 화면 이동 가능하도록
-                            if auth_result == "ok"{
-                               // self.go_next_stage = true
-                            }
                             print("이메일 패스워드 이동하는 버튼 클릭")
                         }){
                             next_btn_txt
                         }
-                        //.disabled(auth_result == "" || auth_result != "ok")
+                        .disabled(!self.phone_viewmodel.auth_num_check)
                         //뷰가 사라질 때 값 저장하기
                         .onDisappear{
                           print("핸드폰 인증 뷰 사라짐")
@@ -202,7 +198,6 @@ struct PhoneAuthView: View {
                 else {
                     // phone_viewmodel.phone_auth_ok = true
                     auth_result = "already"
-                    
                 }
 
                 //통신에 실패한 경우
@@ -220,7 +215,7 @@ struct PhoneAuthView: View {
 extension PhoneAuthView{
     
     var title_view: some View{
-        HStack{
+        HStack(alignment: .center){
             Button(action: {
                 self.presentation.wrappedValue.dismiss()
                 
@@ -229,14 +224,18 @@ extension PhoneAuthView{
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
             }
+            .frame(width: 45, height: 45, alignment: .leading)
+            
             Spacer()
             
             Text("휴대폰 인증")
                 .font(.custom(Font.n_extra_bold, size: 20))
                 .foregroundColor(Color.proco_black)
+                .padding(.trailing)
+
             Spacer()
         }
-        .padding()
+        .padding([.trailing, .leading])
     }
     
     var phone_input_field: some View{
@@ -287,8 +286,10 @@ extension PhoneAuthView{
     
     var auth_input_field: some View{
         TextField("인증번호 6자리", text: self.$phone_viewmodel.auth_num,onCommit: {
-            
+            print("인증번호\(self.$phone_viewmodel.auth_num)")
+            if self.phone_viewmodel.auth_num != "" && self.phone_viewmodel.phone_number != ""{
             send_auth_num()
+            }
             
         })
         .font(.custom(Font.n_regular, size: 15))
@@ -325,14 +326,10 @@ extension PhoneAuthView{
             .frame(minWidth: 0, maxWidth: .infinity)
             .padding()
             .foregroundColor(.proco_white)
-            .background(auth_result != "ok" ? Color.light_gray : Color.proco_black)
+            .background(self.phone_viewmodel.auth_num_check && self.is_phone_number_valid ?  Color.proco_black : Color.light_gray)
             .cornerRadius(25)
             .padding([.leading, .trailing], UIScreen.main.bounds.width/25)
+            
     }
     
 }
-
-
-
-
-

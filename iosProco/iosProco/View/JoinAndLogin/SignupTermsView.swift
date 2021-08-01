@@ -45,15 +45,16 @@ struct SignupTermsView: View {
     var body: some View {
         
         VStack(alignment: .center){
-            
+    
             title_view
             
             Rectangle()
-                .foregroundColor(Color.proco_white.opacity(Double(0.7)))
+                .foregroundColor(Color.white.opacity(Double(0.9)))
                 .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width*1.3, alignment: .center)
                 .clipped()
                 .shadow( radius: 2)
                 .overlay(
+                                   
                     VStack{
                         all_agree_btn
                         Divider()
@@ -72,6 +73,8 @@ struct SignupTermsView: View {
                     })
             
             Spacer()
+            HStack{
+                
             //카카오 로그인 완료시 메인으로 이동.
             NavigationLink("", destination: TabbarView(view_router: ViewRouter()), isActive: self.$kakao_login_end)
             
@@ -80,7 +83,7 @@ struct SignupTermsView: View {
             
             //일반 회원가입시 핸드폰 번호 인증 페이지로 이동
             NavigationLink("",destination: PhoneAuthView(phone_viewmodel: self.signup_user_setting, apple_login: self.$apple_login_end), isActive: self.$go_next_step_not_social)
-            
+            }.frame(width: 2, height: 2, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
             //TODO 모두 다 버튼으로 고쳐야 함.
             if kakao_login == true || apple_login == true {
                 
@@ -156,22 +159,19 @@ struct SignupTermsView: View {
             //약관 5개 전체 vstack묶음 끝
         }
         //약관 내용 웹뷰
-        .sheet(isPresented: self.$go_necessary_term_view){
+        .fullScreenCover(isPresented: self.$go_necessary_term_view){
             TermContentsView(url: "https://withproco.com/tos.html?view=tos")
         }
-        .sheet(isPresented: self.$go_location_term_view){
+        .fullScreenCover(isPresented: self.$go_location_term_view){
             TermContentsView(url: "https://withproco.com/tos.html?view=location")
         }
-        .sheet(isPresented: self.$go_collect_info_term_view){
+        .fullScreenCover(isPresented: self.$go_collect_info_term_view){
             TermContentsView(url: "https://withproco.com/tos.html?view=personal")
         }
-        .sheet(isPresented: self.$go_marketing_term_view, content: {
+        .fullScreenCover(isPresented: self.$go_marketing_term_view, content: {
             TermContentsView(url: "https://withproco.com/tos.html?view=marketing")
         })
-        .onDisappear(perform: {
-           
-            
-        })
+
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
@@ -258,7 +258,7 @@ struct Agree : View{
                                     .aspectRatio(contentMode: .fit)
                             }
                             Text(terms_list.title)
-                                .font(.custom(Font.n_regular, size: 10))
+                                .font(.custom(Font.n_regular, size: 13))
                                 .foregroundColor(Color.proco_black)
                             Spacer()
                         }
@@ -266,7 +266,7 @@ struct Agree : View{
                     //한 row에 버튼이 2개 있어서 모두가 클릭되는 오류 해결 -> button style Borderless나 PlainButton스타일 적용
                     .buttonStyle(BorderlessButtonStyle())
                     .padding(.leading, UIScreen.main.bounds.width/15)
-                }.frame(width: UIScreen.main.bounds.width*0.6, height: UIScreen.main.bounds.width*0.02)
+                }.frame(width: UIScreen.main.bounds.width*0.65, height: UIScreen.main.bounds.width*0.02)
                 
                 Spacer()
                 
@@ -274,9 +274,10 @@ struct Agree : View{
                     HStack{
                         Image("right")
                             .foregroundColor(Color.proco_black)
-                            .frame(width: UIScreen.main.bounds.width*0.1, height: UIScreen.main.bounds.width*0.1)
+                            .frame(width: 50, height: 50)
                     }
-                    .frame(width: UIScreen.main.bounds.width*0.3, height: UIScreen.main.bounds.width*0.1)
+
+                    .frame(width: 50, height: 50)
             }
             .onTapGesture {
                 print("약관 한 개 클릭 : \(terms_list.title)")
@@ -290,7 +291,7 @@ struct Agree : View{
                     self.go_marketing_term_view = true
                 }
             }
-            .padding(.leading)
+            .padding([.leading,.trailing])
         
     }
 }
@@ -298,7 +299,7 @@ struct Agree : View{
 extension SignupTermsView{
     
     var title_view: some View{
-        HStack{
+        HStack(alignment: .center){
             Button(action: {
                 self.presentation.wrappedValue.dismiss()
                 
@@ -306,15 +307,21 @@ extension SignupTermsView{
                 Image("left")
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+                    .padding(.leading)
+
             }
+            .frame(width: 45, height: 45, alignment: .leading)
+
+            
             Spacer()
+            
             Text("이용약관 동의")
                 .font(.custom(Font.n_extra_bold, size: 20))
                 .foregroundColor(Color.proco_black)
             Spacer()
         }
         .padding()
-        .padding(.bottom, UIScreen.main.bounds.width/20)
+        
     }
     
     var all_agree_btn: some View{
@@ -355,8 +362,6 @@ extension SignupTermsView{
                 Spacer()
             }.foregroundColor(Color.proco_black)
         }
-        .padding(UIScreen.main.bounds.width/20)
+        .padding([.top,.leading,.bottom],UIScreen.main.bounds.width/20)
     }
 }
-
-

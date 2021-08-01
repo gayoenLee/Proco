@@ -697,23 +697,23 @@ class GroupVollehMainViewmodel: ObservableObject{
                     
                     print("카드 이름: \(self.card_name)")
                     //2.sqlite에 데이터 저장 - chatroom, user, card, tag
-                    ChatDataManager.shared.insert_chat_info_friend(idx: response.chatroom_idx, card_idx: response.card_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, room_name: self.card_name, kinds: type as! String)
+                    ChatDataManager.shared.insert_chat_info_friend(idx: response.chatroom_idx!, card_idx: response.card_idx!, creator_idx: Int(ChatDataManager.shared.my_idx!)!, room_name: self.card_name, kinds: type as! String)
                     
                     let current_time = ChatDataManager.shared.make_created_at()
                     //TODO profile 사진 변경해야함
-                    ChatDataManager.shared.insert_user(chatroom_idx: response.chatroom_idx, user_idx: idx!, nickname: self.my_nickname!, profile_photo_path: "", read_last_idx: 0, read_start_idx: 0, temp_key: "", server_idx: response.server_idx, updated_at: current_time, deleted_at: "")
+                    ChatDataManager.shared.insert_user(chatroom_idx: response.chatroom_idx!, user_idx: idx!, nickname: self.my_nickname!, profile_photo_path: "", read_last_idx: 0, read_start_idx: 0, temp_key: "", server_idx: response.server_idx!, updated_at: current_time, deleted_at: "")
                     
                     //태그
-                    for tag in response.tags{
+                    for tag in response.tags!{
                         
-                        ChatDataManager.shared.insert_tag(chatroom_idx: response.chatroom_idx, tag_idx: tag.idx, tag_name: tag.tag_name)
+                        ChatDataManager.shared.insert_tag(chatroom_idx: response.chatroom_idx!, tag_idx: tag.idx, tag_name: tag.tag_name)
                     }
                     //card
                     let created_at = ChatDataManager.shared.make_created_at()
-                    ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: type as! String, card_photo_path: response.card_photo_path ?? "", lock_state: 0, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
+                    ChatDataManager.shared.insert_card(chatroom_idx: response.chatroom_idx!, creator_idx: Int(ChatDataManager.shared.my_idx!)!, kinds: type as! String, card_photo_path: response.card_photo_path ?? "", lock_state: 0, title: self.card_name, introduce: self.input_introduce, address: self.input_location, map_lat: "0.0", map_lng: "0.0", current_people_count: 1, apply_user: 0, expiration_at: self.card_expire_time, created_at: created_at, updated_at: "", deleted_at: "")
                     
                     //3.소켓으로 데이터 보내기
-                    SockMgr.socket_manager.make_chat_room_friend(chatroom_idx: response.chatroom_idx, idx: idx!, nickname: self.my_nickname!)
+                    SockMgr.socket_manager.make_chat_room_friend(chatroom_idx: response.chatroom_idx!, idx: idx!, nickname: self.my_nickname!)
                     
                     //추가 후 데이터 집어넣고는 publish변수에 있던 값들 없애주기
                     self.input_location = ""

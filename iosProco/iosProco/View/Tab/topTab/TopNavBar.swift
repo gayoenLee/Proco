@@ -19,12 +19,15 @@ struct TopNavBar: View {
     var page_name: String
     
     var body: some View {
+        HStack{
         //친구관리로 이동.
         NavigationLink("",destination:ManageFriendListView(), isActive: self.$go_to_manage)
         //환경 설정으로 이동
         NavigationLink("", destination: SettingView(), isActive: self.$go_to_setting)
         
         NavigationLink("",destination: UseMethodView(url: "https://withproco.com/ProcoGuidePage.html"), isActive: self.$go_to_intro)
+        }
+        .frame(width: 0, height: 0)
         
             //상단 네비게이션바
             HStack{
@@ -79,7 +82,7 @@ struct TopNavBar: View {
 
                 }
             }
-            .padding([.top,.leading, .trailing], UIScreen.main.bounds.width/20)
+            .padding([.top,.leading, .trailing], UIScreen.main.bounds.width/10)
         .navigationBarHidden(true)
         .navigationBarTitle("", displayMode: .inline)
             .onAppear{
