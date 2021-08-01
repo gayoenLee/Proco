@@ -49,12 +49,12 @@ struct NotiListView: View {
                         if index == self.main_vm.noti_list_model.count-1{
                             
                             NotiRow(noti: self.main_vm.noti_list_model[index], main_vm: self.main_vm, calendar_vm: self.calendar_vm, go_friend_manage: self.$go_friend_manage, go_friend_card_detail: self.$go_friend_card_detail, go_group_card_detail: self.$go_group_card_detail, go_feed: self.$go_feed, friend_card_vm: self.friend_card_vm, group_card_vm: self.group_card_vm, is_last: true)
-                                .padding([.leading, .trailing, .bottom])
+                                
                             
                         }else{
                             
                             NotiRow(noti: self.main_vm.noti_list_model[index], main_vm: self.main_vm, calendar_vm: self.calendar_vm, go_friend_manage: self.$go_friend_manage, go_friend_card_detail: self.$go_friend_card_detail, go_group_card_detail: self.$go_group_card_detail, go_feed: self.$go_feed, friend_card_vm: self.friend_card_vm, group_card_vm: self.group_card_vm, is_last: false)
-                                .padding([.leading, .trailing, .bottom])
+                              
                         }
                     }
                 }
@@ -168,6 +168,17 @@ struct NotiRow: View{
     }
     
     var body: some View{
+        HStack{
+            //노티 클릭시 화면 이동시키는 링크들
+            NavigationLink("",destination: ManageFriendListView(), isActive: self.$go_friend_manage)
+            
+            NavigationLink("",destination: FriendVollehCardDetail(main_vm: self.friend_card_vm, group_main_vm: self.group_card_vm, socket: SockMgr.socket_manager, calendar_vm: CalendarViewModel()), isActive: self.$go_friend_card_detail)
+            
+            NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_card_vm, socket: SockMgr.socket_manager, calendar_vm: CalendarViewModel()), isActive: self.$go_group_card_detail)
+            
+            NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$go_feed)
+        }
+        .frame(width: 0, height: 0)
             HStack{
                 
                 //프로필 이미지
@@ -202,19 +213,12 @@ struct NotiRow: View{
                                     .frame(width: 40, height: 40)
                             }
                     }
-                //노티 클릭시 화면 이동시키는 링크들
-                NavigationLink("",destination: ManageFriendListView(), isActive: self.$go_friend_manage)
-                
-                NavigationLink("",destination: FriendVollehCardDetail(main_vm: self.friend_card_vm, group_main_vm: self.group_card_vm, socket: SockMgr.socket_manager, calendar_vm: CalendarViewModel()), isActive: self.$go_friend_card_detail)
-                
-                NavigationLink("",destination: GroupVollehCardDetail(main_vm: self.group_card_vm, socket: SockMgr.socket_manager, calendar_vm: CalendarViewModel()), isActive: self.$go_group_card_detail)
-                
-                NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true), isActive: self.$go_feed)
+
                     VStack{
                         //인디케이터 볼드 처리 위해 뷰빌더 메소드로 리턴
                         content()
                     }
-                   
+                    Spacer()
                     //페이징 처리
                     .onAppear{
                         if self.is_last{
@@ -223,8 +227,9 @@ struct NotiRow: View{
                             self.main_vm.get_again(page_idx: noti.idx!, page_size: 20)
                         }
                     }
-                    Spacer()
+                   
             }
+            .padding([.leading, .trailing, .bottom],UIScreen.main.bounds.width/20)
         .onTapGesture {
             print("노티 한 개 클릭: \(noti)")
             

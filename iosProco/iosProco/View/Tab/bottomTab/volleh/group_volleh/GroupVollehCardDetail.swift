@@ -73,23 +73,39 @@ struct GroupVollehCardDetail: View {
     var body: some View {
         
         VStack{
+            //상단 돌아가기, 제목, 수정하기 버튼 탭
+            HStack{
+                //돌아가기 버튼
+                Button(action: {
+                    withAnimation{
+                        main_vm.my_card_detail_struct.card_photo_path = ""
+                        self.presentation.wrappedValue.dismiss()
+                        //self.show_current_view.toggle()
+                    }
+                }){
+                Image("left")
+                    .resizable()
+                    .frame(width: 8.51, height: 17)
+                    .padding(.leading, UIScreen.main.bounds.width/20)
+                  
+                }
+                .frame(width: 45, height: 45, alignment: .leading)
+
+                Spacer()
+                
+                //내 카드인 경우 신고하기 버튼 안보임
+                if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator?.idx{
+                    
+                }else{
+                    report_btn
+                        .padding(.trailing)
+                }
+
+            }
+            .padding([.leading,.trailing])
+            
             if self.show_no_result{
                 
-                HStack{
-                    Image("left")
-                        .resizable()
-                        .frame(width: 10, height: 17)
-                        .padding(.leading, UIScreen.main.bounds.width/20)
-                        .onTapGesture {
-                            withAnimation{
-                                self.presentation.wrappedValue.dismiss()
-                                //self.show_current_view.toggle()
-                            }
-                        }
-                    
-                    Spacer()
-                }
-                .padding()
                 Spacer()
                 
                 HStack{
@@ -102,37 +118,12 @@ struct GroupVollehCardDetail: View {
                 }
                 .padding()
                 Spacer()
+                
             }else{
                 
                 ScrollView(.vertical, showsIndicators: false){
                     VStack{
-                        Group{
-                            //상단 돌아가기, 제목, 수정하기 버튼 탭
-                            HStack{
-                                //돌아가기 버튼
-                                Image("left")
-                                    .resizable()
-                                    .frame(width: 10, height: 17)
-                                    .padding(.leading, UIScreen.main.bounds.width/20)
-                                    .onTapGesture {
-                                        withAnimation{
-                                            self.presentation.wrappedValue.dismiss()
-                                            //self.show_current_view.toggle()
-                                        }
-                                    }
-                                
-                                Spacer()
-                                
-                                //내 카드인 경우 신고하기 버튼 안보임
-                                if Int(self.main_vm.my_idx!) == self.main_vm.my_card_detail_struct.creator?.idx{
-                                    
-                                }else{
-                                    report_btn
-                                }
-
-                            }
-                        }
-                        .padding(.top, UIScreen.main.bounds.width/30)
+                        //.padding(.top, UIScreen.main.bounds.width/30)
                         
                         //모임 이미지는 선택 가능한 옵션임.
                         if main_vm.my_card_detail_struct.card_photo_path != "" && main_vm.my_card_detail_struct.card_photo_path != nil{
@@ -152,10 +143,11 @@ struct GroupVollehCardDetail: View {
                             card_tags
                             RoundedRectangle(cornerRadius: 20)
                                 .foregroundColor(.light_gray)
-                                .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.2)
+                                .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.width*0.2)
                                 .overlay(
                                     host_info
                                 )
+                                .padding([.leading, .trailing])
                             
                             Spacer()
                             
@@ -206,8 +198,12 @@ struct GroupVollehCardDetail: View {
                             }
                             
                             //세부사항 부분
-                            meeting_introduce
+                            if self.main_vm.my_card_detail_struct.introduce == "" || self.main_vm.card_detail_struct.introduce == ""{
+                                
+                            }else{
                             
+                                meeting_introduce
+                            }
                             //프로코 이용 규칙
                             Divider()
                                 .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width/30, alignment: .center)
@@ -316,11 +312,11 @@ struct GroupVollehCardDetail: View {
                                     }
                             }
                         }
-                    }.padding()
+                    }.padding(.trailing)
                 }
             }
         }
-        .padding(.trailing)
+        .padding([.trailing, .leading])
         .sheet(isPresented: self.$show_location_detail){
             MapDetailInfoView(vm: self.main_vm)
         }
@@ -700,12 +696,12 @@ extension GroupVollehCardDetail{
                         if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
                             
                             Text( self.main_vm.my_card_detail_struct.like_count ?? 0 > 0 ? "좋아요\(main_vm.my_card_detail_struct.like_count!)개" : "")
-                                .font(.custom(Font.n_extra_bold, size: 10))
+                                .font(.custom(Font.n_extra_bold, size: 11))
                                 .foregroundColor(Color.proco_black)
                             
                         }else{
                             Text( self.main_vm.card_detail_struct.like_count ?? 0 > 0 ? "좋아요\(main_vm.card_detail_struct.like_count!)개" : "")
-                                .font(.custom(Font.n_extra_bold, size: 10))
+                                .font(.custom(Font.n_extra_bold, size: 11))
                                 .foregroundColor(Color.proco_black)
                             
                         }
@@ -826,7 +822,7 @@ extension GroupVollehCardDetail{
                     
                     VStack{
                         Text("주최자")
-                            .font(.custom(Font.t_regular, size: 10))
+                            .font(.custom(Font.t_regular, size: 11))
                             .foregroundColor(.proco_black)
                         
                         
@@ -873,7 +869,7 @@ extension GroupVollehCardDetail{
 
                     VStack{
                         Text("주최자")
-                            .font(.custom(Font.t_regular, size: 10))
+                            .font(.custom(Font.t_regular, size: 11))
                             .foregroundColor(.proco_black)
                         
                         
@@ -889,7 +885,7 @@ extension GroupVollehCardDetail{
                 }
             }
         }
-        .padding(.trailing)
+        .padding([.leading, .trailing])
         .onTapGesture {
             //내 카드는 프로필 안띄움
             if main_vm.my_card_detail_struct.creator!.idx! == Int(main_vm.my_idx!){
@@ -1062,90 +1058,88 @@ extension GroupVollehCardDetail{
                 .padding([.leading, .bottom])
             }
             HStack{
-                Rectangle()
-                    .foregroundColor(.main_green)
-                    .frame(width: UIScreen.main.bounds.width*0.35, height: UIScreen.main.bounds.width/17)
-                    .overlay(
-                        Text("성적인 주제의 대화, 성드립")
-                            .foregroundColor(.proco_white)
-                            .font(.custom(Font.n_bold, size: 11))
-                    )
+                Text("성적인 주제의 대화, 성드립")
+                    .foregroundColor(.proco_white)
+                    .font(.custom(Font.n_bold, size: 11))
+                    .padding(UIScreen.main.bounds.width/100)
+                    .background(Color.main_green)
+                    
                 Spacer()
             }
             .padding(.leading)
             
             HStack{
-                Rectangle()
-                    .foregroundColor(.main_green)
-                    .frame(width: UIScreen.main.bounds.width*0.49, height: UIScreen.main.bounds.width/20)
-                    .overlay(
-                        Text("불쾌감을 줄 수 있는 사진이나 닉네임 사용")
-                            .foregroundColor(.proco_white)
-                            .font(.custom(Font.n_bold, size: 10))
-                    )
+                
+                Text("불쾌감을 줄 수 있는 사진이나 닉네임 사용")
+                    .foregroundColor(.proco_white)
+                    .font(.custom(Font.n_bold, size: 11))
+                    .padding(UIScreen.main.bounds.width/100)
+                    .background(Color.main_green)
+
                 Spacer()
             }
             .padding(.leading)
-            
+
             HStack{
-                Rectangle()
-                    .foregroundColor(.main_green)
-                    .frame(width: UIScreen.main.bounds.width*0.42, height: UIScreen.main.bounds.width/20)
-                    .overlay(
                         Text("모임의 목적 또는 주제와 무관한 행동")
                             .foregroundColor(.proco_white)
-                            .font(.custom(Font.n_bold, size: 10))
-                    )
+                            .font(.custom(Font.n_bold, size: 11))
+                            .padding(UIScreen.main.bounds.width/100)
+                            .background(Color.main_green)
                 Spacer()
             }
             .padding(.leading)
-            
+
             HStack{
-                Rectangle()
-                    .foregroundColor(.main_green)
-                    .frame(width: UIScreen.main.bounds.width*0.14, height: UIScreen.main.bounds.width/20)
-                    .overlay(
                         Text("욕설 및 비방")
                             .foregroundColor(.proco_white)
-                            .font(.custom(Font.n_bold, size: 10))
-                    )
+                            .font(.custom(Font.n_bold, size: 11))
+                            .padding(UIScreen.main.bounds.width/100)
+                            .background(Color.main_green)
                 Spacer()
             }
             .padding(.leading)
-            
+
             HStack{
-                Rectangle()
-                    .foregroundColor(.main_green)
-                    .frame(width: UIScreen.main.bounds.width*0.12, height: UIScreen.main.bounds.width/20)
-                    .overlay(
                         Text("무단 불참")
                             .foregroundColor(.proco_white)
-                            .font(.custom(Font.n_bold, size: 10))
-                    )
+                            .font(.custom(Font.n_bold, size: 11))
+                            .padding(UIScreen.main.bounds.width/100)
+
+                            .background(Color.main_green)
                 Spacer()
             }
-            .padding([.leading, .bottom])
-            
+            .padding(.leading)
+
             HStack{
                 Text("자세한 내용은 프로코 이용규칙을 확인해주세요")
                     .foregroundColor(.proco_black)
-                    .font(.custom(Font.n_bold, size: 10))
+                    .font(.custom(Font.n_bold, size: 11))
                 
                 Spacer()
             }
             .padding([.leading, .bottom])
-            
+
             HStack{
                 
                 Button(action: {
                     print("이용규칙 웹뷰 보기 클릭")
                     self.show_proco_rules = true
                 }){
+                    VStack{
                     Text("프로코 이용규칙")
                         .foregroundColor(.proco_black)
-                        .font(.custom(Font.n_extra_bold, size: 14))
+                        .font(.custom(Font.n_extra_bold, size: 15))
+                        
+                        Divider()
+                            .frame(width: UIScreen.main.bounds.width*0.28, height: 2, alignment: .center)
+                            .background(Color.proco_black)
+                    }
                 }
+                Spacer()
             }
+            .padding([.leading])
+
             Spacer()
         }
         .padding([.leading, .bottom])

@@ -88,7 +88,6 @@ struct FriendCardListView : View{
             self.expiration_at = String.dot_form_date_string(date_string: friend_volleh_card_struct.expiration_at!)
             
         }
-        
     }
 }
 
@@ -134,14 +133,17 @@ extension FriendCardListView{
                 //TODO: if문 - 카드 삭제시 리스트 갯수 업데이트 안돼서 문제 발생 아래 코드로 해결. 나중에 다시 볼 것.
                 if main_vm.friend_volleh_card_struct.count > self.current_card_index{
                     
-                    Capsule()
-                        .foregroundColor(friend_volleh_card_struct.tags![0].tag_name! == "사교/인맥" ? .proco_yellow : friend_volleh_card_struct.tags![0].tag_name! == "게임/오락" ? .proco_pink : friend_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? .proco_olive : friend_volleh_card_struct.tags![0].tag_name! == "운동/스포츠" ? .proco_green : friend_volleh_card_struct.tags![0].tag_name! == "취미/여가" ? .proco_mint : friend_volleh_card_struct.tags![0].tag_name! == "스터디" ? .proco_blue : .proco_red)
-                        .frame(width: friend_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? UIScreen.main.bounds.width*0.2 :UIScreen.main.bounds.width*0.15 , height: UIScreen.main.bounds.width/17)
-                        .overlay(
-                    Text("\(friend_volleh_card_struct.tags![0].tag_name!)")
-                        .font(.custom(Font.t_extra_bold, size: 10))
-                        .foregroundColor(.proco_white)
-                        )
+                    HStack{
+                       
+                        Text("\(friend_volleh_card_struct.tags![0].tag_name!)")
+                            .font(.custom(Font.t_extra_bold, size: 13))
+                            .foregroundColor(.proco_white)
+                            .padding(UIScreen.main.bounds.width/60)
+
+                    }
+                        .background(friend_volleh_card_struct.tags![0].tag_name! == "사교/인맥" ? Color.proco_yellow : friend_volleh_card_struct.tags![0].tag_name! == "게임/오락" ? .proco_pink : friend_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? .proco_olive : friend_volleh_card_struct.tags![0].tag_name! == "운동/스포츠" ? .proco_green : friend_volleh_card_struct.tags![0].tag_name! == "취미/여가" ? .proco_mint : friend_volleh_card_struct.tags![0].tag_name! == "스터디" ? .proco_blue : .proco_red)
+                    .cornerRadius(27.0)
+
                         }
                     }
                 

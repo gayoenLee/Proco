@@ -32,8 +32,7 @@ struct EditCardView: View {
       
         VStack{
             
-            HStack{
-                
+            HStack(alignment: .center){
                 Button(action: {
                     print("돌아가기 클릭")
                     self.presentationMode.wrappedValue.dismiss()
@@ -41,16 +40,23 @@ struct EditCardView: View {
                     Image("left")
                         .resizable()
                         .frame(width: 8.51, height: 17)
+                        .padding(.leading)
+
                 }
+                .frame(width: 45, height: 45, alignment: .leading)
+
                 Spacer()
                 
                 Text("약속 수정")
                     .font(.custom(Font.n_extra_bold, size: 22))
                     .foregroundColor(Color.proco_black)
+                    .padding(.trailing)
+
                 
                 Spacer()
-            }.padding()
-            
+            }
+            .padding(.trailing)
+
             ScrollView{
                 VStack{
                     //완료 버튼을 제외한 카드 편집 뷰

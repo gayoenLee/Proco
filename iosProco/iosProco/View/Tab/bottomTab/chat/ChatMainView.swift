@@ -15,6 +15,7 @@ struct ChatMainView: View {
     var body: some View {
         NavigationView{
             VStack {
+                TopNavBar(page_name: "채팅")
                 ChatTabs(tabs: .constant(["일반", "친구", "모임"]),
                          selection: $selectedTab,
                          underlineColor: selectedTab == 0 ? .proco_black : selectedTab == 1 ? .main_orange : .main_green) { title, isSelected in
@@ -46,7 +47,7 @@ struct ChatMainView: View {
                                 .frame(width: 32, height: 21)
                         }
                     }
-                    .frame(width: UIScreen.main.bounds.width*0.25, height: UIScreen.main.bounds.width*0.2)
+                    .frame(width: UIScreen.main.bounds.width*0.25, height: UIScreen.main.bounds.width*0.15)
                 }
                 if selectedTab == 1{
                     FriendChatTab(socket: SockMgr.socket_manager)
@@ -56,7 +57,7 @@ struct ChatMainView: View {
                     NormalChatTab(socket: SockMgr.socket_manager)
                 }
                 Spacer()
-            }.padding()
+            }
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
             .onAppear{

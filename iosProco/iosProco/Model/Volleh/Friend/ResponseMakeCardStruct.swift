@@ -9,11 +9,11 @@ import Foundation
 import Combine
 
 struct ResponseMakeCardStruct : Codable{
-    var result: String
-    var card_idx : Int
-    var chatroom_idx : Int
-    var server_idx : Int
-    var tags : [Tags]
+    var result: String? = ""
+    var card_idx : Int? = -1
+    var chatroom_idx : Int? = -1
+    var server_idx : Int? = -1
+    var tags : [Tags]? = []
     var card_photo_path : String? = ""
 
 }

@@ -110,12 +110,28 @@ struct NormalChatRoom: View {
     //하단 텝이 있는 뷰에서 왔는지 구분하는 변수 . 기본적으로 true이지만 탭이 없었던 곳에서 뷰를 선언한다면 인자로 false를 전달함.
         var from_tab: Bool = true
     
-    @ObservedObject var view_router = ViewRouter()
+    @ObservedObject var view_router = ViewRouter.get_view_router()
     //신고하기, 추방하기 컨텍스트 메뉴 띄우기
     @State private var show_context_menu : Bool = false
     
     var body: some View {
         ZStack{
+            HStack{
+                NavigationLink("",
+                               destination: FriendVollehCardDetail( main_vm: self.main_vm, group_main_vm: self.group_main_vm,  calendar_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
+                               isActive: self.$invited_friend_card)
+                
+                NavigationLink("",
+                               destination: GroupVollehCardDetail(main_vm: self.group_main_vm, calendar_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
+                               isActive: self.$invited_group_card)
+               
+                NavigationLink("",
+                               destination: ChatMainView().navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
+                               isActive: self.$go_back)
+                //유저 프로필에서 신고하기 클릭시 신고하는 페이지 이동.
+                NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_user_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: self.group_main_vm), isActive: self.$show_report_view)
+                    
+            }.frame(width: 0, height: 0)
             VStack{
                 //상단바
                 HStack{
@@ -132,8 +148,9 @@ struct NormalChatRoom: View {
                     }){
                         Image("left")
                             .resizable()
-                            .frame(width: UIScreen.main.bounds.width/20, height: UIScreen.main.bounds.width/20)
+                            .frame(width: 8.51, height: 17, alignment:.leading)
                     }
+                    .frame(width: 45, height: 45)
                     Spacer()
                     if SockMgr.socket_manager.current_chatroom_info_struct.room_name == ""{
                         //채팅방 주인 이름
@@ -163,20 +180,13 @@ struct NormalChatRoom: View {
                             .frame(width: 20, height: 16)
                     }
                 }
-                .padding([.leading, .trailing, .top], UIScreen.main.bounds.width/10)
+                
+                .padding([.trailing], UIScreen.main.bounds.width/15)
                 //.padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
                 //동적링크에서 open눌렀을 때 카드 초대장으로 바로 이동시키기 위함.
-                NavigationLink("",
-                               destination: FriendVollehCardDetail( main_vm: self.main_vm, group_main_vm: self.group_main_vm,  calendar_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
-                               isActive: self.$invited_friend_card)
+                Spacer()
                 
-                NavigationLink("",
-                               destination: GroupVollehCardDetail(main_vm: self.group_main_vm, calendar_vm: CalendarViewModel()).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
-                               isActive: self.$invited_group_card)
-               
-                NavigationLink("",
-                               destination: ChatMainView().navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
-                               isActive: self.$go_back)
+              
 //                NavigationLink("",
 //                               destination: TabbarView(view_router: self.view_router).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
 //                               isActive: self.$go_back)
@@ -189,11 +199,10 @@ struct NormalChatRoom: View {
                             }
                         }
                     })
-                //유저 프로필에서 신고하기 클릭시 신고하는 페이지 이동.
-                NavigationLink("",destination:  ReportView(show_report: self.$show_report_view, type: "채팅방회원", selected_user_idx: self.selected_user_idx, main_vm: FriendVollehMainViewmodel(), socket_manager: socket_manager, group_main_vm: self.group_main_vm), isActive: self.$show_report_view)
-                    
+
             }
-            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.9)
+            .frame(width: UIScreen.main.bounds.width, height: from_tab ? UIScreen.main.bounds.height*0.85 : UIScreen.main.bounds.height)
+            
             .alert(isPresented: self.$too_big_img_size){
                 Alert(title: Text("알림"), message: Text("10MB이상의 이미지는 보낼 수 없습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
                     self.too_big_img_size = false
@@ -458,7 +467,6 @@ struct NormalChatRoom: View {
                 
             })
             .background(Color.black.opacity(self.show_menu ? 0.28 :0)
-            .edgesIgnoringSafeArea(.all)
             .onTapGesture(perform: {
                 withAnimation{
                     if self.show_menu{
@@ -466,25 +474,25 @@ struct NormalChatRoom: View {
                     }
                 }
             }))
-            .padding(.bottom, UIApplication.shared.windows.first?.safeAreaInsets.bottom)
+        
             //채팅룸 드로어 부분.show_menu의 값에 따라서 열리고 닫힘.
-            Spacer()
-            HStack{
+           
+
                 ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(), show_profile: self.$show_profile,selected_user_idx: self.$selected_user_idx, show_menu: self.$show_menu)
                     .background(Color.white)
                     .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.94)
                     .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.08: UIScreen.main.bounds.width)
                     .padding(.bottom)
-            }
-            .padding(.bottom)
-            
+
+
             //유저 1명 프로필 뷰 보여주는 구분값 이 true일 때 다이얼로그 띄워서 보여주는 뷰
             if show_profile{
                 ChatRoomUserProfileView(friend: user_profile_info ?? UserInDrawerStruct(), show_profile: self.$show_profile, socket: socket_manager, selected_friend_idx: self.$selected_user_idx, show_report_view: self.$show_report_view, go_feed:self.$go_feed, calendar_vm: self.calendar_vm, go_private_chatroom: self.$go_private_chatroom, show_context_menu: self.$show_context_menu)
 
             }
-        }
-        .edgesIgnoringSafeArea(.all)
-    }
-}
 
+        }
+    }
+
+
+}

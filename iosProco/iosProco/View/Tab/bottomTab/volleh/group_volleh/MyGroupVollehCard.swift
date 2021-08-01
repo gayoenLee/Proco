@@ -22,8 +22,8 @@ struct MyGroupVollehCard: View {
     //카드 잠금인지 잠금해제인지 이벤트 종류 알기 위해 저장할값 - 토스트에 띄움
     @Binding var lock_event_kind : String
     
-    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 43, height: 43)) |> RoundCornerImageProcessor(cornerRadius: 5)
-    
+//    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: 43, height: 43)) |> RoundCornerImageProcessor(cornerRadius: 5)
+    let img_processor =  CroppingImageProcessor(size: CGSize(width: 100, height: 100)) |> DownsamplingImageProcessor(size:CGSize(width: 100, height: 100)) |> RoundCornerImageProcessor(cornerRadius: 5) |> ResizingImageProcessor(referenceSize: CGSize(width: 60, height: 60), mode: .aspectFit)
     //모임 카드 이미지가 없는 경우 왼쪽에 공백 생기는 문제 해결 위함.
     var has_card_img : Bool{
         if self.my_group_card.card_photo_path == "" || self.my_group_card.card_photo_path == nil{
@@ -51,7 +51,7 @@ struct MyGroupVollehCard: View {
                     //카드 날짜
                     card_date
                 }
-                .padding(.leading)
+                .padding([.leading, .top])
 
                 
                 HStack{
@@ -69,13 +69,14 @@ struct MyGroupVollehCard: View {
             }
 
         }
+        .padding([.top, .bottom], UIScreen.main.bounds.width/30)
         .onAppear{
             self.expiration_at = String.dot_form_date_string(date_string: my_group_card.expiration_at!)
            print("날짜 확인: \(self.expiration_at)")
             print("모임 카드 이미지 확인: \(self.my_group_card.card_photo_path ?? "")")
         }
         //화면 하나에 카드 여러개 보여주기 위해 조정하는 값
-        .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.09)
+        .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.4)
         .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
             print("내 카드 잠금 통신 완료 받음.: \(value)")
             
@@ -182,14 +183,15 @@ extension MyGroupVollehCard{
     
     var category_and_title : some View{
         VStack{
-            Capsule()
-                .foregroundColor(my_group_card.tags![0].tag_name == "사교/인맥" ? .proco_yellow : my_group_card.tags![0].tag_name == "게임/오락" ? .proco_pink : my_group_card.tags![0].tag_name == "문화/공연/축제" ? .proco_olive : my_group_card.tags![0].tag_name == "운동/스포츠" ? .proco_green : my_group_card.tags![0].tag_name == "취미/여가" ? .proco_mint : my_group_card.tags![0].tag_name == "스터디" ? .proco_blue : .proco_red)
-                .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width/17)
-                .overlay(
-                    Text("\(my_group_card.tags![0].tag_name)")
-                        .font(.custom(Font.t_extra_bold, size: 13))
-                .foregroundColor(.proco_white)
-                )
+            HStack{
+                
+                Text("\(my_group_card.tags![0].tag_name)")
+                    .font(.custom(Font.t_extra_bold, size: 13))
+            .foregroundColor(.proco_white)
+                    .padding(UIScreen.main.bounds.width/60)
+            }
+            .background(my_group_card.tags![0].tag_name == "사교/인맥" ? Color.proco_yellow : my_group_card.tags![0].tag_name == "게임/오락" ? .proco_pink : my_group_card.tags![0].tag_name == "문화/공연/축제" ? .proco_olive : my_group_card.tags![0].tag_name == "운동/스포츠" ? .proco_green : my_group_card.tags![0].tag_name == "취미/여가" ? .proco_mint : my_group_card.tags![0].tag_name == "스터디" ? .proco_blue : .proco_red)
+            .cornerRadius(27.0)
             
             Text("\(my_group_card.title!)")
                 .font(.custom(Font.n_extra_bold, size: 18))
@@ -245,6 +247,7 @@ extension MyGroupVollehCard{
                     .resizable()
                     .frame(width: 15, height: 16.61)
             }
+            .frame(width: 45, height: 45)
             .onReceive(NotificationCenter.default.publisher(for: Notification.event_finished), perform: {value in
                 print("내 카드 잠금 통신 완료 받음.: \(value)")
                 

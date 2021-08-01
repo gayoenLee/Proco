@@ -56,17 +56,17 @@ struct MakeCardViewGroup: View {
     }
     
     var body: some View {
-   
-            VStack{
+        
+        VStack{
+            HStack(alignment: .center){
                 HStack{
-                    
                     Button(action: {
                         print("돌아가기 클릭")
                         self.main_vm.card_name = ""
-                                     self.main_vm.user_selected_tag_set.removeAll()
-                                     self.main_vm.user_selected_tag_list.removeAll()
-                                     self.main_vm.card_date = Date()
-                                     self.main_vm.card_time = Date()
+                        self.main_vm.user_selected_tag_set.removeAll()
+                        self.main_vm.user_selected_tag_list.removeAll()
+                        self.main_vm.card_date = Date()
+                        self.main_vm.card_time = Date()
                         self.main_vm.card_name.removeAll()
                         self.main_vm.input_introduce.removeAll()
                         
@@ -75,157 +75,164 @@ struct MakeCardViewGroup: View {
                         Image("left")
                             .resizable()
                             .frame(width: 8.51, height: 17)
+                            .padding(.leading)
                     }
-                    Spacer()
-                    
+                    .frame(width: 45, height: 45, alignment: .leading)
+                }
+                
+                Spacer()
+                
+                HStack{
                     Text("약속 만들기")
                         .font(.custom(Font.n_extra_bold, size: 22))
                         .foregroundColor(Color.proco_black)
-                    
-                    Spacer()
-                }.padding()
+                        .padding(.trailing)
+                }
+                Spacer()
+            }
+            .padding([.trailing])
+            
+            ScrollViewReader{scrollview in
                 
-                ScrollViewReader{scrollview in
-                    
-                    ScrollView{
-                        VStack{
-                            MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, image_url: self.$image_url, open_map: self.$open_map, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult)
-                            Spacer()
-                            //완료 버튼 클릭시 메인뷰로 이동.
-                            Button(action: {
-                                self.is_title_empty = false
-                                self.category_alert = false
-                                self.make_card_time_disallow = false
+                ScrollView{
+                    VStack{
+                        MakingView(main_vm: self.main_vm, category_alert: self.$category_alert, is_title_empty: self.$is_title_empty, is_offline_meeting: self.$is_offline_meeting, show_img_picker: self.$show_img_picker, selected_category: self.$selected_category, image_url: self.$image_url, open_map: self.$open_map, make_card_time_disallow: self.$make_card_time_disallow, pickerResult: self.$pickerResult)
+                        Spacer()
+                        //완료 버튼 클릭시 메인뷰로 이동.
+                        Button(action: {
+                            self.is_title_empty = false
+                            self.category_alert = false
+                            self.make_card_time_disallow = false
+                            
+                            //필수 카테고리를 선택했는지 체크
+                            if self.main_vm.category_is_selected(){
                                 
-                                //필수 카테고리를 선택했는지 체크
-                                if self.main_vm.category_is_selected(){
+                                //서버에 날짜와 시간 합쳐서 보내기 위해 날짜+시간 만드는 메소드 실행.
+                                let card_time = self.main_vm.make_card_date()
+                                
+                                let check_time_result = self.main_vm.make_card_time_check(make_time: card_time)
+                                
+                                if check_time_result{
                                     
-                                    //서버에 날짜와 시간 합쳐서 보내기 위해 날짜+시간 만드는 메소드 실행.
-                                    let card_time = self.main_vm.make_card_date()
-                                    
-                                    let check_time_result = self.main_vm.make_card_time_check(make_time: card_time)
-                                    
-                                    if check_time_result{
-                                        
-                                        let type: String
-                                        if self.is_offline_meeting{
-                                            type = "오프라인 모임"
-                                        }else{
-                                            type = "온라인 모임"
-                                        }
-                                        print("카드 만들 때 보내는 파라미터 : \(self.main_vm.map_data.map_lat), \(self.main_vm.map_data.map_lng), \(self.main_vm.user_selected_tag_list), 최종 모임 타입: \(type)")
-                                        
-                                        //태그 데이터 보낼 때 카테고리, 태그 2개 순서대로 보내야 함.
-                                        let category_idx = self.main_vm.user_selected_tag_list.firstIndex(where: {
-                                            $0 == self.selected_category
-                                        })
-                                        
-                                        //카테고리를 유저가 선택한 태그 배열에서 삭제하고 맨 첫번재 순서로 다시 집어넣는다.
-                                        self.main_vm.user_selected_tag_list.remove(at: category_idx!)
-                                        self.main_vm.user_selected_tag_list.insert(self.selected_category, at: 0)
-                                        print("유저가 선택한 카테고리 재배열한 것 확인: \(self.main_vm.user_selected_tag_list)")
-                                        
-                                        //카드 만들기 통신 전 multipart로 통신하기 위해 param만듬.
-                                        var param : [String: Any] = [:]
-                                        param = ["type" : type, "title": self.main_vm.card_name, "tags": self.main_vm.user_selected_tag_list, "time": self.main_vm.card_expire_time, "address": self.main_vm.map_data.location_name, "content" : self.main_vm.input_introduce, "map_lat": String(self.main_vm.map_data.map_lat), "map_lng" : String(self.main_vm.map_data.map_lng)]
-                                        
-                                        main_vm.make_card_with_img(param: param, photo_file: self.main_vm.group_card_img_data ?? nil)
-                                        //alert창 타입
-                                        main_vm.card_result_alert(main_vm.alert_type)
-                                        
-                                        
+                                    let type: String
+                                    if self.is_offline_meeting{
+                                        type = "오프라인 모임"
                                     }else{
-                                        print("모임 카드 만드는 시간 현재 시간 10분 후 아님 ")
-                                        self.make_card_time_disallow = true
-                                        
-                                        withAnimation(.default){
-                                            scrollview.scrollTo("scroll_to_top", anchor: .top)
-                                        }
+                                        type = "온라인 모임"
                                     }
+                                    print("카드 만들 때 보내는 파라미터 : \(self.main_vm.map_data.map_lat), \(self.main_vm.map_data.map_lng), \(self.main_vm.user_selected_tag_list), 최종 모임 타입: \(type)")
                                     
-                                }else if self.main_vm.title_check(title: self.main_vm.card_name){
-                                    print("카드 이름 작성 안함.")
-                                    is_title_empty = true
+                                    //태그 데이터 보낼 때 카테고리, 태그 2개 순서대로 보내야 함.
+                                    let category_idx = self.main_vm.user_selected_tag_list.firstIndex(where: {
+                                        $0 == self.selected_category
+                                    })
+                                    
+                                    //카테고리를 유저가 선택한 태그 배열에서 삭제하고 맨 첫번재 순서로 다시 집어넣는다.
+                                    self.main_vm.user_selected_tag_list.remove(at: category_idx!)
+                                    self.main_vm.user_selected_tag_list.insert(self.selected_category, at: 0)
+                                    print("유저가 선택한 카테고리 재배열한 것 확인: \(self.main_vm.user_selected_tag_list)")
+                                    
+                                    //카드 만들기 통신 전 multipart로 통신하기 위해 param만듬.
+                                    var param : [String: Any] = [:]
+                                    param = ["type" : type, "title": self.main_vm.card_name, "tags": self.main_vm.user_selected_tag_list, "time": self.main_vm.card_expire_time, "address": self.main_vm.map_data.location_name, "content" : self.main_vm.input_introduce, "map_lat": String(self.main_vm.map_data.map_lat), "map_lng" : String(self.main_vm.map_data.map_lng)]
+                                    
+                                    main_vm.make_card_with_img(param: param, photo_file: self.main_vm.group_card_img_data ?? nil)
+                                    //alert창 타입
+                                    main_vm.card_result_alert(main_vm.alert_type)
+                                    
+                                    
+                                }else{
+                                    print("모임 카드 만드는 시간 현재 시간 10분 후 아님 ")
+                                    self.make_card_time_disallow = true
                                     
                                     withAnimation(.default){
                                         scrollview.scrollTo("scroll_to_top", anchor: .top)
                                     }
                                 }
-                                else{
-                                    //카테고리 최소 1개 선택 안함.
-                                    category_alert = true
-                                    
-                                    withAnimation(.default){
-                                        scrollview.scrollTo("scroll_to_top", anchor: .top)
-                                    }
+                                
+                            }else if self.main_vm.title_check(title: self.main_vm.card_name){
+                                print("카드 이름 작성 안함.")
+                                is_title_empty = true
+                                
+                                withAnimation(.default){
+                                    scrollview.scrollTo("scroll_to_top", anchor: .top)
                                 }
-                            }){
-                                Text("완료")
-                                    .font(.custom(Font.t_regular, size: 17))
-                                    .padding()
-                                    .foregroundColor(.proco_white)
                             }
-                            .frame(minWidth: 0, maxWidth: .infinity)
-                            .background(Color.main_green)
-                            .cornerRadius(25)
-                            .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
-                            //카드 만들기 성공, 실패 결과에 따라 다르게 알림 창 띄움.
-                            .alert(isPresented: $main_vm.show_alert){
-                                switch main_vm.alert_type{
-                                case .success:
-                                    return Alert(title: Text("모임 카드"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
-                                        
-                                        self.presentationMode.wrappedValue.dismiss()
-                                        //self.make_success.toggle()
-                                        
-                                    }))
-                                case .fail:
-                                    return Alert(title: Text("카드 추가"), message: Text("카드 추가를 다시 시도해주세요."), dismissButton: Alert.Button.default(Text("확인"), action:{
-                                        
-                                    }))
+                            else{
+                                //카테고리 최소 1개 선택 안함.
+                                category_alert = true
+                                
+                                withAnimation(.default){
+                                    scrollview.scrollTo("scroll_to_top", anchor: .top)
                                 }
+                            }
+                        }){
+                            Text("완료")
+                                .font(.custom(Font.t_regular, size: 17))
+                                .padding()
+                                .foregroundColor(.proco_white)
+                        }
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .background(Color.main_green)
+                        .cornerRadius(25)
+                        .padding([.leading, .trailing], UIScreen.main.bounds.width/20)
+                        //카드 만들기 성공, 실패 결과에 따라 다르게 알림 창 띄움.
+                        .alert(isPresented: $main_vm.show_alert){
+                            switch main_vm.alert_type{
+                            case .success:
+                                return Alert(title: Text("모임 카드"), message: Text("카드 추가가 완료됐습니다."), dismissButton: Alert.Button.default(Text("확인"), action:{
+                                    
+                                    self.presentationMode.wrappedValue.dismiss()
+                                    //self.make_success.toggle()
+                                    
+                                }))
+                            case .fail:
+                                return Alert(title: Text("카드 추가"), message: Text("카드 추가를 다시 시도해주세요."), dismissButton: Alert.Button.default(Text("확인"), action:{
+                                    
+                                }))
                             }
                         }
-                        .id("scroll_to_top")
-                        
                     }
+                    .id("scroll_to_top")
+                    
                 }
             }
-            .navigationBarHidden(true)
-            //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
-            .onTapGesture {
-                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-            }
-            //갤러리 나타나는 것.
-            .sheet(isPresented: $show_img_picker) {
-                PhotoPicker(configuration: self.config,
-                            pickerResult: $pickerResult,
-                            isPresented: $show_img_picker, is_profile_img: false, main_vm: SettingViewModel(), group_vm: self.main_vm)
-            }
-            
-            .onAppear{
-                print("모여볼래 카드 만드는 뷰 넘어옴")
-                //여기에서 카드 이름, 태그들, 날짜, 시간 데이터 지우면 지도에서 장소 선택하고 왔을 때 데이터 없어져있으므로 하면 안됨.
-                //                self.main_vm.card_name = ""
-                //                self.main_vm.user_selected_tag_set.removeAll()
-                //                self.main_vm.user_selected_tag_list.removeAll()
-                //                self.main_vm.card_date = Date()
-                //                self.main_vm.card_time = Date()
-            }
-//            .navigationBarColor(background_img: "meeting_wave_bg")
-//            .navigationBarTitle("방 만들기", displayMode: .inline)
-//            .navigationBarItems(leading:
-//                                    Button(action: {
-//                                        self.main_vm.card_name = ""
-//                                        self.main_vm.user_selected_tag_set.removeAll()
-//                                        self.main_vm.user_selected_tag_list.removeAll()
-//                                        self.main_vm.card_date = Date()
-//                                        self.main_vm.card_time = Date()
-//
-//                                        self.presentationMode.wrappedValue.dismiss()
-//                                    }){
-//                                        Image("left")
-//                                    })
+        }
+        .navigationBarHidden(true)
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+        //갤러리 나타나는 것.
+        .sheet(isPresented: $show_img_picker) {
+            PhotoPicker(configuration: self.config,
+                        pickerResult: $pickerResult,
+                        isPresented: $show_img_picker, is_profile_img: false, main_vm: SettingViewModel(), group_vm: self.main_vm)
+        }
+        
+        .onAppear{
+            print("모여볼래 카드 만드는 뷰 넘어옴")
+            //여기에서 카드 이름, 태그들, 날짜, 시간 데이터 지우면 지도에서 장소 선택하고 왔을 때 데이터 없어져있으므로 하면 안됨.
+            //                self.main_vm.card_name = ""
+            //                self.main_vm.user_selected_tag_set.removeAll()
+            //                self.main_vm.user_selected_tag_list.removeAll()
+            //                self.main_vm.card_date = Date()
+            //                self.main_vm.card_time = Date()
+        }
+        //            .navigationBarColor(background_img: "meeting_wave_bg")
+        //            .navigationBarTitle("방 만들기", displayMode: .inline)
+        //            .navigationBarItems(leading:
+        //                                    Button(action: {
+        //                                        self.main_vm.card_name = ""
+        //                                        self.main_vm.user_selected_tag_set.removeAll()
+        //                                        self.main_vm.user_selected_tag_list.removeAll()
+        //                                        self.main_vm.card_date = Date()
+        //                                        self.main_vm.card_time = Date()
+        //
+        //                                        self.presentationMode.wrappedValue.dismiss()
+        //                                    }){
+        //                                        Image("left")
+        //                                    })
         
     }
 }
@@ -375,7 +382,7 @@ struct MakingView: View{
                         }
                     }  .background(Color.light_gray)
                     .cornerRadius(25.0)
-                    .padding(.leading,UIScreen.main.bounds.width/25)
+                    .padding([.leading, .trailing],UIScreen.main.bounds.width/25)
                 }
                 //지도 이미지 나오는 곳*************
                 Rectangle()
@@ -452,7 +459,7 @@ extension MakingView {
         }
         .background(Color.light_gray)
         .cornerRadius(25.0)
-        .padding(.leading,UIScreen.main.bounds.width/25)
+        .padding([.leading, .trailing],UIScreen.main.bounds.width/25)
         
     }
     

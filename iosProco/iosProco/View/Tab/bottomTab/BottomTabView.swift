@@ -47,7 +47,7 @@ struct BottomTabView: View {
 //                            .navigationBarHidden(true)
                             .onAppear{
                                 print("친구랑볼래온어피어")
-
+                               
                                 //UITabBar.appearance().barTintColor = .white
                             }
                     case .people_volleh:

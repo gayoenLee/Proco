@@ -50,7 +50,6 @@ struct MyCardListView: View {
                             Text("\(self.expiration_at)")
                                 .font(.custom(Font.n_extra_bold, size: 15))
                                 .foregroundColor(.proco_white)
-                            
                         )
                 }
                 tags
@@ -302,31 +301,30 @@ private extension MyCardListView{
             ///카테고리
             if SockMgr.socket_manager.is_from_chatroom{
                 
-                // HStack{
-                //카테고리 종류별로 색깔 매치되도록 변경해야 함.
-                Capsule()
-                    .foregroundColor(my_volleh_card_struct.tags![0].tag_name! == "사교/인맥" ? .proco_yellow : my_volleh_card_struct.tags![0].tag_name! == "게임/오락" ? .proco_pink : my_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? .proco_olive : my_volleh_card_struct.tags![0].tag_name! == "운동/스포츠" ? .proco_green : my_volleh_card_struct.tags![0].tag_name! == "취미/여가" ? .proco_mint : my_volleh_card_struct.tags![0].tag_name! == "스터디" ? .proco_blue : .proco_red)
-                    .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width/17)
-                    .overlay(
-                        Text("\(my_volleh_card_struct.tags![0].tag_name!)")
-                            .font(.custom(Font.t_extra_bold, size: UIScreen.main.bounds.width/25))
-                            .foregroundColor(.proco_white)
-                    )
-                
-                // }
+                 HStack{
+                    
+                    Text("\(my_volleh_card_struct.tags![0].tag_name!)")
+                        .font(.custom(Font.t_extra_bold, size: 13))
+                        .foregroundColor(.proco_white)
+                        .padding(UIScreen.main.bounds.width/60)
+                 }
+                 .background(my_volleh_card_struct.tags![0].tag_name! == "사교/인맥" ? Color.proco_yellow : my_volleh_card_struct.tags![0].tag_name! == "게임/오락" ? .proco_pink : my_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? .proco_olive : my_volleh_card_struct.tags![0].tag_name! == "운동/스포츠" ? .proco_green : my_volleh_card_struct.tags![0].tag_name! == "취미/여가" ? .proco_mint : my_volleh_card_struct.tags![0].tag_name! == "스터디" ? .proco_blue : .proco_red)
+                 .cornerRadius(27.0)
+
                 
             }else{
                 //TODO: if문 - 카드 삭제시 리스트 갯수 업데이트 안돼서 문제 발생 아래 코드로 해결. 나중에 다시 볼 것.
                 if main_viewmodel.my_friend_volleh_card_struct.count > self.current_card_index{
                     
-                    Capsule()
-                        .foregroundColor(my_volleh_card_struct.tags![0].tag_name! == "사교/인맥" ? .proco_yellow : my_volleh_card_struct.tags![0].tag_name! == "게임/오락" ? .proco_pink : my_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? .proco_olive : my_volleh_card_struct.tags![0].tag_name! == "운동/스포츠" ? .proco_green : my_volleh_card_struct.tags![0].tag_name! == "취미/여가" ? .proco_mint : my_volleh_card_struct.tags![0].tag_name! == "스터디" ? .proco_blue : .proco_red)
-                        .frame(width: UIScreen.main.bounds.width*0.15, height: UIScreen.main.bounds.width/17)
-                        .overlay(
-                            Text("\(my_volleh_card_struct.tags![0].tag_name!)")
-                                .font(.custom(Font.t_extra_bold, size: 10))
-                                .foregroundColor(.proco_white)
-                        )
+                    HStack{
+                       
+                       Text("\(my_volleh_card_struct.tags![0].tag_name!)")
+                           .font(.custom(Font.t_extra_bold, size: 13))
+                           .foregroundColor(.proco_white)
+                           .padding(UIScreen.main.bounds.width/60)
+                    }
+                    .background(my_volleh_card_struct.tags![0].tag_name! == "사교/인맥" ? Color.proco_yellow : my_volleh_card_struct.tags![0].tag_name! == "게임/오락" ? .proco_pink : my_volleh_card_struct.tags![0].tag_name! == "문화/공연/축제" ? .proco_olive : my_volleh_card_struct.tags![0].tag_name! == "운동/스포츠" ? .proco_green : my_volleh_card_struct.tags![0].tag_name! == "취미/여가" ? .proco_mint : my_volleh_card_struct.tags![0].tag_name! == "스터디" ? .proco_blue : .proco_red)
+                    .cornerRadius(27.0)
                 }
             }
             

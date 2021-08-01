@@ -36,12 +36,17 @@ struct NormalLoginView:View{
         NavigationView{
         VStack{
           //  top_nav_bar
-                
+            Spacer()
+                        Image("logo")
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width*0.5, height: UIScreen.main.bounds.width*0.20, alignment: .center)
+                            .scaledToFit()
+            
             Spacer()
             RoundedRectangle(cornerRadius: 25.0)
                 .foregroundColor(Color.proco_white)
                 .shadow(color: .gray, radius: 2, x: 0, y: 2)
-                .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width*1.2, alignment: .center)
+                .frame(width: UIScreen.main.bounds.width*0.8, height: UIScreen.main.bounds.width*1.1, alignment: .center)
                 .overlay(
                     VStack{
                         VStack(alignment: .center){
@@ -93,7 +98,10 @@ struct NormalLoginView:View{
         .alert(isPresented: $show_alert){
             Alert(title: Text("로그인"), message: Text("로그인을 다시 시도해주세요"), dismissButton: .default(Text("확인")))
         }
-        
+        //키보드 올라왓을 때 화면 다른 곳 터치하면 키보드 내려가는 것
+        .onTapGesture {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
         .onAppear{
             print("일반 로그인 화면 on appear: \(UserDefaults.standard.string(forKey: "fcm_token"))")
         }

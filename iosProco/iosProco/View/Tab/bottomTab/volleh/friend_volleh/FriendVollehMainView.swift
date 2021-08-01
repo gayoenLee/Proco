@@ -59,7 +59,7 @@ struct FriendVollehMainView: View {
     @State private var my_photo_path = UserDefaults.standard.string(forKey: "profile_photo_path") ?? ""
     
     let scale = UIScreen.main.scale
-    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)) |> RoundCornerImageProcessor(cornerRadius: 25)
+    let img_processor = ResizingImageProcessor(referenceSize: CGSize(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)) |> RoundCornerImageProcessor(cornerRadius: 50)
     
     var body: some View {
         VStack{
@@ -77,13 +77,17 @@ struct FriendVollehMainView: View {
                             .font(.custom(Font.n_bold, size: 15))
                             .foregroundColor(.proco_black)
                     }
-                    .padding(.bottom, UIScreen.main.bounds.width/20)
+                    .padding(.top, UIScreen.main.bounds.width/50)
+                    
                     HStack{
                         boring_friends_list
                     }
-                    //수정 하는 페이지로 이동하는 토글 값이 true일 때 navigationlink이용해 페이지 이동
-                    NavigationLink("",destination: EditCardView(main_viewmodel: self.main_vm, tag_category_struct: self.volleh_category_struct), isActive: self.$go_to_edit)
+                    .padding([.leading])
                     
+                    //수정 하는 페이지로 이동하는 토글 값이 true일 때 navigationlink이용해 페이지 이동
+                    HStack{
+                    NavigationLink("",destination: EditCardView(main_viewmodel: self.main_vm, tag_category_struct: self.volleh_category_struct), isActive: self.$go_to_edit)
+                    }
                     DisclosureGroup(isExpanded:$open_my_cards, content: {
                         ForEach(self.main_vm.my_friend_volleh_card_struct){ item in
                             ZStack{
@@ -333,10 +337,10 @@ private extension FriendVollehMainView{
                         Image("main_profile_img")
                             .resizable()
                             .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                            .cornerRadius(50)
+                            .clipShape(Circle())
                             .scaledToFit()
                             .overlay(self.today_is_boring ? Circle()
-                                        .stroke(Color.proco_yellow , lineWidth: 2) : nil)
+                                        .stroke(Color.proco_yellow , lineWidth: 1.5) : nil)
                             .padding([.leading], UIScreen.main.bounds.width/30)
                         
                     }else{
@@ -359,8 +363,9 @@ private extension FriendVollehMainView{
                                     .resizable()
                                     .frame(width: 40, height: 40)
                             }
+                            .clipShape(Circle())
                             .overlay(self.today_is_boring ? Circle()
-                                        .stroke(Color.proco_yellow , lineWidth: 2) : nil)
+                                        .stroke(Color.proco_yellow , lineWidth: 1.5) : nil)
                             .padding([.leading], UIScreen.main.bounds.width/30)
                         
                     }
@@ -394,13 +399,10 @@ private extension FriendVollehMainView{
                             
                             print("심심기간 설정 버튼 클릭")
                             self.set_boring_today_alert.toggle()
-                            //오늘을 심심기간으로 설정했는지 안했는지 알아야 함.
-                            // let boring_today = String.date_string(date: today)
-                            
-                            
+
                         }){
                             VStack{
-                                Image(self.today_is_boring ? "already_simsim_img" : "lead_simsim_img")
+                                Image(self.today_is_boring ? "boring_today_img" : "lead_simsim_img")
 //                                    .resizable()
 //                                    .frame(width: 37.5, height: 20.17)
                             Image(self.today_is_boring ? "boring_set_btn" : "not_boring_set_btn")
@@ -442,6 +444,7 @@ private extension FriendVollehMainView{
                     }
                 }
             }
+            .padding(.top)
         }
     }
     
@@ -488,19 +491,14 @@ private extension FriendVollehMainView{
                     self.main_vm.applied_filter = false
                 }){
                     Text("전체보기")
+                        .padding(UIScreen.main.bounds.width/60)
                         .font(.custom(Font.n_bold, size: 10))
                         .foregroundColor(self.main_vm.applied_filter ? .light_gray : .proco_white)
+                        .background(self.main_vm.applied_filter ? Color.gray : Color.proco_black)
                         .cornerRadius(25)
-                        .padding(UIScreen.main.bounds.width/40)
                 }
-                .background(self.main_vm.applied_filter ? Color.gray : Color.proco_black)
-                .overlay(Capsule()
-                            .stroke(self.main_vm.applied_filter ? Color.gray : Color.proco_black, lineWidth: 1.5)
-                         
-                )
-                .cornerRadius(25.0)
             }
-            .padding([.trailing], UIScreen.main.bounds.width/20)
+            .padding([.leading,.trailing], UIScreen.main.bounds.width/20)
         }
     }
     
@@ -515,10 +513,8 @@ private extension FriendVollehMainView{
                         .frame(width: UIScreen.main.bounds.width*0.95, height: UIScreen.main.bounds.width*0.4)
                         
                         .overlay(
-                            
                             FriendCardListView(main_vm: main_vm, friend_volleh_card_struct: main_vm.friend_volleh_card_struct[self.main_vm.get_friend_index(item: item)], current_card_index: self.main_vm.get_friend_index(item: item))
                         )
-                        
                         //상세 정보 뷰로 이동
                         .onTapGesture {
                             //카드의 정보 세팅에 idx값을 이용해 데이터 꺼낼 때 사용.
@@ -536,8 +532,7 @@ private extension FriendVollehMainView{
                     .foregroundColor(.proco_black)
                     .padding(.leading, UIScreen.main.bounds.width/20)
             })
-            .padding(.trailing)
-            
+            .padding([.leading,.trailing])
         }
     }
     
@@ -556,21 +551,26 @@ private extension FriendVollehMainView{
                         VStack{
                             if friend.profile_photo_path == "" || friend.profile_photo_path == nil{
                                 
-                                Image("main_profile_img")
-                                    .resizable()
-                                    .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-                                    .scaledToFit()
-                                    .overlay(Capsule()
+                                ZStack(alignment: .center){
+                                    
+                                    Image("main_profile_img")
+                                        .resizable()
+                                        .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
+                                        .scaledToFit()
+                                        .clipShape(Circle())
+
+                                        .padding(UIScreen.main.bounds.width/100)
+
+                                    Circle()
                                                 .stroke(Color.proco_yellow, lineWidth: 2)
-                                    )
-                                    .padding([.trailing], UIScreen.main.bounds.width/40)
+                                }
+                                .padding(UIScreen.main.bounds.width/40)
+
                             }else{
                                 
+                                ZStack(alignment: .center){
+                                    
                                 KFImage(URL(string: friend.profile_photo_path!))
-//                                    .placeholder{Image("main_profile_img")
-//                                        .resizable()
-//                                        .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
-//                                    }
                                     .loadDiskFileSynchronously()
                                     .cacheMemoryOnly()
                                     .fade(duration: 0.25)
@@ -588,11 +588,13 @@ private extension FriendVollehMainView{
                                             .resizable()
                                             .frame(width: 40, height: 40)
                                     }
-                                    .overlay(Capsule()
-                                                .stroke(Color.proco_yellow, lineWidth: 2)
-                                    )
-                                
-                                
+                                    .clipShape(Circle())
+                                    .padding(UIScreen.main.bounds.width/100)
+                                    //.overlay(
+                                        Circle()
+                                                .stroke(Color.proco_yellow, lineWidth: 3)
+                                    //)
+                                }
                             }
                             
                             if friend.idx == Int(ChatDataManager.shared.my_idx!)!{
@@ -600,16 +602,18 @@ private extension FriendVollehMainView{
                                 HStack{
                                     Image("check_end_btn")
                                         .resizable()
-                                        .frame(width: 15, height: 15)
-                                    
-                                    Text("나(\(friend.nickname))")
-                                        .font(.custom(Font.n_bold, size: 10))
+                                        .frame(width: 13, height: 13)
+                                    Text("나")
+                                        .font(.custom(Font.n_bold, size: 11))
                                         .foregroundColor(.proco_black)
+//                                    Text("나(\(friend.nickname))")
+//                                        .font(.custom(Font.n_bold, size: 10))
+//                                        .foregroundColor(.proco_black)
                                 }
                                 
                             }else{
                                 Text(friend.nickname)
-                                    .font(.custom(Font.n_bold, size: 10))
+                                    .font(.custom(Font.n_bold, size: 11))
                                     .foregroundColor(.proco_black)
                             }
                             
@@ -617,9 +621,9 @@ private extension FriendVollehMainView{
                     }
                     .padding([.leading, .trailing], UIScreen.main.bounds.width/40)
                 }
-                
             }
-            
+            .padding(.top)
+
         }
     }
     

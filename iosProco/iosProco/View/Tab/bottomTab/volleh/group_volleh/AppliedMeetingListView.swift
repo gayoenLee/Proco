@@ -28,6 +28,8 @@ struct AppliedMeetingListView: View {
                             .resizable()
                             .frame(width: 8.51, height: 17)
                     }
+                    .frame(width: 45, height: 45)
+
                     Spacer()
                     
                     Text("모임 신청 목록")
@@ -35,7 +37,7 @@ struct AppliedMeetingListView: View {
                         .foregroundColor(Color.proco_black)
                     
                     Spacer()
-                }.padding()
+                }.padding(.trailing)
                 
             ScrollView{
                 VStack{

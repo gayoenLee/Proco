@@ -98,14 +98,14 @@ extension GroupVollehCard {
     var category_and_title : some View{
         VStack{
             HStack{
-            Capsule()
-                .foregroundColor(group_card.tags![0].tag_name == "사교/인맥" ? .proco_yellow : group_card.tags![0].tag_name == "게임/오락" ? .proco_pink : group_card.tags![0].tag_name == "문화/공연/축제" ? .proco_olive : group_card.tags![0].tag_name == "운동/스포츠" ? .proco_green : group_card.tags![0].tag_name == "취미/여가" ? .proco_mint : group_card.tags![0].tag_name == "스터디" ? .proco_blue : .proco_red)
-                .frame(width: UIScreen.main.bounds.width*0.2, height: UIScreen.main.bounds.width/17)
-                .overlay(
-                    Text("\(group_card.tags![0].tag_name)")
-                        .font(.custom(Font.t_extra_bold, size: 13))
-                .foregroundColor(.proco_white)
-                )
+                
+                Text("\(group_card.tags![0].tag_name)")
+                    .font(.custom(Font.t_extra_bold, size: 13))
+            .foregroundColor(.proco_white)
+                    .padding(UIScreen.main.bounds.width/60)
+                .background(group_card.tags![0].tag_name == "사교/인맥" ? Color.proco_yellow : group_card.tags![0].tag_name == "게임/오락" ? .proco_pink : group_card.tags![0].tag_name == "문화/공연/축제" ? .proco_olive : group_card.tags![0].tag_name == "운동/스포츠" ? .proco_green : group_card.tags![0].tag_name == "취미/여가" ? .proco_mint : group_card.tags![0].tag_name == "스터디" ? .proco_blue : .proco_red)
+                    .cornerRadius(27.0)
+
                 Spacer()
             }
             HStack{
@@ -139,6 +139,7 @@ extension GroupVollehCard {
             Image(self.group_card.cur_user ?? 0 > 0 ? "meeting_user_num_icon" : "")
                 .resizable()
                 .frame(width: 11, height: 11)
+            
             Text(self.group_card.cur_user ?? 0 > 0 ? "\(self.group_card.cur_user!)명" : "")
                 .font(.custom("", size: 13))
                 .foregroundColor(.proco_black)
@@ -185,7 +186,7 @@ extension GroupVollehCard {
             .foregroundColor(.proco_black)
 
         }
-        .padding([.leading, .bottom])
+        .padding([.leading])
         .onReceive(NotificationCenter.default.publisher(for: Notification.clicked_like), perform: {value in
             print("내 카드 좋아요 클릭 통신 완료 받음.: \(value)")
             
@@ -239,7 +240,7 @@ extension GroupVollehCard {
                     .foregroundColor(Color.proco_black)
             }
         }
-        .padding([.trailing, .bottom])
+        .padding([.trailing])
     }
     
     
