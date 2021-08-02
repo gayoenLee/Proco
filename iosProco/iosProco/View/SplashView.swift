@@ -93,6 +93,7 @@ struct SplashView: View {
                         
                         //초기메인화면 설정값을 탭뷰로 보이기 위해 사용
                         self.view_router.init_root_view = "tab_main"
+                        //self.view_router.init_root_view = "enrolled_friend"
                         //토큰이 있으므로 메인화면으로 보내기
                       //  go_to_main.toggle()
                     }

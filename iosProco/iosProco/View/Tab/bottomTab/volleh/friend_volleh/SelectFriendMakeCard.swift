@@ -123,7 +123,7 @@ struct SelectFriendMakeCard: View {
                     }
                 }
             }
-            
+            //test(
             Spacer()
         }
         .navigationBarTitle("", displayMode: .inline)

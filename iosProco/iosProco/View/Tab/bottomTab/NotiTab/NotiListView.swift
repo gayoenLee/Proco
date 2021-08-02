@@ -38,8 +38,10 @@ struct NotiListView: View {
                    Text("알림이 없습니다.")
                     .font(.custom(Font.n_extra_bold, size: 15))
                     .foregroundColor(.gray)
+                    .padding(.top)
                     
                 }
+                Spacer()
             }else{
             ScrollView{
                 LazyVStack{

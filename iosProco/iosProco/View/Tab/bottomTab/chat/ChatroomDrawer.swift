@@ -543,6 +543,7 @@ struct ChatRoomUserProfileView: View{
                 .padding(.top, UIScreen.main.bounds.width/20)
                 HStack{
                     NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_feed)
+                    
                     NavigationLink("",destination:  NormalChatRoom(main_vm: FriendVollehMainViewmodel() ,group_main_vm: GroupVollehMainViewmodel(),socket: SockMgr.socket_manager), isActive: self.$go_private_chatroom)
                 }.frame(width: 5, height: UIScreen.main.bounds.width/30, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
                 //프로필 이미지

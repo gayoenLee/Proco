@@ -127,11 +127,19 @@ class AddGroupViewmodel: ObservableObject{
                 //있는 데이터 제거 후 추가
                 self.friend_list_struct.removeAll()
                 
-                for friend in response{
-                    if friend.nickname != nil{
-                        self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path, state: friend.state))
-                        print("add group viewmodel에서 데이터 추가 확인 : \(friend.nickname!)")
-                    }
+                if response["result"] == "no result"{
+                    //참가 신청 완료 알림 나타내기
+                    print("참가 신청 목록 없음")
+                }else{
+                    
+                let json_string = """
+                    \(String(describing: response))
+                    """
+                let data = json_string.data(using: .utf8)
+                print("data 스트링 변환 확인: \(json_string)")
+                
+                let json_data = try? JSONDecoder().decode([GetFriendListStruct].self, from: data!)
+                    self.friend_list_struct = json_data!
                 }
             })
     }

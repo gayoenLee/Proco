@@ -11,7 +11,7 @@ import Combine
 
 struct KeyboardHieghtModifier: ViewModifier {
     @State private var keyboardHeight: CGFloat = 0
-
+    var from_tab : Bool = true
     private var keyboardHeightPublisher: AnyPublisher<CGFloat, Never> {
         Publishers.Merge(
             NotificationCenter.default
@@ -29,12 +29,13 @@ struct KeyboardHieghtModifier: ViewModifier {
             .padding(.bottom, keyboardHeight)
             .onReceive(keyboardHeightPublisher) {
                 
-                self.keyboardHeight = $0-UIScreen.main.bounds.height*0.23}
+                self.keyboardHeight =  self.from_tab ? $0-UIScreen.main.bounds.height*0.23:$0-UIScreen.main.bounds.height*0.20}
     }
 }
 
 extension View {
-    func KeyboardAwarePadding() -> some View {
-        ModifiedContent(content: self, modifier: KeyboardHieghtModifier())
+    func KeyboardAwarePadding(from_tab : Bool?) -> some View {
+        
+        ModifiedContent(content: self, modifier: KeyboardHieghtModifier(from_tab: from_tab ?? true))
     }
 }

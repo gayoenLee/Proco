@@ -131,7 +131,7 @@ extension SignupPasswordView{
 
             Spacer()
         }
-        .padding([.trailing])
+        .padding([.leading,.trailing])
     }
     
     

@@ -12,8 +12,8 @@ struct Keys{
 
     struct ProductionServer{
         
-        //static let base_url = "https://api.withproco.com"
-        static let base_url = "https://procotest.kro.kr"
+        static let base_url = "https://api.withproco.com"
+        //static let base_url = "https://procotest.kro.kr"
     }
 
     //메인에서 아이디/비번 찾기

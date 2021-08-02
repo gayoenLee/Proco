@@ -249,13 +249,22 @@ class ManageFriendViewModel: ObservableObject{
                   , receiveValue: {(response) in
                     //그룹 리스트 업데이트 된 경우 다시 가져와야하므로 기존의 모델에 있던 데이터삭제 후 다시 append
                     self.manage_groups.removeAll()
-                    print("그룹 리스트 가져오는 데 받은 value값 : \(response)")
-                    for group in response{
-                        if group.name != nil{
-                            self.manage_groups.append(ManageGroupStruct(result: group.result, idx: group.idx, name: group.name!))
-                            print("그룹 데이터 가져와서 추가 확인 : \(String(describing: group.name))")
-                            
-                        }
+                    if response["result"] == "no result"{
+                        //참가 신청 완료 알림 나타내기
+                        print("참가 신청 목록 없음")
+                    }else{
+                    print("그룹 리스트만 가져오는 데 받은 value값 : \(response)")
+                    let json_string = """
+                        \(String(describing: response))
+                        """
+                    let data = json_string.data(using: .utf8)
+                    print("data 스트링 변환 확인: \(json_string)")
+                    
+                    let json_data = try? JSONDecoder().decode([ManageGroupStruct].self, from: data!)
+                    
+                    print("참가 신청 목록이 있을 경우 : \(json_data)")
+
+                    self.manage_groups = json_data!
                     }
                     
                     NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["got_all_groups" : "ok"])
@@ -399,11 +408,23 @@ class ManageFriendViewModel: ObservableObject{
                     //그룹 리스트 업데이트 된 경우 다시 가져와야하므로 기존의 모델에 있던 데이터삭제 후 다시 append
                     self.manage_groups.removeAll()
                     print("그룹 리스트만 가져오는 데 받은 value값 : \(response)")
-                    for group in response{
-                        if group.name != nil{
-                            self.manage_groups.append(ManageGroupStruct(result: group.result, idx: group.idx, name: group.name!))
-                            print("그룹 데이터만 가져와서 추가 확인 : \(String(describing: group.name!))")
-                        }
+                    
+                    if response["result"] == "no result"{
+                        //참가 신청 완료 알림 나타내기
+                        print("참가 신청 목록 없음")
+                    }else{
+                    print("그룹 리스트만 가져오는 데 받은 value값 : \(response)")
+                    let json_string = """
+                        \(String(describing: response))
+                        """
+                    let data = json_string.data(using: .utf8)
+                    print("data 스트링 변환 확인: \(json_string)")
+                    
+                    let json_data = try? JSONDecoder().decode([ManageGroupStruct].self, from: data!)
+                    
+                    print("참가 신청 목록이 있을 경우 : \(json_data)")
+
+                    self.manage_groups = json_data!
                     }
                   })
     }
@@ -424,11 +445,23 @@ class ManageFriendViewModel: ObservableObject{
                 print("친구관리에서 친구 리스트 가져오는 response: \(String(describing: response))")
                 //있는 데이터 제거 후 추가
                 self.friend_list_struct.removeAll()
-                for friend in response{
-                    if friend.nickname != nil{
-                        self.friend_list_struct.append(GetFriendListStruct(result: friend.result, idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path, state: friend.state, kinds: friend.kinds))
-                        print("데이터 추가 확인 : \(friend.nickname!)")
-                    }
+   
+                if response["result"] == "no result"{
+                    //참가 신청 완료 알림 나타내기
+                    print("참가 신청 목록 없음")
+                }else{
+                    
+                let json_string = """
+                    \(String(describing: response))
+                    """
+                let data = json_string.data(using: .utf8)
+                print("data 스트링 변환 확인: \(json_string)")
+                
+                let json_data = try? JSONDecoder().decode([GetFriendListStruct].self, from: data!)
+                    
+                    self.friend_list_struct = json_data!
+                    
+               
                 }
                 let friend_num = self.friend_list_struct.count
                 
@@ -842,6 +875,11 @@ class ManageFriendViewModel: ObservableObject{
                             }
                             
                         })
+                        let phone_number : String = UserDefaults.standard.string(forKey: "phone_number") ?? ""
+                        
+                        let phonenumber_list = self.contacts_model.map({$0.telephone}).filter({$0 != phone_number})
+                        
+                        self.get_enrolled_friends(contacts: phonenumber_list)
 
                     } catch let error {
                         print("전화번호 가져오는데 실패", error)

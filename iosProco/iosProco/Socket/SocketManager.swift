@@ -16,7 +16,7 @@ import Alamofire
 import Firebase
 import UIKit
 
-var chat_server_ip :String = "http://1.242.147.163:5336/"
+var chat_server_ip :String = "https://3.37.11.107/"
 var access_token = UserDefaults.standard.string(forKey: "access_token")
 var nickname = UserDefaults.standard.string(forKey: "nickname")
 //config 옵션 주석 추가할 것.

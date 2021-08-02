@@ -34,6 +34,7 @@ struct ChatMessageListView: View{
     //채팅방 메세지 보낸 유저 한 명 클릭한 idx값 바인딩 -> 채팅룸에서 전달받기 -> 프로필 띄우기
     @Binding var selected_user_idx: Int
     
+    var from_tab : Bool = true
     var body: some View{
         VStack{
             ScrollViewReader { reader in
@@ -144,7 +145,7 @@ struct ChatMessageListView: View{
             }//채팅 입력창 끝
             .animation(.easeOut)
         }
-        .KeyboardAwarePadding()
+        .KeyboardAwarePadding(from_tab: from_tab)
     }
 }
 

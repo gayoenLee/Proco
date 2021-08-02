@@ -105,11 +105,7 @@ struct iosProcoApp: App {
                               // Fallback for future cases
                           }
                       }
-                .onOpenURL(perform: { url in
-                    print("신딜리게이트 url: \(url)")
-                    print("신딜리게이트에서 open url\(appDelegate.view_router.current_page)")
-                    
-                })
+    
             }
         }
     }

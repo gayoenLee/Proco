@@ -131,10 +131,10 @@ class APIClient {
             }
     }
     //친구 관리 페이지의 모든 그룹 리스트 가져오기
-    static func get_all_manage_group() -> AnyPublisher<[ManageGroupStruct], AFError>{
+    static func get_all_manage_group() -> AnyPublisher<JSON, AFError>{
         //.validate사용하지 말 것.
         let manage_group_publisher = AF.request(APIRouter.get_all_manage_group, interceptor: RequestInterceptorClass())
-            .publishDecodable(type: [ManageGroupStruct].self)
+            .publishDecodable(type: JSON.self)
         print("api client에서 결과 확인 : \(manage_group_publisher.value())")
         return manage_group_publisher.value()
         
@@ -152,10 +152,10 @@ class APIClient {
     }
     
     //친구관리 - 친구 목록 가져오기
-    static func get_friend_list_api(friend_type: String) -> AnyPublisher<[GetFriendListStruct], AFError>{
+    static func get_friend_list_api(friend_type: String) -> AnyPublisher<JSON, AFError>{
         
         let publisher = AF.request(APIRouter.get_friend_list(friend_type: "친구") , interceptor: RequestInterceptorClass())
-            .publishDecodable(type:[GetFriendListStruct].self)
+            .publishDecodable(type:JSON.self)
         
         print("친구 목록 가져오기의 value확인 : \(publisher.value())")
         print("친구 목록 가져오기의 result : \(publisher.result())")

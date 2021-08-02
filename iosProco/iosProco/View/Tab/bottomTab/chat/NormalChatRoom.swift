@@ -115,6 +115,7 @@ struct NormalChatRoom: View {
     @State private var show_context_menu : Bool = false
     
     var body: some View {
+        
         ZStack{
             HStack{
                 NavigationLink("",
@@ -180,7 +181,6 @@ struct NormalChatRoom: View {
                             .frame(width: 20, height: 16)
                     }
                 }
-                
                 .padding([.trailing], UIScreen.main.bounds.width/15)
                 //.padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
                 //동적링크에서 open눌렀을 때 카드 초대장으로 바로 이동시키기 위함.
@@ -191,18 +191,18 @@ struct NormalChatRoom: View {
 //                               destination: TabbarView(view_router: self.view_router).navigationBarTitle("", displayMode: .inline).navigationBarHidden(true),
 //                               isActive: self.$go_back)
                 //메인 채팅 메세지 나오는 부분 + 텍스트 입력창
-                NormalChatMessageView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url : self.$image_url, open_gallery : self.$open_gallery, ui_image: self.$ui_image, too_big_img_size : self.$too_big_img_size, send_again_alert: self.$send_again_click, show_img_bigger: self.$show_img_bigger, show_profile: self.$show_profile ,selected_user_idx: self.$selected_user_idx)
+                NormalChatMessageView(socket: SockMgr.socket_manager, selected_image: self.$selected_image, image_url : self.$image_url, open_gallery : self.$open_gallery, ui_image: self.$ui_image, too_big_img_size : self.$too_big_img_size, send_again_alert: self.$send_again_click, show_img_bigger: self.$show_img_bigger, show_profile: self.$show_profile ,selected_user_idx: self.$selected_user_idx, from_tab : from_tab)
                     .onTapGesture(perform: {
                         withAnimation{
                             if self.show_menu{
                             self.show_menu = false
                             }
                         }
+                        
                     })
-
+                    .padding(.bottom)
             }
-            .frame(width: UIScreen.main.bounds.width, height: from_tab ? UIScreen.main.bounds.height*0.85 : UIScreen.main.bounds.height)
-            
+            .frame(width: UIScreen.main.bounds.width, height: from_tab ? UIScreen.main.bounds.height*0.9 : UIScreen.main.bounds.height*0.9)
             .alert(isPresented: self.$too_big_img_size){
                 Alert(title: Text("알림"), message: Text("10MB이상의 이미지는 보낼 수 없습니다."), dismissButton: Alert.Button.default(Text("확인"), action: {
                     self.too_big_img_size = false
@@ -480,7 +480,7 @@ struct NormalChatRoom: View {
 
                 ChatroomDrawer(socket: socket_manager, main_vm : FriendVollehMainViewmodel(), group_main_vm: GroupVollehMainViewmodel(), show_profile: self.$show_profile,selected_user_idx: self.$selected_user_idx, show_menu: self.$show_menu)
                     .background(Color.white)
-                    .frame(width: UIScreen.main.bounds.width*0.9, height: UIScreen.main.bounds.height*0.94)
+                    .frame(width: UIScreen.main.bounds.width*0.9, height: from_tab ? UIScreen.main.bounds.height*0.93 : UIScreen.main.bounds.height*0.97)
                     .offset(x: self.show_menu ? UIScreen.main.bounds.width*0.08: UIScreen.main.bounds.width)
                     .padding(.bottom)
 

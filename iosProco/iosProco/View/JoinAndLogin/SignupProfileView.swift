@@ -132,6 +132,7 @@ struct SignupProfileView: View {
                     .padding([.leading, .trailing], UIScreen.main.bounds.width/25)
             }
             
+            HStack{
             //회원가입에 성공했을 경우 메인화면으로 보내기, 네비게이션 뷰에서 버튼 없이 화면 이동 가능한 방법.
             NavigationLink("", destination: EnrolledFriendListView(), isActive: self.$login_success)
             //07 29  베타 출시 전 소셜로그인 제거 -> 일반로그인페이지로 변경
@@ -139,6 +140,7 @@ struct SignupProfileView: View {
             
             //프로필 이미지 선택시 갤러리
             NavigationLink("", destination:  ImagePicker(image: self.$selected_image, image_url: self.$image_url, ui_image: self.$ui_image), isActive: self.$show_image_picker)
+            }.frame(width: 0, height: 0)
         }
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
@@ -201,8 +203,14 @@ struct SignupProfileView: View {
                     print("스토리지에 저장한 값 확인: \(String(describing: UserDefaults.standard.string(forKey: "access_token")))")
                     
                     //서버 통신은 성공했으나 회원가입이 안된 경우 회원가입 다시 하라고 alert/서비스 첫 화면으로 돌려 보내기
+                    if image_data.count > 0{
+                        
                     send_profile_image()
-                    
+                        
+                    }else{
+                        
+                        ViewRouter.get_view_router().init_root_view = "enrolled_friend"
+                    }
                 }else{
                     self.login_success = false
                     self.login_fail.toggle()

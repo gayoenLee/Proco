@@ -17,7 +17,10 @@ class SignupInviteListViewModel: ObservableObject{
     
     @Published var contacts_model : [FetchedContactModel] = []{
         didSet{
-            objectWillChange.send()
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+
+            }
         }
     }
     //전체 연락처 가져오기
@@ -65,10 +68,17 @@ class SignupInviteListViewModel: ObservableObject{
                             }
                             
                         })
-
+                        let phone_number : String = UserDefaults.standard.string(forKey: "phone_number") ?? ""
+                        
+                        let phonenumber_list = self.contacts_model.map({$0.telephone}).filter({$0 != phone_number})
+                        
+                        self.get_enrolled_friends(contacts: phonenumber_list)
+                        
+                        
                     } catch let error {
                         print("전화번호 가져오는데 실패", error)
                     }
+                    
                 } else {
                     print("접근 거부됨.")
                 }

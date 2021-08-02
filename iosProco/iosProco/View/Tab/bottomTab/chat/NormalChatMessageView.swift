@@ -32,7 +32,7 @@ struct NormalChatMessageView: View{
     @Binding var show_profile : Bool
     //채팅방에서 유저 한 명 클릭한 idx값 바인딩 -> 채팅룸에서 전달받기 -> 프로필 띄우기
     @Binding var selected_user_idx: Int
-    
+    var from_tab : Bool = true
     var body: some View{
         VStack{
             ScrollViewReader { reader in
@@ -89,9 +89,10 @@ struct NormalChatMessageView: View{
                 }//스크롤뷰 끝
             }//스크롤뷰 리더 끝
             Spacer()
+            VStack(spacing: 1){
             //채팅 입력창
             Divider()
-                .frame(width: UIScreen.main.bounds.width, height: 1)
+                .frame(width: UIScreen.main.bounds.width, height: 2)
                 .foregroundColor(Color.light_gray)
          
             VStack{
@@ -115,8 +116,11 @@ struct NormalChatMessageView: View{
                         send_img_btn
                     
                 }
-            }.frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height*0.08)
+            }.frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width*0.1)
             
+                Divider()
+                    .frame(width: UIScreen.main.bounds.width, height: 2)
+                    .foregroundColor(Color.light_gray)
          
             if show_contents_menu{
                 
@@ -137,11 +141,10 @@ struct NormalChatMessageView: View{
                 .animation(.easeOut)
             }
         }
-           
-           // .padding([.leading, .trailing])
         .animation(.easeOut)
+            }
         }
-        .KeyboardAwarePadding()
+        .KeyboardAwarePadding(from_tab: from_tab)
     }
 }
 
@@ -157,7 +160,7 @@ extension NormalChatMessageView{
                 VStack{
                     Image(systemName: "photo")
                         .resizable()
-                        .frame(width: 90, height: 90)
+                        .frame(width: 80, height: 80 )
                         .foregroundColor(.proco_mint)
                     
                     Text("앨범")
@@ -166,7 +169,7 @@ extension NormalChatMessageView{
                 }
             }
         }
-        .padding(.leading)
+        .padding([.leading, .bottom])
     }
     
     var plus_contents_menu : some View{
