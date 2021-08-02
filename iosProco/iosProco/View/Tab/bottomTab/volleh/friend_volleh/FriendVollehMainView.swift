@@ -172,9 +172,9 @@ struct FriendVollehMainView: View {
                                                 }))
                                             }
                                         }
-                                        
                                     }
                                 }
+                                
                                 Group{
                                     //카드 1개 뷰 : foreach문에서 아이템을 넘겨주는 대신 index를 얻기 위해 뷰모델에 선언된 메소드를 이용해 해당 item의 index값 넘겨준다.
                                     RoundedRectangle(cornerRadius: 25.0)
@@ -339,8 +339,10 @@ private extension FriendVollehMainView{
                             .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6)
                             .clipShape(Circle())
                             .scaledToFit()
+                            .padding(UIScreen.main.bounds.width/100)
+
                             .overlay(self.today_is_boring ? Circle()
-                                        .stroke(Color.proco_yellow , lineWidth: 1.5) : nil)
+                                        .stroke(Color.proco_yellow , lineWidth: 2) : nil)
                             .padding([.leading], UIScreen.main.bounds.width/30)
                         
                     }else{
@@ -364,8 +366,9 @@ private extension FriendVollehMainView{
                                     .frame(width: 40, height: 40)
                             }
                             .clipShape(Circle())
+                            .padding(UIScreen.main.bounds.width/100)
                             .overlay(self.today_is_boring ? Circle()
-                                        .stroke(Color.proco_yellow , lineWidth: 1.5) : nil)
+                                        .stroke(Color.proco_yellow , lineWidth: 2) : nil)
                             .padding([.leading], UIScreen.main.bounds.width/30)
                         
                     }
@@ -379,9 +382,9 @@ private extension FriendVollehMainView{
                         )
                 }
                 .onTapGesture {
-                    
                     self.main_vm.friend_info_struct = GetFriendListStruct(idx: Int(self.main_vm.my_idx!),nickname: main_vm.my_nickname, profile_photo_path: self.my_photo_path, state: self.state_on, kinds:  "")
-                    
+                    print("내거 클릭시 데이터: \(self.main_vm.friend_info_struct)")
+
                     // 내 프로필 이미지 클릭시 다이얼로그 나오고 = on, off 선택 가능
                     self.friend_info_dialog = true
                 }
@@ -439,6 +442,7 @@ private extension FriendVollehMainView{
                             
                         }, label: {
                             Image("main_plus")
+                            
                         })
                         .padding([.trailing], UIScreen.main.bounds.width/20)
                     }

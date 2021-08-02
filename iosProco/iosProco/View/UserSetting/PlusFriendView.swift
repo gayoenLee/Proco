@@ -16,8 +16,6 @@ struct PlusFriendView: View {
     
     //친구 요청 통신 실패시 알림 띄우기 위함.
     @State private var request_fail : Bool = false
-    //추천 친구 리스트 많을 경우 시간 소요-> 프로그래스바 띄우기
-    @State private var show_friend_list : Bool = false
     
     var body: some View {
         VStack{
@@ -63,13 +61,6 @@ struct PlusFriendView: View {
                     .foregroundColor(Color.proco_black)
                 Spacer()
             }.padding()
-            
-            if !show_friend_list{
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-                Spacer()
-                
-            }else{
                 
                 ScrollView{
                     VStack{
@@ -101,7 +92,7 @@ struct PlusFriendView: View {
                         }
                     }
                 }
-            }
+            
             
         }
         .navigationBarTitle("", displayMode: .inline)
@@ -109,13 +100,7 @@ struct PlusFriendView: View {
         .onAppear{
             print("친구 추가하기 뷰 나타남")
             self.manage_vm.getContacts()
-            let phonenumber_list = self.manage_vm.contacts_model.map({$0.telephone})
-            self.manage_vm.get_enrolled_friends(contacts: phonenumber_list)
-            
-            DispatchQueue.main.asyncAfter(deadline: .now()+1.0){
-                self.show_friend_list = true
-            }
-            
+       
         }
         //친구 요청 실패시 띄움
         .alert(isPresented: self.$request_fail){

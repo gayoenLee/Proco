@@ -26,6 +26,7 @@ struct SimSimFeedPage: View {
     
     @State private var previous_month : Date = Date()
     @State private var go_mypage : Bool = false
+
     let img_processor = DownsamplingImageProcessor(size:CGSize(width: 41.5, height: 41.5))
         |> RoundCornerImageProcessor(cornerRadius: 25)
 

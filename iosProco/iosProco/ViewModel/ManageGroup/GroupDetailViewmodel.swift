@@ -178,10 +178,26 @@ class GroupDetailViewmodel: ObservableObject{
                 }
             }, receiveValue: {(response) in
                 print("친구 편집 뷰모델의 receive value값 : \(String(describing: response))")
+                
                 //모두 제거하고 다시 가져오기
                 self.friend_list_struct.removeAll()
                 self.group_details.removeAll()
-                for friend in response{
+                
+                if response["result"] == "no result"{
+                    //참가 신청 완료 알림 나타내기
+                    print("참가 신청 목록 없음")
+                }else{
+                    
+                let json_string = """
+                    \(String(describing: response))
+                    """
+                let data = json_string.data(using: .utf8)
+                print("data 스트링 변환 확인: \(json_string)")
+                
+                let json_data = try? JSONDecoder().decode([GetFriendListStruct].self, from: data!)
+                
+                
+                for friend in json_data!{
                     if friend.nickname != nil{
                         self.friend_list_struct.append(GetFriendListStruct(idx: friend.idx, nickname: friend.nickname!, profile_photo_path: friend.profile_photo_path ?? "", state: friend.state, kinds: friend.kinds))
                         
@@ -192,7 +208,7 @@ class GroupDetailViewmodel: ObservableObject{
                 
                 //친구 수를 노티를 이용하는 이유는 친구 수락 또는 거절시 친구 수를 state로 동적으로 변화시키기 위함.
                 NotificationCenter.default.post(name: Notification.get_data_finish, object: nil, userInfo: ["got_all_friend_detail" : "ok"])
-                
+                }
             })
     }
     

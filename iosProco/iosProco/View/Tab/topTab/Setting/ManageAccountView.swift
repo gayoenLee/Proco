@@ -26,13 +26,19 @@ struct ManageAccountView: View {
     
     //회원탈퇴시 오류 발생했을 때 띄울 토스트
     @State private var show_error_toast :Bool = false
+    @State private var empty_view : Bool = false
     
     var body: some View {
+        
         VStack{
+            HStack{
             NavigationLink("",destination: MyPage(main_vm: self.main_vm).navigationBarTitle("마이페이지"), isActive: self.$go_my_page)
             
             NavigationLink("",destination: SettingChangePwdView(main_vm: self.main_vm).navigationBarTitle("비밀번호 변경"), isActive: self.$go_change_pwd)
-            
+                
+                NavigationLink("",destination: EmptyView(), isActive: self.$empty_view)
+            }
+            .frame(width: 0, height: 0)
             
             List{
                 my_page_btn

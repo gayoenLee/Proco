@@ -73,6 +73,7 @@ struct FriendStateDialogContents : View{
     var body: some View{
         VStack{
             HStack{
+                HStack{
                 Button(action: {
                     withAnimation {
                     self.show_friend_info.toggle()
@@ -83,8 +84,9 @@ struct FriendStateDialogContents : View{
                         .resizable()
                         .frame(width: 12, height: 12)
                 }
-                
                 .padding(.leading,UIScreen.main.bounds.width/30)
+                }
+                .frame(width: 45, height: 45)
                 
                 HStack{
                     Spacer()
@@ -110,8 +112,8 @@ struct FriendStateDialogContents : View{
                 }
                 
             }
-            .padding([.leading, .trailing],UIScreen.main.bounds.width/30)
-            .padding(.top, UIScreen.main.bounds.width/30)
+            .padding([.leading, .trailing],UIScreen.main.bounds.width/40)
+            //.padding(.top, UIScreen.main.bounds.width/30)
            
             
             //네비게이션링크모음
@@ -121,8 +123,7 @@ struct FriendStateDialogContents : View{
                                 .navigationBarHidden(true),
                                isActive: self.$go_to_chat)
                 
-                NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()).navigationBarTitle("", displayMode: .inline)
-                                .navigationBarHidden(true), isActive: self.$go_to_feed)
+                NavigationLink("",destination: SimSimFeedPage(main_vm: self.calendar_vm, view_router: ViewRouter()), isActive: self.$go_to_feed)
                 
                 //마이페이지 이동(내 다이얼로그인 경우)
                 NavigationLink("",destination: MyPage(main_vm: SettingViewModel())        .navigationBarTitle("", displayMode: .inline)
@@ -271,7 +272,7 @@ struct FriendStateDialogContents : View{
                     
                     Button(action: {
                         
-                        self.go_to_feed.toggle()
+                        ViewRouter.get_view_router().current_page = .feed_tab
                     }){
                         HStack{
                             

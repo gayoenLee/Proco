@@ -75,6 +75,7 @@ struct ChatMainView: View {
                 SockMgr.socket_manager.current_view = 111
                 }
             }
+            .edgesIgnoringSafeArea(.top)
         }
     }
 }

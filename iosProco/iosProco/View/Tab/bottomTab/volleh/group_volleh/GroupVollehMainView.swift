@@ -403,6 +403,8 @@ extension GroupVollehMainView{
                         
                     }, label: {
                         Image("main_plus_group")
+                            .resizable()
+                            .frame(width: 44, height: 44)
                     })
                     .padding([.trailing], UIScreen.main.bounds.width/20)
                 }

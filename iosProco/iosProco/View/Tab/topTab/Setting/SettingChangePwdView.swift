@@ -52,6 +52,7 @@ struct SettingChangePwdView: View {
                 .padding([.leading, .trailing, .bottom], UIScreen.main.bounds.width/20)
                   
             }.disabled(!self.vm.isValid)
+            .padding(.bottom)
             .alert(isPresented: $vm.show_result_alert){
               switch vm.request_result_alert{
               case .ok:
